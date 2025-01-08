@@ -1,0 +1,16 @@
+# Pull Request Labeler Configuration
+# Automatically label PRs based on branch names
+# Pull Request Labeler Configuration
+# Automatically label PRs based on branch names
+
+Feature:
+  - head-branch: ["^feature", "feature", "Feature", ^Feature]
+
+Fix:
+  - head-branch: ["^fix", "fix", "hotfix", "bugfix"]
+
+Backend:
+  - head-branch: ["^Backend", "Backend", "backend", ^backend']
+
+Frontend:
+  - head-branch: ["^Frontend", "Frontend", "frontend", ^frontend']
