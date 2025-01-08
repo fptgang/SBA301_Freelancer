@@ -11,7 +11,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          repository: "vidz231/swd391-project"
+          repository: "fptgang/SBA301_Freelancer"
 
       - name: Get changed files
         id: changed-files-yaml
