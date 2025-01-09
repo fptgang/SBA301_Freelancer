@@ -1,0 +1,35 @@
+Account:
+  type: object
+  properties:
+    accountId:
+      type: integer
+      format: int64
+    email:
+      type: string
+    password:
+      type: string
+    firstName:
+      type: string
+    lastName:
+      type: string
+    avatarUrl:
+      type: string
+    balance:
+      type: number
+      format: double
+    role:
+      type: string
+      enum: [CLIENT, FREELANCER]
+    isVerified:
+      type: boolean
+    verifiedAt:
+      type: string
+      format: date-time
+    createdAt:
+      type: string
+      format: date-time
+    updatedAt:
+      type: string
+      format: date-time
+    active:
+      type: boolean

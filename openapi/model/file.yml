@@ -1,0 +1,20 @@
+File:
+  type: object
+  properties:
+    fileId:
+      type: integer
+      format: int64
+    fileName:
+      type: string
+    fileUrl:
+      type: string
+    fileType:
+      type: string
+    size:
+      type: integer
+    createdAt:
+      type: string
+      format: date-time
+    updatedAt:
+      type: string
+      format: date-time
