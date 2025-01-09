@@ -39,7 +39,8 @@
     "dev": "refine dev",
     "build": "tsc && refine build",
     "start": "refine start",
-    "refine": "refine"
+    "refine": "refine",
+    "generate-api": "openapi-generator-cli generate -i ../openapi.yml -g typescript-fetch -o ./generated"
   },
   "browserslist": {
     "production": [
