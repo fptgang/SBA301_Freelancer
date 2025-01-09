@@ -1,0 +1,21 @@
+Transaction:
+  type: object
+  properties:
+    transactionId:
+      type: integer
+      format: int64
+    accountId:
+      type: integer
+      format: int64
+    amount:
+      type: number
+      format: float
+    type:
+      type: string
+      enum: [DEBIT, CREDIT]
+    status:
+      type: string
+      enum: [PENDING, COMPLETED, FAILED]
+    createdAt:
+      type: string
+      format: date-time

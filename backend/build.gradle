@@ -30,7 +30,7 @@ sourceSets {
 
 openApiGenerate {
 	generatorName = "spring"
-	inputSpec = "$rootDir/../openapi.yml"
+	inputSpec = "$rootDir/../openapi/main.yml"
 	outputDir = "$buildDir/generated"
 	apiPackage = "com.fptgang.api"
 	modelPackage = "com.fptgang.model"
@@ -47,6 +47,9 @@ openApiGenerate {
 	globalProperties = [
 			browserClient: 'false',
 			hideGenerationTimestamp: 'true'
+	]
+	typeMappings = [
+			"double": "java.math.BigDecimal"
 	]
 	generateModelTests = false
 	generateApiTests = false
