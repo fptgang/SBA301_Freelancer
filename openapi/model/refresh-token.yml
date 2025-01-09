@@ -1,0 +1,17 @@
+RefreshToken:
+  type: object
+  properties:
+    refreshTokenId:
+      type: integer
+      format: int64
+    accountId:
+      type: integer
+      format: int64
+    token:
+      type: string
+    createdAt:
+      type: string
+      format: date-time
+    expiryDate:
+      type: string
+      format: date-time

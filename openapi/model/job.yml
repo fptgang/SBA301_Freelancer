@@ -1,0 +1,31 @@
+Job:
+  type: object
+  properties:
+    jobId:
+      type: integer
+      format: int64
+    jobCategoryId:
+      type: integer
+      format: int64
+    clientId:
+      type: integer
+      format: int64
+    title:
+      type: string
+    description:
+      type: string
+    minBudget:
+      type: number
+      format: float
+    maxBudget:
+      type: number
+      format: float
+    status:
+      type: string
+      enum: [OPEN, IN_PROGRESS, COMPLETED, CANCELLED]
+    createdAt:
+      type: string
+      format: date-time
+    updatedAt:
+      type: string
+      format: date-time

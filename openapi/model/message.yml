@@ -1,0 +1,17 @@
+Message:
+  type: object
+  properties:
+    messageId:
+      type: integer
+      format: int64
+    senderId:
+      type: integer
+      format: int64
+    receiverId:
+      type: integer
+      format: int64
+    content:
+      type: string
+    createdAt:
+      type: string
+      format: date-time

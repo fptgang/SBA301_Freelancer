@@ -1,0 +1,12 @@
+ProposalAttachment:
+  type: object
+  properties:
+    proposalAttachmentId:
+      type: integer
+      format: int64
+    proposalId:
+      type: integer
+      format: int64
+    fileId:
+      type: integer
+      format: int64

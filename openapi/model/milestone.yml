@@ -1,0 +1,26 @@
+Milestone:
+  type: object
+  properties:
+    milestoneId:
+      type: integer
+      format: int64
+    jobId:
+      type: integer
+      format: int64
+    title:
+      type: string
+    budgetRatio:
+      type: number
+      format: float
+    deadline:
+      type: string
+      format: date-time
+    status:
+      type: string
+      enum: [PENDING, COMPLETED, FAILED]
+    createdAt:
+      type: string
+      format: date-time
+    updatedAt:
+      type: string
+      format: date-time
