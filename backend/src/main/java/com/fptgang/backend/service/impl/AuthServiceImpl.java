@@ -112,10 +112,7 @@ public class AuthServiceImpl implements AuthService {
         } catch (GeneralSecurityException | IOException e) {
             log.error("Error verifying token {}", e.getMessage());
         }
-
-
         return null;
-
 
     }
 
