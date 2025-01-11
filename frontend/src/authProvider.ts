@@ -69,7 +69,9 @@ export const authProvider: AuthProvider = {
       redirectTo: "/login",
     };
   },
-  getPermissions: async () => null,
+  getPermissions: async () => {
+    return ["admin"];
+  },
   getIdentity: async () => {
     const token = localStorage.getItem(TOKEN_KEY);
     if (token) {

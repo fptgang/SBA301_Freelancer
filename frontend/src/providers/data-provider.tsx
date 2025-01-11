@@ -1,4 +1,5 @@
 import { DataProvider } from "@refinedev/core";
+import { Axios } from "axios";
 
 /**
  * Check out the Data Provider documentation for detailed information
@@ -6,10 +7,10 @@ import { DataProvider } from "@refinedev/core";
  **/
 export const dataProvider = (
   apiUrl: string,
-  _httpClient: any, // TODO: replace `any` with your http client type
+  _httpClient: Axios // TODO: replace `any` with your http client type
 ): DataProvider => ({
   getList: async ({ resource, pagination, filters, sorters, meta }) => {
-    const url = `${apiUrl}/${resource}`;
+    const url = `${apiUrl}/${resource}?page=${pagination?.current}&pageSize=${pagination?.pageSize}`;
 
     console.log("getList", {
       resource,
@@ -20,12 +21,14 @@ export const dataProvider = (
       url,
     });
 
+    const result = await _httpClient.get(url);
+
     // TODO: send request to the API
     // const response = await httpClient.get(url, {});
 
     return {
-      data: [],
-      total: 0,
+      data: result.data.content,
+      total: result.data.totalPages,
     };
   },
 
@@ -35,6 +38,9 @@ export const dataProvider = (
       ids,
       meta,
     });
+    const url = `${apiUrl}/${resource}`;
+
+    const result = await _httpClient.get(url);
 
     // TODO: send request to the API
     // const response = await httpClient.get(url, {});
@@ -50,9 +56,10 @@ export const dataProvider = (
       variables,
       meta,
     });
+    const response = await _httpClient.post(`${apiUrl}/${resource}`, variables);
 
     return {
-      data: {} as any,
+      data: response.data,
     };
   },
 
@@ -66,9 +73,13 @@ export const dataProvider = (
 
     // TODO: send request to the API
     // const response = await httpClient.post(url, {});
+    const response = await _httpClient.post(
+      `${apiUrl}/${resource}/${id}`,
+      variables
+    );
 
     return {
-      data: {} as any,
+      data: response.data,
     };
   },
 
@@ -81,9 +92,9 @@ export const dataProvider = (
 
     // TODO: send request to the API
     // const response = await httpClient.get(url, {});
-
+    const response = await _httpClient.get(`${apiUrl}/${resource}/${id}`);
     return {
-      data: {} as any,
+      data: response.data,
     };
   },
 
@@ -97,7 +108,8 @@ export const dataProvider = (
 
     // TODO: send request to the API
     // const response = await httpClient.post(url, {});
-
+    const response = await _httpClient.delete(`${apiUrl}/${resource}/${id}`);
+    console.log(response);
     return {
       data: {} as any,
     };
