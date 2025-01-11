@@ -1,6 +1,5 @@
 package com.fptgang.backend.model;
 
-
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -8,40 +7,29 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
+@Table(name = "milestones")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Account {
-
+public class Milestone {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long accountId;
+    private Long milestoneId;
 
-    @Column(unique = true)
-    private String email;
+    @ManyToOne
+    @JoinColumn(name = "project_id")
+    private Project project;
 
-
-    @Column(nullable = false, columnDefinition = "NVARCHAR(255)")
-    private String firstName;
-
-    @Column(nullable = false, columnDefinition = "NVARCHAR(255)")
-    private String lastName;
-
-    @Column
-    private String password;
-
-    @Column
-    private String avatarUrl;
-
-    @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
-    private Role role;
+    @Column(columnDefinition = "NVARCHAR(255)", length = 255, nullable = false)
+    private String title;
+    private BigDecimal budgetRatio;
+    private LocalDateTime deadline;
     @CreationTimestamp
     private LocalDateTime createdAt;
     @UpdateTimestamp
     private LocalDateTime updatedAt;
-
 }

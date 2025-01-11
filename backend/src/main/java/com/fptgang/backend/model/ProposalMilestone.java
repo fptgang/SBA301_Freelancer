@@ -8,40 +8,38 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
+@Table(name = "proposal_milestones")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Account {
-
+public class ProposalMilestone {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long accountId;
+    private Long milestoneId;
 
-    @Column(unique = true)
-    private String email;
+    @ManyToOne
+    @JoinColumn(name = "proposal_id")
+    private Proposal proposal;
+    @Column(columnDefinition = "NVARCHAR(255)", length = 255, nullable = false)
+    private String title;
+    private BigDecimal budgetRatio;
+    private LocalDateTime deadline;
 
-
-    @Column(nullable = false, columnDefinition = "NVARCHAR(255)")
-    private String firstName;
-
-    @Column(nullable = false, columnDefinition = "NVARCHAR(255)")
-    private String lastName;
-
-    @Column
-    private String password;
-
-    @Column
-    private String avatarUrl;
-
-    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    private Role role;
+    private MilestoneStatus status;
     @CreationTimestamp
     private LocalDateTime createdAt;
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
+    public enum MilestoneStatus {
+        PENDING,
+        APPROVED,
+        REJECTED
+    }
 }
+
