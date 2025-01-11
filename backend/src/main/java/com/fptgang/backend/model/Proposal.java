@@ -10,7 +10,9 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -23,28 +25,30 @@ public class Proposal {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long proposalId;
 
-    @ManyToOne
-    @JoinColumn(name = "project_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "project_id", nullable = false)
     private Project project;
 
-    @ManyToOne
-    @JoinColumn(name = "freelancer_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "freelancer_id", nullable = false)
     private Account freelancer;
-
-    private BigDecimal budget;
-    private LocalDateTime deliveryTime;
 
     @Enumerated(EnumType.STRING)
     private ProposalStatus status;
+
     @CreationTimestamp
     private LocalDateTime createdAt;
+
     @UpdateTimestamp
     private LocalDateTime updatedAt;
+
     private boolean isVisible;
-    @OneToMany(mappedBy = "proposal", cascade = CascadeType.ALL)
-    private Set<ProposalMilestone> milestones = new HashSet<>();
-    @OneToMany(mappedBy = "proposal", cascade = CascadeType.ALL)
-    private Set<File> files = new HashSet<>();
+
+    @OneToMany(mappedBy = "proposal", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Milestone> milestones = new ArrayList<>();
+
+    @OneToMany(mappedBy = "proposal", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<File> files = new ArrayList<>();
 
     public enum ProposalStatus {
         PENDING,

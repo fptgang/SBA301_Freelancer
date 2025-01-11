@@ -21,28 +21,29 @@ public class File {
 
     @Column(columnDefinition = "NVARCHAR(255)", length = 255, nullable = false)
     private String fileName;
+
     @Column(columnDefinition = "NVARCHAR(255)", length = 255, nullable = false)
     private String fileUrl;
+
     private String fileType;
-    private Long size;
+
+    private long size;
+
     @CreationTimestamp
     private LocalDateTime createdAt;
+
     private boolean isVisible;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "uploader_id")
-    private Account uploader;
+    @JoinColumn(name = "proposal_id", nullable = false)
+    private Proposal proposal;
 
-    @ManyToOne()
-    @JoinColumn(name = "project_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "project_id", nullable = false)
     private Project project;
 
-    @ManyToOne()
-    @JoinColumn(name = "message_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "message_id", nullable = false)
     private Message message;
-
-    @ManyToOne()
-    @JoinColumn(name = "proposal_id")
-    private Proposal proposal;
 }
 

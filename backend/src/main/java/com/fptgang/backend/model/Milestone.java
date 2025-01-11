@@ -1,5 +1,6 @@
 package com.fptgang.backend.model;
 
+
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -20,16 +21,30 @@ public class Milestone {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long milestoneId;
 
-    @ManyToOne
-    @JoinColumn(name = "project_id")
-    private Project project;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "proposal_id", nullable = false)
+    private Proposal proposal;
 
     @Column(columnDefinition = "NVARCHAR(255)", length = 255, nullable = false)
     private String title;
-    private BigDecimal budgetRatio;
+    private BigDecimal budget;
     private LocalDateTime deadline;
+
+    @Enumerated(EnumType.STRING)
+    private MilestoneStatus status;
+
+    private boolean isVisible;
+
     @CreationTimestamp
     private LocalDateTime createdAt;
+
     @UpdateTimestamp
     private LocalDateTime updatedAt;
+
+    public enum MilestoneStatus {
+        PENDING,
+        TERMINATED,
+        IN_PROGRESS,
+        FINISHED
+    }
 }

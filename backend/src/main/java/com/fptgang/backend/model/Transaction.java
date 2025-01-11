@@ -19,27 +19,34 @@ public class Transaction {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long transactionId;
 
-    @ManyToOne
-    @JoinColumn(name = "account_id")
-    private Account account;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "from_account_id", nullable = false)
+    private Account fromAccount;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "to_account_id", nullable = false)
+    private Account toAccount;
 
     private BigDecimal amount;
 
     @Enumerated(EnumType.STRING)
     private TransactionType type;
+
     @Enumerated(EnumType.STRING)
     private TransactionStatus status;
+
     @CreationTimestamp
     private LocalDateTime createdAt;
 
     public enum TransactionType {
         DEPOSIT,
         WITHDRAWAL,
-        TRANSFER
+        ESCROW_DEPOSIT,
+        ESCROW_RELEASE,
+        FEE
     }
 
     public enum TransactionStatus {
-        PENDING,
         SUCCESS,
         FAILED
     }
