@@ -1,6 +1,5 @@
 package com.fptgang.backend.model;
 
-
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -8,7 +7,10 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Data
@@ -23,7 +25,6 @@ public class Account {
     @Column(unique = true)
     private String email;
 
-
     @Column(nullable = false, columnDefinition = "NVARCHAR(255)")
     private String firstName;
 
@@ -36,11 +37,26 @@ public class Account {
     @Column
     private String avatarUrl;
 
+    @Column
+    private BigDecimal balance;
+
+    @OneToMany(mappedBy = "fromAccount", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Transaction> outgoingTransactions = new ArrayList<>();
+
+    @OneToMany(mappedBy = "toAccount", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Transaction> incomingTransactions = new ArrayList<>();
+
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private Role role;
+
+    private boolean isVerified;
+    private LocalDateTime verifiedAt;
+    private boolean isVisible;
+
     @CreationTimestamp
     private LocalDateTime createdAt;
+
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
