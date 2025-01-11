@@ -19,7 +19,7 @@ public class RefreshToken {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long refreshTokenId;
 
-    @Column(nullable = false, unique = true,columnDefinition = "nvarchar(255)")
+    @Column(nullable = false, unique = true, columnDefinition = "nvarchar(255)")
     private String token;
 
     private Instant expiryDate;

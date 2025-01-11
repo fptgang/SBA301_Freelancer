@@ -1,6 +1,5 @@
 package com.fptgang.backend.model;
 
-
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -9,39 +8,27 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
+@Table(name = "project_categories")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Account {
-
+public class ProjectCategory {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long accountId;
+    private Long projectCategoryId;
 
-    @Column(unique = true)
-    private String email;
-
-
-    @Column(nullable = false, columnDefinition = "NVARCHAR(255)")
-    private String firstName;
-
-    @Column(nullable = false, columnDefinition = "NVARCHAR(255)")
-    private String lastName;
-
-    @Column
-    private String password;
-
-    @Column
-    private String avatarUrl;
-
-    @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
-    private Role role;
+    @Column(columnDefinition = "NVARCHAR(255)", length = 255, nullable = false)
+    private String name;
     @CreationTimestamp
     private LocalDateTime createdAt;
     @UpdateTimestamp
     private LocalDateTime updatedAt;
+    private boolean isVisible;
 
+    @OneToMany(mappedBy = "category")
+    private Set<Project> projects = new HashSet<>();
 }
