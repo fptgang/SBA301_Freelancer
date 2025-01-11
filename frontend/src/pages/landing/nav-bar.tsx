@@ -2,6 +2,7 @@ import React from "react";
 import { Input, Button, Typography, Dropdown, Space } from "antd";
 import { DownOutlined, SearchOutlined, UserOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router";
+import Title from "antd/lib/typography/Title";
 
 export default function NavBar() {
   const [searchTerm, setSearchTerm] = React.useState("");
@@ -33,7 +34,7 @@ export default function NavBar() {
           onClick={handleLogoClick}
         >
           <img src="/public/icon.svg" alt="Logo" className="h-8 w-auto" />
-          <Typography className="text-sm font-semibold">Hireable</Typography>
+          <Title level={5}>Hireable</Title>
         </div>
         <Dropdown
           menu={{
@@ -91,7 +92,7 @@ export default function NavBar() {
         <Button
           type="primary"
           onClick={handleSignup}
-          className="bg-blue-600 hover:bg-blue-700"
+          //   className="bg-blue-600 hover:bg-blue-700"
         >
           Sign up
         </Button>
