@@ -1,9 +1,9 @@
 package com.fptgang.backend.controller;
 
-import com.fptgang.backend.api.AccountApi;
-import com.fptgang.backend.dto.AccountDto;
-import com.fptgang.backend.dto.GetAccounts200Response;
-import com.fptgang.backend.dto.GetAccountsPageableParameter;
+import com.fptgang.backend.api.controller.AccountApi;
+import com.fptgang.backend.api.model.AccountDto;
+import com.fptgang.backend.api.model.GetAccounts200Response;
+import com.fptgang.backend.api.model.GetAccountsPageableParameter;
 import com.fptgang.backend.mapper.AccountMapper;
 import com.fptgang.backend.service.AccountService;
 import com.fptgang.backend.util.OpenApiHelper;

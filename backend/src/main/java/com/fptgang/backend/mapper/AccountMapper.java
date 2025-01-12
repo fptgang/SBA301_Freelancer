@@ -1,6 +1,6 @@
 package com.fptgang.backend.mapper;
 
-import com.fptgang.backend.dto.AccountDto;
+import com.fptgang.backend.api.model.AccountDto;
 import com.fptgang.backend.model.Account;
 import org.springframework.stereotype.Component;
 

@@ -2,9 +2,8 @@ package com.fptgang.backend.integration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fptgang.backend.TestcontainersConfiguration;
-import com.fptgang.backend.dto.AccountDto;
-import com.fptgang.backend.dto.ErrorResponse;
-import com.fptgang.backend.dto.GetAccounts200Response;
+import com.fptgang.backend.api.model.AccountDto;
+import com.fptgang.backend.api.model.GetAccounts200Response;
 import com.fptgang.backend.model.Account;
 import com.fptgang.backend.model.Role;
 import com.fptgang.backend.repository.AccountRepos;
@@ -14,15 +13,11 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.context.annotation.Import;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
-import org.testcontainers.containers.MySQLContainer;
-import org.testcontainers.junit.jupiter.Container;
 
 import java.util.Arrays;
 

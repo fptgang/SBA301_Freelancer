@@ -1,6 +1,6 @@
 package com.fptgang.backend.exception;
 
-import com.fptgang.backend.dto.ErrorResponse;
+import com.fptgang.backend.api.model.ErrorResponse;
 import jdk.jfr.Description;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.ExceptionHandler;
