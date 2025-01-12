@@ -1,10 +1,10 @@
-Job:
+ProjectDto:
   type: object
   properties:
-    jobId:
+    projectId:
       type: integer
       format: int64
-    jobCategoryId:
+    projectCategoryId:
       type: integer
       format: int64
     clientId:
@@ -14,15 +14,23 @@ Job:
       type: string
     description:
       type: string
-    minBudget:
+    minEstimatedBudget:
       type: number
-      format: float
-    maxBudget:
+      format: double
+    maxEstimatedBudget:
       type: number
-      format: float
+      format: double
+    estimatedDeadline:
+      type: string
+      format: date-time
     status:
       type: string
-      enum: [OPEN, IN_PROGRESS, COMPLETED, CANCELLED]
+      enum: [OPEN, IN_PROGRESS, TERMINATED, FINISHED]
+    activeProposalId:
+      type: integer
+      format: int64
+    isVisible:
+      type: boolean
     createdAt:
       type: string
       format: date-time

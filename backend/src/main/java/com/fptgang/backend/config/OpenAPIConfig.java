@@ -16,11 +16,4 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class OpenAPIConfig {
 
-    @Bean
-    public OpenAPI customOpenAPI() {
-        // Load the OpenAPI YAML file
-        return new OpenAPIV3Parser()
-                .read("src/main/resources/openapi/openapi-dto-model.yml");
-    }
-
 }

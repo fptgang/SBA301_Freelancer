@@ -1,10 +1,13 @@
-Transaction:
+TransactionDto:
   type: object
   properties:
     transactionId:
       type: integer
       format: int64
-    accountId:
+    fromAccountId:
+      type: integer
+      format: int64
+    toAccountId:
       type: integer
       format: int64
     amount:
@@ -12,10 +15,10 @@ Transaction:
       format: float
     type:
       type: string
-      enum: [DEBIT, CREDIT]
+      enum: [DEPOSIT, WITHDRAWAL, ESCROW_DEPOSIT, ESCROW_RELEASE, FEE]
     status:
       type: string
-      enum: [PENDING, COMPLETED, FAILED]
+      enum: [SUCCESS, FAILED]
     createdAt:
       type: string
       format: date-time

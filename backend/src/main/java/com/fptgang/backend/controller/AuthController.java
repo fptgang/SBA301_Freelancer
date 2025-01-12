@@ -75,7 +75,8 @@ public class AuthController {
             return ResponseEntity.ok(null);
         }
         //        System.out.println(authentication.getName());
-        return ResponseEntity.ok(accountService.findByEmail(email));
+        //return ResponseEntity.ok(accountService.findByEmail(email));
+        return null;
     }
 
     @PostMapping("/refreshToken")

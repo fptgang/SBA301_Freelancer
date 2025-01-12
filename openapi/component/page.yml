@@ -1,0 +1,28 @@
+Page:
+  type: object
+  description: A reusable page object for pageable responses
+  properties:
+    content:
+      type: array
+      items:
+        type: object
+        description: Placeholder for specific content
+    totalElements:
+      type: integer
+      description: Total number of elements
+      format: int64
+    totalPages:
+      type: integer
+      description: Total number of pages
+    last:
+      type: boolean
+      description: Whether this is the last page
+    first:
+      type: boolean
+      description: Whether this is the first page
+    numberOfElements:
+      type: integer
+      description: Number of elements in the current page
+    empty:
+      type: boolean
+      description: Whether the page is empty

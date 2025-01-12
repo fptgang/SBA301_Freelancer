@@ -1,0 +1,27 @@
+post:
+  summary: Login to an account
+  operationId: login
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            username:
+              type: string
+            password:
+              type: string
+  responses:
+    '200':
+      description: The operation is success or failed
+      content:
+        application/json:
+          schema:
+            $ref: '../../model/account.yml#/AccountDto'
+    '400':
+      description: The operation was failed
+      content:
+        application/json:
+          schema:
+            $ref: '../../component/error.yml#/ErrorResponse'

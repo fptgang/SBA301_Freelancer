@@ -1,23 +1,25 @@
-Milestone:
+MilestoneDto:
   type: object
   properties:
     milestoneId:
       type: integer
       format: int64
-    jobId:
+    proposalId:
       type: integer
       format: int64
     title:
       type: string
-    budgetRatio:
+    budget:
       type: number
-      format: float
+      format: double
     deadline:
       type: string
       format: date-time
     status:
       type: string
-      enum: [PENDING, COMPLETED, FAILED]
+      enum: [PENDING, TERMINATED, IN_PROGRESS, FINISHED]
+    isVisible:
+      type: boolean
     createdAt:
       type: string
       format: date-time

@@ -1,4 +1,4 @@
-Account:
+AccountDto:
   type: object
   properties:
     accountId:
@@ -6,11 +6,11 @@ Account:
       format: int64
     email:
       type: string
-    password:
-      type: string
     firstName:
       type: string
     lastName:
+      type: string
+    password:
       type: string
     avatarUrl:
       type: string
@@ -19,17 +19,17 @@ Account:
       format: double
     role:
       type: string
-      enum: [CLIENT, FREELANCER]
+      enum: [ADMIN, STAFF, CLIENT, FREELANCER]
     isVerified:
       type: boolean
     verifiedAt:
       type: string
       format: date-time
+    isVisible:
+      type: boolean
     createdAt:
       type: string
       format: date-time
     updatedAt:
       type: string
       format: date-time
-    active:
-      type: boolean
