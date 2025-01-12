@@ -1,7 +1,9 @@
 package com.fptgang.backend.model;
 
+import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
@@ -16,13 +18,14 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Account {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long accountId;
 
-    @Column(unique = true)
+    @Column(nullable = false, unique = true)
     private String email;
 
     @Column(nullable = false, columnDefinition = "NVARCHAR(255)")
@@ -31,13 +34,13 @@ public class Account {
     @Column(nullable = false, columnDefinition = "NVARCHAR(255)")
     private String lastName;
 
-    @Column
+    @Column(nullable = false)
     private String password;
 
-    @Column
+    @Nullable
     private String avatarUrl;
 
-    @Column
+    @Column(precision = 10, scale = 2, columnDefinition = "DECIMAL(10,2) DEFAULT 0.00")
     private BigDecimal balance;
 
     @OneToMany(mappedBy = "fromAccount", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
@@ -50,8 +53,13 @@ public class Account {
     @Enumerated(EnumType.STRING)
     private Role role;
 
+    @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
     private boolean isVerified;
+
+    @Nullable
     private LocalDateTime verifiedAt;
+
+    @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT TRUE")
     private boolean isVisible;
 
     @CreationTimestamp

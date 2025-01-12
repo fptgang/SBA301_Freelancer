@@ -1,7 +1,9 @@
 package com.fptgang.backend.model;
 
+import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
@@ -19,6 +21,7 @@ import java.util.Set;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Project {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -38,11 +41,17 @@ public class Project {
     @Column(columnDefinition = "TEXT", length = 10000000, nullable = false)
     private String description;
 
+    @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal minEstimatedBudget;
+
+    @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal maxEstimatedBudget;
+
+    @Column(nullable = false)
     private LocalDateTime estimatedDeadline;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private ProjectStatus status;
 
     @CreationTimestamp
@@ -51,6 +60,7 @@ public class Project {
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
+    @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT TRUE")
     private boolean isVisible;
 
     @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
@@ -61,6 +71,7 @@ public class Project {
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "active_proposal_id", unique = true)
+    @Nullable
     private Proposal activeProposal;
 
     public enum ProjectStatus {

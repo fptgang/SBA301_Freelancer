@@ -1,24 +1,20 @@
-Proposal:
+ProposalDto:
   type: object
   properties:
     proposalId:
       type: integer
       format: int64
-    jobId:
+    projectId:
       type: integer
       format: int64
     freelancerId:
       type: integer
       format: int64
-    budget:
-      type: number
-      format: float
-    deliveryTime:
-      type: string
-      format: date-time
     status:
       type: string
       enum: [PENDING, ACCEPTED, REJECTED]
+    isVisible:
+      type: boolean
     createdAt:
       type: string
       format: date-time

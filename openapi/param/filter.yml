@@ -1,0 +1,9 @@
+Filter:
+  name: filter
+  in: query
+  description: A single filter in the format `field,operator,value` (e.g., `name,eq,John`)
+  required: false
+  schema:
+    type: string
+    example: "name,eq,John"
+    pattern: "^[a-zA-Z0-9_]+,(eq|ne|lt|gt|lte|gte|in|nin|contains|ncontains|startswith|nstartswith|endswith|nendswith),.+$"

@@ -1,12 +1,12 @@
 package com.fptgang.backend.service.impl;
 
-import com.fptgang.backend.dtos.response.AccountResponseDTO;
-import com.fptgang.backend.exception.InvalidInputException;
-import com.fptgang.backend.model.Account;
 import com.fptgang.backend.repository.AccountRepos;
 import com.fptgang.backend.service.AccountService;
+import com.fptgang.backend.util.OpenApiHelper;
+import com.fptgang.backend.model.Account;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
 
 @Service
 public class AccountServiceImpl implements AccountService {
@@ -18,29 +18,23 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
+    public void update(Account account) {
+
+    }
+
+    @Override
+    public Account findByEmail(String email) {
+        return null;
+    }
+
+    @Override
     public void deleteById(String email) {
 
     }
 
-    public Account toEntity(AccountResponseDTO accountDTO){
-        Account account = accountRepos.findById(accountDTO.getAccountId()).orElseThrow(() ->
-                new InvalidInputException("Account not found"));
-        account.setAccountId(accountDTO.getAccountId());
-        account.setEmail(accountDTO.getEmail());
-        account.setFirstName(accountDTO.getFirstName());
-        account.setLastName(accountDTO.getLastName());
-        account.setRole(accountDTO.getRole());
-        return account;
-    }
-
     @Override
-    public void update(AccountResponseDTO accountDTO) {
-            Account account = toEntity(accountDTO);
-            accountRepos.save(account);
-    }
-
-    public AccountResponseDTO findByEmail(String email) {
-        Account account = accountRepos.findByEmail(email).orElse(null);
-        return account != null ? new AccountResponseDTO(account) :null;
+    public Page<Account> getAll(Pageable pageable, String filter) {
+        var spec = OpenApiHelper.<com.fptgang.backend.model.Account>toSpecification(filter);
+        return accountRepos.findAll(spec, pageable);
     }
 }

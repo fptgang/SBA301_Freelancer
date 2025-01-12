@@ -1,11 +1,13 @@
-JobCategory:
+ProjectCategoryDto:
   type: object
   properties:
-    jobCategoryId:
+    projectCategoryId:
       type: integer
       format: int64
     name:
       type: string
+    isVisible:
+      type: boolean
     createdAt:
       type: string
       format: date-time

@@ -95,8 +95,8 @@ public class AuthServiceImpl implements AuthService {
                 newAccount.setEmail(email);
                 newAccount.setFirstName(firstName);
                 newAccount.setLastName(lastName);
-                newAccount.setRole(Role.USER);
-                 accountRepos.saveAndFlush(newAccount);
+                newAccount.setRole(Role.CLIENT);  // TODO CHANGE THIS
+                accountRepos.saveAndFlush(newAccount);
                 return newAccount;
             });
             Result result = authenticate(email, account);
@@ -171,7 +171,7 @@ public class AuthServiceImpl implements AuthService {
                 account.setEmail(registerRequestDTO.getEmail());
                 account.setFirstName(registerRequestDTO.getFirstName());
                 account.setLastName(registerRequestDTO.getLastName());
-                account.setRole(Role.USER);
+                account.setRole(Role.CLIENT); // TODO CHANGE THIS
                 account.setPassword(passwordEncoderConfig.bcryptEncoder().encode(registerRequestDTO.getPassword()));
                 accountRepos.save(account);
                 return true;

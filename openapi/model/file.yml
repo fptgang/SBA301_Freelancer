@@ -1,4 +1,4 @@
-File:
+FileDto:
   type: object
   properties:
     fileId:
@@ -12,9 +12,9 @@ File:
       type: string
     size:
       type: integer
+      format: int64
+    isVisible:
+      type: boolean
     createdAt:
-      type: string
-      format: date-time
-    updatedAt:
       type: string
       format: date-time

@@ -1,4 +1,4 @@
-Message:
+MessageDto:
   type: object
   properties:
     messageId:
@@ -12,6 +12,8 @@ Message:
       format: int64
     content:
       type: string
+    isVisible:
+      type: boolean
     createdAt:
       type: string
       format: date-time

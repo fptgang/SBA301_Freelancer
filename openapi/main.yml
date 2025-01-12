@@ -2,89 +2,20 @@ openapi: 3.0.1
 info:
   title: Freelance Platform API
   version: 1.0.0
+servers:
+  - url: http://localhost:8080/api/v1
 
 components:
-  schemas:
-    Account:
-      $ref: 'model/account.yml#/Account'
-
-    RefreshToken:
-      $ref: 'model/refresh-token.yml#/RefreshToken'
-
-    Transaction:
-      $ref: 'model/transaction.yml#/Transaction'
-
-    Message:
-      $ref: 'model/message.yml#/Message'
-
-    JobCategory:
-      $ref: 'model/job-category.yml#/JobCategory'
-
-    Job:
-      $ref: 'model/job.yml#/Job'
-
-    Milestone:
-      $ref: 'model/milestone.yml#/Milestone'
-
-    Proposal:
-      $ref: 'model/proposal.yml#/Proposal'
-
-    ProjectFile:
-      $ref: 'model/project-file.yml#/ProjectFile'
-
-    File:
-      $ref: 'model/file.yml#/File'
-
-    MessageAttachment:
-      $ref: 'model/message-attachment.yml#/MessageAttachment'
-
-    ProposalAttachment:
-      $ref: 'model/proposal-attachment.yml#/ProposalAttachment'
-
-    GenericApiResponse:
-      $ref: 'model/generic-api-response.yml#/GenericApiResponse'
-      
-    LoginResponse:
-      type: object
-      allOf:
-        - $ref: '#/components/schemas/GenericApiResponse'
-        - type: object
-          properties:
-            account:
-              $ref: '#/components/schemas/Account'
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
 
 paths:
-  /login:
-    post:
-      summary: Login to an account
-      operationId: login
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                username:
-                  type: string
-                password:
-                  type: string
-      responses:
-        '200':
-          description: Successful login
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/LoginResponse'
-        '400':
-          description: Invalid credentials
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/GenericApiResponse'
-        '500':
-          description: Internal server error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/GenericApiResponse'
+  /auth/login:
+    $ref: 'path/auth/login.yml'
+  /account:
+    $ref: 'path/account.yml'
+  /account/{userId}:
+    $ref: 'path/account-accountId.yml'

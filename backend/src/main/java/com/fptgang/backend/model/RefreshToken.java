@@ -22,6 +22,7 @@ public class RefreshToken {
     @Column(nullable = false, unique = true, columnDefinition = "nvarchar(255)")
     private String token;
 
+    @Column(nullable = false)
     private Instant expiryDate;
 
     @OneToOne

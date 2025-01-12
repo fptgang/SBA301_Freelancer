@@ -3,6 +3,7 @@ package com.fptgang.backend.model;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
@@ -14,6 +15,7 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class File {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,13 +27,16 @@ public class File {
     @Column(columnDefinition = "NVARCHAR(255)", length = 255, nullable = false)
     private String fileUrl;
 
+    @Column(nullable = false)
     private String fileType;
 
+    @Column(nullable = false)
     private long size;
 
     @CreationTimestamp
     private LocalDateTime createdAt;
 
+    @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT TRUE")
     private boolean isVisible;
 
     @ManyToOne(fetch = FetchType.LAZY)

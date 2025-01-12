@@ -16,7 +16,7 @@ public class AppUser extends User {
 
     @NotNull
     public Role getRole() {
-        return getAuthorities().isEmpty() ? Role.USER :
+        return getAuthorities().isEmpty() ? Role.CLIENT : // TODO FIX THIS ROLE
                 Role.valueOf(getAuthorities().iterator().next().getAuthority());
     }
 
