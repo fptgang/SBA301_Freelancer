@@ -12,6 +12,24 @@ components:
       scheme: bearer
       bearerFormat: JWT
 
+  schemas:
+    FileDto:
+      $ref: 'model/file.yml#/FileDto'
+    MessageDto:
+      $ref: 'model/message.yml#/MessageDto'
+    MilestoneDto:
+      $ref: 'model/milestone.yml#/MilestoneDto'
+    ProjectDto:
+      $ref: 'model/project.yml#/ProjectDto'
+    ProjectCategoryDto:
+      $ref: 'model/project-category.yml#/ProjectCategoryDto'
+    ProposalDto:
+      $ref: 'model/proposal.yml#/ProposalDto'
+    RefreshTokenDto:
+      $ref: 'model/refresh-token.yml#/RefreshTokenDto'
+    TransactionDto:
+      $ref: 'model/transaction.yml#/TransactionDto'
+
 paths:
   /auth/login:
     $ref: 'path/auth/login.yml'
