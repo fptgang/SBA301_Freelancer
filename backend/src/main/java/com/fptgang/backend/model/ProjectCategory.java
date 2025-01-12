@@ -8,7 +8,9 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -23,12 +25,15 @@ public class ProjectCategory {
 
     @Column(columnDefinition = "NVARCHAR(255)", length = 255, nullable = false)
     private String name;
+
     @CreationTimestamp
     private LocalDateTime createdAt;
+
     @UpdateTimestamp
     private LocalDateTime updatedAt;
+
     private boolean isVisible;
 
-    @OneToMany(mappedBy = "category")
-    private Set<Project> projects = new HashSet<>();
+    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Project> projects = new ArrayList<>();
 }

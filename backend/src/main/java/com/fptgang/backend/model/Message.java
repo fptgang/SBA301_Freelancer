@@ -7,7 +7,9 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -20,20 +22,22 @@ public class Message {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long messageId;
 
-    @ManyToOne
-    @JoinColumn(name = "sender_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "sender_id", nullable = false)
     private Account sender;
 
-    @ManyToOne
-    @JoinColumn(name = "receiver_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "receiver_id", nullable = false)
     private Account receiver;
 
     @Column(columnDefinition = "TEXT", length = 100000, nullable = false)
     private String content;
+
     @CreationTimestamp
     private LocalDateTime createdAt;
+
     private boolean isVisible;
 
-    @OneToMany(mappedBy = "message", cascade = CascadeType.ALL)
-    private Set<File> files = new HashSet<>();
+    @OneToMany(mappedBy = "message", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<File> files = new ArrayList<>();
 }

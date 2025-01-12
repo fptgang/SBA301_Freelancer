@@ -9,7 +9,9 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -22,38 +24,46 @@ public class Project {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long projectId;
 
-    @ManyToOne
-    @JoinColumn(name = "project_category_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "project_category_id", nullable = false)
     private ProjectCategory category;
 
-    @ManyToOne
-    @JoinColumn(name = "client_id")
-    private Account account;
-    @Column(columnDefinition = "NVARCHAR(255)", length = 255, nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "client_id", nullable = false)
+    private Account client;
 
+    @Column(columnDefinition = "NVARCHAR(255)", length = 255, nullable = false)
     private String title;
 
     @Column(columnDefinition = "TEXT", length = 10000000, nullable = false)
     private String description;
 
-    private BigDecimal minBudget;
-    private BigDecimal maxBudget;
+    private BigDecimal minEstimatedBudget;
+    private BigDecimal maxEstimatedBudget;
+    private LocalDateTime estimatedDeadline;
 
     @Enumerated(EnumType.STRING)
     private ProjectStatus status;
+
     @CreationTimestamp
     private LocalDateTime createdAt;
+
     @UpdateTimestamp
     private LocalDateTime updatedAt;
+
     private boolean isVisible;
-    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL)
-    private Set<Milestone> milestones = new HashSet<>();
-    @OneToMany(mappedBy = "project")
-    private Set<File> files = new HashSet<>();
-    @OneToMany(mappedBy = "project")
-    private Set<Proposal> proposals = new HashSet<>();
+
+    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<File> files = new ArrayList<>();
+
+    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Proposal> proposals = new ArrayList<>();
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "active_proposal_id", unique = true)
+    private Proposal activeProposal;
 
     public enum ProjectStatus {
-        OPEN, CLOSED
+        OPEN, IN_PROGRESS, TERMINATED, FINISHED
     }
 }
