@@ -47,6 +47,8 @@ import About from "./pages/about/About";
 import { Role } from "./data/types/Account";
 import ClientLayout from "./components/layout";
 import NavBar from "./pages/landing/nav-bar";
+import Profile from "./pages/profile/profile";
+import Footer from "./components/common/footer/footer";
 
 const axiosInstance = axios.create();
 axiosInstance.interceptors.request.use((config) => {
@@ -106,15 +108,22 @@ function App() {
               >
                 <Routes>
                   <Route
-                    index
                     element={
                       <ClientLayout
                         HeaderContent={NavBar}
-                        InnerContent={LandingPage}
-                        FooterContent={() => <div>Footer</div>}
+                        InnerContent={() => <Outlet />}
+                        FooterContent={() => <Footer />}
                       />
                     }
-                  ></Route>
+                  >
+                    <Route index element={<LandingPage />} />
+                    <Route
+                      path="/settings"
+                      element={<Navigate to="/admin" />}
+                    />
+                    <Route path="/profile" element={<Profile />} />
+                    <Route path="/about" element={<About />} />
+                  </Route>
 
                   <Route
                     element={
@@ -157,7 +166,6 @@ function App() {
                       </Authenticated>
                     }
                   >
-                    <Route path="/about" element={<About />} />
                     <Route path="/login" element={<Login />} />
                     <Route path="/register" element={<Register />} />
                     <Route

@@ -1,96 +1,135 @@
-import React from "react";
-import { Input, Button, Typography, Dropdown, Space } from "antd";
-import { DownOutlined, SearchOutlined, UserOutlined } from "@ant-design/icons";
+import React, { useState } from "react";
+import {
+  Input,
+  Button,
+  Typography,
+  Dropdown,
+  Space,
+  Drawer,
+  Layout,
+  theme,
+} from "antd";
+import {
+  DownOutlined,
+  SearchOutlined,
+  UserOutlined,
+  MenuOutlined,
+  CloseOutlined,
+} from "@ant-design/icons";
 import { useNavigate } from "react-router";
-import Title from "antd/lib/typography/Title";
-import { Authenticated, useLogout } from "@refinedev/core";
-import { l } from "react-router/dist/development/fog-of-war-DLtn2OLr";
+import { Authenticated } from "@refinedev/core";
+import { ProfileDropdownButton } from "../../components/common/button/profile-dropdown-button";
+
+const { Header } = Layout;
+const { Title } = Typography;
+const { useToken } = theme;
 
 export default function NavBar() {
+  const { token } = useToken();
   const [searchTerm, setSearchTerm] = React.useState("");
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const nav = useNavigate();
+
   const handleSearch = (value: string) => {
     setSearchTerm(value);
   };
 
   const handleLogin = () => {
-    console.log("Login clicked");
     nav("/login");
+    setMobileMenuOpen(false);
   };
 
   const handleSignup = () => {
-    console.log("Signup clicked");
     nav("/register");
+    setMobileMenuOpen(false);
   };
 
   const handleLogoClick = () => {
-    console.log("Logo clicked");
     nav("/");
+    setMobileMenuOpen(false);
+  };
+
+  const menuItems = {
+    findTalent: [
+      { key: "home", label: "Home" },
+      { key: "about", label: "About" },
+      { key: "contact", label: "Contact" },
+    ],
+    findWork: [
+      { key: "services", label: "Services" },
+      { key: "pricing", label: "Pricing" },
+      { key: "faq", label: "FAQ" },
+    ],
   };
 
   return (
-    <>
-      <div className="flex justify-between items-center w-full p-4">
+    <Header
+      className={`
+      sticky top-0 z-50 px-6 h-16 flex items-center
+      border-b border-solid w-full
+    `}
+      style={{
+        backgroundColor: token.colorBgElevated,
+        borderColor: token.colorBorderSecondary,
+      }}
+    >
+      <div className="flex items-center justify-between w-full">
+        {/* Logo and Desktop Navigation */}
         <div className="flex items-center">
           <div
-            className="flex flex-col items-center space-y-1 hover:cursor-pointer"
+            className="flex items-center cursor-pointer mr-12"
             onClick={handleLogoClick}
           >
             <img src="/public/icon.svg" alt="Logo" className="h-8 w-auto" />
-            <Title level={5}>Hireable</Title>
+            <Title
+              level={5}
+              className="!m-0 ml-2"
+              style={{ color: token.colorTextHeading }}
+            >
+              Hireable
+            </Title>
           </div>
-          <Dropdown
-            menu={{
-              items: [
-                { label: "Home", key: "home" },
-                { label: "About", key: "about" },
-                { label: "Contact", key: "contact" },
-              ],
-            }}
-            trigger={["click", "hover"]}
-            className="mx-2"
-          >
-            <Button type="text" className="hover:bg-gray-100">
-              <Space>
-                Find Talent
-                <DownOutlined />
-              </Space>
-            </Button>
-          </Dropdown>
 
-          <Dropdown
-            menu={{
-              items: [
-                { label: "Services", key: "services" },
-                { label: "Pricing", key: "pricing" },
-                { label: "FAQ", key: "faq" },
-              ],
-            }}
-            trigger={["hover", "click"]}
-            className="mx-2"
-          >
-            <Button type="text" className="hover:bg-gray-100">
-              <Space>
-                Find Work
-                <DownOutlined />
-              </Space>
-            </Button>
-          </Dropdown>
+          {/* Desktop Navigation */}
+          <div className="hidden md:flex items-center space-x-4">
+            <Dropdown
+              menu={{ items: menuItems.findTalent }}
+              trigger={["hover"]}
+            >
+              <Button type="text" className="flex items-center">
+                <Space>
+                  Find Talent
+                  <DownOutlined />
+                </Space>
+              </Button>
+            </Dropdown>
+
+            <Dropdown menu={{ items: menuItems.findWork }} trigger={["hover"]}>
+              <Button type="text" className="flex items-center">
+                <Space>
+                  Find Work
+                  <DownOutlined />
+                </Space>
+              </Button>
+            </Dropdown>
+          </div>
         </div>
-        <div className="flex items-center space-x-4">
+
+        {/* Desktop Search and Auth */}
+        <div className="hidden md:flex items-center space-x-4">
           <Input
             placeholder="Search..."
             prefix={<SearchOutlined className="text-gray-400" />}
             value={searchTerm}
             onChange={(e) => handleSearch(e.target.value)}
-            className="w-64"
+            className="w-48 lg:w-64"
+            style={{ backgroundColor: token.colorBgContainer }}
           />
 
           <Authenticated
             key={"authenticated-inner"}
             fallback={
-              <>
-                {" "}
+              <Space size="middle">
                 <Button
                   icon={<UserOutlined />}
                   onClick={handleLogin}
@@ -98,54 +137,95 @@ export default function NavBar() {
                 >
                   Login
                 </Button>
-                <Button
-                  type="primary"
-                  onClick={handleSignup}
-                  //   className="bg-blue-600 hover:bg-blue-700"
-                >
+                <Button type="primary" onClick={handleSignup}>
                   Sign up
                 </Button>
-              </>
+              </Space>
             }
           >
             <ProfileDropdownButton />
           </Authenticated>
         </div>
+
+        {/* Mobile menu button */}
+        <Button
+          type="text"
+          icon={mobileMenuOpen ? <CloseOutlined /> : <MenuOutlined />}
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          className="md:hidden"
+        />
       </div>
-    </>
+
+      {/* Mobile Drawer */}
+      <Drawer
+        placement="right"
+        onClose={() => setMobileMenuOpen(false)}
+        open={mobileMenuOpen}
+        width={280}
+        styles={{
+          body: {
+            padding: 0,
+            backgroundColor: token.colorBgContainer,
+          },
+        }}
+      >
+        <div className="p-4 flex flex-col space-y-4">
+          <Input
+            placeholder="Search..."
+            prefix={<SearchOutlined />}
+            value={searchTerm}
+            onChange={(e) => handleSearch(e.target.value)}
+            style={{ backgroundColor: token.colorBgContainer }}
+          />
+
+          <Dropdown menu={{ items: menuItems.findTalent }} trigger={["click"]}>
+            <Button type="text" className="w-full text-left">
+              <Space>
+                Find Talent
+                <DownOutlined />
+              </Space>
+            </Button>
+          </Dropdown>
+
+          <Dropdown menu={{ items: menuItems.findWork }} trigger={["click"]}>
+            <Button type="text" className="w-full text-left">
+              <Space>
+                Find Work
+                <DownOutlined />
+              </Space>
+            </Button>
+          </Dropdown>
+
+          <div
+            className="pt-4 border-t"
+            style={{ borderColor: token.colorBorderSecondary }}
+          >
+            <Authenticated
+              key={"authenticated-inner"}
+              fallback={
+                <div className="flex flex-col space-y-2">
+                  <Button
+                    icon={<UserOutlined />}
+                    onClick={handleLogin}
+                    className="w-full"
+                  >
+                    Login
+                  </Button>
+                  <Button
+                    type="primary"
+                    onClick={handleSignup}
+                    className="w-full"
+                  >
+                    Sign up
+                  </Button>
+                </div>
+              }
+            >
+              <ProfileDropdownButton />
+            </Authenticated>
+          </div>
+        </div>
+      </Drawer>
+    </Header>
   );
 }
-
-const ProfileDropdownButton = () => {
-  const nav = useNavigate();
-  const { mutate: logout } = useLogout();
-
-  const menuItems = [
-    {
-      key: "profile",
-      label: "Profile",
-      onClick: () => nav("/profile"),
-    },
-    {
-      key: "settings",
-      label: "Settings",
-      onClick: () => nav("/settings"),
-    },
-    {
-      key: "logout",
-      label: "Logout",
-      onClick: () => logout(),
-    },
-  ];
-
-  return (
-    <Dropdown menu={{ items: menuItems }} placement="bottomRight">
-      <Button
-        shape="circle"
-        size="large"
-        icon={<UserOutlined />}
-        className="flex items-center justify-center bg-gray-100 hover:bg-gray-200"
-      />
-    </Dropdown>
-  );
-};

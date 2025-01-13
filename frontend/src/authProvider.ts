@@ -91,7 +91,7 @@ export const authProvider: AuthProvider = {
     };
   },
   getPermissions: async () => {
-    return ["admin"];
+    return localStorage.getItem("role");
   },
   getIdentity: async () => {
     const token = localStorage.getItem(TOKEN_KEY);
