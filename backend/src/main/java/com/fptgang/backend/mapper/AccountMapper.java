@@ -1,8 +1,9 @@
 package com.fptgang.backend.mapper;
 
 import com.fptgang.backend.api.model.AccountDto;
+import com.fptgang.backend.model.Role;
 import com.fptgang.backend.repository.AccountRepos;
-import com.fptgang.model.Account;
+import com.fptgang.backend.model.Account;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -33,10 +34,10 @@ public class AccountMapper extends BaseMapper<AccountDto, Account> {
             existingAccount.setBalance(dto.getBalance() != null ? dto.getBalance() : existingAccount.getBalance());
             existingAccount.setRole(mapRoleAccount(dto.getRole()));
             if (dto.getCreatedAt() != null) {
-                existingAccount.setCreatedAt(dto.getCreatedAt());
+                existingAccount.setCreatedAt(dto.getCreatedAt().toLocalDateTime());
             }
             if (dto.getUpdatedAt() != null) {
-                existingAccount.setUpdatedAt(dto.getUpdatedAt());
+                existingAccount.setUpdatedAt(dto.getUpdatedAt().toLocalDateTime());
             }
             return existingAccount;
         } else {
@@ -66,10 +67,10 @@ public class AccountMapper extends BaseMapper<AccountDto, Account> {
 
             // Convert createdAt and updatedAt to OffsetDateTime if not null
             if (dto.getCreatedAt() != null) {
-                entity.setCreatedAt(dto.getCreatedAt());
+                entity.setCreatedAt(dto.getCreatedAt().toLocalDateTime());
             }
             if (dto.getUpdatedAt() != null) {
-                entity.setUpdatedAt(dto.getUpdatedAt());
+                entity.setUpdatedAt(dto.getUpdatedAt().toLocalDateTime());
             }
 
             return entity;
@@ -113,26 +114,26 @@ public class AccountMapper extends BaseMapper<AccountDto, Account> {
         return dto;
     }
 
-    public Account.RoleEnum mapRoleAccount(AccountDto.RoleEnum roleEnum) {
+    public Role mapRoleAccount(AccountDto.RoleEnum roleEnum) {
         if (roleEnum == null) {
             return null; // Or a default Role, e.g., Role.CLIENT
         }
 
         switch (roleEnum) {
             case ADMIN:
-                return Account.RoleEnum.ADMIN;
+                return Role.ADMIN;
             case STAFF:
-                return Account.RoleEnum.STAFF;
+                return Role.STAFF;
             case CLIENT:
-                return Account.RoleEnum.CLIENT;
+                return Role.CLIENT;
             case FREELANCER:
-                return Account.RoleEnum.FREELANCER;
+                return Role.FREELANCER;
             default:
                 throw new IllegalArgumentException("Unknown RoleEnum: " + roleEnum);
         }
     }
 
-    public AccountDto.RoleEnum mapRoleAccountDto(Account.RoleEnum roleEnum) {
+    public AccountDto.RoleEnum mapRoleAccountDto(Role roleEnum) {
         if (roleEnum == null) {
             return null; // Or a default Role, e.g., Role.CLIENT
         }

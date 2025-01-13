@@ -40,7 +40,7 @@ public class AccountController implements AccountApi {
     @Override
     public ResponseEntity<GetAccounts200Response> getAccounts(GetAccountsPageableParameter pageable, String filter) {
         var page = OpenApiHelper.toPageable(pageable);
-        var res = accountService.getAll(page, filter).map(accountMapper::toDto);
+        var res = accountService.getAll(page, filter).map(accountMapper::toDTO);
         return OpenApiHelper.respondPage(res, GetAccounts200Response.class);
     }
 

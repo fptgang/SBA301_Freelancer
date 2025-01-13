@@ -1,6 +1,6 @@
 package com.fptgang.backend.repository;
 
-import com.fptgang.model.Account;
+import com.fptgang.backend.model.Account;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
