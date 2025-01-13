@@ -42,6 +42,7 @@ public class ProjectCategoryMapper extends BaseMapper<ProjectCategoryDto, Projec
             existEntity.setName(dto.getName() != null ? dto.getName() : existEntity.getName());
             existEntity.setVisible(dto.getIsVisible() != null ? dto.getIsVisible() : true);
             existEntity.setUpdatedAt(dto.getUpdatedAt() != null ? dto.getUpdatedAt().toLocalDateTime() : existEntity.getUpdatedAt());
+            existEntity.setProjectCategoryId(dto.getProjectCategoryId());
 
             return existEntity;
         } else {

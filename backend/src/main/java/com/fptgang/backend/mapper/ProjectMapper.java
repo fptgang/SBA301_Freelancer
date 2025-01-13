@@ -5,6 +5,7 @@ import com.fptgang.backend.model.Account;
 import com.fptgang.backend.model.Project;
 import com.fptgang.backend.model.ProjectCategory;
 import com.fptgang.backend.model.Proposal;
+import com.fptgang.backend.repository.AccountRepos;
 import com.fptgang.backend.repository.ProjectCategoryRepos;
 import com.fptgang.backend.repository.ProjectRepos;
 import com.fptgang.backend.repository.ProposalRepos;
@@ -29,6 +30,9 @@ public class ProjectMapper extends BaseMapper<ProjectDto, Project> {
 
     @Autowired
     private ProposalRepos proposalRepos;
+
+    @Autowired
+    private AccountRepos accountRepos;
 
     public ProjectDto toDTO(Project project) {
         if (project == null) {
@@ -61,6 +65,8 @@ public class ProjectMapper extends BaseMapper<ProjectDto, Project> {
         Optional<Project> existingEntityOptional = projectRepos.findByProjectId(dto.getProjectId());
         Optional<ProjectCategory> projectCategoryOptional = projectCategoryRepos.findByProjectCategoryId(dto.getProjectCategoryId());
         Optional<Proposal> proposalOptional = proposalRepos.findByProposalId(dto.getActiveProposalId());
+        Optional<Account> accountOptional = accountRepos.findByAccountId(dto.getClientId());
+        Account client = accountOptional.get();
         ProjectCategory projectCategory = projectCategoryOptional.get();
         Proposal proposal = proposalOptional.get();
         if (existingEntityOptional.isPresent()) {
@@ -84,16 +90,12 @@ public class ProjectMapper extends BaseMapper<ProjectDto, Project> {
             project.setProjectId(dto.getProjectId());
 
             if (dto.getProjectCategoryId() != null) {
-                ProjectCategory category = new ProjectCategory();
-                category.setProjectCategoryId(dto.getProjectCategoryId());
-                project.setCategory(category);
+                project.setCategory(projectCategory);
             } else {
                 project.setCategory(null);
             }
 
             if (dto.getClientId() != null) {
-                Account client = new Account();
-                client.setAccountId(dto.getClientId());
                 project.setClient(client);
             } else {
                 project.setClient(null);
@@ -117,9 +119,7 @@ public class ProjectMapper extends BaseMapper<ProjectDto, Project> {
             }
 
             if (dto.getActiveProposalId() != null) {
-                Proposal activeProposal = new Proposal();
-                activeProposal.setProposalId(dto.getActiveProposalId());
-                project.setActiveProposal(activeProposal);
+                project.setActiveProposal(proposal);
             } else {
                 project.setActiveProposal(null);
             }
