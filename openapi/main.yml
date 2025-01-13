@@ -37,3 +37,8 @@ paths:
     $ref: 'path/account.yml'
   /account/{userId}:
     $ref: 'path/account-accountId.yml'
+  /projects:
+    $ref: 'path/project.yml'
+  /projects/{projectId}:
+    $ref: 'path/project-projectId.yml'
+

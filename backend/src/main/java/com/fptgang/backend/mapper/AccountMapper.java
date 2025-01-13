@@ -147,7 +147,6 @@ public class AccountMapper extends BaseMapper<AccountDto, Account> {
         if (roleEnum == null) {
             return null; // Or a default Role, e.g., Role.CLIENT
         }
-
         switch (roleEnum) {
             case ADMIN:
                 return AccountDto.RoleEnum.ADMIN;
