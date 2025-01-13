@@ -5,6 +5,9 @@ import {
   loginWithGoogle,
   register,
 } from "./data/service/auth-service";
+import { Auth } from "./data/types/auth";
+import { Role } from "./data/types/Account";
+import { l } from "react-router/dist/development/fog-of-war-DLtn2OLr";
 export const TOKEN_KEY = "refine-auth";
 export const REFRESH_TOKEN_KEY = "refine-refresh-token";
 
@@ -14,20 +17,38 @@ export const authProvider: AuthProvider = {
       const response = await loginWithGoogle(googleToken);
       localStorage.setItem(TOKEN_KEY, response.token);
       localStorage.setItem(REFRESH_TOKEN_KEY, response.refreshToken);
-      return {
-        success: true,
-        redirectTo: "/",
-      };
+      console.log(response);
+      if (response.accountResponseDTO.role === Role.ADMIN) {
+        return {
+          success: true,
+          redirectTo: "/admin",
+        };
+      } else {
+        return {
+          success: true,
+          redirectTo: "/",
+        };
+      }
     }
 
     if ((username || email) && password) {
-      const response = await login(email, password);
+      const response: Auth = await login(email, password);
       localStorage.setItem(TOKEN_KEY, response.token);
       localStorage.setItem(REFRESH_TOKEN_KEY, response.refreshToken);
-      return {
-        success: true,
-        redirectTo: "/",
-      };
+
+      localStorage.setItem("role", response.accountResponseDTO.role);
+
+      if (response.accountResponseDTO.role === Role.ADMIN) {
+        return {
+          success: true,
+          redirectTo: "/admin",
+        };
+      } else {
+        return {
+          success: true,
+          redirectTo: "/",
+        };
+      }
     }
 
     return {
@@ -78,10 +99,12 @@ export const authProvider: AuthProvider = {
       const result = await getCurrentUser(token)
         .then((response) => {
           console.log(response);
+          localStorage.setItem("role", response.role);
           return {
             id: response.accountId,
             name: response.firstName + " " + response.lastName,
             avatar: "https://i.pravatar.cc/300",
+            role: response.role,
           };
         })
         .catch((error) => {
