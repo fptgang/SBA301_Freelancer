@@ -38,6 +38,7 @@ public class MilestoneMapper extends BaseMapper<MilestoneDto, Milestone> {
         milestoneDto.setStatus(mapStatusDto(entity.getStatus()));
         milestoneDto.setCreatedAt(OffsetDateTime.from(entity.getCreatedAt()));
         milestoneDto.setUpdatedAt(OffsetDateTime.from(entity.getUpdatedAt()));
+        milestoneDto.setIsVisible(entity.isVisible());
 
         return milestoneDto;
     }

@@ -28,6 +28,7 @@ public class FileMapper extends BaseMapper<FileDto, File> {
         dto.setFileUrl(entity.getFileUrl());
         dto.setSize(Long.valueOf(entity.getSize()));
         dto.setCreatedAt(OffsetDateTime.from(entity.getCreatedAt()));
+        dto.setIsVisible(entity.isVisible());
 
         return dto;
     }

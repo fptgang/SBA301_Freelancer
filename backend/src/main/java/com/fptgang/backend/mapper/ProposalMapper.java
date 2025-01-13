@@ -43,6 +43,7 @@ public class ProposalMapper extends BaseMapper<ProposalDto, Proposal> {
         proposalDto.setStatus(mapRoleDto(entity.getStatus()));
         proposalDto.setCreatedAt(OffsetDateTime.from(entity.getCreatedAt()));
         proposalDto.setUpdatedAt(OffsetDateTime.from(entity.getUpdatedAt()));
+        proposalDto.setIsVisible(entity.isVisible());
 
         return proposalDto;
     }

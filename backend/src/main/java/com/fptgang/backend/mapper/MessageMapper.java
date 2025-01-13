@@ -35,6 +35,7 @@ public class MessageMapper extends BaseMapper<MessageDto, Message> {
         dto.setMessageId(entity.getMessageId());
         dto.setContent(entity.getContent());
         dto.setCreatedAt(OffsetDateTime.from(entity.getCreatedAt()));
+        dto.setIsVisible(entity.isVisible());
 
         return dto;
     }
