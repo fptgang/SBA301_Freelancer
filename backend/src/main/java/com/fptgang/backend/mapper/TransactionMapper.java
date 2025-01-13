@@ -1,9 +1,23 @@
 package com.fptgang.backend.mapper;
 
 import com.fptgang.backend.api.model.TransactionDto;
+import com.fptgang.backend.repository.TransactionRepos;
+import com.fptgang.model.Proposal;
 import com.fptgang.model.Transaction;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
+import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.util.Optional;
+
+@Component
 public class TransactionMapper extends BaseMapper<TransactionDto, Transaction> {
+
+
+    @Autowired
+    private TransactionRepos transactionRepos;
+
     @Override
     TransactionDto toDTO(Transaction transaction) {
         if (transaction == null) {
@@ -27,31 +41,41 @@ public class TransactionMapper extends BaseMapper<TransactionDto, Transaction> {
             return null;
         }
 
-        Transaction entity = new Transaction();
-        if (dto.getTransactionId() != null) {
-            entity.setTransactionId(dto.getTransactionId());
-        }
-        if (dto.getFromAccountId() != null) {
-            entity.setAccountId(dto.getFromAccountId()); // Mapping field name change
-        }
-        if (dto.getAmount() != null) {
-            entity.setAmount(dto.getAmount());
-        }
-        if (dto.getType() != null) {
-            entity.setType(mapTransactionTypeReverse(dto.getType())); // Convert enum type back
-        }
-        if (dto.getStatus() != null) {
-            entity.setStatus(mapTransactionStatusReverse(dto.getStatus())); // Convert enum status back
-        }
-        if (dto.getCreatedAt() != null) {
-            entity.setCreatedAt(dto.getCreatedAt());
-        }
+        Optional<Transaction> existingEntityOptional = transactionRepos.findByTransactionId(dto.getTransactionId());
+        if (existingEntityOptional.isPresent()) {
+            Transaction existEntity = existingEntityOptional.get();
+            existEntity.setAccountId(dto.getFromAccountId() != null ? dto. getFromAccountId() : existEntity.getAccountId());
+            existEntity.setAmount(dto.getAmount() != null ? dto.getAmount() : existEntity.getAmount());
+            existEntity.setType(dto.getType() != null ? mapTransactionTypeReverse(dto.getType()) : existEntity.getType());
+            existEntity.setStatus(dto.getStatus() != null ? mapTransactionStatusReverse(dto.getStatus()) : existEntity.getStatus());
 
-        return entity;
+            return existEntity;
+        } else {
+            Transaction entity = new Transaction();
+            if (dto.getTransactionId() != null) {
+                entity.setTransactionId(dto.getTransactionId());
+            }
+            if (dto.getFromAccountId() != null) {
+                entity.setAccountId(dto.getFromAccountId()); // Mapping field name change
+            }
+            if (dto.getAmount() != null) {
+                entity.setAmount(dto.getAmount());
+            }
+            if (dto.getType() != null) {
+                entity.setType(mapTransactionTypeReverse(dto.getType())); // Convert enum type back
+            }
+            if (dto.getStatus() != null) {
+                entity.setStatus(mapTransactionStatusReverse(dto.getStatus())); // Convert enum status back
+            }
+            if (dto.getCreatedAt() != null) {
+                entity.setCreatedAt(dto.getCreatedAt());
+            }
+            return  entity;
+        }
     }
 
 
-    private TransactionDto.TypeEnum mapTransactionType(Transaction.TypeEnum type) {
+    public TransactionDto.TypeEnum mapTransactionType(Transaction.TypeEnum type) {
         switch (type) {
             case DEBIT:
                 return TransactionDto.TypeEnum.DEPOSIT;
@@ -62,7 +86,7 @@ public class TransactionMapper extends BaseMapper<TransactionDto, Transaction> {
         }
     }
 
-    private TransactionDto.StatusEnum mapTransactionStatus(Transaction.StatusEnum status) {
+    public TransactionDto.StatusEnum mapTransactionStatus(Transaction.StatusEnum status) {
         switch (status) {
             case PENDING:
                 return TransactionDto.StatusEnum.SUCCESS;
@@ -73,7 +97,7 @@ public class TransactionMapper extends BaseMapper<TransactionDto, Transaction> {
         }
     }
 
-    private Transaction.TypeEnum mapTransactionTypeReverse(TransactionDto.TypeEnum type) {
+    public Transaction.TypeEnum mapTransactionTypeReverse(TransactionDto.TypeEnum type) {
         if (type == null) {
             return null;
         }
@@ -88,7 +112,7 @@ public class TransactionMapper extends BaseMapper<TransactionDto, Transaction> {
     }
 
     // Helper method to map status enum values in reverse
-    private Transaction.StatusEnum mapTransactionStatusReverse(TransactionDto.StatusEnum status) {
+    public Transaction.StatusEnum mapTransactionStatusReverse(TransactionDto.StatusEnum status) {
         if (status == null) {
             return null;
         }

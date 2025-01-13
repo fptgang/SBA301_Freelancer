@@ -1,10 +1,21 @@
 package com.fptgang.backend.mapper;
 
 import com.fptgang.backend.api.model.FileDto;
+import com.fptgang.backend.repository.FileRepos;
 import com.fptgang.model.File;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.util.Optional;
 
 
+@Component
 public class FileMapper extends BaseMapper<FileDto, File> {
+
+    @Autowired
+    private FileRepos fileRepos;
 
     @Override
     FileDto toDTO(File entity) {
@@ -16,8 +27,8 @@ public class FileMapper extends BaseMapper<FileDto, File> {
         dto.setFileName(entity.getFileName());
         dto.setFileType(entity.getFileType());
         dto.setFileUrl(entity.getFileUrl());
-        dto.setSize(dto.getSize());
-        dto.setCreatedAt(dto.getCreatedAt());
+        dto.setSize(Long.valueOf(entity.getSize()));
+        dto.setCreatedAt(entity.getCreatedAt());
 
         return dto;
     }
@@ -29,33 +40,48 @@ public class FileMapper extends BaseMapper<FileDto, File> {
             return null;
         }
 
-        File file = new File();
+        Optional<File> existingFileOptional = fileRepos.findByFileId(dto.getFileId());
+        if(existingFileOptional.isPresent()){
+            File existFile = existingFileOptional.get();
+            existFile.setFileName(dto.getFileName() != null ? dto.getFileName(): existFile.getFileName());
+            existFile.setFileType(dto.getFileType() != null ? dto.getFileType(): existFile.getFileType());
+            existFile.setFileUrl(dto.getFileUrl() != null ? dto.getFileUrl(): existFile.getFileUrl());
+            existFile.setSize(dto.getSize() != null ? dto.getSize().intValue() : existFile.getSize().intValue());
+            existFile.setCreatedAt(dto.getCreatedAt() != null ? dto.getCreatedAt() : existFile.getCreatedAt());
+            existFile.setUpdatedAt(OffsetDateTime.from(Instant.now()));
 
-        if (dto.getFileId() != null) {
-            file.setFileId(dto.getFileId());
+            return existFile;
+        }
+        else{
+            File file = new File();
+
+            if (dto.getFileId() != null) {
+                file.setFileId(dto.getFileId());
+            }
+
+            if (dto.getFileName() != null) {
+                file.setFileName(dto.getFileName());
+            }
+
+            if (dto.getFileUrl() != null) {
+                file.setFileUrl(dto.getFileUrl());
+            }
+
+            if (dto.getFileType() != null) {
+                file.setFileType(dto.getFileType());
+            }
+
+            if (dto.getSize() != null) {
+                file.setSize(dto.getSize() != null ? dto.getSize().intValue() : null);
+            }
+
+            if (dto.getCreatedAt() != null) {
+                file.setCreatedAt(dto.getCreatedAt());
+            }
+
+            return file;
         }
 
-        if (dto.getFileName() != null) {
-            file.setFileName(dto.getFileName());
-        }
-
-        if (dto.getFileUrl() != null) {
-            file.setFileUrl(dto.getFileUrl());
-        }
-
-        if (dto.getFileType() != null) {
-            file.setFileType(dto.getFileType());
-        }
-
-        if (dto.getSize() != null) {
-            file.setSize(dto.getSize() != null ? dto.getSize().intValue() : null);
-        }
-
-        if (dto.getCreatedAt() != null) {
-            file.setCreatedAt(dto.getCreatedAt());
-        }
-
-        return file;
     }
 
 

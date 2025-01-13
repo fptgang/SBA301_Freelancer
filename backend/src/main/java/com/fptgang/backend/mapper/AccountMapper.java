@@ -1,14 +1,20 @@
 package com.fptgang.backend.mapper;
 
 import com.fptgang.backend.api.model.AccountDto;
+import com.fptgang.backend.repository.AccountRepos;
 import com.fptgang.model.Account;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
+import java.util.Optional;
 
 @Component
 public class AccountMapper extends BaseMapper<AccountDto, Account> {
+
+    @Autowired
+    private AccountRepos accountRepos;
 
     @Override
     public Account toEntity(AccountDto dto) {
@@ -16,39 +22,59 @@ public class AccountMapper extends BaseMapper<AccountDto, Account> {
             return null;
         }
 
-        Account entity = new Account();
-        if (dto.getAccountId() != null) {
-            entity.setAccountId(dto.getAccountId());
-        }
-        if (dto.getEmail() != null) {
-            entity.setEmail(dto.getEmail());
-        }
-        if (dto.getFirstName() != null) {
-            entity.setFirstName(dto.getFirstName());
-        }
-        if (dto.getLastName() != null) {
-            entity.setLastName(dto.getLastName());
-        }
-        if (dto.getAvatarUrl() != null) {
-            entity.setAvatarUrl(dto.getAvatarUrl());
-        }
-        if (dto.getBalance() != null) {
-            entity.setBalance(dto.getBalance());
-        }
-        if (dto.getRole() != null) {
-            entity.setRole(mapRoleAccount(dto.getRole())); // Enum conversion
+        Optional<Account> existingAccountOptional = accountRepos.findByAccountId(dto.getAccountId());
+
+        if (existingAccountOptional.isPresent()) {
+            Account existingAccount = existingAccountOptional.get();
+            existingAccount.setEmail(dto.getEmail() != null ? dto.getEmail() : existingAccount.getEmail());
+            existingAccount.setFirstName(dto.getFirstName() != null ? dto.getFirstName() : existingAccount.getFirstName());
+            existingAccount.setLastName(dto.getLastName() != null ? dto.getLastName() : existingAccount.getLastName());
+            existingAccount.setAvatarUrl(dto.getAvatarUrl() != null ? dto.getAvatarUrl() : existingAccount.getAvatarUrl());
+            existingAccount.setBalance(dto.getBalance() != null ? dto.getBalance() : existingAccount.getBalance());
+            existingAccount.setRole(mapRoleAccount(dto.getRole()));
+            if (dto.getCreatedAt() != null) {
+                existingAccount.setCreatedAt(dto.getCreatedAt());
+            }
+            if (dto.getUpdatedAt() != null) {
+                existingAccount.setUpdatedAt(dto.getUpdatedAt());
+            }
+            return existingAccount;
+        } else {
+
+            Account entity = new Account();
+            if (dto.getAccountId() != null) {
+                entity.setAccountId(dto.getAccountId());
+            }
+            if (dto.getEmail() != null) {
+                entity.setEmail(dto.getEmail());
+            }
+            if (dto.getFirstName() != null) {
+                entity.setFirstName(dto.getFirstName());
+            }
+            if (dto.getLastName() != null) {
+                entity.setLastName(dto.getLastName());
+            }
+            if (dto.getAvatarUrl() != null) {
+                entity.setAvatarUrl(dto.getAvatarUrl());
+            }
+            if (dto.getBalance() != null) {
+                entity.setBalance(dto.getBalance());
+            }
+            if (dto.getRole() != null) {
+                entity.setRole(mapRoleAccount(dto.getRole())); // Enum conversion
+            }
+
+            // Convert createdAt and updatedAt to OffsetDateTime if not null
+            if (dto.getCreatedAt() != null) {
+                entity.setCreatedAt(dto.getCreatedAt());
+            }
+            if (dto.getUpdatedAt() != null) {
+                entity.setUpdatedAt(dto.getUpdatedAt());
+            }
+
+            return entity;
         }
 
-        // Convert createdAt and updatedAt to OffsetDateTime if not null
-        if (dto.getCreatedAt() != null) {
-            entity.setCreatedAt(dto.getCreatedAt());
-        }
-        if (dto.getUpdatedAt() != null) {
-            entity.setUpdatedAt(dto.getUpdatedAt());
-        }
-
-
-        return entity;
     }
 
     @Override
@@ -87,7 +113,7 @@ public class AccountMapper extends BaseMapper<AccountDto, Account> {
         return dto;
     }
 
-    private Account.RoleEnum mapRoleAccount(AccountDto.RoleEnum roleEnum) {
+    public Account.RoleEnum mapRoleAccount(AccountDto.RoleEnum roleEnum) {
         if (roleEnum == null) {
             return null; // Or a default Role, e.g., Role.CLIENT
         }
@@ -106,7 +132,7 @@ public class AccountMapper extends BaseMapper<AccountDto, Account> {
         }
     }
 
-    private AccountDto.RoleEnum mapRoleAccountDto(Account.RoleEnum roleEnum) {
+    public AccountDto.RoleEnum mapRoleAccountDto(Account.RoleEnum roleEnum) {
         if (roleEnum == null) {
             return null; // Or a default Role, e.g., Role.CLIENT
         }

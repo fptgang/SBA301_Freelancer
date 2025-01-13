@@ -2,10 +2,23 @@ package com.fptgang.backend.mapper;
 
 import com.fptgang.backend.api.model.AccountDto;
 import com.fptgang.backend.api.model.ProposalDto;
+import com.fptgang.backend.repository.ProposalRepos;
 import com.fptgang.model.Account;
+import com.fptgang.model.Message;
 import com.fptgang.model.Proposal;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
+import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.util.Optional;
+
+@Component
 public class ProposalMapper extends BaseMapper<ProposalDto, Proposal> {
+
+
+    @Autowired
+    private ProposalRepos proposalRepos;
 
     @Override
     public ProposalDto toDTO(Proposal entity) {
@@ -29,37 +42,50 @@ public class ProposalMapper extends BaseMapper<ProposalDto, Proposal> {
         if (dto == null) {
             return null;
         }
+        Optional<Proposal> existingEntityOptional = proposalRepos.findByProposalId(dto.getProposalId());
+        if (existingEntityOptional.isPresent()) {
+            Proposal existEntity = existingEntityOptional.get();
+            existEntity.setJobId(dto.getProjectId() != null ? dto.getProjectId() : existEntity.getJobId());
+            existEntity.setUpdatedAt(OffsetDateTime.from(Instant.now()));
+            existEntity.setFreelancerId(dto.getFreelancerId() != null ? dto.getFreelancerId() : existEntity.getFreelancerId());
+            existEntity.setStatus(dto.getStatus() != null ? mapRoleEntity(dto.getStatus()) : existEntity.getStatus());
 
-        Proposal proposal = new Proposal();
-
-        if (dto.getProposalId() != null) {
-            proposal.setProposalId(dto.getProposalId());
+            return existEntity;
         }
 
-        if (dto.getProjectId() != null) {
-            proposal.setJobId(dto.getProjectId());  // Assuming projectId maps to jobId
-        }
 
-        if (dto.getFreelancerId() != null) {
-            proposal.setFreelancerId(dto.getFreelancerId());
-        }
+        else{
+            Proposal proposal = new Proposal();
 
-        if (dto.getStatus() != null) {
-            proposal.setStatus(mapRoleEntity(dto.getStatus()));
-        }
+            if (dto.getProposalId() != null) {
+                proposal.setProposalId(dto.getProposalId());
+            }
 
-        if (dto.getCreatedAt() != null) {
-            proposal.setCreatedAt(dto.getCreatedAt());
-        }
+            if (dto.getProjectId() != null) {
+                proposal.setJobId(dto.getProjectId());  // Assuming projectId maps to jobId
+            }
 
-        if (dto.getUpdatedAt() != null) {
-            proposal.setUpdatedAt(dto.getUpdatedAt());
-        }
+            if (dto.getFreelancerId() != null) {
+                proposal.setFreelancerId(dto.getFreelancerId());
+            }
 
-        return proposal;
+            if (dto.getStatus() != null) {
+                proposal.setStatus(mapRoleEntity(dto.getStatus()));
+            }
+
+            if (dto.getCreatedAt() != null) {
+                proposal.setCreatedAt(dto.getCreatedAt());
+            }
+
+            if (dto.getUpdatedAt() != null) {
+                proposal.setUpdatedAt(dto.getUpdatedAt());
+            }
+
+            return proposal;
+        }
     }
 
-    private ProposalDto.StatusEnum mapRoleDto(Proposal.StatusEnum roleEnum) {
+    public ProposalDto.StatusEnum mapRoleDto(Proposal.StatusEnum roleEnum) {
         if (roleEnum == null) {
             return null; // Or a default Role, e.g., Role.CLIENT
         }
@@ -76,7 +102,7 @@ public class ProposalMapper extends BaseMapper<ProposalDto, Proposal> {
         }
     }
 
-    private Proposal.StatusEnum mapRoleEntity(ProposalDto.StatusEnum roleEnum) {
+    public Proposal.StatusEnum mapRoleEntity(ProposalDto.StatusEnum roleEnum) {
         if (roleEnum == null) {
             return null; // Or a default Role, e.g., Role.CLIENT
         }

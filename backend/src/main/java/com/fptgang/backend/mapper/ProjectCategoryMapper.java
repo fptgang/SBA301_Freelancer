@@ -2,10 +2,20 @@ package com.fptgang.backend.mapper;
 
 import com.fptgang.backend.api.model.ProjectCategoryDto;
 import com.fptgang.backend.model.ProjectCategory;
+import com.fptgang.backend.repository.ProjectCategoryRepos;
+import com.fptgang.model.Message;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.time.OffsetDateTime;
+import java.util.Optional;
 
-public class ProjectCategoryMapper extends BaseMapper<ProjectCategoryDto,ProjectCategory> {
+@Component
+public class ProjectCategoryMapper extends BaseMapper<ProjectCategoryDto, ProjectCategory> {
+
+    @Autowired
+    private ProjectCategoryRepos projectCategoryRepos;
+
     @Override
     ProjectCategoryDto toDTO(ProjectCategory entity) {
         if (entity == null) {
@@ -27,12 +37,23 @@ public class ProjectCategoryMapper extends BaseMapper<ProjectCategoryDto,Project
             return null;
         }
 
-        ProjectCategory projectCategory = new ProjectCategory();
-        projectCategory.setProjectCategoryId(dto.getProjectCategoryId());
-        projectCategory.setName(dto.getName());
-        projectCategory.setVisible(dto.getIsVisible() != null ? dto.getIsVisible() : true);
-        projectCategory.setCreatedAt(dto.getCreatedAt() != null ? dto.getCreatedAt().toLocalDateTime() : null);
-        projectCategory.setUpdatedAt(dto.getUpdatedAt() != null ? dto.getUpdatedAt().toLocalDateTime() : null);
-        return projectCategory;
+        Optional<ProjectCategory> existingEntityOptional = projectCategoryRepos.findByProjectCategoryId(dto.getProjectCategoryId());
+        if (existingEntityOptional.isPresent()) {
+            ProjectCategory existEntity = existingEntityOptional.get();
+            existEntity.setName(dto.getName() != null ? dto.getName() : existEntity.getName());
+            existEntity.setVisible(dto.getIsVisible() != null ? dto.getIsVisible() : true);
+            existEntity.setUpdatedAt(dto.getUpdatedAt() != null ? dto.getUpdatedAt().toLocalDateTime() : existEntity.getUpdatedAt());
+
+            return existEntity;
+        } else {
+            ProjectCategory projectCategory = new ProjectCategory();
+            projectCategory.setProjectCategoryId(dto.getProjectCategoryId());
+            projectCategory.setName(dto.getName());
+            projectCategory.setVisible(dto.getIsVisible() != null ? dto.getIsVisible() : true);
+            projectCategory.setCreatedAt(dto.getCreatedAt() != null ? dto.getCreatedAt().toLocalDateTime() : null);
+            projectCategory.setUpdatedAt(dto.getUpdatedAt() != null ? dto.getUpdatedAt().toLocalDateTime() : null);
+
+            return projectCategory;
+        }
     }
 }

@@ -5,12 +5,26 @@ import com.fptgang.backend.model.Account;
 import com.fptgang.backend.model.Project;
 import com.fptgang.backend.model.ProjectCategory;
 import com.fptgang.backend.model.Proposal;
+import com.fptgang.backend.repository.AccountRepos;
+import com.fptgang.backend.repository.ProjectRepos;
+import com.fptgang.model.Milestone;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 
+import java.time.Instant;
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.util.Optional;
 
-public class ProjectMapper extends BaseMapper<ProjectDto, Project>{
+@Component
+public class ProjectMapper extends BaseMapper<ProjectDto, Project> {
+
+    @Autowired
+    private ProjectRepos projectRepos;
+
+
     ProjectDto toDTO(Project project) {
         if (project == null) {
             return null;
@@ -39,70 +53,87 @@ public class ProjectMapper extends BaseMapper<ProjectDto, Project>{
             return null;
         }
 
-        Project project = new Project();
-        project.setProjectId(dto.getProjectId());
+        Optional<Project> existingEntityOptional = projectRepos.findByProjectId(dto.getProjectId());
+        if (existingEntityOptional.isPresent()) {
+            Project existEntity = existingEntityOptional.get();
 
-        if (dto.getProjectCategoryId() != null) {
-            ProjectCategory category = new ProjectCategory();
-            category.setProjectCategoryId(dto.getProjectCategoryId());
-            project.setCategory(category);
+            existEntity.setTitle(dto.getTitle() != null ? dto.getTitle() : existEntity.getTitle());
+            existEntity.setDescription(dto.getDescription() != null ? dto.getDescription() : existEntity.getDescription());
+            existEntity.setUpdatedAt(LocalDateTime.from(Instant.now()));
+            existEntity.setStatus(dto.getStatus() != null ? Project.ProjectStatus.valueOf(dto.getStatus().getValue()) : existEntity.getStatus());
+            existEntity.setEstimatedDeadline(dto.getEstimatedDeadline() != null ? dto.getEstimatedDeadline().toLocalDateTime() : existEntity.getEstimatedDeadline());
+            existEntity.setMaxEstimatedBudget(dto.getMaxEstimatedBudget() != null ? dto.getMaxEstimatedBudget() : existEntity.getMaxEstimatedBudget());
+            existEntity.setMinEstimatedBudget(dto.getMinEstimatedBudget() != null ? dto.getMinEstimatedBudget() : existEntity.getMinEstimatedBudget());
+            existEntity.setVisible(dto.getIsVisible() != null ? dto.getIsVisible() : true);
+
+
+            return existEntity;
+
         } else {
-            project.setCategory(null);
+            Project project = new Project();
+            project.setProjectId(dto.getProjectId());
+
+            if (dto.getProjectCategoryId() != null) {
+                ProjectCategory category = new ProjectCategory();
+                category.setProjectCategoryId(dto.getProjectCategoryId());
+                project.setCategory(category);
+            } else {
+                project.setCategory(null);
+            }
+
+            if (dto.getClientId() != null) {
+                Account client = new Account();
+                client.setAccountId(dto.getClientId());
+                project.setClient(client);
+            } else {
+                project.setClient(null);
+            }
+
+            project.setTitle(dto.getTitle());
+            project.setDescription(dto.getDescription());
+            project.setMinEstimatedBudget(dto.getMinEstimatedBudget());
+            project.setMaxEstimatedBudget(dto.getMaxEstimatedBudget());
+
+            if (dto.getEstimatedDeadline() != null) {
+                project.setEstimatedDeadline(dto.getEstimatedDeadline().toLocalDateTime());
+            } else {
+                project.setEstimatedDeadline(null);
+            }
+
+            if (dto.getStatus() != null) {
+                project.setStatus(Project.ProjectStatus.valueOf(dto.getStatus().getValue()));
+            } else {
+                project.setStatus(null);
+            }
+
+            if (dto.getActiveProposalId() != null) {
+                Proposal activeProposal = new Proposal();
+                activeProposal.setProposalId(dto.getActiveProposalId());
+                project.setActiveProposal(activeProposal);
+            } else {
+                project.setActiveProposal(null);
+            }
+
+            if (dto.getIsVisible() != null) {
+                project.setVisible(dto.getIsVisible());
+            } else {
+                project.setVisible(true);
+            }
+
+            if (dto.getCreatedAt() != null) {
+                project.setCreatedAt(dto.getCreatedAt().toLocalDateTime());
+            } else {
+                project.setCreatedAt(null);
+            }
+
+            if (dto.getUpdatedAt() != null) {
+                project.setUpdatedAt(dto.getUpdatedAt().toLocalDateTime());
+            } else {
+                project.setUpdatedAt(null);
+            }
+
+            return project;
         }
-
-        if (dto.getClientId() != null) {
-            Account client = new Account();
-            client.setAccountId(dto.getClientId());
-            project.setClient(client);
-        } else {
-            project.setClient(null);
-        }
-
-        project.setTitle(dto.getTitle());
-        project.setDescription(dto.getDescription());
-        project.setMinEstimatedBudget(dto.getMinEstimatedBudget());
-        project.setMaxEstimatedBudget(dto.getMaxEstimatedBudget());
-
-        if (dto.getEstimatedDeadline() != null) {
-            project.setEstimatedDeadline(dto.getEstimatedDeadline().toLocalDateTime());
-        } else {
-            project.setEstimatedDeadline(null);
-        }
-
-        if (dto.getStatus() != null) {
-            project.setStatus(Project.ProjectStatus.valueOf(dto.getStatus().getValue()));
-        } else {
-            project.setStatus(null);
-        }
-
-        if (dto.getActiveProposalId() != null) {
-            Proposal activeProposal = new Proposal();
-            activeProposal.setProposalId(dto.getActiveProposalId());
-            project.setActiveProposal(activeProposal);
-        } else {
-            project.setActiveProposal(null);
-        }
-
-        if (dto.getIsVisible() != null) {
-            project.setVisible(dto.getIsVisible());
-        } else {
-            project.setVisible(true);
-        }
-
-        if (dto.getCreatedAt() != null) {
-            project.setCreatedAt(dto.getCreatedAt().toLocalDateTime());
-        } else {
-            project.setCreatedAt(null);
-        }
-
-        if (dto.getUpdatedAt() != null) {
-            project.setUpdatedAt(dto.getUpdatedAt().toLocalDateTime());
-        } else {
-            project.setUpdatedAt(null);
-        }
-
-        return project;
     }
-
 
 }

@@ -2,7 +2,9 @@ package com.fptgang.backend.mapper;
 
 import com.fptgang.backend.api.model.RefreshTokenDto;
 import com.fptgang.model.RefreshToken;
+import org.springframework.stereotype.Component;
 
+@Component
 public class RefreshTokenMapper extends BaseMapper<RefreshTokenDto,RefreshToken> {
     @Override
     RefreshTokenDto toDTO(RefreshToken entity) {
