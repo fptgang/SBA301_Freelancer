@@ -2,7 +2,7 @@ package com.fptgang.backend.mapper;
 
 import com.fptgang.backend.api.model.FileDto;
 import com.fptgang.backend.repository.FileRepos;
-import com.fptgang.model.File;
+import com.fptgang.backend.model.File;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -28,7 +28,7 @@ public class FileMapper extends BaseMapper<FileDto, File> {
         dto.setFileType(entity.getFileType());
         dto.setFileUrl(entity.getFileUrl());
         dto.setSize(Long.valueOf(entity.getSize()));
-        dto.setCreatedAt(entity.getCreatedAt());
+        dto.setCreatedAt(OffsetDateTime.from(entity.getCreatedAt()));
 
         return dto;
     }
@@ -46,9 +46,9 @@ public class FileMapper extends BaseMapper<FileDto, File> {
             existFile.setFileName(dto.getFileName() != null ? dto.getFileName(): existFile.getFileName());
             existFile.setFileType(dto.getFileType() != null ? dto.getFileType(): existFile.getFileType());
             existFile.setFileUrl(dto.getFileUrl() != null ? dto.getFileUrl(): existFile.getFileUrl());
-            existFile.setSize(dto.getSize() != null ? dto.getSize().intValue() : existFile.getSize().intValue());
-            existFile.setCreatedAt(dto.getCreatedAt() != null ? dto.getCreatedAt() : existFile.getCreatedAt());
-            existFile.setUpdatedAt(OffsetDateTime.from(Instant.now()));
+            existFile.setSize(dto.getSize() != null ? dto.getSize().intValue() : existFile.getSize());
+            existFile.setCreatedAt(dto.getCreatedAt() != null ? dto.getCreatedAt().toLocalDateTime() : existFile.getCreatedAt());
+
 
             return existFile;
         }
@@ -76,7 +76,7 @@ public class FileMapper extends BaseMapper<FileDto, File> {
             }
 
             if (dto.getCreatedAt() != null) {
-                file.setCreatedAt(dto.getCreatedAt());
+                file.setCreatedAt(dto.getCreatedAt().toLocalDateTime());
             }
 
             return file;

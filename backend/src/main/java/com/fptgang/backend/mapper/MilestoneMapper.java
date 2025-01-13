@@ -1,13 +1,16 @@
 package com.fptgang.backend.mapper;
 
 import com.fptgang.backend.api.model.MilestoneDto;
+import com.fptgang.backend.model.Proposal;
 import com.fptgang.backend.repository.MilestoneRepos;
-import com.fptgang.model.Message;
-import com.fptgang.model.Milestone;
+import com.fptgang.backend.model.Milestone;
+import com.fptgang.backend.repository.ProposalRepos;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
+import java.time.Instant;
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.Optional;
 
@@ -17,6 +20,9 @@ public class MilestoneMapper extends BaseMapper<MilestoneDto, Milestone> {
     @Autowired
     private MilestoneRepos milestoneRepos;
 
+    @Autowired
+    private ProposalRepos proposalRepos;
+
     @Override
     public MilestoneDto toDTO(Milestone entity) {
         if (entity == null) {
@@ -25,15 +31,13 @@ public class MilestoneMapper extends BaseMapper<MilestoneDto, Milestone> {
 
         MilestoneDto milestoneDto = new MilestoneDto();
         milestoneDto.setMilestoneId(entity.getMilestoneId());
-        milestoneDto.setProposalId(entity.getJobId());
+        milestoneDto.setProposalId(entity.getProposal().getProposalId());
         milestoneDto.setTitle(entity.getTitle());
-        milestoneDto.setBudget(entity.getBudgetRatio() != null ?
-                BigDecimal.valueOf(entity.getBudgetRatio()) : null);
-        milestoneDto.setDeadline(entity.getDeadline());
+        milestoneDto.setBudget(entity.getBudget() != null ? entity.getBudget() : null);
+        milestoneDto.setDeadline(OffsetDateTime.from(entity.getDeadline()));
         milestoneDto.setStatus(mapStatusDto(entity.getStatus()));
-        milestoneDto.setCreatedAt(entity.getCreatedAt());
-        milestoneDto.setUpdatedAt(entity.getUpdatedAt());
-        milestoneDto.setIsVisible(entity.getStatus() != Milestone.StatusEnum.FAILED);
+        milestoneDto.setCreatedAt(OffsetDateTime.from(entity.getCreatedAt()));
+        milestoneDto.setUpdatedAt(OffsetDateTime.from(entity.getUpdatedAt()));
 
         return milestoneDto;
     }
@@ -44,16 +48,18 @@ public class MilestoneMapper extends BaseMapper<MilestoneDto, Milestone> {
         }
 
         Optional<Milestone> existingEntityOptional = milestoneRepos.findByMilestoneId(dto.getMilestoneId());
+        Optional<Proposal> proposalOptional = proposalRepos.findByProposalId(dto.getProposalId());
+        Proposal proposal = proposalOptional.get();
         if (existingEntityOptional.isPresent()) {
             Milestone existEntity = existingEntityOptional.get();
 
             existEntity.setTitle(dto.getTitle() != null ? dto.getTitle() : existEntity.getTitle());
-            existEntity.setBudgetRatio(dto.getBudget() != null ? dto.getBudget().floatValue() : existEntity.getBudgetRatio().floatValue());
-            existEntity.setDeadline(dto.getDeadline() != null ? dto.getDeadline() : existEntity.getDeadline());
+            existEntity.setBudget(BigDecimal.valueOf(dto.getBudget() != null ? dto.getBudget().floatValue() : existEntity.getBudget().floatValue()));
+            existEntity.setDeadline(dto.getDeadline() != null ? dto.getDeadline().toLocalDateTime() : existEntity.getDeadline());
             existEntity.setStatus(dto.getStatus() != null ? mapStatusEntity(dto.getStatus()) : existEntity.getStatus());
-            existEntity.setJobId(dto.getProposalId() != null ? dto.getProposalId() : existEntity.getJobId()); // Add JobId
-            existEntity.setCreatedAt(dto.getCreatedAt() != null ? dto.getCreatedAt() : existEntity.getCreatedAt()); // Add createdAt
-            existEntity.setUpdatedAt(OffsetDateTime.now()); // Update updatedAt
+            existEntity.setProposal(dto.getProposalId() != null ? proposal : existEntity.getProposal()); // Add JobId
+            existEntity.setCreatedAt(dto.getCreatedAt() != null ? dto.getCreatedAt().toLocalDateTime() : existEntity.getCreatedAt()); // Add createdAt
+            existEntity.setUpdatedAt(LocalDateTime.from(Instant.now())); // Update updatedAt
 
             return existEntity;
         } else {
@@ -63,25 +69,25 @@ public class MilestoneMapper extends BaseMapper<MilestoneDto, Milestone> {
                 milestone.setMilestoneId(dto.getMilestoneId());
             }
             if (dto.getProposalId() != null) {
-                milestone.setJobId(dto.getProposalId());
+                milestone.setProposal(proposal);
             }
             if (dto.getTitle() != null) {
                 milestone.setTitle(dto.getTitle());
             }
             if (dto.getBudget() != null) {
-                milestone.setBudgetRatio(dto.getBudget().floatValue());
+                milestone.setBudget(BigDecimal.valueOf(dto.getBudget().floatValue()));
             }
             if (dto.getDeadline() != null) {
-                milestone.setDeadline(dto.getDeadline());
+                milestone.setDeadline(dto.getDeadline().toLocalDateTime());
             }
             if (dto.getStatus() != null) {
                 milestone.setStatus(mapStatusEntity(dto.getStatus()));
             }
             if (dto.getCreatedAt() != null) {
-                milestone.setCreatedAt(dto.getCreatedAt());
+                milestone.setCreatedAt(dto.getCreatedAt().toLocalDateTime());
             }
             if (dto.getUpdatedAt() != null) {
-                milestone.setUpdatedAt(dto.getUpdatedAt());
+                milestone.setUpdatedAt(dto.getUpdatedAt().toLocalDateTime());
             }
 
             return milestone;
@@ -89,7 +95,7 @@ public class MilestoneMapper extends BaseMapper<MilestoneDto, Milestone> {
     }
 
 
-    public MilestoneDto.StatusEnum mapStatusDto(Milestone.StatusEnum statusEnum) {
+    public MilestoneDto.StatusEnum mapStatusDto(Milestone.MilestoneStatus statusEnum) {
         if (statusEnum == null) {
             return null; // Or a default Status, e.g., Status.PENDING
         }
@@ -97,27 +103,31 @@ public class MilestoneMapper extends BaseMapper<MilestoneDto, Milestone> {
         switch (statusEnum) {
             case PENDING:
                 return MilestoneDto.StatusEnum.PENDING;
-            case COMPLETED:
-                return MilestoneDto.StatusEnum.FINISHED;  // Example: map COMPLETED to FINISHED
-            case FAILED:
-                return MilestoneDto.StatusEnum.TERMINATED;
+            case TERMINATED:
+                return MilestoneDto.StatusEnum.TERMINATED;  // Example: map COMPLETED to FINISHED
+            case IN_PROGRESS:
+                return MilestoneDto.StatusEnum.IN_PROGRESS;
+            case FINISHED:
+                return MilestoneDto.StatusEnum.FINISHED;
             default:
                 throw new IllegalArgumentException("Unknown StatusEnum: " + statusEnum);
         }
     }
 
-    public Milestone.StatusEnum mapStatusEntity(MilestoneDto.StatusEnum statusEnum) {
+    public Milestone.MilestoneStatus mapStatusEntity(MilestoneDto.StatusEnum statusEnum) {
         if (statusEnum == null) {
             return null; // Or a default Status, e.g., Status.PENDING
         }
 
         switch (statusEnum) {
             case PENDING:
-                return Milestone.StatusEnum.PENDING;
+                return Milestone.MilestoneStatus.PENDING;
             case FINISHED:
-                return Milestone.StatusEnum.COMPLETED;  // Example: map FINISHED to COMPLETED
+                return Milestone.MilestoneStatus.FINISHED;  // Example: map FINISHED to COMPLETED
             case TERMINATED:
-                return Milestone.StatusEnum.FAILED;
+                return Milestone.MilestoneStatus.TERMINATED;
+            case IN_PROGRESS:
+                return Milestone.MilestoneStatus.IN_PROGRESS;
             default:
                 throw new IllegalArgumentException("Unknown StatusEnum: " + statusEnum);
         }

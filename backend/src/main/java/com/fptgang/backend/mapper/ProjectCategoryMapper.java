@@ -3,7 +3,6 @@ package com.fptgang.backend.mapper;
 import com.fptgang.backend.api.model.ProjectCategoryDto;
 import com.fptgang.backend.model.ProjectCategory;
 import com.fptgang.backend.repository.ProjectCategoryRepos;
-import com.fptgang.model.Message;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

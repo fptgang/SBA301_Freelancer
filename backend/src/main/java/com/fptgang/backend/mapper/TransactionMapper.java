@@ -1,12 +1,15 @@
 package com.fptgang.backend.mapper;
 
 import com.fptgang.backend.api.model.TransactionDto;
+import com.fptgang.backend.model.Account;
+import com.fptgang.backend.repository.AccountRepos;
 import com.fptgang.backend.repository.TransactionRepos;
-import com.fptgang.model.Proposal;
-import com.fptgang.model.Transaction;
+import com.fptgang.backend.model.Proposal;
+import com.fptgang.backend.model.Transaction;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.Optional;
@@ -18,6 +21,9 @@ public class TransactionMapper extends BaseMapper<TransactionDto, Transaction> {
     @Autowired
     private TransactionRepos transactionRepos;
 
+    @Autowired
+    private AccountRepos accountRepos;
+
     @Override
     TransactionDto toDTO(Transaction transaction) {
         if (transaction == null) {
@@ -26,11 +32,12 @@ public class TransactionMapper extends BaseMapper<TransactionDto, Transaction> {
 
         TransactionDto dto = new TransactionDto();
         dto.setTransactionId(transaction.getTransactionId());
-        dto.setFromAccountId(transaction.getAccountId()); // Mapping field name change
-        dto.setAmount(transaction.getAmount());
+        dto.setFromAccountId(transaction.getFromAccount().getAccountId()); // Mapping field name change
+        dto.setToAccountId(transaction.getToAccount().getAccountId());
+        dto.setAmount(transaction.getAmount().floatValue());
         dto.setType(mapTransactionType(transaction.getType())); // Convert enum type
         dto.setStatus(mapTransactionStatus(transaction.getStatus())); // Convert enum status
-        dto.setCreatedAt(transaction.getCreatedAt());
+        dto.setCreatedAt(OffsetDateTime.from(transaction.getCreatedAt()));
 
         return dto;
     }
@@ -42,10 +49,12 @@ public class TransactionMapper extends BaseMapper<TransactionDto, Transaction> {
         }
 
         Optional<Transaction> existingEntityOptional = transactionRepos.findByTransactionId(dto.getTransactionId());
+
         if (existingEntityOptional.isPresent()) {
             Transaction existEntity = existingEntityOptional.get();
-            existEntity.setAccountId(dto.getFromAccountId() != null ? dto. getFromAccountId() : existEntity.getAccountId());
-            existEntity.setAmount(dto.getAmount() != null ? dto.getAmount() : existEntity.getAmount());
+            existEntity.setFromAccount(dto.getFromAccountId() != null ? findFromToAccount(dto.getFromAccountId()) : existEntity.getFromAccount());
+            existEntity.setToAccount(dto.getFromAccountId() != null ? findFromToAccount(dto.getToAccountId()) : existEntity.getToAccount());
+            existEntity.setAmount(dto.getAmount() != null ? BigDecimal.valueOf(dto.getAmount()) : existEntity.getAmount());
             existEntity.setType(dto.getType() != null ? mapTransactionTypeReverse(dto.getType()) : existEntity.getType());
             existEntity.setStatus(dto.getStatus() != null ? mapTransactionStatusReverse(dto.getStatus()) : existEntity.getStatus());
 
@@ -56,10 +65,13 @@ public class TransactionMapper extends BaseMapper<TransactionDto, Transaction> {
                 entity.setTransactionId(dto.getTransactionId());
             }
             if (dto.getFromAccountId() != null) {
-                entity.setAccountId(dto.getFromAccountId()); // Mapping field name change
+                entity.setFromAccount(findFromToAccount(dto.getFromAccountId())); // Mapping field name change
+            }
+            if(dto.getToAccountId()!=null){
+                entity.setToAccount(findFromToAccount(dto.getToAccountId()));
             }
             if (dto.getAmount() != null) {
-                entity.setAmount(dto.getAmount());
+                entity.setAmount(BigDecimal.valueOf(dto.getAmount().floatValue()));
             }
             if (dto.getType() != null) {
                 entity.setType(mapTransactionTypeReverse(dto.getType())); // Convert enum type back
@@ -68,61 +80,79 @@ public class TransactionMapper extends BaseMapper<TransactionDto, Transaction> {
                 entity.setStatus(mapTransactionStatusReverse(dto.getStatus())); // Convert enum status back
             }
             if (dto.getCreatedAt() != null) {
-                entity.setCreatedAt(dto.getCreatedAt());
+                entity.setCreatedAt(dto.getCreatedAt().toLocalDateTime());
             }
             return  entity;
         }
     }
 
 
-    public TransactionDto.TypeEnum mapTransactionType(Transaction.TypeEnum type) {
+    public TransactionDto.TypeEnum mapTransactionType(Transaction.TransactionType type) {
         switch (type) {
-            case DEBIT:
+            case DEPOSIT:
                 return TransactionDto.TypeEnum.DEPOSIT;
-            case CREDIT:
+            case WITHDRAWAL:
                 return TransactionDto.TypeEnum.WITHDRAWAL;
+            case FEE:
+                return TransactionDto.TypeEnum.FEE;
+            case ESCROW_DEPOSIT:
+                return TransactionDto.TypeEnum.ESCROW_DEPOSIT;
+            case ESCROW_RELEASE:
+                return TransactionDto.TypeEnum.ESCROW_RELEASE;
             default:
                 throw new IllegalArgumentException("Unexpected type value: " + type);
         }
     }
 
-    public TransactionDto.StatusEnum mapTransactionStatus(Transaction.StatusEnum status) {
+    public TransactionDto.StatusEnum mapTransactionStatus(Transaction.TransactionStatus status) {
         switch (status) {
-            case PENDING:
+            case SUCCESS:
                 return TransactionDto.StatusEnum.SUCCESS;
-            case COMPLETED:
+            case FAILED:
                 return TransactionDto.StatusEnum.FAILED;
             default:
                 throw new IllegalArgumentException("Unexpected status value: " + status);
         }
     }
 
-    public Transaction.TypeEnum mapTransactionTypeReverse(TransactionDto.TypeEnum type) {
+    public Transaction.TransactionType mapTransactionTypeReverse(TransactionDto.TypeEnum type) {
         if (type == null) {
             return null;
         }
         switch (type) {
             case DEPOSIT:
-                return Transaction.TypeEnum.DEBIT; // Assuming DEPOSIT -> DEBIT
+                return Transaction.TransactionType.DEPOSIT;
             case WITHDRAWAL:
-                return Transaction.TypeEnum.CREDIT; // Assuming WITHDRAWAL -> CREDIT
+                return Transaction.TransactionType.WITHDRAWAL;
+            case FEE:
+                return Transaction.TransactionType.FEE;
+            case ESCROW_DEPOSIT:
+                return Transaction.TransactionType.ESCROW_DEPOSIT;
+            case ESCROW_RELEASE:
+                return Transaction.TransactionType.ESCROW_RELEASE;
             default:
                 throw new IllegalArgumentException("Unexpected type value: " + type);
         }
     }
 
     // Helper method to map status enum values in reverse
-    public Transaction.StatusEnum mapTransactionStatusReverse(TransactionDto.StatusEnum status) {
+    public Transaction.TransactionStatus mapTransactionStatusReverse(TransactionDto.StatusEnum status) {
         if (status == null) {
             return null;
         }
         switch (status) {
             case SUCCESS:
-                return Transaction.StatusEnum.PENDING; // Assuming SUCCESS -> PENDING
+                return Transaction.TransactionStatus.SUCCESS;
             case FAILED:
-                return Transaction.StatusEnum.COMPLETED; // Assuming FAILED -> COMPLETED
+                return Transaction.TransactionStatus.FAILED; // Assuming FAILED -> COMPLETE
             default:
                 throw new IllegalArgumentException("Unexpected status value: " + status);
         }
+    }
+
+    public Account findFromToAccount(Long id){
+        Optional<Account> accountOptional = accountRepos.findByAccountId(id);
+        Account account = accountOptional.get();
+        return account;
     }
 }

@@ -5,9 +5,7 @@ import com.fptgang.backend.model.Account;
 import com.fptgang.backend.model.Project;
 import com.fptgang.backend.model.ProjectCategory;
 import com.fptgang.backend.model.Proposal;
-import com.fptgang.backend.repository.AccountRepos;
 import com.fptgang.backend.repository.ProjectRepos;
-import com.fptgang.model.Milestone;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

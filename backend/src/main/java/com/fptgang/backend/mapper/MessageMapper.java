@@ -3,11 +3,11 @@ package com.fptgang.backend.mapper;
 
 import com.fptgang.backend.api.model.MessageDto;
 import com.fptgang.backend.repository.MessageRepos;
-import com.fptgang.model.File;
-import com.fptgang.model.Message;
+import com.fptgang.backend.model.Message;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.time.OffsetDateTime;
 import java.util.Optional;
 
 @Component
@@ -25,10 +25,8 @@ public class MessageMapper extends BaseMapper<MessageDto, Message> {
         MessageDto dto = new MessageDto();
 
         dto.setMessageId(entity.getMessageId());
-        dto.setSenderId(entity.getSenderId());
-        dto.setReceiverId(entity.getReceiverId());
         dto.setContent(entity.getContent());
-        dto.setCreatedAt(entity.getCreatedAt());
+        dto.setCreatedAt(OffsetDateTime.from(entity.getCreatedAt()));
 
         return dto;
     }
@@ -45,9 +43,7 @@ public class MessageMapper extends BaseMapper<MessageDto, Message> {
             Message existEntity = existingEntityOptional.get();
             existEntity.setContent(dto.getContent() != null ? dto.getContent() : existEntity.getContent());
             existEntity.setMessageId(dto.getMessageId() != null ? dto.getMessageId() : existEntity.getMessageId());
-            existEntity.setReceiverId(dto.getReceiverId() != null ? dto.getReceiverId() : existEntity.getReceiverId());
-            existEntity.setSenderId(dto.getSenderId() != null ? dto.getSenderId() : existEntity.getSenderId());
-            existEntity.setCreatedAt(dto.getCreatedAt() != null ? dto.getCreatedAt() : existEntity.getCreatedAt());
+            existEntity.setCreatedAt(dto.getCreatedAt() != null ? dto.getCreatedAt().toLocalDateTime() : existEntity.getCreatedAt());
 
             return existEntity;
         } else {
@@ -57,20 +53,13 @@ public class MessageMapper extends BaseMapper<MessageDto, Message> {
                 entity.setMessageId(dto.getMessageId());
             }
 
-            if (dto.getSenderId() != null) {
-                entity.setSenderId(dto.getSenderId());
-            }
-
-            if (dto.getReceiverId() != null) {
-                entity.setReceiverId(dto.getReceiverId());
-            }
 
             if (dto.getContent() != null) {
                 entity.setContent(dto.getContent());
             }
 
             if (dto.getCreatedAt() != null) {
-                entity.setCreatedAt(dto.getCreatedAt());
+                entity.setCreatedAt(dto.getCreatedAt().toLocalDateTime());
             }
 
             return entity;
