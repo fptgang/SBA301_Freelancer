@@ -16,7 +16,7 @@ public class ProjectCategoryMapper extends BaseMapper<ProjectCategoryDto, Projec
     private ProjectCategoryRepos projectCategoryRepos;
 
     @Override
-    ProjectCategoryDto toDTO(ProjectCategory entity) {
+    public ProjectCategoryDto toDTO(ProjectCategory entity) {
         if (entity == null) {
             return null;
         }
@@ -31,7 +31,7 @@ public class ProjectCategoryMapper extends BaseMapper<ProjectCategoryDto, Projec
     }
 
     @Override
-    ProjectCategory toEntity(ProjectCategoryDto dto) {
+    public ProjectCategory toEntity(ProjectCategoryDto dto) {
         if (dto == null) {
             return null;
         }

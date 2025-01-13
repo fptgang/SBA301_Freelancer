@@ -63,6 +63,8 @@ public class ProposalMapper extends BaseMapper<ProposalDto, Proposal> {
             existEntity.setUpdatedAt(LocalDateTime.from(Instant.now()));
             existEntity.setFreelancer(dto.getFreelancerId() != null ? account : existEntity.getFreelancer());
             existEntity.setStatus(dto.getStatus() != null ? mapRoleEntity(dto.getStatus()) : existEntity.getStatus());
+            existEntity.setProposalId(dto.getProposalId() != null ? dto.getProposalId() : existEntity.getProposalId());
+            existEntity.setVisible(dto.getIsVisible() != null ? dto.getIsVisible() : existEntity.isVisible());
 
             return existEntity;
         }
@@ -76,7 +78,7 @@ public class ProposalMapper extends BaseMapper<ProposalDto, Proposal> {
             }
 
             if (dto.getProjectId() != null) {
-                proposal.setProposalId(dto.getProjectId());
+                proposal.setProject(project);
             }
 
             if (dto.getFreelancerId() != null) {
@@ -94,6 +96,11 @@ public class ProposalMapper extends BaseMapper<ProposalDto, Proposal> {
             if (dto.getUpdatedAt() != null) {
                 proposal.setUpdatedAt(dto.getUpdatedAt().toLocalDateTime());
             }
+
+            if (dto.getIsVisible() != null) {
+                proposal.setVisible(dto.getIsVisible());
+            }
+
 
             return proposal;
         }

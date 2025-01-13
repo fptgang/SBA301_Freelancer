@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
+import java.time.Instant;
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.Optional;
 
@@ -33,12 +35,11 @@ public class AccountMapper extends BaseMapper<AccountDto, Account> {
             existingAccount.setAvatarUrl(dto.getAvatarUrl() != null ? dto.getAvatarUrl() : existingAccount.getAvatarUrl());
             existingAccount.setBalance(dto.getBalance() != null ? dto.getBalance() : existingAccount.getBalance());
             existingAccount.setRole(mapRoleAccount(dto.getRole()));
-            if (dto.getCreatedAt() != null) {
-                existingAccount.setCreatedAt(dto.getCreatedAt().toLocalDateTime());
-            }
-            if (dto.getUpdatedAt() != null) {
-                existingAccount.setUpdatedAt(dto.getUpdatedAt().toLocalDateTime());
-            }
+            existingAccount.setVerified(dto.getIsVerified() != null ? dto.getIsVerified() : existingAccount.isVerified());
+            existingAccount.setVerifiedAt(dto.getVerifiedAt() != null ? dto.getVerifiedAt().toLocalDateTime() : existingAccount.getVerifiedAt());
+            existingAccount.setVisible(dto.getIsVisible() != null ? dto.getIsVisible() : existingAccount.isVisible());
+            existingAccount.setUpdatedAt(LocalDateTime.from(Instant.now()));
+
             return existingAccount;
         } else {
 
@@ -64,7 +65,6 @@ public class AccountMapper extends BaseMapper<AccountDto, Account> {
             if (dto.getRole() != null) {
                 entity.setRole(mapRoleAccount(dto.getRole())); // Enum conversion
             }
-
             // Convert createdAt and updatedAt to OffsetDateTime if not null
             if (dto.getCreatedAt() != null) {
                 entity.setCreatedAt(dto.getCreatedAt().toLocalDateTime());
@@ -72,6 +72,16 @@ public class AccountMapper extends BaseMapper<AccountDto, Account> {
             if (dto.getUpdatedAt() != null) {
                 entity.setUpdatedAt(dto.getUpdatedAt().toLocalDateTime());
             }
+            if (dto.getVerifiedAt() != null) {
+                entity.setVerifiedAt(dto.getVerifiedAt().toLocalDateTime());
+            }
+            if (dto.getIsVerified() != null) {
+                entity.setVerified(dto.getIsVerified());
+            }
+            if (dto.getIsVisible() != null) {
+                entity.setVisible(dto.getIsVisible());
+            }
+
 
             return entity;
         }

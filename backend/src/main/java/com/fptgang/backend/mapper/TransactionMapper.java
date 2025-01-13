@@ -25,7 +25,7 @@ public class TransactionMapper extends BaseMapper<TransactionDto, Transaction> {
     private AccountRepos accountRepos;
 
     @Override
-    TransactionDto toDTO(Transaction transaction) {
+    public TransactionDto toDTO(Transaction transaction) {
         if (transaction == null) {
             return null;
         }
@@ -43,7 +43,7 @@ public class TransactionMapper extends BaseMapper<TransactionDto, Transaction> {
     }
 
     @Override
-    Transaction toEntity(TransactionDto dto) {
+    public Transaction toEntity(TransactionDto dto) {
         if (dto == null) {
             return null;
         }

@@ -5,7 +5,9 @@ import com.fptgang.backend.model.Account;
 import com.fptgang.backend.model.Project;
 import com.fptgang.backend.model.ProjectCategory;
 import com.fptgang.backend.model.Proposal;
+import com.fptgang.backend.repository.ProjectCategoryRepos;
 import com.fptgang.backend.repository.ProjectRepos;
+import com.fptgang.backend.repository.ProposalRepos;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -22,8 +24,13 @@ public class ProjectMapper extends BaseMapper<ProjectDto, Project> {
     @Autowired
     private ProjectRepos projectRepos;
 
+    @Autowired
+    private ProjectCategoryRepos projectCategoryRepos;
 
-    ProjectDto toDTO(Project project) {
+    @Autowired
+    private ProposalRepos proposalRepos;
+
+    public ProjectDto toDTO(Project project) {
         if (project == null) {
             return null;
         }
@@ -46,12 +53,16 @@ public class ProjectMapper extends BaseMapper<ProjectDto, Project> {
         return dto;
     }
 
-    Project toEntity(ProjectDto dto) {
+    public Project toEntity(ProjectDto dto) {
         if (dto == null) {
             return null;
         }
 
         Optional<Project> existingEntityOptional = projectRepos.findByProjectId(dto.getProjectId());
+        Optional<ProjectCategory> projectCategoryOptional = projectCategoryRepos.findByProjectCategoryId(dto.getProjectCategoryId());
+        Optional<Proposal> proposalOptional = proposalRepos.findByProposalId(dto.getActiveProposalId());
+        ProjectCategory projectCategory = projectCategoryOptional.get();
+        Proposal proposal = proposalOptional.get();
         if (existingEntityOptional.isPresent()) {
             Project existEntity = existingEntityOptional.get();
 
@@ -63,7 +74,8 @@ public class ProjectMapper extends BaseMapper<ProjectDto, Project> {
             existEntity.setMaxEstimatedBudget(dto.getMaxEstimatedBudget() != null ? dto.getMaxEstimatedBudget() : existEntity.getMaxEstimatedBudget());
             existEntity.setMinEstimatedBudget(dto.getMinEstimatedBudget() != null ? dto.getMinEstimatedBudget() : existEntity.getMinEstimatedBudget());
             existEntity.setVisible(dto.getIsVisible() != null ? dto.getIsVisible() : true);
-
+            existEntity.setCategory(dto.getProjectCategoryId() != null ? projectCategory : existEntity.getCategory());
+            existEntity.setActiveProposal(dto.getActiveProposalId() != null ? proposal : existEntity.getActiveProposal());
 
             return existEntity;
 

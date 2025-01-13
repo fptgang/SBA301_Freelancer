@@ -60,6 +60,7 @@ public class MilestoneMapper extends BaseMapper<MilestoneDto, Milestone> {
             existEntity.setProposal(dto.getProposalId() != null ? proposal : existEntity.getProposal()); // Add JobId
             existEntity.setCreatedAt(dto.getCreatedAt() != null ? dto.getCreatedAt().toLocalDateTime() : existEntity.getCreatedAt()); // Add createdAt
             existEntity.setUpdatedAt(LocalDateTime.from(Instant.now())); // Update updatedAt
+            existEntity.setVisible( dto.getIsVisible() != null ? dto.getIsVisible() : existEntity.isVisible());
 
             return existEntity;
         } else {
@@ -88,6 +89,9 @@ public class MilestoneMapper extends BaseMapper<MilestoneDto, Milestone> {
             }
             if (dto.getUpdatedAt() != null) {
                 milestone.setUpdatedAt(dto.getUpdatedAt().toLocalDateTime());
+            }
+            if (dto.getIsVisible() != null) {
+                milestone.setVisible(dto.getIsVisible());
             }
 
             return milestone;

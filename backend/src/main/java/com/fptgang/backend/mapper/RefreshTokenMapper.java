@@ -17,7 +17,7 @@ public class RefreshTokenMapper extends BaseMapper<RefreshTokenDto,RefreshToken>
     private AccountRepos accountRepos;
 
     @Override
-    RefreshTokenDto toDTO(RefreshToken entity) {
+    public RefreshTokenDto toDTO(RefreshToken entity) {
         RefreshTokenDto dto = new RefreshTokenDto();
         dto.setRefreshTokenId(entity.getRefreshTokenId());
         dto.setAccountId(entity.getAccount().getAccountId());
@@ -29,7 +29,7 @@ public class RefreshTokenMapper extends BaseMapper<RefreshTokenDto,RefreshToken>
 
 
     @Override
-    RefreshToken toEntity(RefreshTokenDto dto) {
+    public RefreshToken toEntity(RefreshTokenDto dto) {
         if (dto == null) {
             return null;
         }

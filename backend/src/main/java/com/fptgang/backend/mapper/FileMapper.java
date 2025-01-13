@@ -16,9 +16,8 @@ public class FileMapper extends BaseMapper<FileDto, File> {
 
     @Autowired
     private FileRepos fileRepos;
-
     @Override
-    FileDto toDTO(File entity) {
+    public FileDto toDTO(File entity) {
         if (entity == null) {
             return null;
         }
@@ -34,7 +33,7 @@ public class FileMapper extends BaseMapper<FileDto, File> {
     }
 
     @Override
-    File toEntity(FileDto dto) {
+    public File toEntity(FileDto dto) {
 
         if (dto == null) {
             return null;
@@ -48,7 +47,7 @@ public class FileMapper extends BaseMapper<FileDto, File> {
             existFile.setFileUrl(dto.getFileUrl() != null ? dto.getFileUrl(): existFile.getFileUrl());
             existFile.setSize(dto.getSize() != null ? dto.getSize().intValue() : existFile.getSize());
             existFile.setCreatedAt(dto.getCreatedAt() != null ? dto.getCreatedAt().toLocalDateTime() : existFile.getCreatedAt());
-
+            existFile.setVisible(dto.getIsVisible() != null ? dto.getIsVisible() : existFile.isVisible());
 
             return existFile;
         }
@@ -77,6 +76,9 @@ public class FileMapper extends BaseMapper<FileDto, File> {
 
             if (dto.getCreatedAt() != null) {
                 file.setCreatedAt(dto.getCreatedAt().toLocalDateTime());
+            }
+            if (dto.getIsVisible() != null) {
+                file.setVisible(dto.getIsVisible());
             }
 
             return file;
