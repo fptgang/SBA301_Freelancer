@@ -36,8 +36,8 @@ class AccountServiceTest {
     @Autowired
     private AccountRepos accountRepos;
 
-    @BeforeEach
-    void setUp() {
+    @AfterEach
+    void tearDown() {
         accountRepos.deleteAll();
     }
 
