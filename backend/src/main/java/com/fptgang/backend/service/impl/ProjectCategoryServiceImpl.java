@@ -23,11 +23,11 @@ public class ProjectCategoryServiceImpl implements ProjectCategoryService {
     }
 
     @Override
-    public void update(ProjectCategory projectCategory) {
+    public ProjectCategory update(ProjectCategory projectCategory) {
         if(projectCategory.getProjectCategoryId() == null || projectCategoryRepos.existsById(projectCategory.getProjectCategoryId())){
              throw new InvalidInputException("Project Category does not exist");
         }
-        projectCategoryRepos.save(projectCategory);
+        return projectCategoryRepos.save(projectCategory);
     }
 
     @Override
