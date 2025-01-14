@@ -1,17 +1,13 @@
 package com.fptgang.backend.mapper;
 
 import com.fptgang.backend.api.model.MilestoneDto;
-import com.fptgang.backend.model.Proposal;
 import com.fptgang.backend.repository.MilestoneRepos;
 import com.fptgang.backend.model.Milestone;
 import com.fptgang.backend.repository.ProposalRepos;
+import com.fptgang.backend.util.DateTimeUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.math.BigDecimal;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
 import java.util.Optional;
 
 @Component
@@ -33,11 +29,11 @@ public class MilestoneMapper extends BaseMapper<MilestoneDto, Milestone> {
         milestoneDto.setMilestoneId(entity.getMilestoneId());
         milestoneDto.setProposalId(entity.getProposal().getProposalId());
         milestoneDto.setTitle(entity.getTitle());
-        milestoneDto.setBudget(entity.getBudget() != null ? entity.getBudget() : null);
-        milestoneDto.setDeadline(OffsetDateTime.from(entity.getDeadline()));
+        milestoneDto.setBudget(entity.getBudget());
+        milestoneDto.setDeadline(DateTimeUtil.fromLocalToOffset(entity.getDeadline()));
         milestoneDto.setStatus(mapStatusDto(entity.getStatus()));
-        milestoneDto.setCreatedAt(OffsetDateTime.from(entity.getCreatedAt()));
-        milestoneDto.setUpdatedAt(OffsetDateTime.from(entity.getUpdatedAt()));
+        milestoneDto.setCreatedAt(DateTimeUtil.fromLocalToOffset(entity.getCreatedAt()));
+        milestoneDto.setUpdatedAt(DateTimeUtil.fromLocalToOffset(entity.getUpdatedAt()));
         milestoneDto.setIsVisible(entity.isVisible());
 
         return milestoneDto;
@@ -49,47 +45,40 @@ public class MilestoneMapper extends BaseMapper<MilestoneDto, Milestone> {
         }
 
         Optional<Milestone> existingEntityOptional = milestoneRepos.findByMilestoneId(dto.getMilestoneId());
-        Optional<Proposal> proposalOptional = proposalRepos.findByProposalId(dto.getProposalId());
-        Proposal proposal = proposalOptional.get();
+
         if (existingEntityOptional.isPresent()) {
             Milestone existEntity = existingEntityOptional.get();
 
             existEntity.setTitle(dto.getTitle() != null ? dto.getTitle() : existEntity.getTitle());
-            existEntity.setBudget(BigDecimal.valueOf(dto.getBudget() != null ? dto.getBudget().floatValue() : existEntity.getBudget().floatValue()));
-            existEntity.setDeadline(dto.getDeadline() != null ? dto.getDeadline().toLocalDateTime() : existEntity.getDeadline());
+            existEntity.setBudget(dto.getBudget() != null ? dto.getBudget() : existEntity.getBudget());
+            existEntity.setDeadline(dto.getDeadline() != null ? DateTimeUtil.fromOffsetToLocal(dto.getDeadline()) : existEntity.getDeadline());
             existEntity.setStatus(dto.getStatus() != null ? mapStatusEntity(dto.getStatus()) : existEntity.getStatus());
-            existEntity.setProposal(dto.getProposalId() != null ? proposal : existEntity.getProposal()); // Add JobId
-            existEntity.setCreatedAt(dto.getCreatedAt() != null ? dto.getCreatedAt().toLocalDateTime() : existEntity.getCreatedAt()); // Add createdAt
-            existEntity.setUpdatedAt(LocalDateTime.from(Instant.now())); // Update updatedAt
-            existEntity.setVisible( dto.getIsVisible() != null ? dto.getIsVisible() : existEntity.isVisible());
+            existEntity.setVisible(dto.getIsVisible() != null ? dto.getIsVisible() : existEntity.isVisible());
+
+            // NOTE: Cannot change linked proposal
+            //existEntity.setProposal(dto.getProposalId() != null ? proposalRepos.findByProposalId(dto.getProposalId())
+            //        .orElseThrow(() -> new IllegalArgumentException("Proposal not found")) : existEntity.getProposal()); // Add JobId
 
             return existEntity;
         } else {
             Milestone milestone = new Milestone();
+            milestone.setMilestoneId(dto.getMilestoneId());
 
-            if (dto.getMilestoneId() != null) {
-                milestone.setMilestoneId(dto.getMilestoneId());
-            }
             if (dto.getProposalId() != null) {
-                milestone.setProposal(proposal);
+                milestone.setProposal(proposalRepos.findByProposalId(dto.getProposalId())
+                        .orElseThrow(() -> new IllegalArgumentException("Proposal not found")));
             }
             if (dto.getTitle() != null) {
                 milestone.setTitle(dto.getTitle());
             }
             if (dto.getBudget() != null) {
-                milestone.setBudget(BigDecimal.valueOf(dto.getBudget().floatValue()));
+                milestone.setBudget(dto.getBudget());
             }
             if (dto.getDeadline() != null) {
-                milestone.setDeadline(dto.getDeadline().toLocalDateTime());
+                milestone.setDeadline(DateTimeUtil.fromOffsetToLocal(dto.getDeadline()));
             }
             if (dto.getStatus() != null) {
                 milestone.setStatus(mapStatusEntity(dto.getStatus()));
-            }
-            if (dto.getCreatedAt() != null) {
-                milestone.setCreatedAt(dto.getCreatedAt().toLocalDateTime());
-            }
-            if (dto.getUpdatedAt() != null) {
-                milestone.setUpdatedAt(dto.getUpdatedAt().toLocalDateTime());
             }
             if (dto.getIsVisible() != null) {
                 milestone.setVisible(dto.getIsVisible());

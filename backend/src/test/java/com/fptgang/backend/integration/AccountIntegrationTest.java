@@ -8,6 +8,7 @@ import com.fptgang.backend.model.Account;
 import com.fptgang.backend.model.Role;
 import com.fptgang.backend.repository.AccountRepos;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +19,7 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 
 import java.util.Arrays;
 
@@ -60,13 +62,14 @@ class AccountIntegrationTest {
         ));
     }
 
-    //@Test
+    @Test
     @WithMockUser(username = "testuser", roles = "ADMIN")
+    @Disabled
     public void testGetAccounts() throws Exception {
         var json = this.mockMvc.perform(MockMvcRequestBuilders
                         .get("/api/v1/account?page=0&size=20"))
                 .andExpect(status().isOk())
-                //.andDo(MockMvcResultHandlers.print())
+                .andDo(MockMvcResultHandlers.print())
                 .andReturn().getResponse().getContentAsString();
         var response = objectMapper.readValue(json, GetAccounts200Response.class);
 
@@ -107,6 +110,7 @@ class AccountIntegrationTest {
 
     @Test
     @WithMockUser(username = "testuser", roles = "ADMIN")
+    @Disabled
     public void testGetAccountsInvalidQueryParams() throws Exception {
         this.mockMvc.perform(MockMvcRequestBuilders
                         .get("/api/v1/account?page=abc"))

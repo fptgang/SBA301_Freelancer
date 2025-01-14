@@ -4,13 +4,11 @@ import com.fptgang.backend.api.model.AccountDto;
 import com.fptgang.backend.model.Role;
 import com.fptgang.backend.repository.AccountRepos;
 import com.fptgang.backend.model.Account;
+import com.fptgang.backend.util.DateTimeUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
 import java.util.Optional;
 
 @Component
@@ -34,19 +32,16 @@ public class AccountMapper extends BaseMapper<AccountDto, Account> {
             existingAccount.setLastName(dto.getLastName() != null ? dto.getLastName() : existingAccount.getLastName());
             existingAccount.setAvatarUrl(dto.getAvatarUrl() != null ? dto.getAvatarUrl() : existingAccount.getAvatarUrl());
             existingAccount.setBalance(dto.getBalance() != null ? dto.getBalance() : existingAccount.getBalance());
-            existingAccount.setRole(mapRoleAccount(dto.getRole()));
+            existingAccount.setRole(dto.getRole() != null ? mapRoleAccount(dto.getRole()) : existingAccount.getRole());
             existingAccount.setVerified(dto.getIsVerified() != null ? dto.getIsVerified() : existingAccount.isVerified());
-            existingAccount.setVerifiedAt(dto.getVerifiedAt() != null ? dto.getVerifiedAt().toLocalDateTime() : existingAccount.getVerifiedAt());
+            existingAccount.setVerifiedAt(dto.getVerifiedAt() != null ? DateTimeUtil.fromOffsetToLocal(dto.getVerifiedAt()) : existingAccount.getVerifiedAt());
             existingAccount.setVisible(dto.getIsVisible() != null ? dto.getIsVisible() : existingAccount.isVisible());
-            existingAccount.setUpdatedAt(LocalDateTime.from(Instant.now()));
 
             return existingAccount;
         } else {
 
             Account entity = new Account();
-            if (dto.getAccountId() != null) {
-                entity.setAccountId(dto.getAccountId());
-            }
+            entity.setAccountId(dto.getAccountId());
             if (dto.getEmail() != null) {
                 entity.setEmail(dto.getEmail());
             }
@@ -65,15 +60,8 @@ public class AccountMapper extends BaseMapper<AccountDto, Account> {
             if (dto.getRole() != null) {
                 entity.setRole(mapRoleAccount(dto.getRole())); // Enum conversion
             }
-            // Convert createdAt and updatedAt to OffsetDateTime if not null
-            if (dto.getCreatedAt() != null) {
-                entity.setCreatedAt(dto.getCreatedAt().toLocalDateTime());
-            }
-            if (dto.getUpdatedAt() != null) {
-                entity.setUpdatedAt(dto.getUpdatedAt().toLocalDateTime());
-            }
             if (dto.getVerifiedAt() != null) {
-                entity.setVerifiedAt(dto.getVerifiedAt().toLocalDateTime());
+                entity.setVerifiedAt(DateTimeUtil.fromOffsetToLocal(dto.getVerifiedAt()));
             }
             if (dto.getIsVerified() != null) {
                 entity.setVerified(dto.getIsVerified());
@@ -102,24 +90,14 @@ public class AccountMapper extends BaseMapper<AccountDto, Account> {
         dto.setLastName(entity.getLastName());
         dto.setPassword(entity.getPassword());
         dto.setRole(mapRoleAccountDto(entity.getRole()));
+        dto.setIsVerified(entity.isVerified());
+        dto.setIsVisible(entity.isVisible());
         // Nullable fields
-        dto.setAvatarUrl(entity.getAvatarUrl() != null ? entity.getAvatarUrl() : null);
-        dto.setBalance(entity.getBalance() != null ? entity.getBalance() : BigDecimal.ZERO);
-
-        // Nullable timestamps
-        if (entity.getVerifiedAt() != null) {
-            dto.setVerifiedAt(OffsetDateTime.from(entity.getVerifiedAt()));
-        } else {
-            dto.setVerifiedAt(null);
-        }
-
-        if (entity.getCreatedAt() != null) {
-            dto.setCreatedAt(OffsetDateTime.from(entity.getCreatedAt()));
-        }
-
-        if (entity.getUpdatedAt() != null) {
-            dto.setUpdatedAt(OffsetDateTime.from(entity.getUpdatedAt()));
-        }
+        dto.setAvatarUrl(entity.getAvatarUrl());
+        dto.setBalance(entity.getBalance());
+        dto.setVerifiedAt(DateTimeUtil.fromLocalToOffset(entity.getVerifiedAt()));
+        dto.setCreatedAt(DateTimeUtil.fromLocalToOffset(entity.getCreatedAt()));
+        dto.setUpdatedAt(DateTimeUtil.fromLocalToOffset(entity.getUpdatedAt()));
 
         return dto;
     }
@@ -147,7 +125,6 @@ public class AccountMapper extends BaseMapper<AccountDto, Account> {
         if (roleEnum == null) {
             return null; // Or a default Role, e.g., Role.CLIENT
         }
-
         switch (roleEnum) {
             case ADMIN:
                 return AccountDto.RoleEnum.ADMIN;

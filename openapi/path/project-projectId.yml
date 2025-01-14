@@ -1,21 +1,21 @@
 get:
-  summary: Get an account by ID
-  operationId: getAccountById
+  summary: Get a project by ID
+  operationId: getProjectById
   security:
     - bearerAuth: []
   parameters:
-    - name: accountId
+    - name: projectId
       in: path
       required: true
       schema:
-        type: integer
+        type: string
   responses:
     '200':
       description: The operation was success
       content:
         application/json:
           schema:
-            $ref: '../model/account.yml#/AccountDto'
+            $ref: '../model/project.yml#/ProjectDto'
     '400':
       description: The operation was failed
       content:
@@ -23,30 +23,30 @@ get:
           schema:
             $ref: '../component/error.yml#/ErrorResponse'
 put:
-  summary: Update an existing account
-  operationId: updateAccount
+  summary: Update an existing project
+  operationId: updateProject
   security:
     - bearerAuth: []
   parameters:
-    - name: accountId
+    - name: projectId
       in: path
       required: true
       schema:
-        type: integer
+        type: string
   requestBody:
-    description: Account to update
+    description: Project to update
     required: true
     content:
       application/json:
         schema:
-          $ref: '../model/account.yml#/AccountDto'
+          $ref: '../model/project.yml#/ProjectDto'
   responses:
     '200':
       description: The operation was success
       content:
         application/json:
           schema:
-            $ref: '../model/account.yml#/AccountDto'
+            $ref: '../model/project.yml#/ProjectDto'
     '400':
       description: The operation was failed
       content:
@@ -54,12 +54,12 @@ put:
           schema:
             $ref: '../component/error.yml#/ErrorResponse'
 delete:
-  summary: Delete an existing account
-  operationId: deleteAccount
+  summary: Delete an existing project
+  operationId: deleteProject
   security:
     - bearerAuth: []
   parameters:
-    - name: accountId
+    - name: projectId
       in: path
       required: true
       schema:
