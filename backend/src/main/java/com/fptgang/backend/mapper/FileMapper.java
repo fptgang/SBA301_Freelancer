@@ -3,11 +3,10 @@ package com.fptgang.backend.mapper;
 import com.fptgang.backend.api.model.FileDto;
 import com.fptgang.backend.repository.FileRepos;
 import com.fptgang.backend.model.File;
+import com.fptgang.backend.util.DateTimeUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.time.Instant;
-import java.time.OffsetDateTime;
 import java.util.Optional;
 
 
@@ -16,6 +15,7 @@ public class FileMapper extends BaseMapper<FileDto, File> {
 
     @Autowired
     private FileRepos fileRepos;
+
     @Override
     public FileDto toDTO(File entity) {
         if (entity == null) {
@@ -26,8 +26,8 @@ public class FileMapper extends BaseMapper<FileDto, File> {
         dto.setFileName(entity.getFileName());
         dto.setFileType(entity.getFileType());
         dto.setFileUrl(entity.getFileUrl());
-        dto.setSize(Long.valueOf(entity.getSize()));
-        dto.setCreatedAt(OffsetDateTime.from(entity.getCreatedAt()));
+        dto.setSize(entity.getSize());
+        dto.setCreatedAt(DateTimeUtil.fromLocalToOffset(entity.getCreatedAt()));
         dto.setIsVisible(entity.isVisible());
 
         return dto;
@@ -43,21 +43,19 @@ public class FileMapper extends BaseMapper<FileDto, File> {
         Optional<File> existingFileOptional = fileRepos.findByFileId(dto.getFileId());
         if(existingFileOptional.isPresent()){
             File existFile = existingFileOptional.get();
-            existFile.setFileName(dto.getFileName() != null ? dto.getFileName(): existFile.getFileName());
-            existFile.setFileType(dto.getFileType() != null ? dto.getFileType(): existFile.getFileType());
-            existFile.setFileUrl(dto.getFileUrl() != null ? dto.getFileUrl(): existFile.getFileUrl());
-            existFile.setSize(dto.getSize() != null ? dto.getSize().intValue() : existFile.getSize());
-            existFile.setCreatedAt(dto.getCreatedAt() != null ? dto.getCreatedAt().toLocalDateTime() : existFile.getCreatedAt());
+
+            // NOTE: can only change visibility
+            //existFile.setFileName(dto.getFileName() != null ? dto.getFileName(): existFile.getFileName());
+            //existFile.setFileType(dto.getFileType() != null ? dto.getFileType(): existFile.getFileType());
+            //existFile.setFileUrl(dto.getFileUrl() != null ? dto.getFileUrl(): existFile.getFileUrl());
+            //existFile.setSize(dto.getSize() != null ? dto.getSize() : existFile.getSize());
             existFile.setVisible(dto.getIsVisible() != null ? dto.getIsVisible() : existFile.isVisible());
 
             return existFile;
         }
         else{
             File file = new File();
-
-            if (dto.getFileId() != null) {
-                file.setFileId(dto.getFileId());
-            }
+            file.setFileId(dto.getFileId());
 
             if (dto.getFileName() != null) {
                 file.setFileName(dto.getFileName());
@@ -72,12 +70,9 @@ public class FileMapper extends BaseMapper<FileDto, File> {
             }
 
             if (dto.getSize() != null) {
-                file.setSize(dto.getSize() != null ? dto.getSize().intValue() : null);
+                file.setSize(dto.getSize());
             }
 
-            if (dto.getCreatedAt() != null) {
-                file.setCreatedAt(dto.getCreatedAt().toLocalDateTime());
-            }
             if (dto.getIsVisible() != null) {
                 file.setVisible(dto.getIsVisible());
             }

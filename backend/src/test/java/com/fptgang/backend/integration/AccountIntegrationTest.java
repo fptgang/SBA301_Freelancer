@@ -18,6 +18,7 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 
 import java.util.Arrays;
 
@@ -60,13 +61,13 @@ class AccountIntegrationTest {
         ));
     }
 
-    //@Test
+    @Test
     @WithMockUser(username = "testuser", roles = "ADMIN")
     public void testGetAccounts() throws Exception {
         var json = this.mockMvc.perform(MockMvcRequestBuilders
                         .get("/api/v1/account?page=0&size=20"))
                 .andExpect(status().isOk())
-                //.andDo(MockMvcResultHandlers.print())
+                .andDo(MockMvcResultHandlers.print())
                 .andReturn().getResponse().getContentAsString();
         var response = objectMapper.readValue(json, GetAccounts200Response.class);
 
