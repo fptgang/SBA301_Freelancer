@@ -5,8 +5,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface AccountService {
-    void update(Account account);
+    Account create(Account account);
+    Account findById(long id);
     Account findByEmail(String email);
-    void deleteById(String email);
+    Account update(Account account);
+    Account deleteById(long id);
     Page<Account> getAll(Pageable pageable, String filter);
 }
