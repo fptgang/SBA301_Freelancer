@@ -10,7 +10,9 @@ export const dataProvider = (
   _httpClient: Axios // TODO: replace `any` with your http client type
 ): DataProvider => ({
   getList: async ({ resource, pagination, filters, sorters, meta }) => {
-    const url = `${apiUrl}/${resource}?page=${pagination?.current}&pageSize=${pagination?.pageSize}`;
+    const url = `${apiUrl}/${resource}?page=${
+      (pagination?.current ?? 0) - 1
+    }&pageSize=${pagination?.pageSize ?? 20}`;
     console.log("getList", {
       resource,
       pagination,
@@ -19,6 +21,10 @@ export const dataProvider = (
       meta,
       url,
     });
+    console.log("url", url);
+    console.log("sorters", sorters);
+    console.log("filters", filters);
+    console.log("pagination", pagination);
 
     const result = await _httpClient.get(url);
 
@@ -72,7 +78,7 @@ export const dataProvider = (
 
     // TODO: send request to the API
     // const response = await httpClient.post(url, {});
-    const response = await _httpClient.post(
+    const response = await _httpClient.put(
       `${apiUrl}/${resource}/${id}`,
       variables
     );
@@ -107,7 +113,7 @@ export const dataProvider = (
 
     // TODO: send request to the API
     // const response = await httpClient.post(url, {});
-    const response = await _httpClient.post(`${apiUrl}/${resource}/${id}`);
+    const response = await _httpClient.delete(`${apiUrl}/${resource}/${id}`);
     console.log(response);
     return {
       data: {} as any,

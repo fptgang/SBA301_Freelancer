@@ -34,7 +34,9 @@ public class Account {
     @Column(nullable = false, columnDefinition = "NVARCHAR(255)")
     private String lastName;
 
-    @Column(nullable = false)
+    //nullable because it is needed for google sign in
+    @Column
+    @Nullable
     private String password;
 
     @Nullable
