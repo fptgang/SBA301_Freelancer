@@ -43,7 +43,6 @@ public class ProjectCategoryServiceTest {
         testCategory = new ProjectCategory();
         testCategory.setName("Test Category");
         testCategory.setVisible(true);
-        
     }
 
     @AfterEach
