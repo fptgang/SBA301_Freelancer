@@ -1,20 +1,14 @@
 package com.fptgang.backend.mapper;
 
-import com.fptgang.backend.api.model.AccountDto;
 import com.fptgang.backend.api.model.ProposalDto;
-import com.fptgang.backend.model.Project;
 import com.fptgang.backend.repository.AccountRepos;
 import com.fptgang.backend.repository.ProjectRepos;
 import com.fptgang.backend.repository.ProposalRepos;
-import com.fptgang.backend.model.Account;
-import com.fptgang.backend.model.Message;
 import com.fptgang.backend.model.Proposal;
+import com.fptgang.backend.util.DateTimeUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
 import java.util.Optional;
 
 @Component
@@ -37,12 +31,12 @@ public class ProposalMapper extends BaseMapper<ProposalDto, Proposal> {
         }
 
         ProposalDto proposalDto = new ProposalDto();
-        proposalDto.setProposalId(entity.getProposalId() != null ? entity.getProposalId() : null);
-        proposalDto.setProjectId(entity.getProject() != null ? entity.getProject().getProjectId() : null);
-        proposalDto.setFreelancerId(entity.getFreelancer() != null ? entity.getFreelancer().getAccountId() : null);
+        proposalDto.setProposalId(entity.getProposalId());
+        proposalDto.setProjectId(entity.getProject().getProjectId());
+        proposalDto.setFreelancerId(entity.getFreelancer().getAccountId());
         proposalDto.setStatus(mapRoleDto(entity.getStatus()));
-        proposalDto.setCreatedAt(OffsetDateTime.from(entity.getCreatedAt()));
-        proposalDto.setUpdatedAt(OffsetDateTime.from(entity.getUpdatedAt()));
+        proposalDto.setCreatedAt(DateTimeUtil.fromLocalToOffset(entity.getCreatedAt()));
+        proposalDto.setUpdatedAt(DateTimeUtil.fromLocalToOffset(entity.getUpdatedAt()));
         proposalDto.setIsVisible(entity.isVisible());
 
         return proposalDto;
@@ -54,54 +48,40 @@ public class ProposalMapper extends BaseMapper<ProposalDto, Proposal> {
             return null;
         }
         Optional<Proposal> existingEntityOptional = proposalRepos.findByProposalId(dto.getProposalId());
-        Optional<Project> projectOptional = projectRepos.findByProjectId(dto.getProjectId());
-        Optional<Account> accountOptional = accountRepos.findByAccountId(dto.getFreelancerId());
-        Account account = accountOptional.get();
-        Project project = projectOptional.get();
+
         if (existingEntityOptional.isPresent()) {
             Proposal existEntity = existingEntityOptional.get();
-            existEntity.setProject(dto.getProjectId() != null ? project : existEntity.getProject());
-            existEntity.setUpdatedAt(LocalDateTime.from(Instant.now()));
-            existEntity.setFreelancer(dto.getFreelancerId() != null ? account : existEntity.getFreelancer());
+
+            // DTO chi duoc sua status va visible
+            //existEntity.setProject(dto.getProjectId() != null ? project : existEntity.getProject());
+            //existEntity.setFreelancer(dto.getFreelancerId() != null ? account : existEntity.getFreelancer());
             existEntity.setStatus(dto.getStatus() != null ? mapRoleEntity(dto.getStatus()) : existEntity.getStatus());
-            existEntity.setProposalId(dto.getProposalId() != null ? dto.getProposalId() : existEntity.getProposalId());
             existEntity.setVisible(dto.getIsVisible() != null ? dto.getIsVisible() : existEntity.isVisible());
 
             return existEntity;
         }
 
-
         else{
             Proposal proposal = new Proposal();
-
-            if (dto.getProposalId() != null) {
-                proposal.setProposalId(dto.getProposalId());
-            }
+            proposal.setProposalId(dto.getProposalId());
 
             if (dto.getProjectId() != null) {
-                proposal.setProject(project);
+                proposal.setProject(projectRepos.findByProjectId(dto.getProjectId())
+                        .orElseThrow(() -> new IllegalArgumentException("Project not found")));
             }
 
             if (dto.getFreelancerId() != null) {
-                proposal.setFreelancer(account);
+                proposal.setFreelancer(accountRepos.findByAccountId(dto.getFreelancerId())
+                        .orElseThrow(() -> new IllegalArgumentException("Freelancer not found")));
             }
 
             if (dto.getStatus() != null) {
                 proposal.setStatus(mapRoleEntity(dto.getStatus()));
             }
 
-            if (dto.getCreatedAt() != null) {
-                proposal.setCreatedAt(dto.getCreatedAt().toLocalDateTime());
-            }
-
-            if (dto.getUpdatedAt() != null) {
-                proposal.setUpdatedAt(dto.getUpdatedAt().toLocalDateTime());
-            }
-
             if (dto.getIsVisible() != null) {
                 proposal.setVisible(dto.getIsVisible());
             }
-
 
             return proposal;
         }

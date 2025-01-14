@@ -12,7 +12,7 @@ TransactionDto:
       format: int64
     amount:
       type: number
-      format: float
+      format: double
     type:
       type: string
       enum: [DEPOSIT, WITHDRAWAL, ESCROW_DEPOSIT, ESCROW_RELEASE, FEE]
