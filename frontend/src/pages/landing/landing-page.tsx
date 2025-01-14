@@ -6,7 +6,6 @@ import TrustedBy from "./components/trusted-by";
 export default function LandingPage() {
   return (
     <>
-      <NavBar />
       <Hero />
       <TrustedBy />
     </>
