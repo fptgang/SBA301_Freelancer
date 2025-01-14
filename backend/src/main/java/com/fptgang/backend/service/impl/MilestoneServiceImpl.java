@@ -17,8 +17,13 @@ public class MilestoneServiceImpl implements MilestoneService {
 
 
     @Override
-    public void update(Milestone milestone) {
-        proposalRepos.save(milestone);
+    public Milestone create(Milestone milestone) {
+        return proposalRepos.save(milestone);
+    }
+
+    @Override
+    public Milestone update(Milestone milestone) {
+        return proposalRepos.save(milestone);
     }
 
     @Override
@@ -27,8 +32,10 @@ public class MilestoneServiceImpl implements MilestoneService {
     }
 
     @Override
-    public void deleteById(long id) {
-        proposalRepos.deleteById(id);
+    public Milestone deleteById(long id) {
+        var milestone = proposalRepos.findById(id).orElseThrow(() -> new IllegalArgumentException("Account does not exist"));
+        milestone.setVisible(false);
+        return proposalRepos.save(milestone);
     }
 
     @Override
