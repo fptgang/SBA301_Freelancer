@@ -13,7 +13,7 @@ public class TestcontainersConfiguration {
 	@ServiceConnection
 	public MySQLContainer<?> mysqlContainer() {
 		return new MySQLContainer<>(DockerImageName.parse("mysql:latest"))
-				.withReuse(true);
+				.withReuse(false);
 	}
 
 
