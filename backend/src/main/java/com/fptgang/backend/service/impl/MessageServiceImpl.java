@@ -23,8 +23,8 @@ public class MessageServiceImpl implements MessageService {
 
     @Override
     public Message update(Message message) {
-        if(message.getMessageId() == null || messageRepos.existsById(message.getMessageId())){
-            throw new InvalidInputException("Project Category does not exist");
+        if(message.getMessageId() == null || !messageRepos.existsById(message.getMessageId())){
+            throw new InvalidInputException("Message does not exist");
         }
         return messageRepos.save(message);
     }
