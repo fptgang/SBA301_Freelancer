@@ -7,7 +7,7 @@ import org.springframework.data.domain.Pageable;
 public interface ProjectService {
 
     Project create(Project project);
-    void update(Project account);
+    Project update(Project account);
     Project findByProjectId(long projectId);
     void deleteById(long projectId);
     Page<Project> getAll(Pageable pageable, String filter);

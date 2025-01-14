@@ -28,11 +28,11 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public void update(Project project) {
+    public Project update(Project project) {
         if(project.getProjectId() == null || projectRepos.existsById(project.getProjectId())){
             throw new InvalidInputException("Prject does not exist");
         }
-        projectRepos.save(project);
+        return projectRepos.save(project);
     }
 
     @Override
