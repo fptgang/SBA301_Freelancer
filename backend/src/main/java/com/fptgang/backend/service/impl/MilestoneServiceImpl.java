@@ -17,6 +17,11 @@ public class MilestoneServiceImpl implements MilestoneService {
 
 
     @Override
+    public Milestone create(Milestone milestone) {
+        return proposalRepos.save(milestone);
+    }
+
+    @Override
     public Milestone update(Milestone milestone) {
         return proposalRepos.save(milestone);
     }

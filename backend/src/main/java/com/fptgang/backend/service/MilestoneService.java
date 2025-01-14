@@ -5,6 +5,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface MilestoneService {
+    Milestone create(Milestone milestone);
     Milestone update(Milestone milestone);
     Milestone findById(long id);
     Milestone deleteById(long id);
