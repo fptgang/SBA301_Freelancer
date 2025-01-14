@@ -17,18 +17,32 @@ public class ProposalServiceImpl implements ProposalService {
 
 
     @Override
-    public void update(Proposal proposal) {
-        proposalRepos.save(proposal);
+    public Proposal create(Proposal proposal) {
+        return proposalRepos.save(proposal);
+    }
+
+    @Override
+    public Proposal update(Proposal proposal) {
+        if (proposal.getProposalId() == null || proposalRepos.findByProposalId(proposal.getProposalId()).isEmpty()) {
+            throw new IllegalArgumentException("Proposal does not exist");
+        }
+        return proposalRepos.save(proposal);
     }
 
     @Override
     public Proposal findById(long id) {
-        return proposalRepos.findById(id).orElse(null);
+        return proposalRepos.findById(id).orElseThrow(
+                () -> new IllegalArgumentException("Proposal does not exist")
+        );
     }
 
     @Override
-    public void deleteById(long id) {
-        proposalRepos.deleteById(id);
+    public Proposal deleteById(long id) {
+        Proposal proposal = findById(
+                id
+        );
+        proposal.setVisible(false);
+        return proposalRepos.save(proposal);
     }
 
     @Override
