@@ -11,7 +11,6 @@ export const dataProvider = (
 ): DataProvider => ({
   getList: async ({ resource, pagination, filters, sorters, meta }) => {
     const url = `${apiUrl}/${resource}?page=${pagination?.current}&pageSize=${pagination?.pageSize}`;
-
     console.log("getList", {
       resource,
       pagination,
@@ -108,7 +107,7 @@ export const dataProvider = (
 
     // TODO: send request to the API
     // const response = await httpClient.post(url, {});
-    const response = await _httpClient.delete(`${apiUrl}/${resource}/${id}`);
+    const response = await _httpClient.post(`${apiUrl}/${resource}/${id}`);
     console.log(response);
     return {
       data: {} as any,

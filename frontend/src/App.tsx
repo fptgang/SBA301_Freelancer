@@ -17,7 +17,7 @@ import routerBindings, {
   UnsavedChangesNotifier,
 } from "@refinedev/react-router";
 import { App as AntdApp } from "antd";
-import { BrowserRouter, Outlet, Route, Routes } from "react-router";
+import { BrowserRouter, Navigate, Outlet, Route, Routes } from "react-router";
 import { authProvider, REFRESH_TOKEN_KEY, TOKEN_KEY } from "./authProvider";
 import { AppIcon } from "./components/app-icon";
 import { Header } from "./components/header";
@@ -44,6 +44,11 @@ import { API_URL, BASE_URL } from "./utils/constants";
 import { refreshToken } from "./data/service/auth-service";
 import LandingPage from "./pages/landing/landing-page";
 import About from "./pages/about/About";
+import { Role } from "./data/types/Account";
+import ClientLayout from "./components/layout";
+import NavBar from "./pages/landing/nav-bar";
+import Profile from "./pages/profile/profile";
+import Footer from "./components/common/footer/footer";
 
 const axiosInstance = axios.create();
 axiosInstance.interceptors.request.use((config) => {
@@ -104,6 +109,24 @@ function App() {
                 <Routes>
                   <Route
                     element={
+                      <ClientLayout
+                        HeaderContent={NavBar}
+                        InnerContent={() => <Outlet />}
+                        FooterContent={() => <Footer />}
+                      />
+                    }
+                  >
+                    <Route index element={<LandingPage />} />
+                    <Route
+                      path="/settings"
+                      element={<Navigate to="/admin" />}
+                    />
+                    <Route path="/profile" element={<Profile />} />
+                    <Route path="/about" element={<About />} />
+                  </Route>
+
+                  <Route
+                    element={
                       <Authenticated
                         key="authenticated-inner"
                         fallback={<LandingPage />}
@@ -135,12 +158,14 @@ function App() {
                         key="authenticated-outer"
                         fallback={<Outlet />}
                       >
-                        <NavigateToResource />
+                        {localStorage.getItem("role") === Role.ADMIN ? (
+                          <Navigate to="/admin" />
+                        ) : (
+                          <Navigate to="/" />
+                        )}
                       </Authenticated>
                     }
                   >
-                    <Route path="/" element={<LandingPage />} />
-                    <Route path="/about" element={<About />} />
                     <Route path="/login" element={<Login />} />
                     <Route path="/register" element={<Register />} />
                     <Route

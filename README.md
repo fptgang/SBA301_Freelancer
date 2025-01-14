@@ -13,6 +13,7 @@ Freelancer platform
 | anhhdse182336@fpt.edu.vn   | SE182336  | 	Huỳnh Duy Anh   |
 | viltse180769@fpt.edu.vn    | SE180769   | 	Lê Trung Vĩ     |
 | phucvxse180225@fpt.edu.vn  | SE180225  | 	Võ Xuân Phúc    |
+| khahdse180386@fpt.edu.vn | SE180386 | Huỳnh Duy Kha |
 
 # Links
 - Figma: 
