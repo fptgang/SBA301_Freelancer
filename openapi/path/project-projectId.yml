@@ -1,0 +1,75 @@
+get:
+  summary: Get a project by ID
+  operationId: getProjectById
+  security:
+    - bearerAuth: []
+  parameters:
+    - name: projectId
+      in: path
+      required: true
+      schema:
+        type: string
+  responses:
+    '200':
+      description: The operation was success
+      content:
+        application/json:
+          schema:
+            $ref: '../model/project.yml#/ProjectDto'
+    '400':
+      description: The operation was failed
+      content:
+        application/json:
+          schema:
+            $ref: '../component/error.yml#/ErrorResponse'
+put:
+  summary: Update an existing project
+  operationId: updateProject
+  security:
+    - bearerAuth: []
+  parameters:
+    - name: projectId
+      in: path
+      required: true
+      schema:
+        type: string
+  requestBody:
+    description: Project to update
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../model/project.yml#/ProjectDto'
+  responses:
+    '200':
+      description: The operation was success
+      content:
+        application/json:
+          schema:
+            $ref: '../model/project.yml#/ProjectDto'
+    '400':
+      description: The operation was failed
+      content:
+        application/json:
+          schema:
+            $ref: '../component/error.yml#/ErrorResponse'
+delete:
+  summary: Delete an existing project
+  operationId: deleteProject
+  security:
+    - bearerAuth: []
+  parameters:
+    - name: projectId
+      in: path
+      required: true
+      schema:
+        type: integer
+  responses:
+    '200':
+      description: The operation was success
+    '400':
+      description: The operation was failed
+      content:
+        application/json:
+          schema:
+            $ref: '../component/error.yml#/ErrorResponse'
