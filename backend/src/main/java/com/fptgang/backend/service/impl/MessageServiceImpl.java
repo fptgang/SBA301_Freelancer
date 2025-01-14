@@ -30,7 +30,7 @@ public class MessageServiceImpl implements MessageService {
     }
 
     @Override
-    public Message findByProjectCategoryId(long messageId) {
+    public Message findByMessageId(long messageId) {
         return messageRepos.findByMessageId(messageId).orElseThrow(
                 () -> new InvalidInputException("Message with id " + messageId + "not found"));
     }
