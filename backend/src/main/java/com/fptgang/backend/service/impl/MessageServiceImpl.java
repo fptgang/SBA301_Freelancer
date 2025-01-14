@@ -22,11 +22,11 @@ public class MessageServiceImpl implements MessageService {
     }
 
     @Override
-    public void update(Message message) {
+    public Message update(Message message) {
         if(message.getMessageId() == null || messageRepos.existsById(message.getMessageId())){
             throw new InvalidInputException("Project Category does not exist");
         }
-        messageRepos.save(message);
+        return messageRepos.save(message);
     }
 
     @Override

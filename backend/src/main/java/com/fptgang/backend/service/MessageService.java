@@ -6,7 +6,7 @@ import org.springframework.data.domain.Pageable;
 
 public interface MessageService {
     Message create(Message message);
-    void update(Message message);
+    Message update(Message message);
     Message findByProjectCategoryId(long messageId);
     void deleteById(long messageId);
     Page<Message> getAll(Pageable pageable, String filter);
