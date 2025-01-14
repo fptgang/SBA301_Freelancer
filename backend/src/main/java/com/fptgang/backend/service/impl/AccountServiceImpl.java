@@ -53,6 +53,6 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public Page<Account> getAll(Pageable pageable, String filter) {
         var spec = OpenApiHelper.<Account>toSpecification(filter);
-        return accountRepos.findAll(spec, pageable);
+        return accountRepos.findAllByVisibleTrue( pageable, spec);
     }
 }

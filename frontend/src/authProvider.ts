@@ -18,6 +18,7 @@ export const authProvider: AuthProvider = {
       localStorage.setItem(TOKEN_KEY, response.token);
       localStorage.setItem(REFRESH_TOKEN_KEY, response.refreshToken);
       console.log(response);
+      localStorage.setItem("role", response.accountResponseDTO.role);
       if (response.accountResponseDTO.role === Role.ADMIN) {
         return {
           success: true,
@@ -35,7 +36,7 @@ export const authProvider: AuthProvider = {
       const response: Auth = await login(email, password);
       localStorage.setItem(TOKEN_KEY, response.token);
       localStorage.setItem(REFRESH_TOKEN_KEY, response.refreshToken);
-
+      console.log(response);
       localStorage.setItem("role", response.accountResponseDTO.role);
 
       if (response.accountResponseDTO.role === Role.ADMIN) {
@@ -68,11 +69,15 @@ export const authProvider: AuthProvider = {
   },
   check: async () => {
     const token: string | null = localStorage.getItem(TOKEN_KEY);
+    console.log("check auth " + token);
     if (token) {
       const checkStatus = await getCurrentUser(token)
         .then((response) => {
           console.log(response);
+          localStorage.setItem("role", response.role);
+          console.log(response);
           return {
+            role: response.role,
             authenticated: true,
           };
         })

@@ -49,6 +49,7 @@ import ClientLayout from "./components/layout";
 import NavBar from "./pages/landing/nav-bar";
 import Profile from "./pages/profile/profile";
 import Footer from "./components/common/footer/footer";
+import { UsersCreate, UsersEdit, UsersList, UsersShow } from "./pages/users";
 
 const axiosInstance = axios.create();
 axiosInstance.interceptors.request.use((config) => {
@@ -66,7 +67,7 @@ axiosInstance.interceptors.response.use((value) => {
       localStorage.setItem(TOKEN_KEY, response.accessToken);
       localStorage.setItem(REFRESH_TOKEN_KEY, response.refreshToken);
     });
-  } else {
+  } else if (value.status === 401) {
     // window.location.href = "/login";
     localStorage.removeItem(TOKEN_KEY);
   }
@@ -83,17 +84,18 @@ function App() {
               <Refine
                 dataProvider={dataProvider(API_URL, axiosInstance)}
                 notificationProvider={useNotificationProvider}
-                accessControlProvider={accessControlProvider}
+                // accessControlProvider={accessControlProvider}
                 authProvider={authProvider}
                 routerProvider={routerBindings}
                 resources={[
                   {
-                    name: "blog_posts",
-                    list: "/blog-posts",
-                    create: "/blog-posts/create",
-                    edit: "/blog-posts/edit/:id",
-                    show: "/blog-posts/show/:id",
+                    name: "accounts",
+                    list: "/admin/accounts",
+                    create: "/admin/accounts/create",
+                    edit: "/admin/accounts/edit/:id",
+                    show: "/admin/accounts/show/:id",
                     meta: {
+                      label: "Accounts",
                       canDelete: true,
                     },
                   },
@@ -126,10 +128,11 @@ function App() {
                   </Route>
 
                   <Route
+                    path="/admin"
                     element={
                       <Authenticated
                         key="authenticated-inner"
-                        fallback={<LandingPage />}
+                        fallback={<Navigate to={"/"} replace />}
                       >
                         <ThemedLayoutV2
                           Header={Header}
@@ -142,13 +145,13 @@ function App() {
                   >
                     <Route
                       index
-                      element={<NavigateToResource resource="blog_posts" />}
+                      element={<NavigateToResource resource="accounts" />}
                     />
-                    <Route path="/blog-posts">
-                      <Route index element={<BlogPostList />} />
-                      <Route path="create" element={<BlogPostCreate />} />
-                      <Route path="edit/:id" element={<BlogPostEdit />} />
-                      <Route path="show/:id" element={<BlogPostShow />} />
+                    <Route path="accounts">
+                      <Route index element={<UsersList />} />
+                      <Route path="create" element={<UsersCreate />} />
+                      <Route path="edit/:id" element={<UsersEdit />} />
+                      <Route path="show/:id" element={<UsersShow />} />
                     </Route>
                     <Route path="*" element={<ErrorComponent />} />
                   </Route>
@@ -158,8 +161,8 @@ function App() {
                         key="authenticated-outer"
                         fallback={<Outlet />}
                       >
-                        {localStorage.getItem("role") === Role.ADMIN ? (
-                          <Navigate to="/admin" />
+                        {localStorage.getItem("role") === "ADMIN" ? (
+                          <NavigateToResource />
                         ) : (
                           <Navigate to="/" />
                         )}

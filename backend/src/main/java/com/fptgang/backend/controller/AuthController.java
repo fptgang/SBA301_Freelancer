@@ -1,11 +1,13 @@
 package com.fptgang.backend.controller;
 
+import com.fptgang.backend.api.model.AccountDto;
 import com.fptgang.backend.dtos.request.LoginRequestDTO;
 import com.fptgang.backend.dtos.request.RegisterRequestDTO;
 import com.fptgang.backend.dtos.response.AccountResponseDTO;
 import com.fptgang.backend.dtos.response.AuthResponseDTO;
 import com.fptgang.backend.dtos.response.JwtResponseDTO;
 import com.fptgang.backend.exception.InvalidInputException;
+import com.fptgang.backend.mapper.AccountMapper;
 import com.fptgang.backend.model.RefreshToken;
 import com.fptgang.backend.security.TokenService;
 import com.fptgang.backend.service.AccountService;
@@ -31,12 +33,14 @@ public class AuthController {
     private final AuthService authService;
     private final RefreshTokenService refreshTokenService;
     private final AccountService accountService;
+    private final AccountMapper accountMapper;
 
-    public AuthController(AuthService authService, RefreshTokenService refreshTokenService, AuthenticationManager authenticationManager, TokenService tokenService, AccountService accountService) {
+    public AuthController(AuthService authService, RefreshTokenService refreshTokenService, AuthenticationManager authenticationManager, TokenService tokenService, AccountService accountService, AccountMapper accountMapper) {
         this.authService = authService;
         this.refreshTokenService = refreshTokenService;
         this.tokenService = tokenService;
         this.accountService = accountService;
+        this.accountMapper = accountMapper;
     }
 
 
@@ -63,7 +67,7 @@ public class AuthController {
 
     @SecurityRequirement(name = "Bearer Authentication")
     @GetMapping("/me")
-    public ResponseEntity<AccountResponseDTO> getCurrentUser(@RequestParam(required = false) String token) {
+    public ResponseEntity<AccountDto> getCurrentUser(@RequestParam(required = false) String token) {
         if (token == null || token.isEmpty()) {
             //            throw new InvalidInputException("User not found");
             return ResponseEntity.ok(null);
@@ -75,8 +79,7 @@ public class AuthController {
             return ResponseEntity.ok(null);
         }
         //        System.out.println(authentication.getName());
-        //return ResponseEntity.ok(accountService.findByEmail(email));
-        return null;
+        return ResponseEntity.ok(accountMapper.toDTO(accountService.findByEmail(email)));
     }
 
     @PostMapping("/refreshToken")

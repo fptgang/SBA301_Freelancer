@@ -33,7 +33,7 @@ components:
 paths:
   /auth/login:
     $ref: 'path/auth/login.yml'
-  /account:
+  /accounts:
     $ref: 'path/account.yml'
-  /account/{userId}:
+  /accounts/{accountId}:
     $ref: 'path/account-accountId.yml'
