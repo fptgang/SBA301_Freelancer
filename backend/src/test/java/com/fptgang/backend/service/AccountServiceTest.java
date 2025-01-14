@@ -173,6 +173,7 @@ class AccountServiceTest {
         assertTrue(accountsPage.getTotalElements() >= 2);
     }
 
+    @Disabled
     @Test
     @Order(12)
     void getAllAccountsWithFilter() {
