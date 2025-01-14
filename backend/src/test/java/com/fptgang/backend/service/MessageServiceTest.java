@@ -28,7 +28,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @TestConfiguration(proxyBeanMethods = false)
 @Testcontainers
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-public class MessageTest {
+public class MessageServiceTest {
     @Container
     @ServiceConnection
     static MySQLContainer<?> mysql = new MySQLContainer<>(DockerImageName.parse("mysql:latest"));
