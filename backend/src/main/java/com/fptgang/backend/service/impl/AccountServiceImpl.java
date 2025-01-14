@@ -2,17 +2,15 @@ package com.fptgang.backend.service.impl;
 
 import com.fptgang.backend.repository.AccountRepos;
 import com.fptgang.backend.service.AccountService;
-import com.fptgang.backend.model.Account;
 import com.fptgang.backend.util.OpenApiHelper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.fptgang.backend.model.Account;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 @Service
 public class AccountServiceImpl implements AccountService {
-    private static final Logger LOGGER = LoggerFactory.getLogger(AccountServiceImpl.class);
+
     private final AccountRepos accountRepos;
 
     public AccountServiceImpl(AccountRepos accountRepos) {
@@ -21,6 +19,9 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public Account create(Account account) {
+        if(accountRepos.findByEmail(account.getEmail()).isPresent()) {
+            throw new IllegalArgumentException("Email already exists");
+        }
         return accountRepos.save(account);
     }
 
