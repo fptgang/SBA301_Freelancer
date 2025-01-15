@@ -50,6 +50,7 @@ class AccountIntegrationTest {
                         .password("pwd")
                         .avatarUrl("string")
                         .role(Role.ADMIN)
+                        .isVisible(true)
                         .build(),
                 Account.builder().email("b@test.com")
                         .firstName("b")
@@ -58,16 +59,16 @@ class AccountIntegrationTest {
                         .avatarUrl("string")
                         .role(Role.ADMIN)
                         .isVerified(true)
+                        .isVisible(true)
                         .build()
         ));
     }
 
     @Test
     @WithMockUser(username = "testuser", roles = "ADMIN")
-    @Disabled
     public void testGetAccounts() throws Exception {
         var json = this.mockMvc.perform(MockMvcRequestBuilders
-                        .get("/api/v1/account?page=0&size=20"))
+                        .get("/api/v1/accounts?page=0&size=20"))
                 .andExpect(status().isOk())
                 .andDo(MockMvcResultHandlers.print())
                 .andReturn().getResponse().getContentAsString();
@@ -104,16 +105,15 @@ class AccountIntegrationTest {
     //@Test
     public void testGetAccountsUnauthorized() throws Exception {
         this.mockMvc.perform(
-                MockMvcRequestBuilders.get("/api/v1/account?page=0&size=20")
+                MockMvcRequestBuilders.get("/api/v1/accounts?page=0&size=20")
         ).andExpect(status().isUnauthorized());
     }
 
     @Test
     @WithMockUser(username = "testuser", roles = "ADMIN")
-    @Disabled
     public void testGetAccountsInvalidQueryParams() throws Exception {
         this.mockMvc.perform(MockMvcRequestBuilders
-                        .get("/api/v1/account?page=abc"))
+                        .get("/api/v1/accounts?page=abc"))
                 .andExpect(status().isBadRequest());
     }
 }

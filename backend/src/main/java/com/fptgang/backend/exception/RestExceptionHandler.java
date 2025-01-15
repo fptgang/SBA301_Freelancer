@@ -36,6 +36,8 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
             status = HttpStatus.BAD_REQUEST;
         }
 
+        ex.printStackTrace();
+
         ErrorResponse error = new ErrorResponse().error(ex.getMessage());
         return ResponseEntity.status(status).body(error);
     }
