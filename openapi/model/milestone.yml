@@ -4,7 +4,7 @@ MilestoneDto:
     milestoneId:
       type: integer
       format: int64
-    proposalId:
+    projectId:
       type: integer
       format: int64
     title:
