@@ -8,6 +8,16 @@ export const ProfileDropdownButton = () => {
   const { mutate: logout } = useLogout();
 
   const menuItems = [
+    // Add Dashboard item conditionally for admin users
+    ...(localStorage.getRole === "ADMIN"
+      ? [
+          {
+            key: "dashboard",
+            label: "Dashboard",
+            onClick: () => nav("/dashboard"),
+          },
+        ]
+      : []),
     {
       key: "profile",
       label: "Profile",
