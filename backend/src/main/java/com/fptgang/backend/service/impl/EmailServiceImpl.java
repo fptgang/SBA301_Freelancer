@@ -17,6 +17,8 @@ public class EmailServiceImpl implements EmailService {
     private static final Logger log = LoggerFactory.getLogger(EmailServiceImpl.class);
     @Value("${RESEND_API_KEY}")
     private String API_KEY;
+    @Value("${COMPANY_NAME}")
+    private String companyName;
 
     @Override
     public void sendMail(String from, String to, String subject, String html) {
@@ -24,9 +26,9 @@ public class EmailServiceImpl implements EmailService {
         Resend resend = new Resend(API_KEY);
         CreateEmailOptions params = CreateEmailOptions.builder()
                 //"Acme <onboarding@resend.dev>"
-                .from(from)
+                .from(from + " <admin@mail.biddify.fun>")
                 .to(to)
-                .subject(subject)
+                .subject("[" + companyName + "]" + subject)
                 .html(html)
                 .build();
         try {

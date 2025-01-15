@@ -1,6 +1,8 @@
 package com.fptgang.backend.service.impl;
 
+import com.fptgang.backend.dtos.request.ForgotPasswordRequestDTO;
 import com.fptgang.backend.dtos.request.RegisterRequestDTO;
+import com.fptgang.backend.dtos.request.ResetPasswordRequestDTO;
 import com.fptgang.backend.dtos.response.AccountResponseDTO;
 import com.fptgang.backend.dtos.response.AuthResponseDTO;
 import com.fptgang.backend.exception.InvalidInputException;
@@ -13,6 +15,8 @@ import com.fptgang.backend.security.CustomUserDetailsService;
 import com.fptgang.backend.security.PasswordEncoderConfig;
 import com.fptgang.backend.security.TokenService;
 import com.fptgang.backend.service.AuthService;
+import com.fptgang.backend.service.EmailService;
+import com.fptgang.backend.service.PasswordResetTokenService;
 import com.fptgang.backend.service.RefreshTokenService;
 import com.google.api.client.auth.openidconnect.IdToken;
 import com.google.api.client.auth.openidconnect.IdTokenVerifier;
@@ -23,6 +27,7 @@ import com.google.api.client.http.LowLevelHttpRequest;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.gson.GsonFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,9 +48,9 @@ import static org.springframework.security.oauth2.core.OAuth2TokenIntrospectionC
 
 
 @Service
+@Slf4j
 public class AuthServiceImpl implements AuthService {
 
-    private static final Logger log = LoggerFactory.getLogger(AuthServiceImpl.class);
     private final AccountRepos accountRepos;
 
     @Autowired
@@ -61,9 +66,16 @@ public class AuthServiceImpl implements AuthService {
     @Autowired
     private RefreshTokenRepos refreshTokenRepos;
 
+    private final EmailService emailService;
+
+    private final PasswordResetTokenService passwordResetTokenService;
+
     @Autowired
-    public AuthServiceImpl(AccountRepos accountRepos) {
+    public AuthServiceImpl(AccountRepos accountRepos, EmailServiceImpl emailService, PasswordResetTokenService passwordResetTokenService) {
+
         this.accountRepos = accountRepos;
+        this.emailService = emailService;
+        this.passwordResetTokenService = passwordResetTokenService;
     }
 
     @Override
@@ -114,6 +126,57 @@ public class AuthServiceImpl implements AuthService {
         }
         return null;
 
+    }
+
+    @Override
+    public void forgotPassword(ForgotPasswordRequestDTO forgotPasswordRequestDTO) {
+        log.info("Processing forgot password request for email: {}", forgotPasswordRequestDTO.getEmail());
+        Account account = accountRepos.findByEmail(forgotPasswordRequestDTO.getEmail())
+                .orElseThrow(() -> new InvalidInputException("User not found"));
+
+        String resetToken = passwordResetTokenService.generateToken(forgotPasswordRequestDTO.getEmail());
+
+        // Create reset password link
+        String resetLink = "http://localhost:5173/reset-password?token=" + resetToken;
+
+        // Send email
+        String emailBody = String.format("""
+            Hello %s,
+            
+            You have requested to reset your password. Please click the link below to reset it:
+            %s
+            
+            This link will expire in 15 minutes.
+            
+            If you didn't request this, please ignore this email.
+            
+            Best regards,
+            Your Application Team
+            """, account.getFirstName(), resetLink);
+
+        emailService.sendMail("Admin", forgotPasswordRequestDTO.getEmail(), "Password Reset Request", emailBody);
+
+        log.info("Password reset email sent to: {}", forgotPasswordRequestDTO.getEmail());
+    }
+
+    @Override
+    public void resetPassword(ResetPasswordRequestDTO request) {
+        if (!request.getNewPassword().equals(request.getConfirmPassword())) {
+            throw new InvalidInputException("Passwords do not match");
+        }
+
+        String email = passwordResetTokenService.getEmailFromToken(request.getToken())
+                .orElseThrow(() -> new InvalidInputException("Invalid or expired reset token"));
+
+        Account account = accountRepos.findByEmail(email)
+                .orElseThrow(() -> new InvalidInputException("User not found"));
+
+        // Update password
+        account.setPassword(passwordEncoderConfig.bcryptEncoder().encode(request.getNewPassword()));
+        accountRepos.save(account);
+        // Invalidate the token
+        passwordResetTokenService.invalidateToken(request.getToken());
+        log.info("Password successfully reset for user: {}", email);
     }
 
     @Override
@@ -182,6 +245,7 @@ public class AuthServiceImpl implements AuthService {
             throw new InvalidInputException("Email already exists");
         }
     }
+
 
 
     @Override

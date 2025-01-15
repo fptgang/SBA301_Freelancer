@@ -31,7 +31,9 @@ import {
   type FormProps,
   Divider,
   theme,
+  Select,
 } from "antd";
+import { Option } from "antd/es/mentions";
 
 type RegisterProps = RegisterPageProps<LayoutProps, CardProps, FormProps>;
 /**
@@ -159,6 +161,36 @@ export const RegisterPage: React.FC<RegisterProps> = ({
           requiredMark={false}
           {...formProps}
         >
+          <Form.Item
+            name={["role"]}
+            label={translate(
+              "pages.register.role",
+              "Are u here as a freelancer or client?"
+            )}
+            rules={[
+              {
+                required: true,
+                message: translate(
+                  "pages.register.errors.requiredRole",
+                  "Role is required"
+                ),
+              },
+            ]}
+          >
+            <Select
+              placeholder={translate("pages.register.fields.role", "Role")}
+              allowClear
+              size="large"
+            >
+              <Option value="FREELANCER">
+                {translate("pages.register.roles.admin", "Freelancer")}
+              </Option>
+              <Option value="CLIENT">
+                {translate("pages.register.roles.client", "Client")}
+              </Option>
+            </Select>
+          </Form.Item>
+
           <Form.Item
             name={["firstName"]}
             label={translate("pages.register.firstName", "First Name")}

@@ -1,4 +1,10 @@
 package com.fptgang.backend.dtos.request;
 
-public record ResetPasswordRequestDTO() {
+import lombok.Data;
+
+@Data
+public class ResetPasswordRequestDTO {
+    private String token;
+    private String newPassword;
+    private String confirmPassword;
 }

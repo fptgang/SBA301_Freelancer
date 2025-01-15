@@ -53,3 +53,17 @@ export const refreshToken = async (token: string): Promise<JwtResponse> => {
   const response = await axios.post(`${BASE_URL}/refreshToken`, { token });
   return response.data;
 };
+
+export const forgotPassword = async (email: string) => {
+  const response = await axios.post(`${BASE_URL}/forgot-password`, { email });
+  return response;
+};
+interface ResetPasswordRequestDTO {
+  token: string;
+  newPassword: string;
+  confirmPassword: string;
+}
+export const resetPassword = async (data: ResetPasswordRequestDTO) => {
+  const response = await axios.post(`${BASE_URL}/reset-password`, data);
+  return response;
+};
