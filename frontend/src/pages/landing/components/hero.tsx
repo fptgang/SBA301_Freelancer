@@ -4,6 +4,8 @@ import { Button, Typography } from "antd";
 import { ArrowRightOutlined } from "@ant-design/icons";
 import TrustedBy from "./trusted-by";
 import { motion } from "framer-motion";
+import { useIsAuthenticated } from "@refinedev/core";
+import { useNavigate } from "react-router";
 
 const { Title, Paragraph } = Typography;
 
@@ -25,13 +27,19 @@ const Hero: React.FC = () => {
 
     return () => clearInterval(interval);
   }, [currentIndex]);
-
+  const { data: auth } = useIsAuthenticated();
+  const nav = useNavigate();
   const handleHireTalentButton = () => {
-    console.log("Hire Talent button clicked");
+    if (!auth?.authenticated) {
+      console.log("Authenticated");
+      nav("/login", { replace: true });
+    }
   };
 
   const handleLearnMore = () => {
-    console.log("Learn More");
+    if (!auth?.authenticated) {
+      nav("/login", { replace: true });
+    }
   };
 
   return (

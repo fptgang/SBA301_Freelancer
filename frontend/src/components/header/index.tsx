@@ -10,6 +10,7 @@ import {
 } from "antd";
 import React, { useContext } from "react";
 import { ColorModeContext } from "../../contexts/color-mode";
+import { ProfileDropdownButton } from "../common/button/profile-dropdown-button";
 
 const { Text } = Typography;
 const { useToken } = theme;
@@ -52,8 +53,7 @@ export const Header: React.FC<RefineThemedLayoutV2HeaderProps> = ({
           defaultChecked={mode === "dark"}
         />
         <Space style={{ marginLeft: "8px" }} size="middle">
-          {user?.name && <Text strong>{user.name}</Text>}
-          {user?.avatar && <Avatar src={user?.avatar} alt={user?.name} />}
+          <ProfileDropdownButton />
         </Space>
       </Space>
     </AntdLayout.Header>

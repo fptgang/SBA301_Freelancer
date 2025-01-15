@@ -1,5 +1,6 @@
 package com.fptgang.backend.dtos.request;
 
+import com.fptgang.backend.model.Role;
 import lombok.*;
 
 @Data
@@ -18,5 +19,4 @@ public class RegisterRequestDTO {
     private String firstName;
 
     private String lastName;
-
 }

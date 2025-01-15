@@ -106,16 +106,6 @@ class MilestoneServiceTest {
         // Set other necessary fields
     }
 
-//    Proposal createTestProposal(int id) {
-//        Project project = createTestProject(id);
-//        Account freelancer = createTestAccount(id+2)    ;
-//        Proposal proposal = new Proposal();
-//        proposal.setProject(project);
-//        proposal.setFreelancer(freelancer);
-//        proposal.setStatus(Proposal.ProposalStatus.PENDING);
-//        proposal.setVisible(true);
-//        return proposalService.create(proposal);
-//    }
 
     @Test
     @Order(1)

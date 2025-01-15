@@ -1,9 +1,11 @@
 import type { AuthProvider } from "@refinedev/core";
 import {
+  forgotPassword,
   getCurrentUser,
   login,
   loginWithGoogle,
   register,
+  resetPassword,
 } from "./data/service/auth-service";
 import { Auth } from "./data/types/auth";
 import { Role } from "./data/types/Account";
@@ -124,7 +126,7 @@ export const authProvider: AuthProvider = {
     console.error(error);
     return { error };
   },
-  register: async (data: any) => {
+  register: async (data) => {
     const response = await register(data);
     if (response) {
       return {
@@ -137,4 +139,44 @@ export const authProvider: AuthProvider = {
       redirectTo: "/login",
     };
   },
+  updatePassword: async (params: ResetPasswordRequestDTO) => {
+    if (params.token) {
+      console.log("reset password");
+      resetPassword({
+        token: params.token,
+        newPassword: params.newPassword,
+        confirmPassword: params.confirmPassword,
+      });
+    } else {
+      console.log("update password");
+    }
+
+    console.log(params);
+    return {
+      success: true,
+      redirectTo: "/login",
+    };
+  },
+  forgotPassword: async (params) => {
+    console.log(params);
+    const response = await forgotPassword(params.email);
+
+    if (response.status === 200) {
+      return {
+        success: true,
+        redirectTo: "/login",
+      };
+    }
+    return {
+      success: false,
+      redirectTo: "/forgot-password",
+    };
+  },
 };
+
+export interface ResetPasswordRequestDTO {
+  token: string | undefined;
+  oldPassword: string | undefined;
+  newPassword: string;
+  confirmPassword: string;
+}
