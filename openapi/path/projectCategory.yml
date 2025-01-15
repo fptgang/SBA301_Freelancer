@@ -1,0 +1,79 @@
+  get:
+    summary: Get a list of project categories
+    operationId: getProjectCategories
+    security:
+      - bearerAuth: []
+    parameters:
+      - $ref: '../param/pageable.yml#/Pageable'
+      - $ref: '../param/filter.yml#/Filter'
+    responses:
+      '200':
+        description: The operation was success
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '../component/page.yml#/Page'
+                - type: object
+                  properties:
+                    content:
+                      type: array
+                      items:
+                        $ref: '../model/project-category.yml#/ProjectCategoryDto'
+      '400':
+        description: The operation was failed
+        content:
+          application/json:
+            schema:
+              $ref: '../component/error.yml#/ErrorResponse'
+      '401':
+        description: Unauthorized access
+        content:
+          application/json:
+            schema:
+              $ref: '../component/error.yml#/ErrorResponse'
+      '403':
+        description: Forbidden access
+        content:
+          application/json:
+            schema:
+              $ref: '../component/error.yml#/ErrorResponse'
+
+  post:
+    summary: Create a project category
+    operationId: createProjectCategory
+    security:
+      - bearerAuth: []
+    requestBody:
+      description: Project category to create
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../model/project-category.yml#/ProjectCategoryDto'
+    responses:
+      '200':
+        description: The operation was success
+        content:
+          application/json:
+            schema:
+              $ref: '../model/project-category.yml#/ProjectCategoryDto'
+      '400':
+        description: The operation was failed
+        content:
+          application/json:
+            schema:
+              $ref: '../component/error.yml#/ErrorResponse'
+      '401':
+        description: Unauthorized access
+        content:
+          application/json:
+            schema:
+              $ref: '../component/error.yml#/ErrorResponse'
+      '403':
+        description: Forbidden access
+        content:
+          application/json:
+            schema:
+              $ref: '../component/error.yml#/ErrorResponse'
+

@@ -39,6 +39,12 @@ import NavBar from "./pages/landing/nav-bar";
 import Profile from "./pages/profile/profile";
 import Footer from "./components/common/footer/footer";
 import {
+  ProjectCategoriesCreate,
+  ProjectCategoriesEdit,
+  ProjectCategoriesList,
+  ProjectCategoriesShow,
+} from "./pages/projectcategories";
+import {
   UsersCreate,
   AccountsEdit,
   AccountsList,
@@ -90,6 +96,17 @@ function App() {
                     show: "/admin/accounts/show/:id",
                     meta: {
                       label: "Accounts",
+                      canDelete: true,
+                    },
+                  },
+                  {
+                    name: "projectCategories",
+                    list: "/admin/projectCategories",
+                    create: "/admin/projectCategories/create",
+                    edit: "/admin/projectCategories/edit/:id",
+                    show: "/admin/projectCategories/show/:id",
+                    meta: {
+                      label: "Project Categories",
                       canDelete: true,
                     },
                   },
@@ -151,6 +168,21 @@ function App() {
                       <Route path="create" element={<UsersCreate />} />
                       <Route path="edit/:id" element={<AccountsEdit />} />
                       <Route path="show/:id" element={<AccountsShow />} />
+                    </Route>
+                    <Route path="projectCategories">
+                      <Route index element={<ProjectCategoriesList />} />
+                      <Route
+                        path="create"
+                        element={<ProjectCategoriesCreate />}
+                      />
+                      <Route
+                        path="edit/:id"
+                        element={<ProjectCategoriesEdit />}
+                      />
+                      <Route
+                        path="show/:id"
+                        element={<ProjectCategoriesShow />}
+                      />
                     </Route>
                     <Route path="*" element={<ErrorComponent />} />
                   </Route>
