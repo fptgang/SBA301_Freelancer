@@ -41,4 +41,8 @@ paths:
     $ref: 'path/project.yml'
   /projects/{projectId}:
     $ref: 'path/project-projectId.yml'
+  /projectCategories:
+    $ref: 'path/projectCategory.yml'
+  /projectCategories/{projectCategoryId}:
+    $ref: 'path/projectCategory-projectCategoryId.yml'
 

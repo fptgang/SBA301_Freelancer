@@ -16,8 +16,12 @@ export const dataProvider = (
       sortQuery = generateSortQuery(sorters);
     }
 
-    const url = `${apiUrl}/${resource}?page=${
-      (pagination?.current ?? 0) - 1
+    let currentPage = pagination?.current ?? 0;
+    if (currentPage > 0) {
+      currentPage--;
+    }
+    const url = `${apiUrl}/${resource}?page=${currentPage}&pageSize=${
+      pagination?.pageSize ?? 20
     }&size=${pagination?.pageSize ?? 20}&${sortQuery}`;
     console.log("getList", {
       resource,
