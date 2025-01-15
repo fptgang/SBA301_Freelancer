@@ -22,18 +22,7 @@ import { authProvider, REFRESH_TOKEN_KEY, TOKEN_KEY } from "./authProvider";
 import { AppIcon } from "./components/app-icon";
 import { Header } from "./components/header";
 import { ColorModeContextProvider } from "./contexts/color-mode";
-import {
-  BlogPostCreate,
-  BlogPostEdit,
-  BlogPostList,
-  BlogPostShow,
-} from "./pages/blog-posts";
-import {
-  CategoryCreate,
-  CategoryEdit,
-  CategoryList,
-  CategoryShow,
-} from "./pages/categories";
+
 import { ForgotPassword } from "./pages/forgotPassword";
 import { Login } from "./pages/login";
 import { Register } from "./pages/register";
@@ -49,7 +38,12 @@ import ClientLayout from "./components/layout";
 import NavBar from "./pages/landing/nav-bar";
 import Profile from "./pages/profile/profile";
 import Footer from "./components/common/footer/footer";
-import { UsersCreate, UsersEdit, UsersList, UsersShow } from "./pages/users";
+import {
+  UsersCreate,
+  AccountsEdit,
+  AccountsList,
+  AccountsShow,
+} from "./pages/users";
 
 const axiosInstance = axios.create();
 axiosInstance.interceptors.request.use((config) => {
@@ -84,7 +78,7 @@ function App() {
               <Refine
                 dataProvider={dataProvider(API_URL, axiosInstance)}
                 notificationProvider={useNotificationProvider}
-                // accessControlProvider={accessControlProvider}
+                accessControlProvider={accessControlProvider}
                 authProvider={authProvider}
                 routerProvider={routerBindings}
                 resources={[
@@ -104,7 +98,6 @@ function App() {
                   syncWithLocation: true,
                   warnWhenUnsavedChanges: true,
                   useNewQueryKeys: true,
-                  // projectId: "5TAkwJ-tibThy-DCs2El",
                   title: { text: "Hireable", icon: <AppIcon /> },
                 }}
               >
@@ -125,22 +118,28 @@ function App() {
                     />
                     <Route path="/profile" element={<Profile />} />
                     <Route path="/about" element={<About />} />
+                    <Route path="*" element={<ErrorComponent />} />
                   </Route>
-
                   <Route
                     path="/admin"
                     element={
-                      <Authenticated
-                        key="authenticated-inner"
-                        fallback={<Navigate to={"/"} replace />}
-                      >
-                        <ThemedLayoutV2
-                          Header={Header}
-                          Sider={(props) => <ThemedSiderV2 {...props} fixed />}
+                      localStorage.getItem("role") === "ADMIN" ? (
+                        <Authenticated
+                          key="authenticated-inner"
+                          fallback={<Navigate to={"/"} replace />}
                         >
-                          <Outlet />
-                        </ThemedLayoutV2>
-                      </Authenticated>
+                          <ThemedLayoutV2
+                            Header={Header}
+                            Sider={(props) => (
+                              <ThemedSiderV2 {...props} fixed />
+                            )}
+                          >
+                            <Outlet />
+                          </ThemedLayoutV2>
+                        </Authenticated>
+                      ) : (
+                        <Navigate to="/" />
+                      )
                     }
                   >
                     <Route
@@ -148,10 +147,10 @@ function App() {
                       element={<NavigateToResource resource="accounts" />}
                     />
                     <Route path="accounts">
-                      <Route index element={<UsersList />} />
+                      <Route index element={<AccountsList />} />
                       <Route path="create" element={<UsersCreate />} />
-                      <Route path="edit/:id" element={<UsersEdit />} />
-                      <Route path="show/:id" element={<UsersShow />} />
+                      <Route path="edit/:id" element={<AccountsEdit />} />
+                      <Route path="show/:id" element={<AccountsShow />} />
                     </Route>
                     <Route path="*" element={<ErrorComponent />} />
                   </Route>

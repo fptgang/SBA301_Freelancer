@@ -1,5 +1,6 @@
 import { DataProvider } from "@refinedev/core";
 import { Axios } from "axios";
+import generateSortQuery from "../utils/query-utils";
 
 /**
  * Check out the Data Provider documentation for detailed information
@@ -10,9 +11,14 @@ export const dataProvider = (
   _httpClient: Axios // TODO: replace `any` with your http client type
 ): DataProvider => ({
   getList: async ({ resource, pagination, filters, sorters, meta }) => {
+    let sortQuery = "";
+    if (sorters) {
+      sortQuery = generateSortQuery(sorters);
+    }
+
     const url = `${apiUrl}/${resource}?page=${
       (pagination?.current ?? 0) - 1
-    }&pageSize=${pagination?.pageSize ?? 20}`;
+    }&size=${pagination?.pageSize ?? 20}&${sortQuery}`;
     console.log("getList", {
       resource,
       pagination,
@@ -25,15 +31,13 @@ export const dataProvider = (
     console.log("sorters", sorters);
     console.log("filters", filters);
     console.log("pagination", pagination);
-
     const result = await _httpClient.get(url);
-
     // TODO: send request to the API
     // const response = await httpClient.get(url, {});
 
     return {
       data: result.data.content,
-      total: result.data.totalPages,
+      total: result.data.totalElements,
     };
   },
 

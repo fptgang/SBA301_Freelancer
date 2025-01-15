@@ -18,20 +18,19 @@ m = g(r.sub, p.sub) && keyMatch(r.obj, p.obj) && regexMatch(r.act, p.act)
 `);
 
 export const adapter = new StringAdapter(`
-p, admin, posts, (list)|(create)
-p, admin, posts/*, (edit)|(show)|(delete)
-p, admin, posts/*, field
+p, ADMIN, accounts, (list)|(create)
+p, ADMIN, accounts/*, (edit)|(show)|(delete)
+p, ADMIN, accounts/*, field
 
-p, admin, users, (list)|(create)
-p, admin, users/*, (edit)|(show)|(delete)
+p, ADMIN, projectCategories, (list)|(create)
+p, ADMIN, projectCategories/*, (edit)|(show)|(delete)
 
-p, admin, categories, (list)|(create)
-p, admin, categories/*, (edit)|(show)|(delete)
+p, ADMIN, categories, (list)|(create)
+p, ADMIN, categories/*, (edit)|(show)|(delete)
 
 p, editor, posts, (list)|(create)
 p, editor, posts/*, (edit)|(show)
 p, editor, posts/hit, field, deny
-
 p, editor, categories, list
 
 `);
