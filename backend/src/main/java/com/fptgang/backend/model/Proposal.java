@@ -35,6 +35,9 @@ public class Proposal {
     @JoinColumn(name = "freelancer_id", nullable = false)
     private Account freelancer;
 
+    @Column(columnDefinition = "TEXT", length = 10000000)
+    private String notes;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private ProposalStatus status;
@@ -47,9 +50,6 @@ public class Proposal {
 
     @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT TRUE")
     private boolean isVisible;
-
-    @OneToMany(mappedBy = "proposal", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Milestone> milestones = new ArrayList<>();
 
     @OneToMany(mappedBy = "proposal", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<File> files = new ArrayList<>();

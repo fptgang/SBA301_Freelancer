@@ -31,7 +31,7 @@ public class Account {
     @Column(nullable = false, columnDefinition = "NVARCHAR(255)")
     private String firstName;
 
-    @Column(nullable = false, columnDefinition = "NVARCHAR(255)")
+    @Column( columnDefinition = "NVARCHAR(255)")
     private String lastName;
 
     //nullable because it is needed for google sign in
