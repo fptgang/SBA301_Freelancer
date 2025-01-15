@@ -53,14 +53,14 @@ public class ProjectCategoryServiceImpl implements ProjectCategoryService {
     }
 
     @Override
-    public Page<ProjectCategory> getAll(Pageable pageable, String filter, Role role) {
+    public Page<ProjectCategory> getAllVisible(Pageable pageable, String filter) {
         var spec = OpenApiHelper.<ProjectCategory>toSpecification(filter);
-        if (role.equals(Role.ADMIN)) {
-            log.info("Admin");
-            return projectCategoryRepos.findAll(spec, pageable);
-        } else {
-            log.info("not Admin");
-            return projectCategoryRepos.findAllByVisibleTrue(pageable, spec);
-        }
+        return projectCategoryRepos.findAllByVisibleTrue(pageable, spec);
+    }
+
+    @Override
+    public Page<ProjectCategory> getAll(Pageable pageable, String filter) {
+        var spec = OpenApiHelper.<ProjectCategory>toSpecification(filter);
+        return projectCategoryRepos.findAll(spec, pageable);
     }
 }

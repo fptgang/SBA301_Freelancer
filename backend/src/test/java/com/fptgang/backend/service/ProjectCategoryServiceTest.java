@@ -143,4 +143,57 @@ public class ProjectCategoryServiceTest {
         assertNotNull(page);
         assertEquals(3, page.getTotalElements());
     }
+    @Order(8)
+    @Test
+    void getAllVisibleProjectCategories() {
+        // Arrange
+        for (int i = 1; i <= 3; i++) {
+            ProjectCategory category = ProjectCategory.builder()
+                    .name("Category " + i)
+                    .isVisible(true)
+                    .build();
+            projectCategoryService.create(category);
+        }
+        ProjectCategory hiddenCategory = ProjectCategory.builder()
+                .name("Hidden Category")
+                .isVisible(false)
+                .build();
+        projectCategoryService.create(hiddenCategory);
+
+        Pageable pageable = PageRequest.of(0, 10);
+
+        // Act
+        Page<ProjectCategory> page = projectCategoryService.getAllVisible(pageable, null);
+
+        // Assert
+        assertNotNull(page);
+        assertEquals(3, page.getTotalElements());
+    }
+
+    @Order(9)
+    @Test
+    void getAllVisibleProjectCategoriesWithFilter() {
+        // Arrange
+        for (int i = 1; i <= 3; i++) {
+            ProjectCategory category = ProjectCategory.builder()
+                    .name("Category " + i)
+                    .isVisible(true)
+                    .build();
+            projectCategoryService.create(category);
+        }
+        ProjectCategory hiddenCategory = ProjectCategory.builder()
+                .name("Hidden Category")
+                .isVisible(false)
+                .build();
+        projectCategoryService.create(hiddenCategory);
+
+        Pageable pageable = PageRequest.of(0, 10);
+
+        // Act
+        Page<ProjectCategory> page = projectCategoryService.getAllVisible(pageable, "name,contains,Category");
+
+        // Assert
+        assertNotNull(page);
+        assertEquals(3, page.getTotalElements());
+    }
 }

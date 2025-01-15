@@ -10,5 +10,6 @@ public interface ProjectCategoryService {
     ProjectCategory update(ProjectCategory projectCategory);
     ProjectCategory findByProjectCategoryId(long projectCategoryId);
     void deleteById(long projectCategoryId);
-    Page<ProjectCategory> getAll(Pageable pageable, String filter, Role role);
+    Page<ProjectCategory> getAllVisible(Pageable pageable, String filter);
+    Page<ProjectCategory> getAll(Pageable pageable, String filter);
 }

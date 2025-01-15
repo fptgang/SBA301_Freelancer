@@ -8,17 +8,15 @@ import com.fptgang.backend.mapper.ProjectCategoryMapper;
 import com.fptgang.backend.model.Account;
 import com.fptgang.backend.service.AccountService;
 import com.fptgang.backend.service.ProjectCategoryService;
-import com.fptgang.backend.service.impl.AccountServiceImpl;
 import com.fptgang.backend.util.OpenApiHelper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.net.Authenticator;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -52,8 +50,13 @@ public class ProjectCategoryController implements ProjectCategoriesApi {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         Account account = accountService.findByEmail(authentication.getName());
         var page = OpenApiHelper.toPageable(pageable);
-        var res = projectCategoryService.getAll(page, filter,account.getRole()).map(projectCategoryMapper::toDTO);
-        return OpenApiHelper.respondPage(res, GetProjectCategories200Response.class);    }
+        Page<ProjectCategoryDto> res;
+        if (account.getRole().equals("ADMIN")) {
+            res = projectCategoryService.getAll(page, filter).map(projectCategoryMapper::toDTO);
+        } else
+            res = projectCategoryService.getAllVisible(page, filter).map(projectCategoryMapper::toDTO);
+        return OpenApiHelper.respondPage(res, GetProjectCategories200Response.class);
+    }
 
     @Override
     public ResponseEntity<ProjectCategoryDto> getProjectCategoryById(Long projectCategoryId) {
