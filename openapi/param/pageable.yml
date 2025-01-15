@@ -18,5 +18,5 @@ Pageable:
         items:
           type: string
           description: Sort fields in the format `field,asc|desc`
-          example: name,asc
+          example: createdAt,desc
         description: Sorting criteria

@@ -8,9 +8,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class OpenApiHelper {
 
@@ -22,19 +22,32 @@ public class OpenApiHelper {
         Integer page = Reflect.on(pageableObj).field("page").get();
         Integer size = Reflect.on(pageableObj).field("size").get();
         List<String> sortFields = Reflect.on(pageableObj).field("sort").get();
-
-        Sort sort = sortFields.stream()
-                .map(sortField -> {
-                    String[] parts = sortField.split(",", 2);
-                    if (parts.length == 2) {
-                        return new Sort.Order(Sort.Direction.fromString(parts[1]), parts[0]);
-                    }
-                    return new Sort.Order(Sort.Direction.ASC, parts[0]);
-                })
-                .collect(Collectors.collectingAndThen(Collectors.toList(), Sort::by));
+        Sort sort = convertToSpringSort(sortFields);
 
         return PageRequest.of(page, size, sort);
     }
+
+    private static Sort convertToSpringSort(List<String> sort) {
+        String joinedSort = String.join(",", sort);
+        List<Sort.Order> orders = new ArrayList<>();
+        String[] fieldsAndOrders = joinedSort.split(",");
+
+        for (int i = 0; i < fieldsAndOrders.length-1; i += 2) {
+            String field = fieldsAndOrders[i];
+            String order = fieldsAndOrders[i + 1];
+            if (field.isEmpty() || order.isEmpty())
+                continue;
+
+            if ("asc".equalsIgnoreCase(order)) {
+                orders.add(Sort.Order.asc(field));
+            } else if ("desc".equalsIgnoreCase(order)) {
+                orders.add(Sort.Order.desc(field));
+            }
+        }
+
+        return Sort.by(orders);
+    }
+
 
     public static <T> T toPage(Page<?> page, Class<T> clazz) {
         T response = Reflect.on(clazz).create().get();
@@ -72,6 +85,10 @@ public class OpenApiHelper {
 
         return (root, query, criteriaBuilder) -> {
             Path<String> fieldPath = root.get(field);
+
+            if (fieldPath == null) {
+                return criteriaBuilder.or();
+            }
 
             return switch (operator) {
                 case "eq" -> criteriaBuilder.equal(fieldPath, value);
