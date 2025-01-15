@@ -39,6 +39,9 @@ public class ProjectMapper extends BaseMapper<ProjectDto, Project> {
         dto.setClientId(project.getClient().getAccountId());
         dto.setTitle(project.getTitle());
         dto.setDescription(project.getDescription());
+        dto.setMinEstimatedBudget(project.getMinEstimatedBudget());
+        dto.setMaxEstimatedBudget(project.getMaxEstimatedBudget());
+        dto.setEstimatedDeadline(DateTimeUtil.fromLocalToOffset(project.getEstimatedDeadline()));
         dto.setStatus(ProjectDto.StatusEnum.fromValue(project.getStatus().name()));
         dto.setActiveProposalId(project.getActiveProposal() != null ? project.getActiveProposal().getProposalId() : null);
         dto.setIsVisible(project.isVisible());
@@ -61,6 +64,9 @@ public class ProjectMapper extends BaseMapper<ProjectDto, Project> {
             existEntity.setTitle(dto.getTitle() != null ? dto.getTitle() : existEntity.getTitle());
             existEntity.setDescription(dto.getDescription() != null ? dto.getDescription() : existEntity.getDescription());
             existEntity.setStatus(dto.getStatus() != null ? Project.ProjectStatus.valueOf(dto.getStatus().getValue()) : existEntity.getStatus());
+            existEntity.setEstimatedDeadline(dto.getEstimatedDeadline() != null ? DateTimeUtil.fromOffsetToLocal(dto.getEstimatedDeadline()) : existEntity.getEstimatedDeadline());
+            existEntity.setMaxEstimatedBudget(dto.getMaxEstimatedBudget() != null ? dto.getMaxEstimatedBudget() : existEntity.getMaxEstimatedBudget());
+            existEntity.setMinEstimatedBudget(dto.getMinEstimatedBudget() != null ? dto.getMinEstimatedBudget() : existEntity.getMinEstimatedBudget());
             existEntity.setVisible(dto.getIsVisible() != null ? dto.getIsVisible() : existEntity.isVisible());
             existEntity.setCategory(dto.getProjectCategoryId() != null ?
                     projectCategoryRepos.findByProjectCategoryId(dto.getProjectCategoryId())
@@ -89,6 +95,12 @@ public class ProjectMapper extends BaseMapper<ProjectDto, Project> {
 
             project.setTitle(dto.getTitle());
             project.setDescription(dto.getDescription());
+            project.setMinEstimatedBudget(dto.getMinEstimatedBudget());
+            project.setMaxEstimatedBudget(dto.getMaxEstimatedBudget());
+
+            if (dto.getEstimatedDeadline() != null) {
+                project.setEstimatedDeadline(DateTimeUtil.fromOffsetToLocal(dto.getEstimatedDeadline()));
+            }
 
             if (dto.getStatus() != null) {
                 project.setStatus(Project.ProjectStatus.valueOf(dto.getStatus().getValue()));

@@ -1,0 +1,9 @@
+SkillDto:
+  type: object
+  properties:
+    skillId:
+      type: integer
+      format: int64
+    name:
+      type: string
+
