@@ -5,23 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="d21bfcd3-12cd-4298-bc9e-f7b2eb78a303" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/com/fptgang/backend/model/Proficiency.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/com/fptgang/backend/model/Profile.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/com/fptgang/backend/model/ProfileSkill.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/com/fptgang/backend/model/ProjectSkill.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/com/fptgang/backend/model/Skill.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/test/java/com/fptgang/backend/service/MilestoneServiceTest.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/test/java/com/fptgang/backend/service/ProposalServiceTest.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/model/skill.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/com/fptgang/backend/mapper/MilestoneMapper.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/com/fptgang/backend/mapper/MilestoneMapper.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/com/fptgang/backend/mapper/ProjectMapper.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/com/fptgang/backend/mapper/ProjectMapper.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/com/fptgang/backend/model/Account.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/com/fptgang/backend/model/Account.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/com/fptgang/backend/model/Milestone.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/com/fptgang/backend/model/Milestone.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/com/fptgang/backend/model/Project.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/com/fptgang/backend/model/Project.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/com/fptgang/backend/model/Proposal.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/com/fptgang/backend/model/Proposal.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/model/milestone.yml" beforeDir="false" afterPath="$PROJECT_DIR$/model/milestone.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/model/project.yml" beforeDir="false" afterPath="$PROJECT_DIR$/model/project.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/src/test/java/com/fptgang/backend/service/AccountServiceTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/test/java/com/fptgang/backend/service/AccountServiceTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/src/test/java/com/fptgang/backend/service/MilestoneServiceTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/test/java/com/fptgang/backend/service/MilestoneServiceTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -51,21 +37,21 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "com.codeium.enabled": "true",
-    "git-widget-placeholder": "develop",
-    "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "D:/GitHub/SBA301_Freelancer/openapi",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;com.codeium.enabled&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;Backend/Phuc__SBA-4&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;D:/GitHub/SBA301_Freelancer/openapi&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
       <recent name="C:\Users\phucx\OneDrive\Documents\GitHub\SBA301_Freelancer\openapi\path" />
@@ -114,6 +100,7 @@
       <workItem from="1736924697098" duration="1572000" />
       <workItem from="1736932824375" duration="807000" />
       <workItem from="1736935532852" duration="66000" />
+      <workItem from="1736977935170" duration="595000" />
     </task>
     <servers />
   </component>

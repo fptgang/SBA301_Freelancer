@@ -54,27 +54,27 @@ class MilestoneServiceTest {
     }
     @AfterEach
     void tearDown() {
-        milestoneRepos.deleteAll();
-        accountRepos.deleteAll();
         projectCategoryRepos.deleteAll();
         projectRepos.deleteAll();
+        milestoneRepos.deleteAll();
+        accountRepos.deleteAll();
         proposalRepos.deleteAll();
     }
 
     Milestone createTestMilestone(int id) {
         Milestone milestone = new Milestone();
-        Proposal proposal = createTestProposal(id);
+        Project project = createTestProject(id);
         milestone.setTitle("Milestone "+id);
         milestone.setBudget(BigDecimal.valueOf(1000));
         milestone.setDeadline(LocalDateTime.now().plusDays(30));
         milestone.setStatus(Milestone.MilestoneStatus.PENDING);
         milestone.setVisible(true);
-        milestone.setProposal(proposal);
+        milestone.setProject(project);
         return milestoneService.create(milestone);
     }
     Account createTestAccount(int id) {
         Account account = new Account();
-        account.setEmail("test"+id+"@example.com");
+        account.setEmail("MilestoneTest"+id+"@example.com");
         account.setPassword("password");
         account.setVisible(true);
         account.setBalance(BigDecimal.valueOf(0));
@@ -99,26 +99,23 @@ class MilestoneServiceTest {
         testProject.setDescription("Test Description");
         testProject.setCategory(testCategory);
         testProject.setClient(employer);
-        testProject.setEstimatedDeadline(LocalDateTime.now().plusDays(30));
         testProject.setStatus(Project.ProjectStatus.OPEN);
-        testProject.setMinEstimatedBudget(BigDecimal.valueOf(1000));
-        testProject.setMaxEstimatedBudget(BigDecimal.valueOf(2000));
         testProject.setVisible(true);
 
         return projectService.create(testProject);
         // Set other necessary fields
     }
 
-    Proposal createTestProposal(int id) {
-        Project project = createTestProject(id);
-        Account freelancer = createTestAccount(id+2)    ;
-        Proposal proposal = new Proposal();
-        proposal.setProject(project);
-        proposal.setFreelancer(freelancer);
-        proposal.setStatus(Proposal.ProposalStatus.PENDING);
-        proposal.setVisible(true);
-        return proposalService.create(proposal);
-    }
+//    Proposal createTestProposal(int id) {
+//        Project project = createTestProject(id);
+//        Account freelancer = createTestAccount(id+2)    ;
+//        Proposal proposal = new Proposal();
+//        proposal.setProject(project);
+//        proposal.setFreelancer(freelancer);
+//        proposal.setStatus(Proposal.ProposalStatus.PENDING);
+//        proposal.setVisible(true);
+//        return proposalService.create(proposal);
+//    }
 
     @Test
     @Order(1)
@@ -207,7 +204,7 @@ class MilestoneServiceTest {
         Milestone milestone2 = createTestMilestone(2);
 
         Pageable pageable = PageRequest.of(0, 10);
-        Page<Milestone> milestonesPage = milestoneService.getAll(pageable, "");
+        Page<Milestone> milestonesPage = milestoneService.getAll(pageable, null);
 
         assertTrue(milestonesPage.getTotalElements() >= 2);
     }
