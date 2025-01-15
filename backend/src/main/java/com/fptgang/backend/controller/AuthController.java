@@ -1,8 +1,10 @@
 package com.fptgang.backend.controller;
 
 import com.fptgang.backend.api.model.AccountDto;
+import com.fptgang.backend.dtos.request.ForgotPasswordRequestDTO;
 import com.fptgang.backend.dtos.request.LoginRequestDTO;
 import com.fptgang.backend.dtos.request.RegisterRequestDTO;
+import com.fptgang.backend.dtos.request.ResetPasswordRequestDTO;
 import com.fptgang.backend.dtos.response.AccountResponseDTO;
 import com.fptgang.backend.dtos.response.AuthResponseDTO;
 import com.fptgang.backend.dtos.response.JwtResponseDTO;
@@ -108,4 +110,15 @@ public class AuthController {
         return ResponseEntity.ok(authService.loginWithGoogle(token));
     }
 
+    @PostMapping("/forgot-password")
+    public ResponseEntity<Void> forgotPassword(@RequestBody ForgotPasswordRequestDTO forgotPasswordRequestDTO) {
+        authService.forgotPassword(forgotPasswordRequestDTO);
+        return ResponseEntity.ok().build();
+    }
+    @PostMapping("/reset-password")
+    public ResponseEntity<Void> resetPassword(@RequestBody ResetPasswordRequestDTO request) {
+        authService.resetPassword(request);
+        return ResponseEntity.ok().build();
+    }
 }
+

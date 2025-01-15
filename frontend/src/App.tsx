@@ -2,12 +2,7 @@ import { Authenticated, Refine } from "@refinedev/core";
 import { DevtoolsPanel, DevtoolsProvider } from "@refinedev/devtools";
 import { RefineKbar, RefineKbarProvider } from "@refinedev/kbar";
 
-import {
-  ErrorComponent,
-  ThemedLayoutV2,
-  ThemedSiderV2,
-  useNotificationProvider,
-} from "@refinedev/antd";
+import { ErrorComponent, ThemedLayoutV2, ThemedSiderV2 } from "@refinedev/antd";
 import "@refinedev/antd/dist/reset.css";
 
 import routerBindings, {
@@ -50,6 +45,8 @@ import {
   AccountsList,
   AccountsShow,
 } from "./pages/users";
+import ResetPassword from "./pages/reset-password";
+import { notificationProvider } from "./providers/notification-provider";
 
 const axiosInstance = axios.create();
 axiosInstance.interceptors.request.use((config) => {
@@ -83,7 +80,7 @@ function App() {
             <DevtoolsProvider>
               <Refine
                 dataProvider={dataProvider(API_URL, axiosInstance)}
-                notificationProvider={useNotificationProvider}
+                notificationProvider={notificationProvider}
                 accessControlProvider={accessControlProvider}
                 authProvider={authProvider}
                 routerProvider={routerBindings}
@@ -133,6 +130,7 @@ function App() {
                       path="/settings"
                       element={<Navigate to="/admin" />}
                     />
+                    <Route path="/reset-password" element={<ResetPassword />} />
                     <Route path="/profile" element={<Profile />} />
                     <Route path="/about" element={<About />} />
                     <Route path="*" element={<ErrorComponent />} />
