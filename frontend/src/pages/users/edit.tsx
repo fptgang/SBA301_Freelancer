@@ -20,10 +20,10 @@ import {
 } from "@ant-design/icons";
 import dayjs from "dayjs";
 import { ROLE_OPTIONS } from "../../utils/constants";
-import { Account } from "../../../generated/models/Account";
+import { AccountDto } from "../../../generated";
 
 export const AccountsEdit: React.FC = () => {
-  const { formProps, saveButtonProps, queryResult } = useForm<Account>({
+  const { formProps, saveButtonProps, queryResult } = useForm<AccountDto>({
     redirect: false,
   });
 

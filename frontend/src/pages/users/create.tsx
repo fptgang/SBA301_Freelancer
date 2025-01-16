@@ -21,10 +21,10 @@ import {
   QuestionCircleOutlined,
 } from "@ant-design/icons";
 import { ROLE_OPTIONS } from "../../utils/constants";
-import { Account } from "../../../generated/models/Account";
+import { AccountDto } from "../../../generated";
 
 export const UsersCreate: React.FC = () => {
-  const { formProps, saveButtonProps } = useForm<Account>();
+  const { formProps, saveButtonProps } = useForm<AccountDto>();
 
   const emailValidationRules = [
     { required: true, message: "Email is required" },

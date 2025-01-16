@@ -27,14 +27,13 @@ import {
   CheckCircleOutlined,
   EyeOutlined,
 } from "@ant-design/icons";
-import { Role } from "../../data/types/Account";
 import { ROLE_COLOR_MAP } from "../../utils/constants";
-import { Account } from "../../../generated/models/Account";
+import { AccountDto } from "../../../generated";
 
 const { Title } = Typography;
 
 export const AccountsShow: React.FC = () => {
-  const { queryResult } = useShow<Account>();
+  const { queryResult } = useShow<AccountDto>();
   const { data, isLoading } = queryResult;
   const record = data?.data;
 
@@ -164,7 +163,7 @@ export const AccountsShow: React.FC = () => {
               }
             >
               <BooleanField
-                value={record?.active}
+                value={record?.isVisible}
                 trueIcon={<CheckCircleOutlined className="text-green-500" />}
                 falseIcon={<ClockCircleOutlined className="text-gray-500" />}
                 valueLabelTrue="Visible"
