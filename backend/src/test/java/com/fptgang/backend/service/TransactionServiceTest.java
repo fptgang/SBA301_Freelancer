@@ -1,5 +1,6 @@
 package com.fptgang.backend.service;
 
+import com.fptgang.backend.TestcontainersConfiguration;
 import com.fptgang.backend.model.Account;
 import com.fptgang.backend.model.Role;
 import com.fptgang.backend.model.Transaction;
@@ -12,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -28,11 +30,8 @@ import static org.junit.jupiter.api.Assertions.*;
 @TestConfiguration(proxyBeanMethods = false)
 @Testcontainers
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@Import(TestcontainersConfiguration.class)
 public class TransactionServiceTest {
-
-    @Container
-    @ServiceConnection
-    static MySQLContainer<?> mysql = new MySQLContainer<>(DockerImageName.parse("mysql:latest"));
 
     @Autowired
     private TransactionService transactionService;

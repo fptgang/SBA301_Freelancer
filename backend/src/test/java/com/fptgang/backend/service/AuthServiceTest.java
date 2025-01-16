@@ -1,5 +1,6 @@
 package com.fptgang.backend.service;
 
+import com.fptgang.backend.TestcontainersConfiguration;
 import com.fptgang.backend.dtos.request.RegisterRequestDTO;
 import com.fptgang.backend.dtos.response.AccountResponseDTO;
 import com.fptgang.backend.dtos.response.AuthResponseDTO;
@@ -12,6 +13,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.test.context.DynamicPropertyRegistry;
@@ -28,11 +30,8 @@ import static org.junit.jupiter.api.Assertions.*;
 @Testcontainers
 //add orderings
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@Import(TestcontainersConfiguration.class)
 class AuthServiceTest {
-
-    @Container
-    @ServiceConnection
-    static MySQLContainer<?> mysql = new MySQLContainer<>("mysql:latest");
 
     @Autowired
     private AuthService authService;
