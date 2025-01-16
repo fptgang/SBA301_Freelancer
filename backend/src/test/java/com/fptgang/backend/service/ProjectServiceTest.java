@@ -1,5 +1,6 @@
 package com.fptgang.backend.service;
 
+import com.fptgang.backend.TestcontainersConfiguration;
 import com.fptgang.backend.model.Project;
 import com.fptgang.backend.model.ProjectCategory;
 import com.fptgang.backend.repository.ProjectRepos;
@@ -10,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -23,11 +25,8 @@ import static org.junit.jupiter.api.Assertions.*;
 @TestConfiguration(proxyBeanMethods = false)
 @Testcontainers
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@Import(TestcontainersConfiguration.class)
 class ProjectServiceTest {
-
-    @Container
-    @ServiceConnection
-    static MySQLContainer<?> mysql = new MySQLContainer<>("mysql:latest");
 
     @Autowired
     private ProjectService projectService;
