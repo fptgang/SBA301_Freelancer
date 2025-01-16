@@ -28,6 +28,9 @@ public class ProjectMapper extends BaseMapper<ProjectDto, Project> {
     @Autowired
     private AccountRepos accountRepos;
 
+    @Autowired
+    private ProjectSkillMapper projectSkillMapper;
+
     public ProjectDto toDTO(Project project) {
         if (project == null) {
             return null;

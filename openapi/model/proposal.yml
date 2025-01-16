@@ -10,6 +10,8 @@ ProposalDto:
     freelancerId:
       type: integer
       format: int64
+    notes:
+      type: string
     status:
       type: string
       enum: [PENDING, ACCEPTED, REJECTED]

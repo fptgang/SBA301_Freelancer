@@ -95,3 +95,11 @@ dependencies {
 tasks.named('test') {
 	useJUnitPlatform()
 }
+
+tasks.named('openApiGenerate') {
+	dependsOn clean
+}
+
+tasks.named { it == "generateEffectiveLombokConfig" }.configureEach {
+	dependsOn tasks.named { it == "openApiGenerate" }
+}

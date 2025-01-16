@@ -19,14 +19,14 @@ components:
       $ref: 'model/message.yml#/MessageDto'
     MilestoneDto:
       $ref: 'model/milestone.yml#/MilestoneDto'
-    ProjectDto:
-      $ref: 'model/project.yml#/ProjectDto'
-    ProjectCategoryDto:
-      $ref: 'model/project-category.yml#/ProjectCategoryDto'
+    ProfileDto:
+      $ref: 'model/profile.yml#/ProfileDto'
     ProposalDto:
       $ref: 'model/proposal.yml#/ProposalDto'
     RefreshTokenDto:
       $ref: 'model/refresh-token.yml#/RefreshTokenDto'
+    SkillDto:
+      $ref: 'model/skill.yml#/SkillDto'
     TransactionDto:
       $ref: 'model/transaction.yml#/TransactionDto'
 

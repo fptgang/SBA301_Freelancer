@@ -5,6 +5,10 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "profile_skills")
@@ -15,7 +19,7 @@ import lombok.NoArgsConstructor;
 public class ProfileSkill {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long profileSkillId;
 
     @ManyToOne
     @JoinColumn(name = "profile_id", nullable = false)
@@ -29,4 +33,9 @@ public class ProfileSkill {
     @Column(name = "proficiency", nullable = false)
     private Proficiency proficiency;
 
+    @CreationTimestamp
+    private LocalDateTime createdAt;
+
+    @UpdateTimestamp
+    private LocalDateTime updatedAt;
 }

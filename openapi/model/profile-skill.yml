@@ -1,0 +1,11 @@
+ProfileSkillDto:
+  type: object
+  properties:
+    profileSkillId:
+      type: integer
+      format: int64
+    skill:
+      $ref: 'skill.yml#/SkillDto'
+    proficiency:
+      type: string
+      enum: [ BEGINNER, INTERMEDIATE, ADVANCED, EXPERT ]
