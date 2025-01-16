@@ -5,6 +5,10 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "project_required_skills")
@@ -15,7 +19,7 @@ import lombok.NoArgsConstructor;
 public class ProjectSkill {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long projectSkillId;
 
     @ManyToOne
     @JoinColumn(name = "project_id", nullable = false)
@@ -29,5 +33,9 @@ public class ProjectSkill {
     @Column(name = "proficiency", nullable = false)
     private Proficiency proficiency;
 
+    @CreationTimestamp
+    private LocalDateTime createdAt;
 
+    @UpdateTimestamp
+    private LocalDateTime updatedAt;
 }

@@ -31,7 +31,8 @@ public class Account {
     @Column(nullable = false, columnDefinition = "NVARCHAR(255)")
     private String firstName;
 
-    @Column( columnDefinition = "NVARCHAR(255)")
+    @Column(columnDefinition = "NVARCHAR(255)")
+    @Nullable
     private String lastName;
 
     //nullable because it is needed for google sign in
@@ -62,7 +63,7 @@ public class Account {
     private LocalDateTime verifiedAt;
 
     @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT TRUE")
-    private boolean isVisible;
+    private boolean isVisible = true;
 
     @CreationTimestamp
     private LocalDateTime createdAt;

@@ -1,0 +1,24 @@
+ProfileDto:
+  type: object
+  properties:
+    accountId:
+      type: integer
+      format: int64
+    overview:
+      type: string
+    education:
+      type: string
+    phoneNumber:
+      type: string
+    language:
+      type: string
+    skills:
+      type: array
+      items:
+        $ref: 'profile-skill.yml#/ProfileSkillDto'
+    createdAt:
+      type: string
+      format: date-time
+    updatedAt:
+      type: string
+      format: date-time

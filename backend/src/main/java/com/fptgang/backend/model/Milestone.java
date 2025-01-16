@@ -41,7 +41,7 @@ public class Milestone {
     private MilestoneStatus status;
 
     @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT TRUE")
-    private boolean isVisible;
+    private boolean isVisible = true;
 
     @CreationTimestamp
     private LocalDateTime createdAt;

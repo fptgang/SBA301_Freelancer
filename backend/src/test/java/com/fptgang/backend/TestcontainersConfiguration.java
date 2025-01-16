@@ -14,7 +14,7 @@ public class TestcontainersConfiguration {
 	public MySQLContainer<?> mysqlContainer() {
 		return new MySQLContainer<>(DockerImageName.parse("mysql:latest"))
 				.withExposedPorts(3306)
-				.withReuse(true);
+				.withReuse(false);
 	}
 
 
