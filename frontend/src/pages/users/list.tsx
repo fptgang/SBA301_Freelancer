@@ -78,7 +78,7 @@ export const AccountsList: React.FC = () => {
   };
 
   return (
-    <List wrapperProps={{ className: "bg-white rounded-lg shadow-md p-6" }}>
+    <List>
       <div className="mb-6">
         <Input.Search
           placeholder="Search accounts..."
@@ -94,7 +94,6 @@ export const AccountsList: React.FC = () => {
         rowKey="id"
         className="overflow-x-auto"
         scroll={{ x: true }}
-        rowClassName="hover:bg-gray-50"
       >
         <Table.Column
           dataIndex={["accountId"]}
