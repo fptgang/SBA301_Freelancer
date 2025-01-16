@@ -3,6 +3,7 @@ package com.fptgang.backend.service;
 import com.fptgang.backend.model.Account;
 import com.fptgang.backend.model.Role;
 import com.fptgang.backend.repository.AccountRepos;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -21,6 +22,7 @@ import java.math.BigDecimal;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@Slf4j
 @SpringBootTest
 @TestConfiguration(proxyBeanMethods = false)
 @Testcontainers
@@ -43,7 +45,7 @@ class AccountServiceTest {
 
     Account createTestAccount(Integer accountId) {
         Account account = new Account();
-        account.setEmail("test"+accountId+"@example.com");
+        account.setEmail("testAccount"+accountId+"@example.com");
         account.setPassword("password");
         account.setVisible(true);
         account.setBalance(BigDecimal.valueOf(0));
@@ -185,7 +187,7 @@ class AccountServiceTest {
 
 
         Account account4 = new Account();
-        account4.setEmail("unfiltered@example.com");
+        account4.setEmail("filtered@example.com");
         account4.setPassword("password");
         account4.setVisible(true);
         account4.setBalance(BigDecimal.valueOf(0));
@@ -196,8 +198,10 @@ class AccountServiceTest {
         accountService.create(account4);
 
         Pageable pageable = PageRequest.of(0, 10);
-        Page<Account> accountsPage = accountService.getAll(pageable, "email,contains,test");
-
-        assertTrue(accountsPage.getTotalElements() <=3);
+        Page<Account> accountsPage = accountService.getAll(pageable, "email,contains,filtered");
+        for(Account account : accountsPage.getContent()){
+            log.info(account.getEmail());
+        }
+        assertTrue(accountsPage.getTotalElements() ==1);
     }
 }
