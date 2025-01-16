@@ -21,7 +21,7 @@ import {
   QuestionCircleOutlined,
 } from "@ant-design/icons";
 import { ROLE_OPTIONS } from "../../utils/constants";
-import { Account } from "../../data/types/Account";
+import { Account } from "../../../generated/models/Account";
 
 export const UsersCreate: React.FC = () => {
   const { formProps, saveButtonProps } = useForm<Account>();

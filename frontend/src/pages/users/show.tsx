@@ -29,25 +29,12 @@ import {
 } from "@ant-design/icons";
 import { Role } from "../../data/types/Account";
 import { ROLE_COLOR_MAP } from "../../utils/constants";
+import { Account } from "../../../generated/models/Account";
 
 const { Title } = Typography;
 
-interface AccountRecord {
-  accountId: string;
-  email: string;
-  firstName: string;
-  lastName: string;
-  role: string;
-  isVerified: boolean;
-  verifiedAt?: string;
-  isVisible: boolean;
-  createdAt: string;
-  updatedAt: string;
-  balance: number;
-}
-
 export const AccountsShow: React.FC = () => {
-  const { queryResult } = useShow<AccountRecord>();
+  const { queryResult } = useShow<Account>();
   const { data, isLoading } = queryResult;
   const record = data?.data;
 
@@ -177,7 +164,7 @@ export const AccountsShow: React.FC = () => {
               }
             >
               <BooleanField
-                value={record?.isVisible}
+                value={record?.active}
                 trueIcon={<CheckCircleOutlined className="text-green-500" />}
                 falseIcon={<ClockCircleOutlined className="text-gray-500" />}
                 valueLabelTrue="Visible"

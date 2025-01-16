@@ -1,6 +1,6 @@
-import { Account } from "./Account";
+import { Account } from "./account";
 
-export interface Auth {
+export default interface Auth {
   token: string;
   refreshToken: string;
   email: string;

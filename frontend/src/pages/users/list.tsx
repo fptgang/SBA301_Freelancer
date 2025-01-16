@@ -27,8 +27,8 @@ import {
   ClockCircleOutlined,
   CheckCircleOutlined,
 } from "@ant-design/icons";
-import { Account } from "../../data/types/Account";
 import { ROLE_COLOR_MAP } from "../../utils/constants";
+import { Account } from "../../../generated/models/Account";
 
 const { Text } = Typography;
 
@@ -51,14 +51,6 @@ export const AccountsList: React.FC = () => {
           value: undefined,
         },
       ],
-    },
-  });
-
-  const { data: accountData, isLoading: accountIsLoading } = useMany({
-    resource: "accounts",
-    ids: tableProps?.dataSource?.map((item) => item?.accountId) ?? [],
-    queryOptions: {
-      enabled: !!tableProps?.dataSource,
     },
   });
 
