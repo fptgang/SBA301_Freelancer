@@ -36,21 +36,17 @@ class MilestoneServiceTest {
     private final AccountRepos accountRepos;
     private final ProjectCategoryRepos projectCategoryRepos;
     private final ProjectService projectService;
-    private final ProposalService proposalService;
     private final ProjectRepos projectRepos;
-    private final ProposalRepos proposalRepos;
 
     @Autowired
-    public MilestoneServiceTest(MilestoneService milestoneService, MilestoneRepos milestoneRepos, AccountService accountService, AccountRepos accountRepos, ProjectCategoryRepos projectCategoryRepos, ProjectCategoryRepos projectCategoryRepos1, ProjectService projectService, ProposalService proposalService, ProjectRepos projectRepos, ProposalRepos proposalRepos) {
+    public MilestoneServiceTest(MilestoneService milestoneService, MilestoneRepos milestoneRepos, AccountService accountService, AccountRepos accountRepos, ProjectCategoryRepos projectCategoryRepos, ProjectCategoryRepos projectCategoryRepos1, ProjectService projectService, ProjectRepos projectRepos) {
         this.milestoneService = milestoneService;
         this.milestoneRepos = milestoneRepos;
         this.accountService = accountService;
         this.accountRepos = accountRepos;
         this.projectCategoryRepos = projectCategoryRepos1;
         this.projectService = projectService;
-        this.proposalService = proposalService;
         this.projectRepos = projectRepos;
-        this.proposalRepos = proposalRepos;
     }
     @AfterEach
     void tearDown() {
@@ -58,7 +54,6 @@ class MilestoneServiceTest {
         projectRepos.deleteAll();
         milestoneRepos.deleteAll();
         accountRepos.deleteAll();
-        proposalRepos.deleteAll();
     }
 
     Milestone createTestMilestone(int id) {
