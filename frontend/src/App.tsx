@@ -28,7 +28,6 @@ import { API_URL, BASE_URL } from "./utils/constants";
 import { refreshToken } from "./data/service/auth-service";
 import LandingPage from "./pages/landing/landing-page";
 import About from "./pages/about/About";
-import { Role } from "./data/types/Account";
 import ClientLayout from "./components/layout";
 import NavBar from "./pages/landing/nav-bar";
 import Profile from "./pages/profile/profile";
