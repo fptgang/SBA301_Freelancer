@@ -2,7 +2,6 @@ package com.fptgang.backend.service.impl;
 
 import com.fptgang.backend.exception.InvalidInputException;
 import com.fptgang.backend.model.Message;
-import com.fptgang.backend.model.ProjectCategory;
 import com.fptgang.backend.repository.MessageRepos;
 import com.fptgang.backend.service.MessageService;
 import com.fptgang.backend.util.OpenApiHelper;

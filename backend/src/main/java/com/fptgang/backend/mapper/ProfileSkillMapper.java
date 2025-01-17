@@ -1,7 +1,9 @@
 package com.fptgang.backend.mapper;
 
 import com.fptgang.backend.api.model.ProfileSkillDto;
-import com.fptgang.backend.model.*;
+import com.fptgang.backend.model.Proficiency;
+import com.fptgang.backend.model.ProfileSkill;
+import com.fptgang.backend.model.Skill;
 import com.fptgang.backend.repository.ProfileSkillRepos;
 import com.fptgang.backend.repository.SkillRepos;
 import org.springframework.beans.factory.annotation.Autowired;

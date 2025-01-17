@@ -6,7 +6,10 @@ package com.fptgang.backend.service.impl;
 //import com.fptgang.backend.dtos.response.AccountResponseDTO;
 //import com.fptgang.backend.dtos.response.AuthResponseDTO;
 
-import com.fptgang.backend.api.model.*;
+import com.fptgang.backend.api.model.AuthResponseDto;
+import com.fptgang.backend.api.model.ForgotPasswordRequestDto;
+import com.fptgang.backend.api.model.RegisterRequestDto;
+import com.fptgang.backend.api.model.ResetPasswordRequestDto;
 import com.fptgang.backend.exception.InvalidInputException;
 import com.fptgang.backend.mapper.AccountMapper;
 import com.fptgang.backend.model.Account;
@@ -21,35 +24,24 @@ import com.fptgang.backend.service.AuthService;
 import com.fptgang.backend.service.EmailService;
 import com.fptgang.backend.service.PasswordResetTokenService;
 import com.fptgang.backend.service.RefreshTokenService;
-import com.google.api.client.auth.openidconnect.IdToken;
-import com.google.api.client.auth.openidconnect.IdTokenVerifier;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.google.api.client.http.HttpTransport;
-import com.google.api.client.http.LowLevelHttpRequest;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.gson.GsonFactory;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
-import java.time.Instant;
 import java.time.LocalDateTime;
-import java.util.Collections;
-
-import static org.springframework.security.oauth2.core.OAuth2TokenIntrospectionClaimNames.CLIENT_ID;
 
 
 @Service

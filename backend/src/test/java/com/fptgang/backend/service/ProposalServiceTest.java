@@ -3,23 +3,21 @@ package com.fptgang.backend.service;
 
 import com.fptgang.backend.TestcontainersConfiguration;
 import com.fptgang.backend.model.*;
-import com.fptgang.backend.repository.*;
+import com.fptgang.backend.repository.AccountRepos;
+import com.fptgang.backend.repository.ProjectCategoryRepos;
+import com.fptgang.backend.repository.ProjectRepos;
+import com.fptgang.backend.repository.ProposalRepos;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.testcontainers.containers.MySQLContainer;
-import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import org.testcontainers.utility.DockerImageName;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.*;
 

@@ -2,7 +2,6 @@ package com.fptgang.backend.controller;
 
 import com.fptgang.backend.api.controller.AuthApi;
 import com.fptgang.backend.api.model.*;
-
 import com.fptgang.backend.exception.InvalidInputException;
 import com.fptgang.backend.mapper.AccountMapper;
 import com.fptgang.backend.mapper.RefreshTokenMapper;
@@ -11,16 +10,15 @@ import com.fptgang.backend.security.TokenService;
 import com.fptgang.backend.service.AccountService;
 import com.fptgang.backend.service.AuthService;
 import com.fptgang.backend.service.RefreshTokenService;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.slf4j.Logger;
-
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 
 @RestController
