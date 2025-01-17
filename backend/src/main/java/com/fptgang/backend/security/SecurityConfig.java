@@ -11,10 +11,13 @@ import com.nimbusds.jose.proc.SecurityContext;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
+import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -69,7 +72,7 @@ public class SecurityConfig {
                                         "/swagger-ui.html",
                                         "/api/v1/mail/**"
                                 ).permitAll()
-                                .anyRequest().denyAll();
+                                .anyRequest().authenticated();
                     }
                 })
                 .csrf(AbstractHttpConfigurer::disable)
@@ -88,6 +91,17 @@ public class SecurityConfig {
                 UsernamePasswordAuthenticationFilter.class
         );
         return http.build();
+    }
+
+    @Bean
+    public RoleHierarchy roleHierarchy() {
+        return RoleHierarchyImpl.fromHierarchy(
+                """
+                        ROLE_ADMIN > ROLE_STAFF
+                        ROLE_STAFF > ROLE_CLIENT
+                        ROLE_STAFF > ROLE_FREELANCER
+                """
+        );
     }
 
     @Bean

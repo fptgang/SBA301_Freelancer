@@ -14,8 +14,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -64,8 +64,9 @@ public class AuthController implements AuthApi {
     }
 
     @Override
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<AccountDto> getCurrentUser() {
-        String email = SecurityUtil.getCurrentUserEmail();
+        String email = SecurityUtil.requireCurrentUserEmail();
         return ResponseEntity.ok(accountMapper.toDTO(accountService.findByEmail(email)));
     }
 
@@ -111,8 +112,9 @@ public class AuthController implements AuthApi {
     }
 
     @Override
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Void> logout() {
-        String email = SecurityUtil.getCurrentUserEmail();
+        String email = SecurityUtil.requireCurrentUserEmail();
         authService.logout(email, getFingerprint());
         return ResponseEntity.ok().build();
     }

@@ -21,11 +21,11 @@ public class ProfileSkill {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long profileSkillId;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "profile_id", nullable = false)
     private Profile profile;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "skill_id", nullable = false)
     private Skill skill;
 

@@ -5,11 +5,14 @@ import com.fptgang.backend.api.model.AccountDto;
 import com.fptgang.backend.api.model.GetAccounts200Response;
 import com.fptgang.backend.api.model.GetAccountsPageableParameter;
 import com.fptgang.backend.mapper.AccountMapper;
+import com.fptgang.backend.model.Role;
 import com.fptgang.backend.service.AccountService;
 import com.fptgang.backend.util.OpenApiHelper;
+import com.fptgang.backend.util.SecurityUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -58,8 +61,29 @@ public class AccountController implements AccountsApi {
     }
 
     @Override
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<AccountDto> updateAccount(Integer accountId, AccountDto accountDto) {
         log.info("Updating account " + accountId);
+
+        if (!SecurityUtil.hasPermission(Role.ADMIN)) {
+            accountDto.setBalance(null);
+            accountDto.setRole(null);
+            accountDto.setIsVisible(null);
+        }
+
+        if (!SecurityUtil.hasPermission(Role.STAFF)) {
+            accountDto.setIsVerified(null);
+            accountDto.setVerifiedAt(null);
+        }
+
+        if (SecurityUtil.isRole(Role.CLIENT, Role.FREELANCER)) {
+            if (!accountService.findByEmail(SecurityUtil.getCurrentUserEmail())
+                    .getAccountId()
+                    .equals(Long.valueOf(accountId))) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            }
+        }
+
         return ResponseEntity.ok(accountMapper.toDTO(accountService.update(accountMapper.toEntity(accountDto))));
     }
 }
