@@ -6,14 +6,13 @@ import { ErrorComponent, ThemedLayoutV2, ThemedSiderV2 } from "@refinedev/antd";
 import "@refinedev/antd/dist/reset.css";
 
 import routerBindings, {
-  CatchAllNavigate,
   DocumentTitleHandler,
   NavigateToResource,
   UnsavedChangesNotifier,
 } from "@refinedev/react-router";
 import { App as AntdApp } from "antd";
 import { BrowserRouter, Navigate, Outlet, Route, Routes } from "react-router";
-import { authProvider, REFRESH_TOKEN_KEY, TOKEN_KEY } from "./authProvider";
+import { authProvider } from "./authProvider";
 import { AppIcon } from "./components/app-icon";
 import { Header } from "./components/header";
 import { ColorModeContextProvider } from "./contexts/color-mode";
@@ -23,8 +22,7 @@ import { Login } from "./pages/login";
 import { Register } from "./pages/register";
 import { accessControlProvider } from "./providers/access-control-provider";
 import { dataProvider } from "./providers/data-provider";
-import axios from "axios";
-import { API_URL, BASE_URL } from "./utils/constants";
+import { API_URL } from "./utils/constants";
 import LandingPage from "./pages/landing/landing-page";
 import About from "./pages/about/About";
 import ClientLayout from "./components/layout";
