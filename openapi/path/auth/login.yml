@@ -6,21 +6,16 @@ post:
     content:
       application/json:
         schema:
-          type: object
-          properties:
-            username:
-              type: string
-            password:
-              type: string
+          $ref: '../../model/auth/login-request.yml#/LoginRequestDto'
   responses:
     '200':
-      description: The operation is success or failed
+      description: Successful login
       content:
         application/json:
           schema:
-            $ref: '../../model/account.yml#/AccountDto'
+            $ref: '../../model/auth/auth-response.yml#/AuthResponseDto'
     '400':
-      description: The operation was failed
+      description: Invalid input
       content:
         application/json:
           schema:

@@ -1,27 +1,21 @@
 package com.fptgang.backend.service;
 
 import com.fptgang.backend.TestcontainersConfiguration;
-import com.fptgang.backend.dtos.request.RegisterRequestDTO;
-import com.fptgang.backend.dtos.response.AccountResponseDTO;
-import com.fptgang.backend.dtos.response.AuthResponseDTO;
+import com.fptgang.backend.api.model.AuthResponseDto;
+import com.fptgang.backend.api.model.RegisterRequestDto;
 import com.fptgang.backend.exception.InvalidInputException;
 import com.fptgang.backend.repository.AccountRepos;
-import com.fptgang.backend.service.impl.AuthServiceImpl;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
-import org.testcontainers.containers.MySQLContainer;
-import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import org.testcontainers.utility.DockerImageName;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -49,15 +43,15 @@ class AuthServiceTest {
 
     void registerValidInput() {
         // Arrange
-        RegisterRequestDTO registerRequestDTO = new RegisterRequestDTO();
-        registerRequestDTO.setEmail("test@example.com");
-        registerRequestDTO.setPassword("password123");
-        registerRequestDTO.setConfirmPassword("password123");
-        registerRequestDTO.setFirstName("John");
-        registerRequestDTO.setLastName("Doe");
+        RegisterRequestDto RegisterRequestDto = new RegisterRequestDto();
+        RegisterRequestDto.setEmail("test@example.com");
+        RegisterRequestDto.setPassword("password123");
+        RegisterRequestDto.setConfirmPassword("password123");
+        RegisterRequestDto.setFirstName("John");
+        RegisterRequestDto.setLastName("Doe");
 
         // Act
-        boolean result = authService.register(registerRequestDTO);
+        boolean result = authService.register(RegisterRequestDto);
 
         // Assert
         assertTrue(result);
@@ -66,7 +60,7 @@ class AuthServiceTest {
 
     void loginValidCredentials() {
         // Act
-        AuthResponseDTO authResponse = authService.login("test@example.com", "password123");
+        AuthResponseDto authResponse = authService.login("test@example.com", "password123");
         // Assert
         assertEquals("test@example.com", authResponse.getAccountResponseDTO().getEmail());
         assertNotNull(authResponse.getToken());
@@ -77,15 +71,15 @@ class AuthServiceTest {
     @Order(2)
     void registerEmailAlreadyExists() {
         // Arrange
-        RegisterRequestDTO registerRequestDTO = new RegisterRequestDTO();
-        registerRequestDTO.setEmail("ccc@example.com");
-        registerRequestDTO.setPassword("password123");
-        registerRequestDTO.setConfirmPassword("password123");
-        registerRequestDTO.setFirstName("John");
-        registerRequestDTO.setLastName("Doe");
-        authService.register(registerRequestDTO);
+        RegisterRequestDto RegisterRequestDto = new RegisterRequestDto();
+        RegisterRequestDto.setEmail("ccc@example.com");
+        RegisterRequestDto.setPassword("password123");
+        RegisterRequestDto.setConfirmPassword("password123");
+        RegisterRequestDto.setFirstName("John");
+        RegisterRequestDto.setLastName("Doe");
+        authService.register(RegisterRequestDto);
 
-        RegisterRequestDTO duplicateRegisterDTO = new RegisterRequestDTO();
+        RegisterRequestDto duplicateRegisterDTO = new RegisterRequestDto();
         duplicateRegisterDTO.setEmail("ccc@example.com");
         duplicateRegisterDTO.setPassword("password123");
         duplicateRegisterDTO.setConfirmPassword("password123");
@@ -100,15 +94,15 @@ class AuthServiceTest {
     @Order(3)
     void registerPasswordMismatch() {
         // Arrange
-        RegisterRequestDTO registerRequestDTO = new RegisterRequestDTO();
-        registerRequestDTO.setEmail("test@example.com");
-        registerRequestDTO.setPassword("password123");
-        registerRequestDTO.setConfirmPassword("password321");
-        registerRequestDTO.setFirstName("John");
-        registerRequestDTO.setLastName("Doe");
+        RegisterRequestDto RegisterRequestDto = new RegisterRequestDto();
+        RegisterRequestDto.setEmail("test@example.com");
+        RegisterRequestDto.setPassword("password123");
+        RegisterRequestDto.setConfirmPassword("password321");
+        RegisterRequestDto.setFirstName("John");
+        RegisterRequestDto.setLastName("Doe");
 
         // Act & Assert
-        assertThrows(InvalidInputException.class, () -> authService.register(registerRequestDTO));
+        assertThrows(InvalidInputException.class, () -> authService.register(RegisterRequestDto));
     }
 
 

@@ -1,0 +1,16 @@
+post:
+  summary: Login with Google
+  operationId: loginWithGoogle
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: string
+  responses:
+    '200':
+      description: Successful login with Google
+      content:
+        application/json:
+          schema:
+            $ref: '../../model/auth/auth-response.yml#/AuthResponseDto'

@@ -1,0 +1,8 @@
+get:
+  summary: Logout from the account
+  operationId: logout
+  security:
+    - BearerAuth: [ ]
+  responses:
+    '200':
+      description: Successful logout

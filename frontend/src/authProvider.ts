@@ -1,26 +1,29 @@
 import type { AuthProvider } from "@refinedev/core";
-import {
-  forgotPassword,
-  getCurrentUser,
-  login,
-  loginWithGoogle,
-  register,
-  resetPassword,
-} from "./data/service/auth-service";
-import Auth from "./data/types/auth";
-import { AccountDtoRoleEnum } from "../generated";
-export const TOKEN_KEY = "refine-auth";
-export const REFRESH_TOKEN_KEY = "refine-refresh-token";
+import { API_URL } from "./utils/constants";
 
+import {
+  AccountDtoRoleEnum,
+  AuthResponseDto,
+  Configuration,
+  DefaultApi,
+  ResetPasswordRequestDto,
+} from "../generated";
+export const TOKEN_KEY = "refine-auth";
+const config: Configuration = new Configuration({
+  basePath: API_URL,
+});
+export const REFRESH_TOKEN_KEY = "refine-refresh-token";
+const api = new DefaultApi(config);
 export const authProvider: AuthProvider = {
   login: async ({ username, email, password, googleToken }) => {
     if (googleToken) {
-      const response = await loginWithGoogle(googleToken);
-      localStorage.setItem(TOKEN_KEY, response.token);
-      localStorage.setItem(REFRESH_TOKEN_KEY, response.refreshToken);
+      const normalizedToken = googleToken.replace('"', "");
+      const response = await api.loginWithGoogle({ body: normalizedToken });
+      localStorage.setItem(TOKEN_KEY, response.token ?? "");
+      localStorage.setItem(REFRESH_TOKEN_KEY, response.refreshToken ?? "");
       console.log(response);
-      localStorage.setItem("role", response.accountResponseDTO.role);
-      if (response.accountResponseDTO.role === AccountDtoRoleEnum.Admin) {
+      localStorage.setItem("role", response?.accountResponseDTO?.role ?? "");
+      if (response?.accountResponseDTO?.role === AccountDtoRoleEnum.Admin) {
         return {
           success: true,
           redirectTo: "/admin",
@@ -34,13 +37,13 @@ export const authProvider: AuthProvider = {
     }
 
     if ((username || email) && password) {
-      const response: Auth = await login(email, password);
-      localStorage.setItem(TOKEN_KEY, response.token);
-      localStorage.setItem(REFRESH_TOKEN_KEY, response.refreshToken);
+      const response: AuthResponseDto = await api.login(email, password);
+      localStorage.setItem(TOKEN_KEY, response.token ?? "");
+      localStorage.setItem(REFRESH_TOKEN_KEY, response.refreshToken ?? "");
       console.log(response);
-      localStorage.setItem("role", response.accountResponseDTO.role);
+      localStorage.setItem("role", response.accountResponseDTO?.role ?? "");
 
-      if (response.accountResponseDTO.role === AccountDtoRoleEnum.Admin) {
+      if (response.accountResponseDTO?.role === AccountDtoRoleEnum.Admin) {
         return {
           success: true,
           redirectTo: "/admin",
@@ -72,10 +75,15 @@ export const authProvider: AuthProvider = {
     const token: string | null = localStorage.getItem(TOKEN_KEY);
     console.log("check auth " + token);
     if (token) {
-      const checkStatus = await getCurrentUser(token)
+      const checkStatus = await api
+        .getCurrentUser({
+          token,
+        })
         .then((response) => {
           console.log(response);
-          localStorage.setItem("role", response.role);
+          if (response.role) {
+            localStorage.setItem("role", response.role);
+          }
           console.log(response);
           return {
             role: response.role,
@@ -102,14 +110,17 @@ export const authProvider: AuthProvider = {
   getIdentity: async () => {
     const token = localStorage.getItem(TOKEN_KEY);
     if (token) {
-      const result = await getCurrentUser(token)
+      const result = await api
+        .getCurrentUser({ token })
         .then((response) => {
           console.log(response);
-          localStorage.setItem("role", response.role);
+          if (response.role) {
+            localStorage.setItem("role", response.role);
+          }
           return {
             id: response.accountId,
             name: response.firstName + " " + response.lastName,
-            avatar: "https://i.pravatar.cc/300",
+            avatar: response.avatarUrl ?? "https://i.pravatar.cc/300",
             role: response.role,
           };
         })
@@ -126,26 +137,42 @@ export const authProvider: AuthProvider = {
     return { error };
   },
   register: async (data) => {
-    const response = await register(data);
-    if (response) {
-      return {
-        success: true,
-        redirectTo: "/login",
-      };
-    }
-    return {
-      success: true,
-      redirectTo: "/login",
-    };
+    const result = await api
+      .register(data)
+      .then(() => {
+        return {
+          success: true,
+          redirectTo: "/login",
+        };
+      })
+      .catch(() => {
+        return {
+          success: false,
+          error: {
+            name: "RegisterError",
+            message: "Invalid username or password",
+          },
+        };
+      });
+    return result;
   },
-  updatePassword: async (params: ResetPasswordRequestDTO) => {
+  updatePassword: async (params: ResetPasswordRequestDto) => {
     if (params.token) {
       console.log("reset password");
-      resetPassword({
-        token: params.token,
-        newPassword: params.newPassword,
-        confirmPassword: params.confirmPassword,
-      });
+      api
+        .resetPassword({
+          resetPasswordRequestDto: {
+            token: params.token,
+            newPassword: params.newPassword,
+            confirmPassword: params.confirmPassword,
+          },
+        })
+        .then(() => {
+          return {
+            success: true,
+            redirectTo: "/login",
+          };
+        });
     } else {
       console.log("update password");
     }
@@ -158,24 +185,21 @@ export const authProvider: AuthProvider = {
   },
   forgotPassword: async (params) => {
     console.log(params);
-    const response = await forgotPassword(params.email);
+    const response = api.forgotPassword(params.email);
+    const result = response
+      .then(() => {
+        return {
+          success: true,
+          redirectTo: "/forgot-password",
+        };
+      })
+      .catch(() => {
+        return {
+          success: false,
+          redirectTo: "/forgot-password",
+        };
+      });
 
-    if (response.status === 200) {
-      return {
-        success: true,
-        redirectTo: "/login",
-      };
-    }
-    return {
-      success: false,
-      redirectTo: "/forgot-password",
-    };
+    return result;
   },
 };
-
-export interface ResetPasswordRequestDTO {
-  token: string | undefined;
-  oldPassword: string | undefined;
-  newPassword: string;
-  confirmPassword: string;
-}

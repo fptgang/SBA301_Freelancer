@@ -1,0 +1,11 @@
+AuthResponseDto:
+  type: object
+  properties:
+    token:
+      type: string
+    refreshToken:
+      type: string
+    email:
+      type: string
+    accountResponseDTO:
+      $ref: '../account.yml#/AccountDto'

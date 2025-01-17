@@ -1,9 +1,9 @@
 package com.fptgang.backend.aspect;
 
 import com.fptgang.backend.api.model.AccountDto;
-import org.aspectj.lang.annotation.Aspect;
-import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.ProceedingJoinPoint;
+import org.aspectj.lang.annotation.Around;
+import org.aspectj.lang.annotation.Aspect;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;

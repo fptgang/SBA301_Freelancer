@@ -22,7 +22,7 @@ import dayjs from "dayjs";
 import { ROLE_OPTIONS } from "../../utils/constants";
 import { AccountDto } from "../../../generated/models/AccountDto";
 
-export const AccountDtosEdit: React.FC = () => {
+export const AccountsEdit: React.FC = () => {
   const { formProps, saveButtonProps, queryResult } = useForm<AccountDto>({
     redirect: false,
   });
@@ -50,15 +50,15 @@ export const AccountDtosEdit: React.FC = () => {
       <Card
         title={
           <span className="text-lg font-semibold flex items-center gap-2">
-            <UserOutlined /> Edit AccountDto
+            <UserOutlined /> Edit Account
           </span>
         }
         className="mb-4"
       >
         {AccountDtosData?.verifiedAt && (
           <Alert
-            message="Verified AccountDto"
-            description={`This AccountDto was verified on ${dayjs(
+            message="Verified Account"
+            description={`This Account was verified on ${dayjs(
               AccountDtosData.verifiedAt
             ).format("MMMM D, YYYY")}`}
             type="success"
@@ -79,18 +79,19 @@ export const AccountDtosEdit: React.FC = () => {
                 label={
                   <span className="flex items-center gap-2">
                     <IdcardOutlined />
-                    AccountDto ID
-                    <Tooltip title="Unique identifier for this AccountDto">
+                    Account ID
+                    <Tooltip title="Unique identifier for this Account">
                       <QuestionCircleOutlined className="text-gray-400" />
                     </Tooltip>
                   </span>
                 }
-                name="AccountDtoId"
+                name="AccountId"
                 rules={[{ required: true }]}
               >
                 <Input
                   placeholder="Enter AccountDto ID"
                   className="w-full"
+                  defaultValue={AccountDtosData?.accountId}
                   disabled
                 />
               </Form.Item>

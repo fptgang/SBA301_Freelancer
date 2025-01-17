@@ -1,0 +1,18 @@
+post:
+  summary: Register a new account
+  operationId: register
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../../model/auth/register-request.yml#/RegisterRequestDto'
+  responses:
+    '201':
+      description: Account created
+    '400':
+      description: Invalid input
+      content:
+        application/json:
+          schema:
+            $ref: '../../component/error.yml#/ErrorResponse'

@@ -150,6 +150,7 @@ export const AccountsList: React.FC = () => {
             { text: "Admin", value: "ADMIN" },
             { text: "Freelancer", value: "FREELANCER" },
             { text: "Staff", value: "STAFF" },
+            { text: "Client", value: "CLIENT" },
           ]}
           render={(value: keyof typeof ROLE_COLOR_MAP) => (
             <Tag

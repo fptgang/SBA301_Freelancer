@@ -1,10 +1,9 @@
 package com.fptgang.backend.mapper;
 
 import com.fptgang.backend.api.model.MilestoneDto;
-import com.fptgang.backend.repository.MilestoneRepos;
 import com.fptgang.backend.model.Milestone;
+import com.fptgang.backend.repository.MilestoneRepos;
 import com.fptgang.backend.repository.ProjectRepos;
-import com.fptgang.backend.repository.ProposalRepos;
 import com.fptgang.backend.util.DateTimeUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

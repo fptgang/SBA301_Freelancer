@@ -1,0 +1,16 @@
+post:
+  summary: Refresh access token
+  operationId: refreshToken
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: string
+  responses:
+    '200':
+      description: New access token
+      content:
+        application/json:
+          schema:
+            $ref: '../../model/auth/jwt-response.yml#/JwtResponseDto'

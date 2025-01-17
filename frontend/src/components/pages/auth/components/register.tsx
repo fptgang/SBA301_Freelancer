@@ -37,7 +37,7 @@ import { Option } from "antd/es/mentions";
 
 type RegisterProps = RegisterPageProps<LayoutProps, CardProps, FormProps>;
 /**
- * **refine** has register page form which is served on `/register` route when the `authProvider` configuration is provided.
+ * **refine** has register.yml page form which is served on `/register.yml` route when the `authProvider` configuration is provided.
  *
  * @see {@link https://refine.dev/docs/ui-frameworks/antd/components/antd-auth-page/#register} for more details.
  */
@@ -88,7 +88,7 @@ export const RegisterPage: React.FC<RegisterProps> = ({
         ...titleStyles,
       }}
     >
-      {translate("pages.register.title", "Sign up for your account")}
+      {translate("pages.register.yml.title", "Sign up for your account")}
     </Typography.Title>
   );
 
@@ -129,7 +129,7 @@ export const RegisterPage: React.FC<RegisterProps> = ({
                 }}
               >
                 {translate(
-                  "pages.register.divider",
+                  "pages.register.yml.divider",
                   translate("pages.login.divider", "or")
                 )}
               </Typography.Text>
@@ -164,41 +164,41 @@ export const RegisterPage: React.FC<RegisterProps> = ({
           <Form.Item
             name={["role"]}
             label={translate(
-              "pages.register.role",
+              "pages.register.yml.role",
               "Are u here as a freelancer or client?"
             )}
             rules={[
               {
                 required: true,
                 message: translate(
-                  "pages.register.errors.requiredRole",
+                  "pages.register.yml.errors.requiredRole",
                   "Role is required"
                 ),
               },
             ]}
           >
             <Select
-              placeholder={translate("pages.register.fields.role", "Role")}
+              placeholder={translate("pages.register.yml.fields.role", "Role")}
               allowClear
               size="large"
             >
               <Option value="FREELANCER">
-                {translate("pages.register.roles.admin", "Freelancer")}
+                {translate("pages.register.yml.roles.admin", "Freelancer")}
               </Option>
               <Option value="CLIENT">
-                {translate("pages.register.roles.client", "Client")}
+                {translate("pages.register.yml.roles.client", "Client")}
               </Option>
             </Select>
           </Form.Item>
 
           <Form.Item
             name={["firstName"]}
-            label={translate("pages.register.firstName", "First Name")}
+            label={translate("pages.register.yml.firstName", "First Name")}
             rules={[
               {
                 required: true,
                 message: translate(
-                  "pages.register.errors.requiredFirstName",
+                  "pages.register.yml.errors.requiredFirstName",
                   "First name is required"
                 ),
               },
@@ -208,12 +208,12 @@ export const RegisterPage: React.FC<RegisterProps> = ({
           </Form.Item>
           <Form.Item
             name={["lastName"]}
-            label={translate("pages.register.lastName", "Last Name")}
+            label={translate("pages.register.yml.lastName", "Last Name")}
             rules={[
               {
                 required: true,
                 message: translate(
-                  "pages.register.errors.requiredLastName",
+                  "pages.register.yml.errors.requiredLastName",
                   "Last Name name is required"
                 ),
               },
@@ -224,19 +224,19 @@ export const RegisterPage: React.FC<RegisterProps> = ({
 
           <Form.Item
             name="email"
-            label={translate("pages.register.email", "Email")}
+            label={translate("pages.register.yml.email", "Email")}
             rules={[
               {
                 required: true,
                 message: translate(
-                  "pages.register.errors.requiredEmail",
+                  "pages.register.yml.errors.requiredEmail",
                   "Email is required"
                 ),
               },
               {
                 type: "email",
                 message: translate(
-                  "pages.register.errors.validEmail",
+                  "pages.register.yml.errors.validEmail",
                   "Invalid email address"
                 ),
               },
@@ -244,17 +244,17 @@ export const RegisterPage: React.FC<RegisterProps> = ({
           >
             <Input
               size="large"
-              placeholder={translate("pages.register.fields.email", "Email")}
+              placeholder={translate("pages.register.yml.fields.email", "Email")}
             />
           </Form.Item>
           <Form.Item
             name="password"
-            label={translate("pages.register.fields.password", "Password")}
+            label={translate("pages.register.yml.fields.password", "Password")}
             rules={[
               {
                 required: true,
                 message: translate(
-                  "pages.register.errors.requiredPassword",
+                  "pages.register.yml.errors.requiredPassword",
                   "Password is required"
                 ),
               },
@@ -265,14 +265,14 @@ export const RegisterPage: React.FC<RegisterProps> = ({
           <Form.Item
             name="confirmPassword"
             label={translate(
-              "pages.register.fields.confirmPassword",
+              "pages.register.yml.fields.confirmPassword",
               "Confirm Password"
             )}
             rules={[
               {
                 required: true,
                 message: translate(
-                  "pages.register.errors.requiredConfirmPassword",
+                  "pages.register.yml.errors.requiredConfirmPassword",
                   "Confirm Password is required"
                 ),
               },
@@ -289,7 +289,7 @@ export const RegisterPage: React.FC<RegisterProps> = ({
                 }}
               >
                 {translate(
-                  "pages.register.buttons.haveAccount",
+                  "pages.register.yml.buttons.haveAccount",
                   translate(
                     "pages.login.buttons.haveAccount",
                     "Have an account?"
@@ -303,7 +303,7 @@ export const RegisterPage: React.FC<RegisterProps> = ({
                   to="/login"
                 >
                   {translate(
-                    "pages.register.signin",
+                    "pages.register.yml.signin",
                     translate("pages.login.signin", "Sign in")
                   )}
                 </ActiveLink>
@@ -322,7 +322,7 @@ export const RegisterPage: React.FC<RegisterProps> = ({
               loading={isLoading}
               block
             >
-              {translate("pages.register.buttons.submit", "Sign up")}
+              {translate("pages.register.yml.buttons.submit", "Sign up")}
             </Button>
           </Form.Item>
         </Form>
@@ -339,7 +339,7 @@ export const RegisterPage: React.FC<RegisterProps> = ({
             }}
           >
             {translate(
-              "pages.register.buttons.haveAccount",
+              "pages.register.yml.buttons.haveAccount",
               translate("pages.login.buttons.haveAccount", "Have an account?")
             )}{" "}
             <ActiveLink
@@ -350,7 +350,7 @@ export const RegisterPage: React.FC<RegisterProps> = ({
               to="/login"
             >
               {translate(
-                "pages.register.signin",
+                "pages.register.yml.signin",
                 translate("pages.login.signin", "Sign in")
               )}
             </ActiveLink>

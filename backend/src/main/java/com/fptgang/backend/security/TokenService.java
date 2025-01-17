@@ -50,7 +50,7 @@ public class TokenService {
                 return jwtDecoder.decode(token).getSubject();
             }
         } catch (Exception e) {
-            log.info("Invalid token {}", e.getMessage());
+            log.info("Invalid token: {}", e.getMessage());
         }
         return null;
 
