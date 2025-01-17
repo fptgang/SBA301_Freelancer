@@ -21,7 +21,7 @@ import {
   QuestionCircleOutlined,
 } from "@ant-design/icons";
 import { ROLE_OPTIONS } from "../../utils/constants";
-import { AccountDto } from "../../../generated";
+import { AccountDto } from "../../../generated/models/AccountDto";
 
 export const UsersCreate: React.FC = () => {
   const { formProps, saveButtonProps } = useForm<AccountDto>();
@@ -129,7 +129,7 @@ export const UsersCreate: React.FC = () => {
             </Col>
           </Row>
 
-          <Divider orientation="left">Account Settings</Divider>
+          <Divider orientation="left">AccountDto Settings</Divider>
 
           <Row gutter={24}>
             <Col span={24} md={12}>
@@ -138,7 +138,7 @@ export const UsersCreate: React.FC = () => {
                   <span className="flex items-center gap-2">
                     <DollarOutlined />
                     Initial Balance
-                    <Tooltip title="Starting balance for the user account">
+                    <Tooltip title="Starting balance for the user AccountDto">
                       <QuestionCircleOutlined className="text-gray-400" />
                     </Tooltip>
                   </span>

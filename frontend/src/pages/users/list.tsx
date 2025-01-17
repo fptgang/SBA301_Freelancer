@@ -28,7 +28,7 @@ import {
   CheckCircleOutlined,
 } from "@ant-design/icons";
 import { ROLE_COLOR_MAP } from "../../utils/constants";
-import { AccountDto } from "../../../generated";
+import { AccountDto } from "../../../generated/models/AccountDto";
 
 const { Text } = Typography;
 
