@@ -1,11 +1,14 @@
 package com.fptgang.backend.service.impl;
 
-import com.fptgang.backend.dtos.request.ForgotPasswordRequestDTO;
-import com.fptgang.backend.dtos.request.RegisterRequestDTO;
-import com.fptgang.backend.dtos.request.ResetPasswordRequestDTO;
-import com.fptgang.backend.dtos.response.AccountResponseDTO;
-import com.fptgang.backend.dtos.response.AuthResponseDTO;
+//import com.fptgang.backend.dtos.request.ForgotPasswordRequestDTO;
+//import com.fptgang.backend.dtos.request.RegisterRequestDTO;
+//import com.fptgang.backend.dtos.request.ResetPasswordRequestDTO;
+//import com.fptgang.backend.dtos.response.AccountResponseDTO;
+//import com.fptgang.backend.dtos.response.AuthResponseDTO;
+
+import com.fptgang.backend.api.model.*;
 import com.fptgang.backend.exception.InvalidInputException;
+import com.fptgang.backend.mapper.AccountMapper;
 import com.fptgang.backend.model.Account;
 import com.fptgang.backend.model.RefreshToken;
 import com.fptgang.backend.model.Role;
@@ -69,6 +72,8 @@ public class AuthServiceImpl implements AuthService {
     private final EmailService emailService;
 
     private final PasswordResetTokenService passwordResetTokenService;
+    @Autowired
+    private AccountMapper accountMapper;
 
     @Autowired
     public AuthServiceImpl(AccountRepos accountRepos, EmailServiceImpl emailService, PasswordResetTokenService passwordResetTokenService) {
@@ -89,7 +94,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public AuthResponseDTO loginWithGoogle(String token) {
+    public AuthResponseDto loginWithGoogle(String token) {
         log.info("begin login with google");
         HttpTransport httpTransport = new NetHttpTransport();
         JsonFactory jsonFactory = new GsonFactory();
@@ -114,12 +119,8 @@ public class AuthServiceImpl implements AuthService {
             Result result = authenticate(email, account);
             String newToken = tokenService.token(result.authentication);
             log.info("User logged in successfully {}", newToken);
-            return AuthResponseDTO
-                    .builder()
-                    .accountResponseDTO(new AccountResponseDTO(account))
-                    .email(email)
-                    .token(newToken)
-                    .refreshToken(result.refreshToken().getToken()).build();
+            
+            return getAuthResponseDTO(email, account, token, result);
 
         } catch (GeneralSecurityException | IOException e) {
             log.error("Error verifying token {}", e.getMessage());
@@ -129,7 +130,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public void forgotPassword(ForgotPasswordRequestDTO forgotPasswordRequestDTO) {
+    public void forgotPassword(ForgotPasswordRequestDto forgotPasswordRequestDTO) {
         log.info("Processing forgot password request for email: {}", forgotPasswordRequestDTO.getEmail());
         Account account = accountRepos.findByEmail(forgotPasswordRequestDTO.getEmail())
                 .orElseThrow(() -> new InvalidInputException("User not found"));
@@ -141,18 +142,18 @@ public class AuthServiceImpl implements AuthService {
 
         // Send email
         String emailBody = String.format("""
-            Hello %s,
-            
-            You have requested to reset your password. Please click the link below to reset it:
-            %s
-            
-            This link will expire in 15 minutes.
-            
-            If you didn't request this, please ignore this email.
-            
-            Best regards,
-            Your Application Team
-            """, account.getFirstName(), resetLink);
+                Hello %s,
+                
+                You have requested to reset your password. Please click the link below to reset it:
+                %s
+                
+                This link will expire in 15 minutes.
+                
+                If you didn't request this, please ignore this email.
+                
+                Best regards,
+                Your Application Team
+                """, account.getFirstName(), resetLink);
 
         emailService.sendMail("Admin", forgotPasswordRequestDTO.getEmail(), "Password Reset Request", emailBody);
 
@@ -160,7 +161,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public void resetPassword(ResetPasswordRequestDTO request) {
+    public void resetPassword(ResetPasswordRequestDto request) {
         if (!request.getNewPassword().equals(request.getConfirmPassword())) {
             throw new InvalidInputException("Passwords do not match");
         }
@@ -180,7 +181,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public AuthResponseDTO login(String email, String password) {
+    public AuthResponseDto login(String email, String password) {
         log.info("begin login");
         try {
             Account account = accountRepos.findByEmail(email)
@@ -195,12 +196,8 @@ public class AuthServiceImpl implements AuthService {
 
                 log.info("User logged in successfully {}", token);
 //                assert refreshToken != null;
-                return AuthResponseDTO
-                        .builder()
-                        .accountResponseDTO(new AccountResponseDTO(account))
-                        .email(email)
-                        .token(token)
-                        .refreshToken(result.refreshToken().getToken()).build();
+
+                return getAuthResponseDTO(email, account, token, result);
             } else {
                 throw new InvalidInputException("Password is incorrect");
             }
@@ -208,6 +205,15 @@ public class AuthServiceImpl implements AuthService {
             log.error("Error Logging in {}", e.getMessage());
             throw new InvalidInputException(e.getMessage());
         }
+    }
+
+    private AuthResponseDto getAuthResponseDTO(String email, Account account, String token, Result result) {
+        AuthResponseDto authResponseDTO = new AuthResponseDto();
+        authResponseDTO.setAccountResponseDTO(accountMapper.toDTO(account));
+        authResponseDTO.setEmail(email);
+        authResponseDTO.setToken(token);
+        authResponseDTO.setRefreshToken(result.refreshToken().getToken());
+        return authResponseDTO;
     }
 
     private Result authenticate(String email, Account account) {
@@ -227,7 +233,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public boolean register(RegisterRequestDTO registerRequestDTO) {
+    public boolean register(RegisterRequestDto registerRequestDTO) {
         if (accountRepos.findByEmail(registerRequestDTO.getEmail()).isEmpty()) {
             if (registerRequestDTO.getPassword().equals(registerRequestDTO.getConfirmPassword())) {
                 Account account = new Account();
@@ -245,7 +251,6 @@ public class AuthServiceImpl implements AuthService {
             throw new InvalidInputException("Email already exists");
         }
     }
-
 
 
     @Override

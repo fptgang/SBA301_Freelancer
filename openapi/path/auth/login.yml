@@ -1,0 +1,22 @@
+post:
+  summary: Login to an account
+  operationId: login
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../../model/auth/login-request.yml#/LoginRequestDto'
+  responses:
+    '200':
+      description: Successful login
+      content:
+        application/json:
+          schema:
+            $ref: '../../model/auth/auth-response.yml#/AuthResponseDto'
+    '400':
+      description: Invalid input
+      content:
+        application/json:
+          schema:
+            $ref: '../../component/error.yml#/ErrorResponse'

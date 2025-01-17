@@ -7,7 +7,6 @@ import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -40,15 +39,13 @@ import java.security.interfaces.RSAPublicKey;
 @EnableMethodSecurity(proxyTargetClass = true)
 public class SecurityConfig {
 
-    @Autowired
     private final CustomUserDetailsService customUserDetailsService;
-    @Autowired
     private final PasswordEncoderConfig passwordEncoderConfig;
 
     @Value("${jwt.public.key}")
     RSAPublicKey key;
     @Value("${jwt.private.key}")
-    RSAPrivateKey priv;
+    RSAPrivateKey privateKey;
 
     public SecurityConfig(CustomUserDetailsService customUserDetailsService, PasswordEncoderConfig passwordEncoderConfig) {
         this.customUserDetailsService = customUserDetailsService;
@@ -122,7 +119,7 @@ public class SecurityConfig {
 
     @Bean
     JwtEncoder jwtEncoder() {
-        JWK jwk = new RSAKey.Builder(this.key).privateKey(this.priv).build();
+        JWK jwk = new RSAKey.Builder(this.key).privateKey(this.privateKey).build();
         JWKSource<SecurityContext> jwks = new ImmutableJWKSet<>(new JWKSet(jwk));
         return new NimbusJwtEncoder(jwks);
     }

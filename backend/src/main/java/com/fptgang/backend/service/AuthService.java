@@ -1,24 +1,27 @@
 package com.fptgang.backend.service;
 
-import com.fptgang.backend.dtos.request.ForgotPasswordRequestDTO;
-import com.fptgang.backend.dtos.request.RegisterRequestDTO;
-import com.fptgang.backend.dtos.request.ResetPasswordRequestDTO;
-import com.fptgang.backend.dtos.response.AuthResponseDTO;
+import com.fptgang.backend.api.model.AuthResponseDto;
+import com.fptgang.backend.api.model.ForgotPasswordRequestDto;
+import com.fptgang.backend.api.model.RegisterRequestDto;
+import com.fptgang.backend.api.model.ResetPasswordRequestDto;
+//import com.fptgang.backend.dtos.request.ForgotPasswordRequestDTO;
+//import com.fptgang.backend.dtos.request.RegisterRequestDTO;
+//import com.fptgang.backend.dtos.response.AuthResponseDTO;
 import org.springframework.security.core.Authentication;
 
 public interface AuthService {
 
-    AuthResponseDTO login(String email, String password);
+    AuthResponseDto login(String email, String password);
 
-    boolean register(RegisterRequestDTO registerRequestDTO);
+    boolean register(RegisterRequestDto registerRequestDTO);
 
     boolean logout(Authentication authentication);
 
     Authentication getAuthentication(String email);
 
-    AuthResponseDTO loginWithGoogle(String token);
+    AuthResponseDto loginWithGoogle(String token);
 
-    void forgotPassword(ForgotPasswordRequestDTO email);
+    void forgotPassword(ForgotPasswordRequestDto email);
 
-    void resetPassword(ResetPasswordRequestDTO request);
+    void resetPassword(ResetPasswordRequestDto request);
 }

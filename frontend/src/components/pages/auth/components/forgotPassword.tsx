@@ -153,7 +153,7 @@ export const ForgotPasswordPage: React.FC<ResetPassworProps> = ({
               {translate(
                 "pages.forgotPassword.buttons.haveAccount",
                 translate(
-                  "pages.register.buttons.haveAccount",
+                  "pages.register.yml.buttons.haveAccount",
                   "Have an account? "
                 )
               )}{" "}
