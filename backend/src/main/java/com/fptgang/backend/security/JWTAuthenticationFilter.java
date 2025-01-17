@@ -45,7 +45,6 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
         String token = getJWTFromRequest(request);
 
         if (!StringUtils.hasText(token)) {
-            LOGGER.debug("Found no token in request");
             return;
         }
 

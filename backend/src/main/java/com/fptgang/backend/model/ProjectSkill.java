@@ -21,11 +21,11 @@ public class ProjectSkill {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long projectSkillId;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "project_id", nullable = false)
     private Project project;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "skill_id", nullable = false)
     private Skill skill;
 

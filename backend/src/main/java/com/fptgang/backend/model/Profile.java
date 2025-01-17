@@ -46,7 +46,7 @@ public class Profile {
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "account_id")
     private Account account;
 

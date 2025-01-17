@@ -15,7 +15,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -27,7 +26,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
-@ActiveProfiles(value = "test")
 @AutoConfigureMockMvc
 @RunWith(SpringRunner.class)
 @Import(TestcontainersConfiguration.class)
@@ -103,7 +101,7 @@ class AccountIntegrationTest {
         assertThat(account2.getIsVerified()).isTrue();
     }
 
-    //@Test
+    @Test
     public void testGetAccountsUnauthorized() throws Exception {
         this.mockMvc.perform(
                 MockMvcRequestBuilders.get("/api/v1/accounts?page=0&size=20")
