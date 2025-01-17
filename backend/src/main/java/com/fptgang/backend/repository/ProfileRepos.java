@@ -1,0 +1,11 @@
+package com.fptgang.backend.repository;
+
+import com.fptgang.backend.model.Profile;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+
+import java.util.Optional;
+
+public interface ProfileRepos extends JpaRepository<Profile,Long>, JpaSpecificationExecutor<Profile> {
+    Optional<Profile> findByProfileId(Long profileId);
+}
