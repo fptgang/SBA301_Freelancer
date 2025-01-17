@@ -1,6 +1,7 @@
 package com.fptgang.backend.security;
 
 
+import com.fptgang.backend.service.JwtService;
 import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
@@ -19,15 +20,12 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 import org.springframework.security.oauth2.server.resource.web.BearerTokenAuthenticationEntryPoint;
 import org.springframework.security.oauth2.server.resource.web.access.BearerTokenAccessDeniedHandler;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
@@ -43,9 +41,13 @@ public class SecurityConfig {
     private final PasswordEncoderConfig passwordEncoderConfig;
 
     @Value("${jwt.public.key}")
-    RSAPublicKey key;
+    private RSAPublicKey key;
+
     @Value("${jwt.private.key}")
-    RSAPrivateKey privateKey;
+    private RSAPrivateKey privateKey;
+
+    @Value("${security.disableAuthorization:false}")
+    private boolean disableAuthorization;
 
     public SecurityConfig(CustomUserDetailsService customUserDetailsService, PasswordEncoderConfig passwordEncoderConfig) {
         this.customUserDetailsService = customUserDetailsService;
@@ -53,14 +55,23 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        // @formatter:off
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, JWTAuthenticationFilter jwtAuthenticationFilter) throws Exception {
         http
-                .authorizeHttpRequests((authorize) -> authorize
-                        .requestMatchers("api/v1/auth/**","/swagger-ui/**","/v3/**","/swagger-ui.html","/api/v1/mail/**").permitAll()
-//                        .requestMatchers("/auth/me").authenticated()
-                        .anyRequest().permitAll()
-                )
+                .authorizeHttpRequests((authorize) -> {
+                    if (disableAuthorization) {
+                        authorize.anyRequest().permitAll();
+                    } else {
+                        authorize
+                                .requestMatchers(
+                                        "/api/v1/auth/**",
+                                        "/swagger-ui/**",
+                                        "/v3/**",
+                                        "/swagger-ui.html",
+                                        "/api/v1/mail/**"
+                                ).permitAll()
+                                .anyRequest().denyAll();
+                    }
+                })
                 .csrf(AbstractHttpConfigurer::disable)
                 .authenticationProvider(daoAuthenticationProvider())
                 .httpBasic(Customizer.withDefaults())
@@ -72,9 +83,8 @@ public class SecurityConfig {
                         .authenticationEntryPoint(new BearerTokenAuthenticationEntryPoint())
                         .accessDeniedHandler(new BearerTokenAccessDeniedHandler())
                 );
-        // @formatter:on
         http.addFilterBefore(
-                jwtAuthenticationFilter(),
+                jwtAuthenticationFilter,
                 UsernamePasswordAuthenticationFilter.class
         );
         return http.build();
@@ -88,22 +98,9 @@ public class SecurityConfig {
         return daoAuthenticationProvider;
     }
 
-
     @Bean
-    public JWTAuthenticationFilter jwtAuthenticationFilter() {
-        return new JWTAuthenticationFilter();
-    }
-
-    @Bean
-    UserDetailsService users() {
-        // @formatter:off
-        return new InMemoryUserDetailsManager(
-                User.withUsername("user")
-                        .password("{noop}password")
-                        .authorities("app")
-                        .build()
-        );
-        // @formatter:on
+    public JWTAuthenticationFilter jwtAuthenticationFilter(JwtService tokenService) {
+        return new JWTAuthenticationFilter(tokenService);
     }
 
     @Bean
@@ -113,15 +110,14 @@ public class SecurityConfig {
     }
 
     @Bean
-    JwtDecoder jwtDecoder() {
+    public JwtDecoder jwtDecoder() {
         return NimbusJwtDecoder.withPublicKey(this.key).build();
     }
 
     @Bean
-    JwtEncoder jwtEncoder() {
+    public JwtEncoder jwtEncoder() {
         JWK jwk = new RSAKey.Builder(this.key).privateKey(this.privateKey).build();
         JWKSource<SecurityContext> jwks = new ImmutableJWKSet<>(new JWKSet(jwk));
         return new NimbusJwtEncoder(jwks);
     }
-
 }

@@ -1,10 +1,10 @@
 package com.fptgang.backend.security;
 
 import com.fptgang.backend.model.Account;
+import com.fptgang.backend.model.Role;
 import com.fptgang.backend.repository.AccountRepos;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -15,20 +15,27 @@ import java.util.List;
 
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
-    private static final Logger log = LoggerFactory.getLogger(CustomUserDetailsService.class);
-    @Autowired
-    private AccountRepos accountRepos;
+    private static final Logger LOGGER = LoggerFactory.getLogger(CustomUserDetailsService.class);
+    private final AccountRepos accountRepos;
+
+    public CustomUserDetailsService(AccountRepos accountRepos) {
+        this.accountRepos = accountRepos;
+    }
 
     @Override
+    @Deprecated // AVOID using because it fetches from database
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        log.info("User logged in successfully{}", username);
-        try {
-            Account account = accountRepos.findByEmail(username).orElseThrow(() -> new UsernameNotFoundException("User not found"));
-            return new AppUser(account.getEmail(), account.getPassword() == null ? "" : account.getPassword(), List.of(new SimpleGrantedAuthority(account.getRole().toString())));
-        } catch (Exception e) {
-            log.error("User not found{}", e.getMessage());
-            throw new UsernameNotFoundException("User not found");
-        }
+        Account account = accountRepos.findByEmail(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        return createUserDetails(account.getEmail(), account.getRole());
+    }
 
+    public UserDetails createUserDetails(String email, Role role) {
+        LOGGER.debug("New UserDetails for {}", email);
+        return new AppUser(
+                email,
+                null, // never store password
+                List.of(new SimpleGrantedAuthority(role.toString()))
+        );
     }
 }

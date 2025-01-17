@@ -2,13 +2,7 @@ get:
   summary: Get current user information
   operationId: getCurrentUser
   security:
-    - BearerAuth: [ ]
-  parameters:
-    - name: token
-      in: query
-      required: false
-      schema:
-        type: string
+    - bearerAuth: []
   responses:
     '200':
       description: Current user information

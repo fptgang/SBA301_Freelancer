@@ -1,6 +1,7 @@
 package com.fptgang.backend.model;
 
 import jakarta.persistence.*;
+import jakarta.annotation.Nullable;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -22,10 +23,19 @@ public class RefreshToken {
     @Column(nullable = false, unique = true, columnDefinition = "nvarchar(255)")
     private String token;
 
+    @Nullable
+    private String ipAddress;
+
+    @Nullable
+    private String sessionId;
+
+    @Nullable
+    private String clientInfo;
+
     @Column(nullable = false)
     private Instant expiryDate;
 
-    @OneToOne
-    @JoinColumn(name = "account_id", referencedColumnName = "accountId")
+    @ManyToOne
+    @JoinColumn(name = "account_id", nullable = false)
     private Account account;
 }
