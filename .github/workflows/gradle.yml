@@ -18,6 +18,14 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+    env:
+      AZURE_STORAGE_ACCOUNT_NAME: ${{ secrets.AZURE_STORAGE_ACCOUNT_NAME }}
+      AZURE_STORAGE_ACCOUNT_ENDPOINT: ${{ secrets.AZURE_STORAGE_ACCOUNT_ENDPOINT }}
+      AZURE_STORAGE_SAS_TOKEN: ${{ secrets.AZURE_STORAGE_SAS_TOKEN }}
+      AZURE_STORAGE_CONTAINER_NAME: ${{ secrets.AZURE_STORAGE_CONTAINER_NAME }}
+      AZURE_STORAGE_ACCOUNT_KEY: ${{ secrets.AZURE_STORAGE_ACCOUNT_KEY }}
+      RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+      COMPANY_NAME: ${{ secrets.COMPANY_NAME }}
 
     steps:
       - uses: actions/checkout@v4
@@ -41,14 +49,7 @@ jobs:
       - name: Test with Gradle Wrapper
         run: ./gradlew test
         working-directory: ./backend
-        env:
-          AZURE_STORAGE_ACCOUNT_NAME: ${{ secrets.AZURE_STORAGE_ACCOUNT_NAME }}
-          AZURE_STORAGE_ACCOUNT_ENDPOINT: ${{ secrets.AZURE_STORAGE_ACCOUNT_ENDPOINT }}
-          AZURE_STORAGE_SAS_TOKEN: ${{ secrets.AZURE_STORAGE_SAS_TOKEN }}
-          AZURE_STORAGE_CONTAINER_NAME: ${{ secrets.AZURE_STORAGE_CONTAINER_NAME }}
-          AZURE_STORAGE_ACCOUNT_KEY: ${{ secrets.AZURE_STORAGE_ACCOUNT_KEY }}
-          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
-          COMPANY_NAME: ${{ secrets.COMPANY_NAME }}
+
 
     # NOTE: The Gradle Wrapper is the default and recommended way to run Gradle (https://docs.gradle.org/current/userguide/gradle_wrapper.html).
     # If your project does not have the Gradle Wrapper configured, you can use the following configuration to run Gradle with a specified version.
