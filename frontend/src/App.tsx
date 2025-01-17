@@ -25,13 +25,13 @@ import { accessControlProvider } from "./providers/access-control-provider";
 import { dataProvider } from "./providers/data-provider";
 import axios from "axios";
 import { API_URL, BASE_URL } from "./utils/constants";
-import { refreshToken } from "./data/service/auth-service";
 import LandingPage from "./pages/landing/landing-page";
 import About from "./pages/about/About";
 import ClientLayout from "./components/layout";
 import NavBar from "./pages/landing/nav-bar";
 import Profile from "./pages/profile/profile";
 import Footer from "./components/common/footer/footer";
+
 import {
   ProjectCategoriesCreate,
   ProjectCategoriesEdit,
@@ -46,29 +46,7 @@ import {
 } from "./pages/users";
 import ResetPassword from "./pages/reset-password";
 import { notificationProvider } from "./providers/notification-provider";
-
-const axiosInstance = axios.create();
-axiosInstance.interceptors.request.use((config) => {
-  const token = localStorage.getItem(TOKEN_KEY);
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
-
-axiosInstance.interceptors.response.use((value) => {
-  const refresh_token_key = localStorage.getItem(REFRESH_TOKEN_KEY);
-  if (value.status === 401 && refresh_token_key) {
-    refreshToken(refresh_token_key).then((response) => {
-      localStorage.setItem(TOKEN_KEY, response.accessToken);
-      localStorage.setItem(REFRESH_TOKEN_KEY, response.refreshToken);
-    });
-  } else if (value.status === 401) {
-    // window.location.href = "/login";
-    localStorage.removeItem(TOKEN_KEY);
-  }
-  return value;
-});
+import axiosInstance from "./config/axios-config";
 
 function App() {
   return (

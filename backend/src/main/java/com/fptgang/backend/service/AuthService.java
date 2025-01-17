@@ -4,9 +4,7 @@ import com.fptgang.backend.api.model.AuthResponseDto;
 import com.fptgang.backend.api.model.ForgotPasswordRequestDto;
 import com.fptgang.backend.api.model.RegisterRequestDto;
 import com.fptgang.backend.api.model.ResetPasswordRequestDto;
-//import com.fptgang.backend.dtos.request.ForgotPasswordRequestDTO;
-//import com.fptgang.backend.dtos.request.RegisterRequestDTO;
-//import com.fptgang.backend.dtos.response.AuthResponseDTO;
+
 import org.springframework.security.core.Authentication;
 
 public interface AuthService {

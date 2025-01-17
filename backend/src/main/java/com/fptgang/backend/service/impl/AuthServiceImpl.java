@@ -45,6 +45,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
+import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.Collections;
 
 import static org.springframework.security.oauth2.core.OAuth2TokenIntrospectionClaimNames.CLIENT_ID;
@@ -106,12 +108,14 @@ public class AuthServiceImpl implements AuthService {
             String[] name = payload.get("name").toString().split(" ");
             String firstName = name[0];
             String lastName = name.length > 1 ? name[1] : "";
-            log.info(email + " " + name);
+            log.info("{} {}", email, name[0]);
             Account account = accountRepos.findByEmail(email).orElseGet(() -> {
                 Account newAccount = new Account();
                 newAccount.setEmail(email);
                 newAccount.setFirstName(firstName);
                 newAccount.setLastName(lastName);
+                newAccount.setVerified(true);
+                newAccount.setVerifiedAt(LocalDateTime.from(Instant.now()));
                 newAccount.setRole(Role.CLIENT);  // TODO CHANGE THIS
                 accountRepos.saveAndFlush(newAccount);
                 return newAccount;
@@ -119,8 +123,8 @@ public class AuthServiceImpl implements AuthService {
             Result result = authenticate(email, account);
             String newToken = tokenService.token(result.authentication);
             log.info("User logged in successfully {}", newToken);
-            
-            return getAuthResponseDTO(email, account, token, result);
+
+            return getAuthResponseDTO(email, account, newToken, result);
 
         } catch (GeneralSecurityException | IOException e) {
             log.error("Error verifying token {}", e.getMessage());

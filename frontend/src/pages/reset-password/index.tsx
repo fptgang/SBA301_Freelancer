@@ -1,8 +1,7 @@
 import { useGo, useNotification, useParsed } from "@refinedev/core";
 import { Button, Card, Form, Input, Typography, theme } from "antd";
 import React, { useEffect } from "react";
-import { resetPassword } from "../../data/service/auth-service";
-import { useNavigate } from "react-router";
+import api from "../../config/openapi-config";
 
 const { Title } = Typography;
 const { useToken } = theme;
@@ -48,10 +47,12 @@ export const ResetPassword: React.FC = () => {
 
     setIsSubmitting(true);
     try {
-      await resetPassword({
-        token: browser.params.token,
-        newPassword: values.password,
-        confirmPassword: values.confirmPassword,
+      await api.resetPassword({
+        resetPasswordRequestDto: {
+          token: browser.params.token,
+          newPassword: values.password,
+          confirmPassword: values.confirmPassword,
+        },
       });
 
       showNotification(

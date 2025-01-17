@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.*;
 
 
 @RestController
-@RequestMapping("api/v1/auth")
+@RequestMapping("api/v1")
 public class AuthController implements AuthApi {
 
     private static final Logger log = LoggerFactory.getLogger(AuthController.class);
@@ -46,7 +46,7 @@ public class AuthController implements AuthApi {
 
     @Override
     public ResponseEntity<AuthResponseDto> loginWithGoogle(String body) {
-        return ResponseEntity.ok(authService.loginWithGoogle(body));
+        return ResponseEntity.ok(authService.loginWithGoogle(body.replace("\"", "")));
     }
 
     @Override
@@ -55,7 +55,7 @@ public class AuthController implements AuthApi {
             //            throw new InvalidInputException("User not found");
             return ResponseEntity.ok(null);
         }
-        log.info("begin getCurrentUser");
+        log.info("begin getCurrentUser" + token);
         String email = tokenService.getEmailFromToken(token);
         log.info("email: {}", email);
         if (email == null || email.isEmpty()) {

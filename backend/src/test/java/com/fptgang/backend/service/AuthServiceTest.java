@@ -3,8 +3,7 @@ package com.fptgang.backend.service;
 import com.fptgang.backend.TestcontainersConfiguration;
 import com.fptgang.backend.api.model.AuthResponseDto;
 import com.fptgang.backend.api.model.RegisterRequestDto;
-import com.fptgang.backend.dtos.response.AccountResponseDTO;
-import com.fptgang.backend.dtos.response.AuthResponseDTO;
+
 import com.fptgang.backend.exception.InvalidInputException;
 import com.fptgang.backend.repository.AccountRepos;
 import com.fptgang.backend.service.impl.AuthServiceImpl;
