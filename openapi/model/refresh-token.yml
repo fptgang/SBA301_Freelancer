@@ -9,6 +9,12 @@ RefreshTokenDto:
       format: int64
     token:
       type: string
+    ipAddress:
+      type: string
+    sessionId:
+      type: string
+    clientInfo:
+      type: string
     createdAt:
       type: string
       format: date-time

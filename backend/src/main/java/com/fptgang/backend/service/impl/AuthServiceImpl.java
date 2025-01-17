@@ -1,11 +1,5 @@
 package com.fptgang.backend.service.impl;
 
-//import com.fptgang.backend.dtos.request.ForgotPasswordRequestDTO;
-//import com.fptgang.backend.dtos.request.RegisterRequestDTO;
-//import com.fptgang.backend.dtos.request.ResetPasswordRequestDTO;
-//import com.fptgang.backend.dtos.response.AccountResponseDTO;
-//import com.fptgang.backend.dtos.response.AuthResponseDTO;
-
 import com.fptgang.backend.api.model.AuthResponseDto;
 import com.fptgang.backend.api.model.ForgotPasswordRequestDto;
 import com.fptgang.backend.api.model.RegisterRequestDto;
@@ -16,14 +10,9 @@ import com.fptgang.backend.model.Account;
 import com.fptgang.backend.model.RefreshToken;
 import com.fptgang.backend.model.Role;
 import com.fptgang.backend.repository.AccountRepos;
-import com.fptgang.backend.repository.RefreshTokenRepos;
-import com.fptgang.backend.security.CustomUserDetailsService;
 import com.fptgang.backend.security.PasswordEncoderConfig;
-import com.fptgang.backend.security.TokenService;
-import com.fptgang.backend.service.AuthService;
-import com.fptgang.backend.service.EmailService;
-import com.fptgang.backend.service.PasswordResetTokenService;
-import com.fptgang.backend.service.RefreshTokenService;
+import com.fptgang.backend.service.*;
+import com.fptgang.backend.util.Fingerprint;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import com.google.api.client.http.HttpTransport;
@@ -31,107 +20,144 @@ import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.gson.GsonFactory;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.time.LocalDateTime;
-
+import java.util.List;
 
 @Service
 @Slf4j
 public class AuthServiceImpl implements AuthService {
 
     private final AccountRepos accountRepos;
-
-    @Autowired
-    private CustomUserDetailsService customUserDetailService;
-    @Autowired
-    private TokenService tokenService;
-
-    @Autowired
-    private RefreshTokenService refreshTokenService;
-
-    @Autowired
-    private PasswordEncoderConfig passwordEncoderConfig;
-    @Autowired
-    private RefreshTokenRepos refreshTokenRepos;
-
+    private final JwtService tokenService;
+    private final RefreshTokenService refreshTokenService;
+    private final PasswordEncoderConfig passwordEncoderConfig;
     private final EmailService emailService;
-
     private final PasswordResetTokenService passwordResetTokenService;
-    @Autowired
-    private AccountMapper accountMapper;
+    private final AccountMapper accountMapper;
 
-    @Autowired
-    public AuthServiceImpl(AccountRepos accountRepos, EmailServiceImpl emailService, PasswordResetTokenService passwordResetTokenService) {
-
+    public AuthServiceImpl(AccountRepos accountRepos,
+                           JwtService tokenService,
+                           RefreshTokenService refreshTokenService,
+                           PasswordEncoderConfig passwordEncoderConfig,
+                           EmailService emailService,
+                           PasswordResetTokenService passwordResetTokenService,
+                           AccountMapper accountMapper) {
         this.accountRepos = accountRepos;
+        this.tokenService = tokenService;
+        this.refreshTokenService = refreshTokenService;
+        this.passwordEncoderConfig = passwordEncoderConfig;
         this.emailService = emailService;
         this.passwordResetTokenService = passwordResetTokenService;
+        this.accountMapper = accountMapper;
     }
 
     @Override
-    public Authentication getAuthentication(String email) {
-        log.info("begin getAuthentication {}", email);
-        UserDetails userDetails = customUserDetailService.loadUserByUsername(email);
-        Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-        return authentication;
+    public AuthResponseDto login(String email, String password, Fingerprint fingerprint) {
+        Account account = accountRepos.findByEmail(email)
+                .orElseThrow(() -> new InvalidInputException("User not found"));
 
+        if (passwordEncoderConfig.bcryptEncoder().matches(password, account.getPassword())) {
+            Result result = authenticate(account, fingerprint);
+            log.info("User {} logged using Email-Password: token = {}", email, result.jwt);
+            return result.dto;
+        } else {
+            throw new InvalidInputException("Password is incorrect");
+        }
     }
 
     @Override
-    public AuthResponseDto loginWithGoogle(String token) {
-        log.info("begin login with google");
+    public AuthResponseDto loginWithGoogle(String token, Fingerprint fingerprint) {
         HttpTransport httpTransport = new NetHttpTransport();
         JsonFactory jsonFactory = new GsonFactory();
         GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier(httpTransport, jsonFactory);
+
         try {
             GoogleIdToken idToken = verifier.verify(token);
             GoogleIdToken.Payload payload = idToken.getPayload();
             String email = payload.getEmail();
-            String[] name = payload.get("name").toString().split(" ");
-            String firstName = name[0];
-            String lastName = name.length > 1 ? name[1] : "";
-            log.info("{} {}", email, name[0]);
+            String googleAccountId = payload.get("id").toString();
+            String firstName = payload.get("given_name").toString();
+            String lastName = payload.get("family_name").toString();
+            String picture = payload.get("picture").toString();
+
             Account account = accountRepos.findByEmail(email).orElseGet(() -> {
-                Account newAccount = new Account();
-                newAccount.setEmail(email);
-                newAccount.setFirstName(firstName);
-                newAccount.setLastName(lastName);
-                newAccount.setVerified(true);
-                newAccount.setVerifiedAt(LocalDateTime.now());
-                newAccount.setRole(Role.CLIENT);  // TODO CHANGE THIS
-                accountRepos.saveAndFlush(newAccount);
-                return newAccount;
+                log.info("User {} registered using Google account {}", email, googleAccountId);
+                log.info("User {} is verified using Google account {}", email, googleAccountId);
+
+                return accountRepos.saveAndFlush(
+                        Account.builder()
+                                .email(email)
+                                .firstName(firstName)
+                                .lastName(lastName)
+                                .avatarUrl(picture)
+                                .role(Role.CLIENT)  // TODO CHANGE THIS
+                                .isVerified(true)
+                                .verifiedAt(LocalDateTime.now())
+                                .build()
+                );
             });
-            Result result = authenticate(email, account);
-            String newToken = tokenService.token(result.authentication);
-            log.info("User logged in successfully {}", newToken);
 
-            return getAuthResponseDTO(email, account, newToken, result);
+            Result result = authenticate(account, fingerprint);
+            log.info("User {} logged using Google account {}: token = {}", email, googleAccountId, result.jwt);
 
+            return result.dto;
         } catch (GeneralSecurityException | IOException e) {
-            log.error("Error verifying token {}", e.getMessage());
+            log.error("Error Google login {}", e.getMessage());
         }
         return null;
-
     }
 
     @Override
-    public void forgotPassword(ForgotPasswordRequestDto forgotPasswordRequestDTO) {
-        log.info("Processing forgot password request for email: {}", forgotPasswordRequestDTO.getEmail());
-        Account account = accountRepos.findByEmail(forgotPasswordRequestDTO.getEmail())
+    public boolean register(RegisterRequestDto dto) {
+        if (accountRepos.findByEmail(dto.getEmail()).isEmpty()) {
+            if (dto.getPassword().equals(dto.getConfirmPassword())) {
+                String hashPass = passwordEncoderConfig.bcryptEncoder().encode(dto.getPassword());
+                accountRepos.save(
+                        Account.builder()
+                                .email(dto.getEmail())
+                                .firstName(dto.getFirstName())
+                                .lastName(dto.getLastName())
+                                .role(Role.CLIENT)  // TODO CHANGE THIS
+                                .password(hashPass)
+                                .build());
+                log.info("User {} registered using Email-Password", dto.getEmail());
+                return true;
+            } else {
+                throw new InvalidInputException("Password and Confirm Password do not match");
+            }
+        } else {
+            throw new InvalidInputException("Email already exists");
+        }
+    }
+
+    @Override
+    public boolean logout(String email, Fingerprint fingerprint) {
+        // Prefer revoking by sessionId unless it is not provided
+        if (fingerprint == null || fingerprint.getSessionId() == null) {
+            refreshTokenService.revokeRefreshTokenByAccountEmail(email);
+        } else {
+            refreshTokenService.revokeRefreshTokenBySessionId(fingerprint.getSessionId());
+        }
+        SecurityContextHolder.getContext().setAuthentication(null);
+        return true;
+    }
+
+    @Override
+    public void forgotPassword(ForgotPasswordRequestDto dto) {
+        Account account = accountRepos.findByEmail(dto.getEmail())
                 .orElseThrow(() -> new InvalidInputException("User not found"));
 
-        String resetToken = passwordResetTokenService.generateToken(forgotPasswordRequestDTO.getEmail());
+        log.info("Processing forgot password request for email: {}", dto.getEmail());
+
+        String resetToken = passwordResetTokenService.generateToken(dto.getEmail());
 
         // Create reset password link
         String resetLink = "http://localhost:5173/reset-password?token=" + resetToken;
@@ -151,9 +177,9 @@ public class AuthServiceImpl implements AuthService {
                 Your Application Team
                 """, account.getFirstName(), resetLink);
 
-        emailService.sendMail("Admin", forgotPasswordRequestDTO.getEmail(), "Password Reset Request", emailBody);
+        emailService.sendMail("Admin", dto.getEmail(), "Password Reset Request", emailBody);
 
-        log.info("Password reset email sent to: {}", forgotPasswordRequestDTO.getEmail());
+        log.info("Password reset email sent to: {}", dto.getEmail());
     }
 
     @Override
@@ -171,96 +197,46 @@ public class AuthServiceImpl implements AuthService {
         // Update password
         account.setPassword(passwordEncoderConfig.bcryptEncoder().encode(request.getNewPassword()));
         accountRepos.save(account);
+
         // Invalidate the token
         passwordResetTokenService.invalidateToken(request.getToken());
+
+        // For security, revoke all refresh tokens
+        refreshTokenService.revokeRefreshTokenByAccountEmail(email);
+
         log.info("Password successfully reset for user: {}", email);
     }
 
-    @Override
-    public AuthResponseDto login(String email, String password) {
-        log.info("begin login");
-        try {
-            Account account = accountRepos.findByEmail(email)
-                    .orElseThrow(
-                            () -> new InvalidInputException("User not found")
-                    );
-            if (passwordEncoderConfig.bcryptEncoder().matches(password, account.getPassword())) {
-//                SecurityContextHolder.getContext().setAuthentication((authentication);
-                Result result = authenticate(email, account);
-                log.info("user logged in :{}", result.authentication().getName());
-                String token = tokenService.token(result.authentication());
+    private Result authenticate(Account account, Fingerprint fingerprint) {
+        Jwt jwt = tokenService.generateJwt(account.getEmail(), account.getRole());
+        String token = jwt.getTokenValue();
 
-                log.info("User logged in successfully {}", token);
-//                assert refreshToken != null;
-
-                return getAuthResponseDTO(email, account, token, result);
-            } else {
-                throw new InvalidInputException("Password is incorrect");
-            }
-        } catch (Exception e) {
-            log.error("Error Logging in {}", e.getMessage());
-            throw new InvalidInputException(e.getMessage());
-        }
-    }
-
-    private AuthResponseDto getAuthResponseDTO(String email, Account account, String token, Result result) {
-        AuthResponseDto authResponseDTO = new AuthResponseDto();
-        authResponseDTO.setAccountResponseDTO(accountMapper.toDTO(account));
-        authResponseDTO.setEmail(email);
-        authResponseDTO.setToken(token);
-        authResponseDTO.setRefreshToken(result.refreshToken().getToken());
-        return authResponseDTO;
-    }
-
-    private Result authenticate(String email, Account account) {
-        RefreshToken refreshToken = refreshTokenService.findByAccountId(account.getAccountId());
-        if (refreshToken == null) {
-            refreshToken = refreshTokenService.createRefreshToken(email);
-        } else {
-            if (refreshTokenService.verifyExpiration(refreshToken) == null) {
-                refreshToken = refreshTokenService.createRefreshToken(email);
-            }
-        }
-        Authentication authentication = getAuthentication(email);
-        return new Result(refreshToken, authentication);
-    }
-
-    private record Result(RefreshToken refreshToken, Authentication authentication) {
-    }
-
-    @Override
-    public boolean register(RegisterRequestDto registerRequestDTO) {
-        if (accountRepos.findByEmail(registerRequestDTO.getEmail()).isEmpty()) {
-            if (registerRequestDTO.getPassword().equals(registerRequestDTO.getConfirmPassword())) {
-                Account account = new Account();
-                account.setEmail(registerRequestDTO.getEmail());
-                account.setFirstName(registerRequestDTO.getFirstName());
-                account.setLastName(registerRequestDTO.getLastName());
-                account.setRole(Role.CLIENT); // TODO CHANGE THIS
-                account.setPassword(passwordEncoderConfig.bcryptEncoder().encode(registerRequestDTO.getPassword()));
-                accountRepos.save(account);
-                return true;
-            } else {
-                throw new InvalidInputException("Password and Confirm Password do not match");
-            }
-        } else {
-            throw new InvalidInputException("Email already exists");
-        }
-    }
-
-
-    @Override
-    @Transactional
-    public boolean logout(Authentication authentication) {
-        log.info("begin logout");
-        SecurityContextHolder.getContext().setAuthentication(null);
-        Account account = accountRepos.findByEmail(authentication.getName()).orElseThrow(
-                () -> new InvalidInputException("User not found")
+        RefreshToken refreshToken = refreshTokenService.createRefreshToken(
+                account.getEmail(), fingerprint
         );
-        log.info("begin delete refreshToken");
-        refreshTokenRepos.deleteByAccount(account);
-        return true;
+
+        JwtAuthenticationToken authenticationToken = new JwtAuthenticationToken(
+                jwt,
+                List.of(new SimpleGrantedAuthority(account.getRole().toString()))
+        );
+
+        SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+
+        log.debug(
+                "Authentication context created under token {} granted to {} with role {}",
+                token, account.getEmail(), account.getRole()
+        );
+
+        AuthResponseDto dto = new AuthResponseDto()
+                .token(token)
+                .refreshToken(refreshToken.getToken())
+                .email(account.getEmail())
+                .accountResponseDTO(accountMapper.toDTO(account));
+
+        return new Result(token, dto);
     }
 
+    private record Result(String jwt, AuthResponseDto dto) {
+    }
 
 }

@@ -15,8 +15,8 @@ import org.springframework.web.servlet.HandlerExceptionResolver;
 import java.io.IOException;
 
 @Component("restAuthenticationEntryPoint")
-public class JWTAuthEntryPoint implements AuthenticationEntryPoint {
-    private static final Logger logger = LoggerFactory.getLogger(JWTAuthEntryPoint.class);
+public class RestAuthEntryPoint implements AuthenticationEntryPoint {
+    private static final Logger LOGGER = LoggerFactory.getLogger(RestAuthEntryPoint.class);
 
     @Qualifier("handlerExceptionResolver")
     @Autowired
@@ -28,9 +28,8 @@ public class JWTAuthEntryPoint implements AuthenticationEntryPoint {
             HttpServletResponse response,
             AuthenticationException authException
     ) throws IOException, ServletException {
-        logger.info("Unauthorized error: {}", authException.getMessage());
+        LOGGER.info("Unauthorized error: {}", authException.getMessage());
         resolver.resolveException(request, response, null, authException);
     }
-
 
 }

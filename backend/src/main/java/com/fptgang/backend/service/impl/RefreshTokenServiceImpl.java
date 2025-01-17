@@ -5,74 +5,78 @@ import com.fptgang.backend.model.Account;
 import com.fptgang.backend.model.RefreshToken;
 import com.fptgang.backend.repository.AccountRepos;
 import com.fptgang.backend.repository.RefreshTokenRepos;
-import com.fptgang.backend.security.TokenService;
 import com.fptgang.backend.service.RefreshTokenService;
+import com.fptgang.backend.util.Fingerprint;
+import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Nullable;
+import java.time.Duration;
 import java.time.Instant;
-import java.util.Optional;
 import java.util.UUID;
 
 @Service
 public class RefreshTokenServiceImpl implements RefreshTokenService {
+    private static final Duration REFRESH_TOKEN_EXPIRY_DURATION = Duration.ofDays(7);
+    private static final Logger LOGGER = LoggerFactory.getLogger(RefreshTokenServiceImpl.class);
 
-    private static final Logger log = LoggerFactory.getLogger(RefreshTokenServiceImpl.class);
-    RefreshTokenRepos refreshTokenRepository;
+    private final RefreshTokenRepos refreshTokenRepos;
+    private final AccountRepos accountRepos;
 
-    AccountRepos accountRepos;
-
-    @Autowired
-    public RefreshTokenServiceImpl(RefreshTokenRepos refreshTokenRepository, AccountRepos accountRepos, TokenService tokenService) {
-        this.refreshTokenRepository = refreshTokenRepository;
+    public RefreshTokenServiceImpl(RefreshTokenRepos refreshTokenRepos,
+                                   AccountRepos accountRepos) {
+        this.refreshTokenRepos = refreshTokenRepos;
         this.accountRepos = accountRepos;
     }
 
-    public RefreshToken createRefreshToken(String username) {
-        Account account = accountRepos.findByEmail(username)
-                .orElseThrow(() -> new InvalidInputException("Account not found with email " + username));
-
-        // Check if a refresh token already exists for the account
-        Optional<RefreshToken> existingToken = refreshTokenRepository.findByAccount_AccountId(account.getAccountId());
-        if (existingToken.isPresent()) {
-            return existingToken.get();
-        }
+    @Override
+    public RefreshToken createRefreshToken(String email, Fingerprint fingerprint) {
+        Account account = accountRepos.findByEmail(email)
+                .orElseThrow(() -> new InvalidInputException("Account not found with email " + email));
 
         RefreshToken refreshToken = RefreshToken.builder()
-                .account(account)
                 .token(UUID.randomUUID().toString())
-                .expiryDate(Instant.now().plusMillis(600000)) // set expiry of refresh token to 10 minutes - you can configure it application.properties file
+                .ipAddress(fingerprint.getIpAddress())
+                .sessionId(fingerprint.getSessionId())
+                .clientInfo(fingerprint.getClientInfo())
+                .expiryDate(Instant.now().plus(REFRESH_TOKEN_EXPIRY_DURATION))
+                .account(account)
                 .build();
 
-        RefreshToken savedRefreshToken = refreshTokenRepository.save(refreshToken);
-        accountRepos.save(account); // Save the account to update the refresh token association
+        LOGGER.info(
+                "A new refresh token {} is created associating with user {}, sessionId {}, ip {}, client {}",
+                refreshToken.getToken(), email, fingerprint.getSessionId(), fingerprint.getIpAddress(), fingerprint.getClientInfo()
+        );
 
-        return savedRefreshToken;
+        return refreshTokenRepos.save(refreshToken);
+    }
+
+    @Nullable
+    @Override
+    public RefreshToken findByToken(String token) {
+        return refreshTokenRepos.findByToken(token);
     }
 
     @Override
-    public RefreshToken findByAccountId(Long accountId) {
-        return refreshTokenRepository.findByAccount_AccountId(accountId)
-                .orElse(null);
+    public Page<RefreshToken> getAllByAccountId(Long accountId, Pageable pageable) {
+        return refreshTokenRepos.findAllByAccount_AccountId(accountId, pageable);
     }
 
-
-    public Optional<RefreshToken> findByToken(String token) {
-        String cleanToken = token.replaceAll("\"", "");
-
-        log.info("Cleaned Token: " + cleanToken);
-        return refreshTokenRepository.findByToken(cleanToken);
+    @Override
+    @Transactional
+    public void revokeRefreshTokenByAccountEmail(String email) {
+        refreshTokenRepos.deleteAllByAccount_Email(email);
+        LOGGER.info("Revoked all refresh tokens associating with email {}", email);
     }
 
-    public RefreshToken verifyExpiration(RefreshToken token) {
-        if (token.getExpiryDate().compareTo(Instant.now()) < 0) {
-            refreshTokenRepository.delete(token);
-            log.info("Refresh token is expired. Please make a new login..!");
-            return null;
-//            throw new InvalidInputException(token.getToken() + " Refresh token is expired. Please make a new login..!");
-        }
-        return token;
+    @Override
+    @Transactional
+    public void revokeRefreshTokenBySessionId(String sessionId) {
+        refreshTokenRepos.deleteAllBySessionId(sessionId);
+        LOGGER.info("Revoked all refresh tokens associating with sessionId {}", sessionId);
     }
 }

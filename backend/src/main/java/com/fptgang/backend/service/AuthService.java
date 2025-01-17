@@ -4,19 +4,17 @@ import com.fptgang.backend.api.model.AuthResponseDto;
 import com.fptgang.backend.api.model.ForgotPasswordRequestDto;
 import com.fptgang.backend.api.model.RegisterRequestDto;
 import com.fptgang.backend.api.model.ResetPasswordRequestDto;
-import org.springframework.security.core.Authentication;
+import com.fptgang.backend.util.Fingerprint;
 
 public interface AuthService {
 
-    AuthResponseDto login(String email, String password);
+    AuthResponseDto login(String email, String password, Fingerprint fingerprint);
+
+    AuthResponseDto loginWithGoogle(String token, Fingerprint fingerprint);
 
     boolean register(RegisterRequestDto registerRequestDTO);
 
-    boolean logout(Authentication authentication);
-
-    Authentication getAuthentication(String email);
-
-    AuthResponseDto loginWithGoogle(String token);
+    boolean logout(String email, Fingerprint fingerprint);
 
     void forgotPassword(ForgotPasswordRequestDto email);
 

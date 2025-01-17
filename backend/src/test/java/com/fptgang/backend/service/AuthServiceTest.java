@@ -5,16 +5,12 @@ import com.fptgang.backend.api.model.AuthResponseDto;
 import com.fptgang.backend.api.model.RegisterRequestDto;
 import com.fptgang.backend.exception.InvalidInputException;
 import com.fptgang.backend.repository.AccountRepos;
-import org.junit.jupiter.api.MethodOrderer;
-import org.junit.jupiter.api.Order;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestMethodOrder;
+import com.fptgang.backend.util.Fingerprint;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Import;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -32,6 +28,17 @@ class AuthServiceTest {
 
     @Autowired
     private AccountRepos accountRepos;
+
+    private static Fingerprint fingerprint;
+
+    @BeforeAll
+    static void beforeAll() {
+        fingerprint = Fingerprint.builder()
+                .sessionId("292dc572-34b3-4b77-b64d-de8929645c49")
+                .ipAddress("127.0.0.1")
+                .clientInfo("Test")
+                .build();
+    }
 
     @Test
     @Order(1)
@@ -60,7 +67,7 @@ class AuthServiceTest {
 
     void loginValidCredentials() {
         // Act
-        AuthResponseDto authResponse = authService.login("test@example.com", "password123");
+        AuthResponseDto authResponse = authService.login("test@example.com", "password123", fingerprint);
         // Assert
         assertEquals("test@example.com", authResponse.getAccountResponseDTO().getEmail());
         assertNotNull(authResponse.getToken());
@@ -110,44 +117,24 @@ class AuthServiceTest {
     @Order(4)
     void loginInvalidEmail() {
         // Act & Assert
-        assertThrows(InvalidInputException.class, () -> authService.login("invalid@example.com", "password123"));
+        assertThrows(InvalidInputException.class, () -> authService.login("invalid@example.com", "password123", fingerprint));
     }
 
     @Test
     @Order(5)
     void loginInvalidPassword() {
         // Act & Assert
-        assertThrows(InvalidInputException.class, () -> authService.login("test@example.com", "wrongpassword"));
+        assertThrows(InvalidInputException.class, () -> authService.login("test@example.com", "wrongpassword", fingerprint));
     }
 
     @Test
     @Order(6)
     void logoutValidUser() {
-        Authentication authentication = authService.getAuthentication("test@example.com");
-
         // Act
-        boolean result = authService.logout(authentication);
+        boolean result = authService.logout("test@example.com", fingerprint);
 
         // Assert
         assertTrue(result);
-    }
-
-    @Test
-    @Order(7)
-    void getAuthenticationValidUser() {
-        // Act
-        Authentication authentication = authService.getAuthentication("test@example.com");
-
-        // Assert
-        assertNotNull(authentication);
-        assertEquals("test@example.com", authentication.getName());
-    }
-
-    @Test
-    @Order(8)
-    void getAuthenticationInvalidUser() {
-        // Act & Assert
-        assertThrows(UsernameNotFoundException.class, () -> authService.getAuthentication("invalid@example.com"));
     }
 
 
