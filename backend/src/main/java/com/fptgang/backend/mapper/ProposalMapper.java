@@ -38,6 +38,7 @@ public class ProposalMapper extends BaseMapper<ProposalDto, Proposal> {
         proposalDto.setCreatedAt(DateTimeUtil.fromLocalToOffset(entity.getCreatedAt()));
         proposalDto.setUpdatedAt(DateTimeUtil.fromLocalToOffset(entity.getUpdatedAt()));
         proposalDto.setIsVisible(entity.isVisible());
+        proposalDto.setNotes(entity.getNotes());
 
         return proposalDto;
     }
@@ -81,6 +82,10 @@ public class ProposalMapper extends BaseMapper<ProposalDto, Proposal> {
 
             if (dto.getIsVisible() != null) {
                 proposal.setVisible(dto.getIsVisible());
+            }
+
+            if (dto.getNotes() != null) {
+                proposal.setNotes(dto.getNotes());
             }
 
             return proposal;

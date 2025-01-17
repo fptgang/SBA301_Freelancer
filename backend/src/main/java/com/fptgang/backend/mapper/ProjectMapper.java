@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 
 
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Component
 public class ProjectMapper extends BaseMapper<ProjectDto, Project> {
@@ -47,6 +48,7 @@ public class ProjectMapper extends BaseMapper<ProjectDto, Project> {
         dto.setIsVisible(project.isVisible());
         dto.setCreatedAt(DateTimeUtil.fromLocalToOffset(project.getCreatedAt()));
         dto.setUpdatedAt(DateTimeUtil.fromLocalToOffset(project.getUpdatedAt()));
+        dto.setRequiredSkills(project.getRequiredSkills().stream().map(projectSkillMapper::toDTO).collect(Collectors.toList()));
 
         return dto;
     }
@@ -73,6 +75,9 @@ public class ProjectMapper extends BaseMapper<ProjectDto, Project> {
                     proposalRepos.findByProposalId(dto.getActiveProposalId())
                         .orElseThrow(() -> new IllegalArgumentException("Proposal not found")) :
                     existEntity.getActiveProposal());
+            existEntity.setRequiredSkills(dto.getRequiredSkills() != null ?
+                    dto.getRequiredSkills().stream().map(projectSkillMapper::toEntity).collect(Collectors.toList()) :
+                    existEntity.getRequiredSkills());
 
             return existEntity;
 
@@ -100,6 +105,12 @@ public class ProjectMapper extends BaseMapper<ProjectDto, Project> {
             if (dto.getActiveProposalId() != null) {
                 project.setActiveProposal(proposalRepos.findByProposalId(dto.getActiveProposalId())
                         .orElseThrow(() -> new IllegalArgumentException("Proposal not found")));
+            }
+
+            if (dto.getRequiredSkills() != null) {
+                project.setRequiredSkills(dto.getRequiredSkills().stream()
+                        .map(projectSkillMapper::toEntity)
+                        .collect(Collectors.toList()));
             }
 
             if (dto.getIsVisible() != null) {
