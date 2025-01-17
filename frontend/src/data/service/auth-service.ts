@@ -1,7 +1,7 @@
 import axios from "axios";
 import { JwtResponse } from "../types/JwtResponse";
-import { Auth } from "../types/auth";
-import { Account } from "../types/Account";
+import { AccountDtoRoleEnum } from "../../../generated";
+import Auth from "../types/auth";
 
 const BASE_URL = "http://localhost:8080/api/v1/auth";
 
@@ -39,7 +39,9 @@ export const logout = async (token: string) => {
   return response.data;
 };
 
-export const getCurrentUser = async (token: string): Promise<Account> => {
+export const getCurrentUser = async (
+  token: string
+): Promise<AccountDtoRoleEnum> => {
   const response = await axios.get(`${BASE_URL}/me`, {
     params: { token },
     headers: {

@@ -28,12 +28,12 @@ import {
   CheckCircleOutlined,
 } from "@ant-design/icons";
 import { ROLE_COLOR_MAP } from "../../utils/constants";
-import { Account } from "../../../generated/models/Account";
+import { AccountDto } from "../../../generated/models/AccountDto";
 
 const { Text } = Typography;
 
 export const AccountsList: React.FC = () => {
-  const { tableProps, searchFormProps } = useTable<Account>({
+  const { tableProps, searchFormProps } = useTable<AccountDto>({
     syncWithLocation: true,
     sorters: {
       initial: [
@@ -112,12 +112,12 @@ export const AccountsList: React.FC = () => {
 
         <Table.Column
           title="Name"
-          render={(_, record: Account) => (
+          render={(_, record: AccountDto) => (
             <Text>
               {record.firstName} {record.lastName}
             </Text>
           )}
-          sorter={(a: Account, b: Account) =>
+          sorter={(a: AccountDto, b: AccountDto) =>
             `${a.firstName} ${a.lastName}`.localeCompare(
               `${b.firstName} ${b.lastName}`
             )
@@ -196,7 +196,7 @@ export const AccountsList: React.FC = () => {
         <Table.Column
           title="Actions"
           fixed="right"
-          render={(_, record: Account) => (
+          render={(_, record: AccountDto) => (
             <Space size="middle">
               <Tooltip title="Edit Account">
                 <EditButton

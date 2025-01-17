@@ -7,9 +7,8 @@ import {
   register,
   resetPassword,
 } from "./data/service/auth-service";
-import { Auth } from "./data/types/auth";
-import { Role } from "./data/types/Account";
-import { l } from "react-router/dist/development/fog-of-war-DLtn2OLr";
+import Auth from "./data/types/auth";
+import { AccountDtoRoleEnum } from "../generated";
 export const TOKEN_KEY = "refine-auth";
 export const REFRESH_TOKEN_KEY = "refine-refresh-token";
 
@@ -21,7 +20,7 @@ export const authProvider: AuthProvider = {
       localStorage.setItem(REFRESH_TOKEN_KEY, response.refreshToken);
       console.log(response);
       localStorage.setItem("role", response.accountResponseDTO.role);
-      if (response.accountResponseDTO.role === Role.ADMIN) {
+      if (response.accountResponseDTO.role === AccountDtoRoleEnum.Admin) {
         return {
           success: true,
           redirectTo: "/admin",
@@ -41,7 +40,7 @@ export const authProvider: AuthProvider = {
       console.log(response);
       localStorage.setItem("role", response.accountResponseDTO.role);
 
-      if (response.accountResponseDTO.role === Role.ADMIN) {
+      if (response.accountResponseDTO.role === AccountDtoRoleEnum.Admin) {
         return {
           success: true,
           redirectTo: "/admin",

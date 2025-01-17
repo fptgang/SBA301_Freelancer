@@ -20,14 +20,14 @@ import {
 } from "@ant-design/icons";
 import dayjs from "dayjs";
 import { ROLE_OPTIONS } from "../../utils/constants";
-import { Account } from "../../../generated/models/Account";
+import { AccountDto } from "../../../generated/models/AccountDto";
 
-export const AccountsEdit: React.FC = () => {
-  const { formProps, saveButtonProps, queryResult } = useForm<Account>({
+export const AccountDtosEdit: React.FC = () => {
+  const { formProps, saveButtonProps, queryResult } = useForm<AccountDto>({
     redirect: false,
   });
 
-  const accountsData = queryResult?.data?.data;
+  const AccountDtosData = queryResult?.data?.data;
 
   const emailValidationRules = [
     { required: true, message: "Email is required" },
@@ -50,16 +50,16 @@ export const AccountsEdit: React.FC = () => {
       <Card
         title={
           <span className="text-lg font-semibold flex items-center gap-2">
-            <UserOutlined /> Edit Account
+            <UserOutlined /> Edit AccountDto
           </span>
         }
         className="mb-4"
       >
-        {accountsData?.verifiedAt && (
+        {AccountDtosData?.verifiedAt && (
           <Alert
-            message="Verified Account"
-            description={`This account was verified on ${dayjs(
-              accountsData.verifiedAt
+            message="Verified AccountDto"
+            description={`This AccountDto was verified on ${dayjs(
+              AccountDtosData.verifiedAt
             ).format("MMMM D, YYYY")}`}
             type="success"
             showIcon
@@ -79,17 +79,17 @@ export const AccountsEdit: React.FC = () => {
                 label={
                   <span className="flex items-center gap-2">
                     <IdcardOutlined />
-                    Account ID
-                    <Tooltip title="Unique identifier for this account">
+                    AccountDto ID
+                    <Tooltip title="Unique identifier for this AccountDto">
                       <QuestionCircleOutlined className="text-gray-400" />
                     </Tooltip>
                   </span>
                 }
-                name="accountId"
+                name="AccountDtoId"
                 rules={[{ required: true }]}
               >
                 <Input
-                  placeholder="Enter account ID"
+                  placeholder="Enter AccountDto ID"
                   className="w-full"
                   disabled
                 />
