@@ -115,7 +115,7 @@ public class AuthServiceImpl implements AuthService {
                 newAccount.setFirstName(firstName);
                 newAccount.setLastName(lastName);
                 newAccount.setVerified(true);
-                newAccount.setVerifiedAt(LocalDateTime.from(Instant.now()));
+                newAccount.setVerifiedAt(LocalDateTime.now());
                 newAccount.setRole(Role.CLIENT);  // TODO CHANGE THIS
                 accountRepos.saveAndFlush(newAccount);
                 return newAccount;
