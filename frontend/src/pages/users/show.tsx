@@ -28,7 +28,7 @@ import {
   EyeOutlined,
 } from "@ant-design/icons";
 import { ROLE_COLOR_MAP } from "../../utils/constants";
-import { AccountDtoDto } from "../../../generatedDto";
+import { AccountDto } from "../../../generated";
 
 const { Title } = Typography;
 
