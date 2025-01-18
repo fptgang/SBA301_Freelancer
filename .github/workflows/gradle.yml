@@ -45,9 +45,18 @@ jobs:
       # - name: Build with Gradle Wrapper
       #   run: ./gradlew build
       #   working-directory: ./backend
+      - name: Debug
+        run: |
+          echo $AZURE_STORAGE_ACCOUNT_NAME
+          echo $AZURE_STORAGE_ACCOUNT_ENDPOINT
+          echo $AZURE_STORAGE_SAS_TOKEN
+          echo $AZURE_STORAGE_CONTAINER_NAME
+          echo $AZURE_STORAGE_ACCOUNT_KEY
+          echo $RESEND_API_KEY
+          echo $COMPANY_NAME
 
       - name: Test with Gradle Wrapper
-        run:   ./gradlew test -DAZURE_STORAGE_ACCOUNT_NAME=${{ secrets.AZURE_STORAGE_ACCOUNT_NAME }} -DAZURE_STORAGE_ACCOUNT_ENDPOINT=${{ secrets.AZURE_STORAGE_ACCOUNT_ENDPOINT }} -DAZURE_STORAGE_SAS_TOKEN=${{ secrets.AZURE_STORAGE_SAS_TOKEN }} -DAZURE_STORAGE_CONTAINER_NAME=${{ secrets.AZURE_STORAGE_CONTAINER_NAME }} -DAZURE_STORAGE_ACCOUNT_KEY=${{ secrets.AZURE_STORAGE_ACCOUNT_KEY }} -DRESEND_API_KEY=${{ secrets.RESEND_API_KEY }} -DCOMPANY_NAME=${{ secrets.COMPANY_NAME }}
+        run:   ./gradlew test
         working-directory: ./backend
 
 
