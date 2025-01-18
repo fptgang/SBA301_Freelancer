@@ -42,7 +42,7 @@ public class AzureConfig {
         log.error(FileUtils.encodeBase64(storageAccountKey.getBytes(StandardCharsets.UTF_8)));
 
         return new BlobServiceClientBuilder()
-                .endpoint(storageEndpoint)
+                .endpoint("https://hirable.blob.core.windows.net/")
                 .endpoint(URLEncoder.encode(storageEndpoint, StandardCharsets.UTF_8))
                 .credential(new StorageSharedKeyCredential(storageAccountName, storageAccountKey))
                 .buildClient();
