@@ -1,12 +1,8 @@
 package com.fptgang.backend.repository;
 
 import com.fptgang.backend.model.Account;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
@@ -15,7 +11,4 @@ import java.util.Optional;
 public interface AccountRepos extends JpaRepository<Account, Long>, JpaSpecificationExecutor<Account> {
     Optional<Account> findByEmail(String mail);
     Optional<Account> findByAccountId(Long accountId);
-
-    @Query("SELECT a FROM Account a WHERE a.isVisible = true")
-    Page<Account> findAllByVisibleTrue(Pageable pageable, Specification<Account> spec);
 }

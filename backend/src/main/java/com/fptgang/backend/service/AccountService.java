@@ -10,5 +10,8 @@ public interface AccountService {
     Account findByEmail(String email);
     Account update(Account account);
     Account deleteById(long id);
-    Page<Account> getAll(Pageable pageable, String filter);
+    Page<Account> getAll(Pageable pageable, String filter, boolean includeInvisible);
+    default Page<Account> getAll(Pageable pageable, String filter) {
+        return getAll(pageable, filter, false);
+    }
 }
