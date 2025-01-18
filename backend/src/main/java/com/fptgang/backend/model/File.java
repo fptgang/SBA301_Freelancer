@@ -40,15 +40,15 @@ public class File {
     private boolean isVisible = true;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "proposal_id", nullable = false)
+    @JoinColumn(name = "proposal_id")
     private Proposal proposal;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "project_id", nullable = false)
+    @JoinColumn(name = "project_id")
     private Project project;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "message_id", nullable = false)
+    @JoinColumn(name = "message_id")
     private Message message;
 }
 

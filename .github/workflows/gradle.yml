@@ -18,6 +18,14 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+    env:
+      AZURE_STORAGE_ACCOUNT_NAME: ${{ vars.AZURE_STORAGE_ACCOUNT_NAME }}
+      AZURE_STORAGE_ACCOUNT_ENDPOINT: ${{ vars.AZURE_STORAGE_ACCOUNT_ENDPOINT }}
+      AZURE_STORAGE_SAS_TOKEN: ${{ vars.AZURE_STORAGE_SAS_TOKEN }}
+      AZURE_STORAGE_CONTAINER_NAME: ${{ vars.AZURE_STORAGE_CONTAINER_NAME }}
+      AZURE_STORAGE_ACCOUNT_KEY: ${{ vars.AZURE_STORAGE_ACCOUNT_KEY }}
+      RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+      COMPANY_NAME: ${{ secrets.COMPANY_NAME }}
 
     steps:
       - uses: actions/checkout@v4
@@ -39,7 +47,7 @@ jobs:
       #   working-directory: ./backend
 
       - name: Test with Gradle Wrapper
-        run: ./gradlew test
+        run:   ./gradlew test
         working-directory: ./backend
 
     # NOTE: The Gradle Wrapper is the default and recommended way to run Gradle (https://docs.gradle.org/current/userguide/gradle_wrapper.html).
