@@ -35,10 +35,6 @@ public class AzureConfig {
     private String storageAccountKey;
 
     @Bean
-    public BlobServiceClient blobServiceClient() {
-        log.error(hash(storageAccountName));
-        log.error(hash(storageEndpoint));
-        log.error(hash(storageAccountKey));
 
     public BlobServiceClient blobServiceClient() throws UnsupportedEncodingException {
         log.error(FileUtils.encodeBase64(storageAccountName.getBytes(StandardCharsets.UTF_8)));
