@@ -42,13 +42,28 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@af1da67850ed9a4cedd57bfd976089dd991e2582 # v4.0.0
 
-      # - name: Build with Gradle Wrapper
-      #   run: ./gradlew build
-      #   working-directory: ./backend
+      - name: Log environment variables
+        run: |
+        echo "AZURE_STORAGE_ACCOUNT_NAME: $AZURE_STORAGE_ACCOUNT_NAME"
+        echo "AZURE_STORAGE_ACCOUNT_ENDPOINT: $AZURE_STORAGE_ACCOUNT_ENDPOINT"
+        echo "AZURE_STORAGE_SAS_TOKEN: $AZURE_STORAGE_SAS_TOKEN"
+        echo "AZURE_STORAGE_CONTAINER_NAME: $AZURE_STORAGE_CONTAINER_NAME"
+        echo "AZURE_STORAGE_ACCOUNT_KEY: $AZURE_STORAGE_ACCOUNT_KEY"
+        echo "RESEND_API_KEY: $RESEND_API_KEY"
+        echo "COMPANY_NAME: $COMPANY_NAME"
+
+      - name: Build with Gradle Wrapper
+        run: ./gradlew build
+        working-directory: ./backend
+
 
       - name: Test with Gradle Wrapper
         run: ./gradlew test
         working-directory: ./backend
+    uses:
+        actions/cache@v4
+
+
 
 
     # NOTE: The Gradle Wrapper is the default and recommended way to run Gradle (https://docs.gradle.org/current/userguide/gradle_wrapper.html).
