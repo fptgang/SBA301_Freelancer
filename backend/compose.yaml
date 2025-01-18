@@ -6,8 +6,6 @@ services:
       - 'MYSQL_PASSWORD=secret'
       - 'MYSQL_ROOT_PASSWORD=verysecret'
       - 'MYSQL_USER=myuser'
-    env_file:
-      - .env
     ports:
       - '3306:3306'
     networks:
