@@ -24,8 +24,8 @@ jobs:
       AZURE_STORAGE_SAS_TOKEN: ${{ vars.AZURE_STORAGE_SAS_TOKEN }}
       AZURE_STORAGE_CONTAINER_NAME: ${{ vars.AZURE_STORAGE_CONTAINER_NAME }}
       AZURE_STORAGE_ACCOUNT_KEY: ${{ vars.AZURE_STORAGE_ACCOUNT_KEY }}
-      RESEND_API_KEY: ${{ vars.RESEND_API_KEY }}
-      COMPANY_NAME: ${{ vars.COMPANY_NAME }}
+      RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+      COMPANY_NAME: ${{ secrets.COMPANY_NAME }}
 
     steps:
       - uses: actions/checkout@v4
@@ -45,15 +45,6 @@ jobs:
       # - name: Build with Gradle Wrapper
       #   run: ./gradlew build
       #   working-directory: ./backend
-      - name: Debug
-        run: |
-          echo $AZURE_STORAGE_ACCOUNT_NAME
-          echo $AZURE_STORAGE_ACCOUNT_ENDPOINT
-          echo $AZURE_STORAGE_SAS_TOKEN
-          echo $AZURE_STORAGE_CONTAINER_NAME
-          echo $AZURE_STORAGE_ACCOUNT_KEY
-          echo $RESEND_API_KEY
-          echo $COMPANY_NAME
 
       - name: Test with Gradle Wrapper
         run:   ./gradlew test
