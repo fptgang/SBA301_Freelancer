@@ -111,3 +111,10 @@ tasks.named('openApiGenerate') {
 tasks.named { it == "generateEffectiveLombokConfig" }.configureEach {
 	dependsOn tasks.named { it == "openApiGenerate" }
 }
+
+test {
+	testLogging {
+		showStandardStreams true
+		exceptionFormat 'full'
+	}
+}

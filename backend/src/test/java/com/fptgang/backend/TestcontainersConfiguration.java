@@ -16,6 +16,4 @@ public class TestcontainersConfiguration {
 				.withExposedPorts(3306)
 				.withReuse(false);
 	}
-
-
 }
