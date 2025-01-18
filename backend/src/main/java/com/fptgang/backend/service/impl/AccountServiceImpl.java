@@ -12,9 +12,23 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Service
 public class AccountServiceImpl implements AccountService {
+    private static final List<String> WHITELIST_PATHS =
+            List.of(
+                    "accountId",
+                    "email",
+                    "firstName",
+                    "lastName",
+                    "balance",
+                    "role",
+                    "isVerified",
+                    "verifiedAt",
+                    "createdAt",
+                    "updatedAt"
+            );
 
     private final AccountRepos accountRepos;
     private final PasswordEncoderConfig passwordEncoderConfig;
@@ -50,9 +64,6 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public Account create(Account account) {
-        if (accountRepos.findByEmail(account.getEmail()).isPresent()) {
-            throw new IllegalArgumentException("Email already exists");
-        }
         return accountRepos.save(account);
     }
 
@@ -68,7 +79,7 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public Account update(Account account) {
-        if (account.getAccountId() == null || !accountRepos.existsById(account.getAccountId())) {
+        if (account.getAccountId() == null) {
             throw new IllegalArgumentException("Account does not exist");
         }
         return accountRepos.save(account);
@@ -83,8 +94,11 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public Page<Account> getAll(Pageable pageable, String filter) {
-        var spec = OpenApiHelper.<Account>toSpecification(filter);
-        return accountRepos.findAllByVisibleTrue(pageable, spec);
+    public Page<Account> getAll(Pageable pageable, String filter, boolean includeInvisible) {
+        var spec = OpenApiHelper.<Account>toSpecification(filter, WHITELIST_PATHS);
+        if (!includeInvisible) {
+            spec = spec.and((a, q, cb) -> cb.isTrue(a.get("isVisible")));
+        }
+        return accountRepos.findAll(spec, pageable);
     }
 }

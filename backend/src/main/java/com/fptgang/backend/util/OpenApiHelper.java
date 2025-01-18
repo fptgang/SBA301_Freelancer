@@ -73,6 +73,10 @@ public class OpenApiHelper {
     }
 
     public static <T> Specification<T> toSpecification(String filterString) {
+        return toSpecification(filterString, null);
+    }
+
+    public static <T> Specification<T> toSpecification(String filterString, List<String> whitelistFields) {
         if (filterString == null)
             return Specification.anyOf();
 
@@ -85,6 +89,10 @@ public class OpenApiHelper {
         String field = filterParts[0];
         String operator = filterParts[1];
         String value = filterParts[2];
+
+        if (whitelistFields != null && !whitelistFields.contains(field)) {
+            throw new IllegalArgumentException("Invalid field: " + field);
+        }
 
         return (root, query, criteriaBuilder) -> {
             Path<String> fieldPath = root.get(field);
