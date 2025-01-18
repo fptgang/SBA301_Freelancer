@@ -18,7 +18,7 @@ export const authProvider: AuthProvider = {
   login: async ({ username, email, password, googleToken }) => {
     if (googleToken) {
       const normalizedToken = googleToken.replace('"', "");
-      const response = await api.loginWithGoogle({ body: normalizedToken });
+      const response = await api.loginWithGoogle({ body: googleToken });
       localStorage.setItem(TOKEN_KEY, response.token ?? "");
       localStorage.setItem(REFRESH_TOKEN_KEY, response.refreshToken ?? "");
       console.log(response);
@@ -37,7 +37,9 @@ export const authProvider: AuthProvider = {
     }
 
     if ((username || email) && password) {
-      const response: AuthResponseDto = await api.login(email, password);
+      const response: AuthResponseDto = await api.login({
+        loginRequestDto: { email: email, password: password },
+      });
       localStorage.setItem(TOKEN_KEY, response.token ?? "");
       localStorage.setItem(REFRESH_TOKEN_KEY, response.refreshToken ?? "");
       console.log(response);
@@ -77,7 +79,9 @@ export const authProvider: AuthProvider = {
     if (token) {
       const checkStatus = await api
         .getCurrentUser({
-          token,
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         })
         .then((response) => {
           console.log(response);
@@ -111,7 +115,11 @@ export const authProvider: AuthProvider = {
     const token = localStorage.getItem(TOKEN_KEY);
     if (token) {
       const result = await api
-        .getCurrentUser({ token })
+        .getCurrentUser({
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
         .then((response) => {
           console.log(response);
           if (response.role) {
@@ -138,7 +146,15 @@ export const authProvider: AuthProvider = {
   },
   register: async (data) => {
     const result = await api
-      .register(data)
+      .register({
+        registerRequestDto: {
+          email: data.email,
+          password: data.password,
+          firstName: data.firstName,
+          lastName: data.lastName,
+          confirmPassword: data.confirmPassword,
+        },
+      })
       .then(() => {
         return {
           success: true,
