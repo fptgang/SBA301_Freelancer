@@ -83,7 +83,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
 
     @Override
     @Transactional
-    @Scheduled(cron = "0 0 3 * * ?")
+    @Scheduled(fixedRate = 604800000) // run exactly every 7 days regardless of the starting day
     public void deleteExpiredTokens() {
         LOGGER.info("Starting cleanup of expired refresh tokens");
         int deletedCount = refreshTokenRepos.deleteByExpiryDateBefore(Instant.now());
