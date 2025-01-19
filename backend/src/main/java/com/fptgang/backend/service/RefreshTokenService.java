@@ -14,4 +14,5 @@ public interface RefreshTokenService {
     Page<RefreshToken> getAllByAccountId(Long accountId, Pageable pageable);
     void revokeRefreshTokenByAccountEmail(String email);
     void revokeRefreshTokenBySessionId(String sessionId);
+    void deleteExpiredTokens();
 }
