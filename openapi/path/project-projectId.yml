@@ -8,7 +8,7 @@ get:
       in: path
       required: true
       schema:
-        type: string
+        type: integer
   responses:
     '200':
       description: The operation was success
@@ -32,7 +32,7 @@ put:
       in: path
       required: true
       schema:
-        type: string
+        type: integer
   requestBody:
     description: Project to update
     required: true

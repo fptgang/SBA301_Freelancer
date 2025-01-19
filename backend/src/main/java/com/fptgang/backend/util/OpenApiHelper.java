@@ -101,6 +101,10 @@ public class OpenApiHelper {
                 return criteriaBuilder.or();
             }
 
+            //parse boolean class if dete value is a true false value
+            if (value.equalsIgnoreCase("true") || value.equalsIgnoreCase("false") ){
+                return criteriaBuilder.equal(fieldPath, Boolean.parseBoolean(value));
+            }
             return switch (operator) {
                 case "eq" -> criteriaBuilder.equal(fieldPath, value);
                 case "ne" -> criteriaBuilder.notEqual(fieldPath, value);

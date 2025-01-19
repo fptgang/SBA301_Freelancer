@@ -50,12 +50,17 @@ export const AccountsList: React.FC = () => {
           operator: "eq",
           value: undefined,
         },
+        {
+          field: "isVerified",
+          operator: "eq",
+          value: undefined,
+        },
       ],
     },
   });
 
-  const getVerificationStatus = (verifiedAt: string | null) => {
-    return verifiedAt ? (
+  const getVerificationStatus = (isVerified: boolean | null) => {
+    return isVerified ? (
       <Badge status="success" text="Verified" />
     ) : (
       <Badge status="warning" text="Pending" />
@@ -152,6 +157,7 @@ export const AccountsList: React.FC = () => {
             { text: "Staff", value: "STAFF" },
             { text: "Client", value: "CLIENT" },
           ]}
+          filterMultiple={false}
           render={(value: keyof typeof ROLE_COLOR_MAP) => (
             <Tag
               color={ROLE_COLOR_MAP[value] || "default"}
@@ -163,7 +169,7 @@ export const AccountsList: React.FC = () => {
         />
 
         <Table.Column
-          dataIndex="verifiedAt"
+          dataIndex="isVerified"
           title={
             <Tooltip title="Account verification status">
               <Space>
@@ -172,11 +178,12 @@ export const AccountsList: React.FC = () => {
               </Space>
             </Tooltip>
           }
-          render={(value: string) => getVerificationStatus(value)}
+          render={(value: boolean) => getVerificationStatus(value)}
           filters={[
             { text: "Verified", value: true },
             { text: "Pending", value: false },
           ]}
+          filterMultiple={false}
         />
 
         <Table.Column

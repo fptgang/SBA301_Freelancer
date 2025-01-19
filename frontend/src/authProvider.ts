@@ -17,7 +17,6 @@ const api = new DefaultApi(config);
 export const authProvider: AuthProvider = {
   login: async ({ username, email, password, googleToken }) => {
     if (googleToken) {
-      const normalizedToken = googleToken.replace('"', "");
       const response = await api.loginWithGoogle({ body: googleToken });
       localStorage.setItem(TOKEN_KEY, response.token ?? "");
       localStorage.setItem(REFRESH_TOKEN_KEY, response.refreshToken ?? "");
@@ -201,12 +200,14 @@ export const authProvider: AuthProvider = {
   },
   forgotPassword: async (params) => {
     console.log(params);
-    const response = api.forgotPassword(params.email);
+    const response = api.forgotPassword({
+      forgotPasswordRequestDto: { email: params.email },
+    });
     const result = response
       .then(() => {
         return {
           success: true,
-          redirectTo: "/forgot-password",
+          redirectTo: "/login",
         };
       })
       .catch(() => {
