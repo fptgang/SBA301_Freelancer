@@ -59,4 +59,8 @@ paths:
     $ref: 'path/projectCategory.yml'
   /projectCategories/{projectCategoryId}:
     $ref: 'path/projectCategory-projectCategoryId.yml'
+  /transactions:
+     $ref: 'path/transaction.yml'
+  /transactions/{transactionId}:
+    $ref: 'path/transaction-transactionId.yml'   
 
