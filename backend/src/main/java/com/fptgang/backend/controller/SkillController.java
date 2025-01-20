@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/v1/skill")
+@RequestMapping("/api/v1")
 public class SkillController implements SkillsApi {
     private final SkillMapper skillMapper;
     private final SkillService skillService;
