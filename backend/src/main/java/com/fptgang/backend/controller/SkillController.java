@@ -1,13 +1,15 @@
 package com.fptgang.backend.controller;
 
 import com.fptgang.backend.api.controller.SkillsApi;
-import com.fptgang.backend.api.model.GetAccountsPageableParameter;
-import com.fptgang.backend.api.model.GetSkills200Response;
-import com.fptgang.backend.api.model.SkillDto;
+import com.fptgang.backend.api.model.*;
 import com.fptgang.backend.mapper.SkillMapper;
+import com.fptgang.backend.model.Role;
+import com.fptgang.backend.model.Skill;
 import com.fptgang.backend.service.SkillService;
 import com.fptgang.backend.util.OpenApiHelper;
+import com.fptgang.backend.util.SecurityUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -45,9 +47,12 @@ public class SkillController implements SkillsApi {
 
     @Override
     public ResponseEntity<GetSkills200Response> getSkills(GetAccountsPageableParameter pageable, String filter) {
-        log.info("Getting skill");
         var page = OpenApiHelper.toPageable(pageable);
-        var res = skillService.getAll(page, filter).map(skillMapper::toDTO);
+        Page<SkillDto> res;
+        if (Role.ADMIN.hasPermission(SecurityUtil.getCurrentUserRole())) {
+            res = skillService.getAll(page, filter).map(skillMapper::toDTO);
+        } else
+            res = skillService.getAllVisible(page, filter).map(skillMapper::toDTO);
         return OpenApiHelper.respondPage(res, GetSkills200Response.class);
     }
 
