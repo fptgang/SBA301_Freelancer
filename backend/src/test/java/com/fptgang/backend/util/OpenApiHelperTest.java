@@ -8,6 +8,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
@@ -21,6 +23,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class OpenApiHelperTest {
     @Test
     public void testToPageableSingleSort() {
@@ -374,8 +377,14 @@ public class OpenApiHelperTest {
         }
 
         private Predicate getPredicate(Specification<String> spec, String path) {
+            var expressionMock = mock(Expression.class);
+
+            var pathMock = mock(Path.class);
+            when(pathMock.as(String.class)).thenReturn(expressionMock);
+
             var root = mock(Root.class);
-            when(root.get(path)).thenReturn(mock(Path.class));
+            when(root.get(path)).thenReturn(pathMock);
+
             return spec.toPredicate(
                     root,
                     mock(CriteriaQuery.class),
