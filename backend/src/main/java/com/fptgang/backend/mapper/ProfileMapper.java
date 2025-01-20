@@ -23,7 +23,7 @@ public class ProfileMapper extends BaseMapper<ProfileDto, Profile> {
     private AccountRepos accountRepos;
 
     @Override
-    ProfileDto toDTO(Profile entity) {
+    public ProfileDto toDTO(Profile entity) {
         if (entity == null) {
             return null;
         }
@@ -45,7 +45,7 @@ public class ProfileMapper extends BaseMapper<ProfileDto, Profile> {
     }
 
     @Override
-    Profile toEntity(ProfileDto dto) {
+    public Profile toEntity(ProfileDto dto) {
         if (dto == null) {
             return null;
         }
