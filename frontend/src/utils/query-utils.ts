@@ -14,22 +14,35 @@ export const generateSortQuery = (sort: CrudSort[]) => {
     return "";
   }
   const sortQuery = sort.map((s) => generateSortField(s)).join(",");
-  return `sort=${sortQuery}`;
+  return `sort=${encodeURIComponent(sortQuery)}`;
 };
 function generateSortField({ field, order }: Sort) {
   return `${field},${order}`;
 }
 
-export const generateFilterQuery = (filter: LogicalFilter[]): string => {
-  if (!filter || filter.length === 0) {
+export const generateFilterQuery = (filters: LogicalFilter[]): string => {
+  if (!filters || filters.length === 0) {
     return "";
   }
 
-  // Take only the first filter as per OpenAPI spec
-  const firstFilter = filter[0];
-  const filterStr = generateFilterField(firstFilter);
+  let multiFilters  = [];
 
-  return filterStr ? `filter=${filterStr}` : "";
+  for (let filter of filters) {
+    const filterField = generateFilterField(filter);
+    if (filterField.length == 0)
+      continue;
+    multiFilters.push(filterField);
+  }
+
+  if (multiFilters.length == 0) {
+    return "";
+  }
+
+  if (multiFilters.length == 1) {
+    return "filter=" + encodeURIComponent(multiFilters[0]);
+  }
+
+  return "filter=" + encodeURIComponent(JSON.stringify(multiFilters));
 };
 
 function generateFilterField(filter: LogicalFilter): string {
