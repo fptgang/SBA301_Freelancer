@@ -59,7 +59,28 @@ paths:
     $ref: 'path/projectCategory.yml'
   /projectCategories/{projectCategoryId}:
     $ref: 'path/projectCategory-projectCategoryId.yml'
+  /transactions:
+     $ref: 'path/transaction.yml'
+  /transactions/{transactionId}:
+    $ref: 'path/transaction-transactionId.yml'
+  /proposals:
+     $ref: 'path/proposal.yml'
+  /proposals/{proposalId}:
+    $ref: 'path/proposal-proposalId.yml'
+  /milestones:
+     $ref: 'path/milestone.yml'
+  /milestones/{milestoneId}:
+    $ref: 'path/milestone-milestoneId.yml'
+  /messages:
+     $ref: 'path/message.yml'
+  /messages/{messagesId}:
+    $ref: 'path/message-messageId.yml'   
+  /files:
+     $ref: 'path/file.yml'
+  /files/{fileId}:
+    $ref: 'path/file-fileId.yml'   
   /skills:
     $ref: 'path/skill.yml'
   /skills/{skillId}:
     $ref: 'path/skill-skillId.yml'
+

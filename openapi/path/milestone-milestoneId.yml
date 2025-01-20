@@ -1,0 +1,77 @@
+get:
+  summary: Get a milestone by ID
+  operationId: getMilestoneById
+  security:
+    - bearerAuth: []
+  parameters:
+    - name: milestoneId
+      in: path
+      required: true
+      schema:
+        type: integer
+  responses:
+    '200':
+      description: The operation was successful
+      content:
+        application/json:
+          schema:
+            $ref: '../model/milestone.yml#/MilestoneDto'
+    '400':
+      description: The operation failed
+      content:
+        application/json:
+          schema:
+            $ref: '../component/error.yml#/ErrorResponse'
+
+put:
+  summary: Update an existing milestone
+  operationId: updateMilestone
+  security:
+    - bearerAuth: []
+  parameters:
+    - name: milestoneId
+      in: path
+      required: true
+      schema:
+        type: integer
+  requestBody:
+    description: Milestone to update
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../model/milestone.yml#/MilestoneDto'
+  responses:
+    '200':
+      description: The operation was successful
+      content:
+        application/json:
+          schema:
+            $ref: '../model/milestone.yml#/MilestoneDto'
+    '400':
+      description: The operation failed
+      content:
+        application/json:
+          schema:
+            $ref: '../component/error.yml#/ErrorResponse'
+
+delete:
+  summary: Delete an existing milestone
+  operationId: deleteMilestone
+  security:
+    - bearerAuth: []
+  parameters:
+    - name: milestoneId
+      in: path
+      required: true
+      schema:
+        type: integer
+  responses:
+    '200':
+      description: The operation was successful
+    '400':
+      description: The operation failed
+      content:
+        application/json:
+          schema:
+            $ref: '../component/error.yml#/ErrorResponse'

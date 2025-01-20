@@ -1,0 +1,77 @@
+get:
+  summary: Get a message by ID
+  operationId: getMessageById
+  security:
+    - bearerAuth: []
+  parameters:
+    - name: messageId
+      in: path
+      required: true
+      schema:
+        type: integer
+  responses:
+    '200':
+      description: The operation was successful
+      content:
+        application/json:
+          schema:
+            $ref: '../model/message.yml#/MessageDto'
+    '400':
+      description: The operation failed
+      content:
+        application/json:
+          schema:
+            $ref: '../component/error.yml#/ErrorResponse'
+
+put:
+  summary: Update an existing message
+  operationId: updateMessage
+  security:
+    - bearerAuth: []
+  parameters:
+    - name: messageId
+      in: path
+      required: true
+      schema:
+        type: integer
+  requestBody:
+    description: Message to update
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../model/message.yml#/MessageDto'
+  responses:
+    '200':
+      description: The operation was successful
+      content:
+        application/json:
+          schema:
+            $ref: '../model/message.yml#/MessageDto'
+    '400':
+      description: The operation failed
+      content:
+        application/json:
+          schema:
+            $ref: '../component/error.yml#/ErrorResponse'
+
+delete:
+  summary: Delete an existing message
+  operationId: deleteMessage
+  security:
+    - bearerAuth: []
+  parameters:
+    - name: messageId
+      in: path
+      required: true
+      schema:
+        type: integer
+  responses:
+    '200':
+      description: The operation was successful
+    '400':
+      description: The operation failed
+      content:
+        application/json:
+          schema:
+            $ref: '../component/error.yml#/ErrorResponse'
