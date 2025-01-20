@@ -1,0 +1,54 @@
+get:
+  summary: Get a list of transactions
+  operationId: getTransactions
+  security:
+    - bearerAuth: []
+  parameters:
+    - $ref: '../param/pageable.yml#/Pageable'
+    - $ref: '../param/filter.yml#/Filter'
+  responses:
+    '200':
+      description: The operation was successful
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '../component/page.yml#/Page'
+              - type: object
+                properties:
+                  content:
+                    type: array
+                    items:
+                      $ref: '../model/transaction.yml#/TransactionDto'
+    '400':
+      description: The operation failed
+      content:
+        application/json:
+          schema:
+            $ref: '../component/error.yml#/ErrorResponse'
+
+post:
+  summary: Create a transaction
+  operationId: createTransaction
+  security:
+    - bearerAuth: []
+  requestBody:
+    description: Transaction to create
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../model/transaction.yml#/TransactionDto'
+  responses:
+    '200':
+      description: The operation was successful
+      content:
+        application/json:
+          schema:
+            $ref: '../model/transaction.yml#/TransactionDto'
+    '400':
+      description: The operation failed
+      content:
+        application/json:
+          schema:
+            $ref: '../component/error.yml#/ErrorResponse'

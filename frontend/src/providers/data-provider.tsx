@@ -1,6 +1,6 @@
-import { DataProvider } from "@refinedev/core";
+import { DataProvider, LogicalFilter } from "@refinedev/core";
 import { Axios } from "axios";
-import generateSortQuery from "../utils/query-utils";
+import { generateSortQuery, generateFilterQuery } from "../utils/query-utils";
 
 /**
  * Check out the Data Provider documentation for detailed information
@@ -12,8 +12,13 @@ export const dataProvider = (
 ): DataProvider => ({
   getList: async ({ resource, pagination, filters, sorters, meta }) => {
     let sortQuery = "";
+    console.log(filters);
     if (sorters) {
       sortQuery = generateSortQuery(sorters);
+    }
+    let filterQuery = "";
+    if (filters) {
+      filterQuery = generateFilterQuery(filters as LogicalFilter[]);
     }
 
     let currentPage = pagination?.current ?? 0;
@@ -22,7 +27,7 @@ export const dataProvider = (
     }
     const url = `${apiUrl}/${resource}?page=${currentPage}&pageSize=${
       pagination?.pageSize ?? 20
-    }&size=${pagination?.pageSize ?? 20}&${sortQuery}`;
+    }&size=${pagination?.pageSize ?? 20}&${sortQuery}&${filterQuery}`;
     console.log("getList", {
       resource,
       pagination,

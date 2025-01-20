@@ -11,6 +11,7 @@ import com.fptgang.backend.util.SecurityUtil;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -24,6 +25,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("api/v1")
+@Slf4j
 public class AuthController implements AuthApi {
     private static final Duration SESSION_ID_EXPIRY_DURATION = Duration.ofDays(30);
     private static final Logger LOGGER = LoggerFactory.getLogger(AuthController.class);
@@ -52,13 +54,15 @@ public class AuthController implements AuthApi {
     @Override
     public ResponseEntity<AuthResponseDto> loginWithGoogle(String body) {
         try {
+            log.info("Logging in with Google token: {}", body);
             AuthResponseDto dto = authService.loginWithGoogle(
-                    body.replace("\"", ""),
+                    body.replace("\"",""),
                     getFingerprint()
             );
             attachSessionIdCookie();
             return ResponseEntity.ok(dto);
         } catch (Exception e) {
+            log.error("Error while logging in with Google {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
     }

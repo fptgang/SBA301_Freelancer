@@ -32,11 +32,13 @@ export const ResetPassword: React.FC = () => {
     });
   };
   useEffect(() => {
-    go({
-      to: "/forgot-password",
-      type: "replace",
-    });
-  }, [go]);
+    if (!browser.params?.token) {
+      go({
+        to: "/forgot-password",
+        type: "replace",
+      });
+    }
+  }, [browser.params?.token, go]);
 
   const handleSubmit = async (values: ResetPasswordFormValues) => {
     if (!browser.params?.token) {

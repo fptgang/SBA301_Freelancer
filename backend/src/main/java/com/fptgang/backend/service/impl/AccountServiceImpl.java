@@ -97,7 +97,7 @@ public class AccountServiceImpl implements AccountService {
     public Page<Account> getAll(Pageable pageable, String filter, boolean includeInvisible) {
         var spec = OpenApiHelper.<Account>toSpecification(filter, WHITELIST_PATHS);
         if (!includeInvisible) {
-            spec = spec.and((a, q, cb) -> cb.isTrue(a.get("isVisible")));
+            spec = spec.and((a, _, cb) -> cb.isTrue(a.get("isVisible")));
         }
         return accountRepos.findAll(spec, pageable);
     }

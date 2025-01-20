@@ -1,74 +1,76 @@
 get:
-  summary: Get a project by ID
-  operationId: getProjectById
+  summary: Get a proposal by ID
+  operationId: getProposalById
   security:
     - bearerAuth: []
   parameters:
-    - name: projectId
+    - name: proposalId
       in: path
       required: true
       schema:
         type: integer
   responses:
     '200':
-      description: The operation was success
+      description: The operation was successful
       content:
         application/json:
           schema:
-            $ref: '../model/project.yml#/ProjectDto'
+            $ref: '../model/proposal.yml#/ProposalDto'
     '400':
-      description: The operation was failed
+      description: The operation failed
       content:
         application/json:
           schema:
             $ref: '../component/error.yml#/ErrorResponse'
+
 put:
-  summary: Update an existing project
-  operationId: updateProject
+  summary: Update an existing proposal
+  operationId: updateProposal
   security:
     - bearerAuth: []
   parameters:
-    - name: projectId
+    - name: proposalId
       in: path
       required: true
       schema:
         type: integer
   requestBody:
-    description: Project to update
+    description: Proposal to update
     required: true
     content:
       application/json:
         schema:
-          $ref: '../model/project.yml#/ProjectDto'
+          $ref: '../model/proposal.yml#/ProposalDto'
   responses:
     '200':
-      description: The operation was success
+      description: The operation was successful
       content:
         application/json:
           schema:
-            $ref: '../model/project.yml#/ProjectDto'
+            $ref: '../model/proposal.yml#/ProposalDto'
     '400':
-      description: The operation was failed
+      description: The operation failed
       content:
         application/json:
           schema:
             $ref: '../component/error.yml#/ErrorResponse'
+
 delete:
-  summary: Delete an existing project
-  operationId: deleteProject
+  summary: Delete an existing proposal
+  operationId: deleteProposal
   security:
     - bearerAuth: []
   parameters:
-    - name: projectId
+    - name: proposalId
       in: path
       required: true
       schema:
         type: integer
   responses:
     '200':
-      description: The operation was success
+      description: The operation was successful
     '400':
-      description: The operation was failed
+      description: The operation failed
       content:
         application/json:
           schema:
