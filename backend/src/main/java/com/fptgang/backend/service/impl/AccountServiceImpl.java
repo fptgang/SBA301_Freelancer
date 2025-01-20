@@ -16,20 +16,6 @@ import java.util.List;
 
 @Service
 public class AccountServiceImpl implements AccountService {
-    private static final List<String> WHITELIST_PATHS =
-            List.of(
-                    "accountId",
-                    "email",
-                    "firstName",
-                    "lastName",
-                    "balance",
-                    "role",
-                    "isVerified",
-                    "verifiedAt",
-                    "createdAt",
-                    "updatedAt"
-            );
-
     private final AccountRepos accountRepos;
     private final PasswordEncoderConfig passwordEncoderConfig;
 
@@ -95,7 +81,7 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public Page<Account> getAll(Pageable pageable, String filter, boolean includeInvisible) {
-        var spec = OpenApiHelper.<Account>toSpecification(filter, WHITELIST_PATHS);
+        var spec = OpenApiHelper.<Account>toSpecification(filter);
         if (!includeInvisible) {
             spec = spec.and((a, _, cb) -> cb.isTrue(a.get("isVisible")));
         }
