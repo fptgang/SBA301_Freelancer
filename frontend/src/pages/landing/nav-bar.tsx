@@ -40,7 +40,7 @@ export default function NavBar() {
   };
 
   const handleSignup = () => {
-    nav("/register.yml");
+    nav("/register");
     setMobileMenuOpen(false);
   };
 

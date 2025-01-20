@@ -83,14 +83,13 @@ public class AuthServiceImpl implements AuthService {
             GoogleIdToken idToken = verifier.verify(token);
             GoogleIdToken.Payload payload = idToken.getPayload();
             String email = payload.getEmail();
-            String googleAccountId = payload.get("id").toString();
             String firstName = payload.get("given_name").toString();
             String lastName = payload.get("family_name").toString();
             String picture = payload.get("picture").toString();
 
             Account account = accountRepos.findByEmail(email).orElseGet(() -> {
-                log.info("User {} registered using Google account {}", email, googleAccountId);
-                log.info("User {} is verified using Google account {}", email, googleAccountId);
+                log.info("User {} registered using Google account", email);
+                log.info("User {} is verified using Google account ", email);
 
                 return accountRepos.saveAndFlush(
                         Account.builder()
@@ -106,7 +105,7 @@ public class AuthServiceImpl implements AuthService {
             });
 
             Result result = authenticate(account, fingerprint);
-            log.info("User {} logged using Google account {}: token = {}", email, googleAccountId, result.jwt);
+            log.info("User {} logged using Google account: token = {}", email, result.jwt);
 
             return result.dto;
         } catch (GeneralSecurityException | IOException e) {

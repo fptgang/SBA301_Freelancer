@@ -87,8 +87,6 @@ dependencies {
 			mavenBom("com.azure.spring:spring-cloud-azure-dependencies:5.19.0")
 		}
 	}
-
-
 	developmentOnly 'org.springframework.boot:spring-boot-docker-compose'
 	testImplementation 'org.springframework.boot:spring-boot-docker-compose'
 	runtimeOnly 'com.h2database:h2'

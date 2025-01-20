@@ -59,4 +59,7 @@ paths:
     $ref: 'path/projectCategory.yml'
   /projectCategories/{projectCategoryId}:
     $ref: 'path/projectCategory-projectCategoryId.yml'
-
+  /skills:
+    $ref: 'path/skill.yml'
+  /skills/{skillId}:
+    $ref: 'path/skill-skillId.yml'

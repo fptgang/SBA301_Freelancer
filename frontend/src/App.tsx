@@ -41,10 +41,16 @@ import {
   AccountsEdit,
   AccountsList,
   AccountsShow,
-} from "./pages/users";
+} from "./pages/accounts";
 import ResetPassword from "./pages/reset-password";
 import { notificationProvider } from "./providers/notification-provider";
 import axiosInstance from "./config/axios-config";
+import {
+  ProjectsCreate,
+  ProjectsEdit,
+  ProjectsList,
+  ProjectsShow,
+} from "./pages/projects";
 
 function App() {
   return (
@@ -81,6 +87,13 @@ function App() {
                       label: "Project Categories",
                       canDelete: true,
                     },
+                  },
+                  {
+                    name: "projects",
+                    list: "/admin/projects",
+                    create: "/admin/projects/create",
+                    edit: "/admin/projects/edit/:id",
+                    show: "/admin/projects/show/:id",
                   },
                 ]}
                 options={{
@@ -141,6 +154,12 @@ function App() {
                       <Route path="create" element={<UsersCreate />} />
                       <Route path="edit/:id" element={<AccountsEdit />} />
                       <Route path="show/:id" element={<AccountsShow />} />
+                    </Route>
+                    <Route path="projects">
+                      <Route index element={<ProjectsList />} />
+                      <Route path="create" element={<ProjectsCreate />} />
+                      <Route path="edit/:id" element={<ProjectsEdit />} />
+                      <Route path="show/:id" element={<ProjectsShow />} />
                     </Route>
                     <Route path="projectCategories">
                       <Route index element={<ProjectCategoriesList />} />

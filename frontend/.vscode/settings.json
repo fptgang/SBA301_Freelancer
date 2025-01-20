@@ -3,6 +3,8 @@
     "Dtos",
     "geekblue",
     "Idcard",
+    "ncontains",
+    "nendswith",
     "projectcategories",
     "undoable"
   ]

@@ -7,47 +7,115 @@ import {
   BooleanField,
   DateField,
 } from "@refinedev/antd";
-import { Typography } from "antd";
+import { Typography, Card, Descriptions, Space, Tag, Skeleton } from "antd";
+import {
+  FolderOutlined,
+  ClockCircleOutlined,
+  CheckCircleOutlined,
+  EyeOutlined,
+} from "@ant-design/icons";
 
-const { Title } = Typography;
+interface ProjectCategoryDto {
+  projectCategoryId: number;
+  name: string;
+  isVisible: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
 
-export const ProjectCategoriesShow = () => {
-  const { query } = useShow();
-  const { data, isLoading } = query;
-
+export const ProjectCategoriesShow: React.FC = () => {
+  const { queryResult } = useShow<ProjectCategoryDto>();
+  const { data, isLoading } = queryResult;
   const record = data?.data;
+  const isAdmin = localStorage.getItem("role") === "ADMIN";
 
-  const { data: projectCategoryData, isLoading: projectCategoryIsLoading } =
-    useOne({
-      resource: "projectCategories",
-      id: record?.projectCategoryId || "",
-      queryOptions: {
-        enabled: !!record,
-      },
-    });
+  if (isLoading) {
+    return <Skeleton active paragraph={{ rows: 6 }} />;
+  }
 
   return (
     <Show isLoading={isLoading}>
-      <Title level={5}>Project Category</Title>
-      {projectCategoryIsLoading ? (
-        <>Loading...</>
-      ) : (
-        <>{projectCategoryData?.data?.projectCategoryId}</>
-      )}
-      <Title level={5}>Name</Title>
-      <TextField value={record?.name} />
-      {localStorage.getItem("role") == "ADMIN" ? (
-        <>
-          <Title level={5}>Is Visible</Title>
-          <BooleanField value={record?.isVisible} />
-        </>
-      ) : (
-        ""
-      )}
-      <Title level={5}>Created At</Title>
-      <DateField value={record?.createdAt} />
-      <Title level={5}>Updated At</Title>
-      <DateField value={record?.updatedAt} />
+      <Space direction="vertical" size="large" className="w-full">
+        <Card
+          title={
+            <Space>
+              <FolderOutlined className="text-blue-500" />
+              <span className="font-semibold">Category Details</span>
+            </Space>
+          }
+          className="shadow-md"
+        >
+          <Descriptions
+            bordered
+            column={{ xxl: 2, xl: 2, lg: 2, md: 1, sm: 1, xs: 1 }}
+          >
+            <Descriptions.Item
+              label={
+                <Space>
+                  <FolderOutlined />
+                  Name
+                </Space>
+              }
+              span={2}
+            >
+              <span className="font-medium">{record?.name}</span>
+            </Descriptions.Item>
+
+            {isAdmin && (
+              <Descriptions.Item
+                label={
+                  <Space>
+                    <EyeOutlined />
+                    Visibility
+                  </Space>
+                }
+                span={2}
+              >
+                <BooleanField
+                  value={record?.isVisible}
+                  trueIcon={<CheckCircleOutlined className="text-green-500" />}
+                  falseIcon={<ClockCircleOutlined className="text-gray-500" />}
+                  valueLabelTrue="Visible"
+                  valueLabelFalse="Hidden"
+                />
+              </Descriptions.Item>
+            )}
+          </Descriptions>
+        </Card>
+
+        <Card
+          title={
+            <Space>
+              <ClockCircleOutlined className="text-blue-500" />
+              <span className="font-semibold">System Information</span>
+            </Space>
+          }
+          className="shadow-md"
+        >
+          <Descriptions
+            bordered
+            column={{ xxl: 2, xl: 2, lg: 2, md: 1, sm: 1, xs: 1 }}
+          >
+            <Descriptions.Item label="Created At">
+              <DateField
+                value={record?.createdAt}
+                format="MMMM D, YYYY HH:mm:ss"
+              />
+            </Descriptions.Item>
+
+            <Descriptions.Item label="Last Updated">
+              <DateField
+                value={record?.updatedAt}
+                format="MMMM D, YYYY HH:mm:ss"
+              />
+            </Descriptions.Item>
+
+            <Descriptions.Item label="Category ID" span={2}>
+              <Tag className="font-mono">{record?.projectCategoryId}</Tag>
+            </Descriptions.Item>
+          </Descriptions>
+        </Card>
+      </Space>
     </Show>
   );
 };

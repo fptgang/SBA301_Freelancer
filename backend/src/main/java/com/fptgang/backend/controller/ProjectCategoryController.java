@@ -6,9 +6,12 @@ import com.fptgang.backend.api.model.GetProjectCategories200Response;
 import com.fptgang.backend.api.model.ProjectCategoryDto;
 import com.fptgang.backend.mapper.ProjectCategoryMapper;
 import com.fptgang.backend.model.Account;
+import com.fptgang.backend.model.Role;
 import com.fptgang.backend.service.AccountService;
 import com.fptgang.backend.service.ProjectCategoryService;
 import com.fptgang.backend.util.OpenApiHelper;
+import com.fptgang.backend.util.SecurityUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -18,6 +21,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/v1")
 public class ProjectCategoryController implements ProjectCategoriesApi {
@@ -47,11 +51,10 @@ public class ProjectCategoryController implements ProjectCategoriesApi {
 
     @Override
     public ResponseEntity<GetProjectCategories200Response> getProjectCategories(GetAccountsPageableParameter pageable, String filter) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        Account account = accountService.findByEmail(authentication.getName());
+
         var page = OpenApiHelper.toPageable(pageable);
         Page<ProjectCategoryDto> res;
-        if (account.getRole().equals("ADMIN")) {
+        if (Role.ADMIN.hasPermission(SecurityUtil.getCurrentUserRole())) {
             res = projectCategoryService.getAll(page, filter).map(projectCategoryMapper::toDTO);
         } else
             res = projectCategoryService.getAllVisible(page, filter).map(projectCategoryMapper::toDTO);

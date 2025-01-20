@@ -1,10 +1,10 @@
 get:
-  summary: Get a project by ID
-  operationId: getProjectById
+  summary: Get a skill by ID
+  operationId: getSkillById
   security:
     - bearerAuth: []
   parameters:
-    - name: projectId
+    - name: skillId
       in: path
       required: true
       schema:
@@ -15,7 +15,7 @@ get:
       content:
         application/json:
           schema:
-            $ref: '../model/project.yml#/ProjectDto'
+            $ref: '../model/skill.yml#/SkillDto'
     '400':
       description: The operation was failed
       content:
@@ -23,30 +23,30 @@ get:
           schema:
             $ref: '../component/error.yml#/ErrorResponse'
 put:
-  summary: Update an existing project
-  operationId: updateProject
+  summary: Update an existing skill
+  operationId: updateSkill
   security:
     - bearerAuth: []
   parameters:
-    - name: projectId
+    - name: skillId
       in: path
       required: true
       schema:
         type: integer
   requestBody:
-    description: Project to update
+    description: Skill to update
     required: true
     content:
       application/json:
         schema:
-          $ref: '../model/project.yml#/ProjectDto'
+          $ref: '../model/skill.yml#/SkillDto'
   responses:
     '200':
       description: The operation was success
       content:
         application/json:
           schema:
-            $ref: '../model/project.yml#/ProjectDto'
+            $ref: '../model/skill.yml#/SkillDto'
     '400':
       description: The operation was failed
       content:
@@ -54,12 +54,12 @@ put:
           schema:
             $ref: '../component/error.yml#/ErrorResponse'
 delete:
-  summary: Delete an existing project
-  operationId: deleteProject
+  summary: Delete an existing skill
+  operationId: deleteSkill
   security:
     - bearerAuth: []
   parameters:
-    - name: projectId
+    - name: skillId
       in: path
       required: true
       schema:

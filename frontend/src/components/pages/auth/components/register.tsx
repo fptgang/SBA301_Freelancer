@@ -244,7 +244,10 @@ export const RegisterPage: React.FC<RegisterProps> = ({
           >
             <Input
               size="large"
-              placeholder={translate("pages.register.yml.fields.email", "Email")}
+              placeholder={translate(
+                "pages.register.yml.fields.email",
+                "Email"
+              )}
             />
           </Form.Item>
           <Form.Item
