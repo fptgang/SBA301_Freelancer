@@ -56,6 +56,6 @@ public class SkillServiceImpl implements SkillService {
     @Override
     public Page<Skill> getAllVisible(Pageable pageable, String filter) {
         var spec = OpenApiHelper.<Skill>toSpecification(filter);
-        return skillRepos.findAll(spec, pageable);
+        return skillRepos.findAllByVisibleTrue(pageable, spec);
     }
 }
