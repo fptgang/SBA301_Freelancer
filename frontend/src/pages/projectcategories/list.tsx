@@ -9,13 +9,38 @@ import {
   BooleanField,
   DateField,
   RefreshButton,
+  CreateButton,
 } from "@refinedev/antd";
-import { Table, Space } from "antd";
-import { CheckSquareOutlined } from "@ant-design/icons";
+import { Table, Space, Tooltip, Typography, Input, Badge, Tag } from "antd";
+import {
+  FolderOutlined,
+  CheckSquareOutlined,
+  ClockCircleOutlined,
+  EyeOutlined,
+} from "@ant-design/icons";
 
-export const ProjectCategoriesList = () => {
-  const { tableProps } = useTable({
+const { Text } = Typography;
+
+export const ProjectCategoriesList: React.FC = () => {
+  const { tableProps, searchFormProps } = useTable({
     syncWithLocation: true,
+    sorters: {
+      initial: [
+        {
+          field: "createdAt",
+          order: "desc",
+        },
+      ],
+    },
+    filters: {
+      initial: [
+        {
+          field: "isVisible",
+          operator: "eq",
+          value: undefined,
+        },
+      ],
+    },
   });
 
   const { data: projectCategoryData, isLoading: projectCategoryIsLoading } =
@@ -27,57 +52,144 @@ export const ProjectCategoriesList = () => {
       },
     });
 
+  const getVisibilityStatus = (isVisible: boolean) => {
+    return isVisible ? (
+      <Badge status="success" text="Visible" />
+    ) : (
+      <Badge status="default" text="Hidden" />
+    );
+  };
+
+  const isAdmin = localStorage.getItem("role") === "ADMIN";
+
   return (
-    <List>
-      <Table {...tableProps} rowKey="id">
+    <List
+      headerButtons={[
+        <RefreshButton key="refresh" className="mr-2" />,
+        <CreateButton resource="projectCategories" />,
+      ]}
+    >
+      <div className="mb-6">
+        <Input.Search
+          placeholder="Search project categories..."
+          className="max-w-md"
+          {...(searchFormProps.onFinish && {
+            onSearch: searchFormProps.onFinish,
+          })}
+        />
+      </div>
+
+      <Table
+        {...tableProps}
+        rowKey="id"
+        className="overflow-x-auto"
+        scroll={{ x: true }}
+      >
         <Table.Column
           dataIndex={["projectCategoryId"]}
-          title="Project Category"
+          title={
+            <Tooltip title="Category identifier">
+              <Space>
+                <FolderOutlined />
+                <span>Category ID</span>
+              </Space>
+            </Tooltip>
+          }
+          sorter
+          render={(value: string) => (
+            <Text className="font-medium">{value}</Text>
+          )}
         />
 
-        <Table.Column dataIndex="name" title="Name" />
-        {localStorage.getItem("role") == "ADMIN" ? (
+        <Table.Column
+          dataIndex="name"
+          title="Name"
+          sorter
+          render={(value: string) => (
+            <Text strong className="capitalize">
+              {value}
+            </Text>
+          )}
+        />
+
+        {isAdmin && (
           <Table.Column
-            dataIndex={["isVisible"]}
-            title="Is Visible"
-            render={(value: any) => <BooleanField value={value} />}
+            dataIndex="isVisible"
+            title={
+              <Tooltip title="Category visibility status">
+                <Space>
+                  <EyeOutlined />
+                  <span>Visibility</span>
+                </Space>
+              </Tooltip>
+            }
+            render={(value: boolean) => getVisibilityStatus(value)}
+            filters={[
+              { text: "Visible", value: true },
+              { text: "Hidden", value: false },
+            ]}
+            filterMultiple={false}
           />
-        ) : (
-          ""
         )}
+
         <Table.Column
-          dataIndex={["createdAt"]}
-          title="Created At"
-          render={(value: any) => <DateField value={value} />}
+          dataIndex="createdAt"
+          title={
+            <Space>
+              <ClockCircleOutlined />
+              <span>Created</span>
+            </Space>
+          }
+          render={(value: string) => (
+            <DateField value={value} format="MMMM DD, YYYY" />
+          )}
+          sorter
+          defaultSortOrder="descend"
         />
+
         <Table.Column
-          dataIndex={["updatedAt"]}
+          dataIndex="updatedAt"
           title="Updated At"
-          render={(value: any) => <DateField value={value} />}
+          render={(value: string) => (
+            <DateField value={value} format="MMMM DD, YYYY" />
+          )}
+          sorter
         />
+
         <Table.Column
           title="Actions"
-          dataIndex="actions"
+          fixed="right"
           render={(_, record: BaseRecord) => (
-            <Space>
-              <EditButton
-                hideText
-                size="small"
-                recordItemId={record.projectCategoryId}
-              />
-              <ShowButton
-                hideText
-                size="small"
-                recordItemId={record.projectCategoryId}
-              />
-              {record.isVisible ? (
-                <DeleteButton
+            <Space size="middle">
+              <Tooltip title="Edit Category">
+                <EditButton
                   hideText
                   size="small"
                   recordItemId={record.projectCategoryId}
+                  className="text-blue-600 hover:text-blue-700"
                 />
-              ) : (
-                <></>
+              </Tooltip>
+              <Tooltip title="View Details">
+                <ShowButton
+                  hideText
+                  size="small"
+                  recordItemId={record.projectCategoryId}
+                  className="text-green-600 hover:text-green-700"
+                />
+              </Tooltip>
+              {record.isVisible && (
+                <Tooltip title="Delete Category">
+                  <DeleteButton
+                    hideText
+                    size="small"
+                    recordItemId={record.projectCategoryId}
+                    className="text-red-600 hover:text-red-700"
+                    confirmTitle="Delete Category"
+                    confirmOkText="Delete"
+                    confirmCancelText="Cancel"
+                    about="Are you sure you want to delete this category? This action cannot be undone."
+                  />
+                </Tooltip>
               )}
             </Space>
           )}

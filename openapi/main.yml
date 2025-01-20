@@ -79,4 +79,8 @@ paths:
      $ref: 'path/file.yml'
   /files/{fileId}:
     $ref: 'path/file-fileId.yml'   
+  /skills:
+    $ref: 'path/skill.yml'
+  /skills/{skillId}:
+    $ref: 'path/skill-skillId.yml'
 

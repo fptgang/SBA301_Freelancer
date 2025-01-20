@@ -21,7 +21,9 @@ export const adapter = new StringAdapter(`
 p, ADMIN, accounts, (list)|(create)
 p, ADMIN, accounts/*, (edit)|(show)|(delete)
 p, ADMIN, accounts/*, field
-
+p, ADMIN, projects, (list)|(create)
+p, ADMIN, projects/*, (edit)|(show)|(delete)
+p, ADMIN, projects/*, field
 p, ADMIN, projectCategories, (list)|(create)
 p, ADMIN, projectCategories/*, (edit)|(show)|(delete)
 

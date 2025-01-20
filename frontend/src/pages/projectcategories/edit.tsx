@@ -1,61 +1,81 @@
 import React from "react";
-import { Edit, useForm, useSelect } from "@refinedev/antd";
-import { Form, Input, Select, Checkbox, DatePicker } from "antd";
-import dayjs from "dayjs";
+import { Edit, useForm } from "@refinedev/antd";
+import { Form, Input, Checkbox, Card, Space } from "antd";
+import { FolderOutlined, EyeOutlined } from "@ant-design/icons";
+import { ProjectCategoryDto } from "../../../generated";
 
-export const ProjectCategoriesEdit = () => {
-  const { formProps, saveButtonProps, query } = useForm();
+export const ProjectCategoriesEdit: React.FC = () => {
+  const { formProps, saveButtonProps, queryResult } =
+    useForm<ProjectCategoryDto>({
+      redirect: "show",
+    });
 
-  const projectCategoriesData = query?.data?.data;
-
-  const { selectProps: projectCategorySelectProps } = useSelect({
-    resource: "projectCategories",
-    defaultValue: projectCategoriesData?.projectCategoryId,
-    optionLabel: "name",
-  });
+  const projectCategoriesData = queryResult?.data?.data;
+  const isAdmin = localStorage.getItem("role") === "ADMIN";
 
   return (
     <Edit saveButtonProps={saveButtonProps}>
-      <Form {...formProps} layout="vertical">
-        <Form.Item
-          label="Project Category"
-          name={"projectCategoryId"}
-          rules={[
-            {
-              required: true,
-            },
-          ]}
-          hidden
+      <Form
+        {...formProps}
+        layout="vertical"
+        initialValues={{
+          ...formProps.initialValues,
+          isVisible: formProps.initialValues?.isVisible ?? true,
+        }}
+      >
+        <Card
+          title={
+            <Space>
+              <FolderOutlined className="text-blue-500" />
+              <span className="font-semibold">Edit Category</span>
+            </Space>
+          }
+          className="shadow-md"
         >
-          {/* <Select {...projectCategorySelectProps} /> */}
-        </Form.Item>
-        <Form.Item
-          label="Name"
-          name={["name"]}
-          rules={[
-            {
-              required: true,
-            },
-          ]}
-        >
-          <Input />
-        </Form.Item>
-        {localStorage.getItem("role") == "ADMIN" ? (
+          {/* Hidden Project Category ID */}
+          <Form.Item name="projectCategoryId" hidden>
+            <Input type="hidden" />
+          </Form.Item>
+
+          {/* Category Name */}
           <Form.Item
-            label="Is Visible"
-            valuePropName="checked"
-            name={["isVisible"]}
+            label="Category Name"
+            name="name"
             rules={[
               {
                 required: true,
+                message: "Please enter a category name",
+              },
+              {
+                min: 3,
+                message: "Category name must be at least 3 characters",
+              },
+              {
+                max: 50,
+                message: "Category name cannot exceed 50 characters",
               },
             ]}
           >
-            <Checkbox>Is Visible</Checkbox>
+            <Input placeholder="Enter category name" className="max-w-md" />
           </Form.Item>
-        ) : (
-          ""
-        )}
+
+          {/* Visibility Toggle - Admin Only */}
+          {isAdmin && (
+            <Form.Item
+              label={
+                <Space>
+                  <EyeOutlined />
+                  <span>Visibility</span>
+                </Space>
+              }
+              name="isVisible"
+              valuePropName="checked"
+              tooltip="Control whether this category is visible to users"
+            >
+              <Checkbox>Make this category visible to users</Checkbox>
+            </Form.Item>
+          )}
+        </Card>
       </Form>
     </Edit>
   );
