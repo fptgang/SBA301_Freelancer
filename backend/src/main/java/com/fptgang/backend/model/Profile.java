@@ -46,6 +46,9 @@ public class Profile {
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
+    @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT TRUE")
+    private boolean isVisible = true;
+
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "account_id")
     private Account account;
