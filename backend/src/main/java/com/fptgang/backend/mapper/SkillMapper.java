@@ -13,7 +13,7 @@ public class SkillMapper extends BaseMapper<SkillDto, Skill> {
     private SkillRepos skillRepos;
 
     @Override
-    SkillDto toDTO(Skill entity) {
+    public SkillDto toDTO(Skill entity) {
         if (entity == null) {
             return null;
         }
@@ -27,7 +27,7 @@ public class SkillMapper extends BaseMapper<SkillDto, Skill> {
     }
 
     @Override
-    Skill toEntity(SkillDto dto) {
+    public Skill toEntity(SkillDto dto) {
         if (dto == null) {
             return null;
         }
