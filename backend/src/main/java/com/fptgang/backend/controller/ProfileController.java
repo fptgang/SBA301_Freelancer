@@ -25,12 +25,10 @@ public class ProfileController implements ProfilesApi {
     }
 
 
-    @PostMapping
+    @Override
     public ResponseEntity<ProfileDto> createProfile(ProfileDto profileDto) {
-        ProfileDto response = profileMapper
-                .toDTO(profileService
-                        .create(profileMapper.toEntity(profileDto)));
-        return new ResponseEntity<>(response, HttpStatus.CREATED);
+        var profile = profileMapper.toEntity(profileDto);
+        return new ResponseEntity<>(profileMapper.toDTO(profileService.create(profile)), HttpStatus.OK);
     }
 
     @Override
@@ -53,10 +51,4 @@ public class ProfileController implements ProfilesApi {
         return ProfilesApi.super.updateProfile(profileId, profileDto);
     }
 
-    @PostMapping("/{projectId}")
-    public ResponseEntity<Void> deleteProfileById(@PathVariable long projectId) {
-        ResponseEntity<Void> response = new ResponseEntity<Void>(HttpStatus.OK);
-        profileService.deleteById(projectId);
-        return response;
-    }
 }
