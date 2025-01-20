@@ -1,0 +1,58 @@
+get:
+  summary: Get a list of files
+  operationId: getFiles
+  security:
+    - bearerAuth: []
+  parameters:
+    - $ref: '../param/pageable.yml#/Pageable'
+    - $ref: '../param/filter.yml#/Filter'
+  responses:
+    '200':
+      description: The operation was successful
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '../component/page.yml#/Page'
+              - type: object
+                properties:
+                  content:
+                    type: array
+                    items:
+                      $ref: '../model/file.yml#/FileDto'
+    '400':
+      description: The operation failed
+      content:
+        application/json:
+          schema:
+            $ref: '../component/error.yml#/ErrorResponse'
+
+post:
+  summary: Upload a file
+  operationId: uploadFile
+  security:
+    - bearerAuth: []
+  requestBody:
+    description: File to upload
+    required: true
+    content:
+      multipart/form-data:
+        schema:
+          type: object
+          properties:
+            file:
+              type: string
+              format: binary
+  responses:
+    '200':
+      description: The operation was successful
+      content:
+        application/json:
+          schema:
+            $ref: '../model/file.yml#/FileDto'
+    '400':
+      description: The operation failed
+      content:
+        application/json:
+          schema:
+            $ref: '../component/error.yml#/ErrorResponse'

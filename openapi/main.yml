@@ -62,5 +62,21 @@ paths:
   /transactions:
      $ref: 'path/transaction.yml'
   /transactions/{transactionId}:
-    $ref: 'path/transaction-transactionId.yml'   
+    $ref: 'path/transaction-transactionId.yml'
+  /proposals:
+     $ref: 'path/proposal.yml'
+  /proposals/{proposalId}:
+    $ref: 'path/proposal-proposalId.yml'
+  /milestones:
+     $ref: 'path/milestone.yml'
+  /milestones/{milestoneId}:
+    $ref: 'path/milestone-milestoneId.yml'
+  /messages:
+     $ref: 'path/message.yml'
+  /messages/{messagesId}:
+    $ref: 'path/message-messageId.yml'   
+  /files:
+     $ref: 'path/file.yml'
+  /files/{fileId}:
+    $ref: 'path/file-fileId.yml'   
 

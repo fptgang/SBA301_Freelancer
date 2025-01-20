@@ -1,0 +1,77 @@
+get:
+  summary: Get a file by ID
+  operationId: getFileById
+  security:
+    - bearerAuth: []
+  parameters:
+    - name: fileId
+      in: path
+      required: true
+      schema:
+        type: integer
+  responses:
+    '200':
+      description: The operation was successful
+      content:
+        application/json:
+          schema:
+            $ref: '../model/file.yml#/FileDto'
+    '400':
+      description: The operation failed
+      content:
+        application/json:
+          schema:
+            $ref: '../component/error.yml#/ErrorResponse'
+
+put:
+  summary: Update metadata of an existing file
+  operationId: updateFile
+  security:
+    - bearerAuth: []
+  parameters:
+    - name: fileId
+      in: path
+      required: true
+      schema:
+        type: integer
+  requestBody:
+    description: Metadata to update
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../model/file.yml#/FileDto'
+  responses:
+    '200':
+      description: The operation was successful
+      content:
+        application/json:
+          schema:
+            $ref: '../model/file.yml#/FileDto'
+    '400':
+      description: The operation failed
+      content:
+        application/json:
+          schema:
+            $ref: '../component/error.yml#/ErrorResponse'
+
+delete:
+  summary: Delete an existing file
+  operationId: deleteFile
+  security:
+    - bearerAuth: []
+  parameters:
+    - name: fileId
+      in: path
+      required: true
+      schema:
+        type: integer
+  responses:
+    '200':
+      description: The operation was successful
+    '400':
+      description: The operation failed
+      content:
+        application/json:
+          schema:
+            $ref: '../component/error.yml#/ErrorResponse'
