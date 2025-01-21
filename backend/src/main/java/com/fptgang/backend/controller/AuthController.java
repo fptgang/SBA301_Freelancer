@@ -53,18 +53,13 @@ public class AuthController implements AuthApi {
 
     @Override
     public ResponseEntity<AuthResponseDto> loginWithGoogle(String body) {
-        try {
-            log.info("Logging in with Google token: {}", body);
-            AuthResponseDto dto = authService.loginWithGoogle(
-                    body.replace("\"",""),
-                    getFingerprint()
-            );
-            attachSessionIdCookie();
-            return ResponseEntity.ok(dto);
-        } catch (Exception e) {
-            log.error("Error while logging in with Google {}", e.getMessage());
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-        }
+        log.info("Logging in with Google token: {}", body);
+        AuthResponseDto dto = authService.loginWithGoogle(
+                body.replace("\"",""),
+                getFingerprint()
+        );
+        attachSessionIdCookie();
+        return ResponseEntity.ok(dto);
     }
 
     @Override
@@ -84,17 +79,13 @@ public class AuthController implements AuthApi {
 
     @Override
     public ResponseEntity<AuthResponseDto> login(LoginRequestDto loginRequestDto) {
-        try {
-            AuthResponseDto dto = authService.login(
-                    loginRequestDto.getEmail(),
-                    loginRequestDto.getPassword(),
-                    getFingerprint()
-            );
-            attachSessionIdCookie();
-            return ResponseEntity.ok(dto);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-        }
+        AuthResponseDto dto = authService.login(
+                loginRequestDto.getEmail(),
+                loginRequestDto.getPassword(),
+                getFingerprint()
+        );
+        attachSessionIdCookie();
+        return ResponseEntity.ok(dto);
     }
 
     @Override
