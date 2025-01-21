@@ -1,5 +1,7 @@
 package com.fptgang.backend.util;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.Expression;
 import jakarta.persistence.criteria.Path;
@@ -21,6 +23,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public class OpenApiHelper {
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     public static Pageable toPageable(Object pageableObj) {
         if (pageableObj == null) {
@@ -81,15 +84,46 @@ public class OpenApiHelper {
         if (filterString == null)
             return Specification.anyOf();
 
+        filterString = filterString.trim();
+
+        if (filterString.isEmpty())
+            return Specification.anyOf();
+
+        if (filterString.startsWith("[") && filterString.endsWith("]")) {
+            try {
+                String[] args = OBJECT_MAPPER.readValue(filterString, String[].class);
+                if (args.length == 0) {
+                    return Specification.anyOf();
+                }
+
+                if (args.length == 1) {
+                    return toSpecificationSingle(args[0]);
+                }
+
+                //noinspection unchecked
+                return Specification.allOf(
+                        Arrays.stream(args)
+                                .map(OpenApiHelper::toSpecificationSingle)
+                                .toArray(Specification[]::new)
+                );
+            } catch (JsonProcessingException e) {
+                throw new IllegalArgumentException("Invalid multi-filter format");
+            }
+        }
+
+        return toSpecificationSingle(filterString);
+    }
+
+    private static <T> Specification<T> toSpecificationSingle(String filterString) {
         String[] filterParts = filterString.split(",", 3);
 
-        if (filterParts.length != 3) {
+        if (filterParts.length != 2 && filterParts.length != 3) {
             throw new IllegalArgumentException("Invalid filter format. Expected: field,op,value");
         }
 
         String field = filterParts[0];
         String operator = filterParts[1].toLowerCase();
-        String value = filterParts[2];
+        String value = filterParts.length == 3 ? filterParts[2] : "";
 
         return (root, query, criteriaBuilder) -> {
             Path<?> fieldPath = root.get(field);
