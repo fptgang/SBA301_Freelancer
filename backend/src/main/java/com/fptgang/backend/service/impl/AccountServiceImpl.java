@@ -3,49 +3,74 @@ package com.fptgang.backend.service.impl;
 import com.fptgang.backend.model.Account;
 import com.fptgang.backend.model.Role;
 import com.fptgang.backend.repository.AccountRepos;
-import com.fptgang.backend.security.PasswordEncoderConfig;
 import com.fptgang.backend.service.AccountService;
 import com.fptgang.backend.util.OpenApiHelper;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.util.List;
+import java.time.LocalDateTime;
 
 @Service
+@Slf4j
 public class AccountServiceImpl implements AccountService {
+    private final String DEFAULT_ESCROW_EMAIL = "escrow@hirable.com";
     private final AccountRepos accountRepos;
-    private final PasswordEncoderConfig passwordEncoderConfig;
+
+    @Value("${hirable.account.escrow:0}")
+    private Long escrowAccountId;
 
     @Autowired
-    public AccountServiceImpl(AccountRepos accountRepos, PasswordEncoderConfig passwordEncoderConfig) {
+    public AccountServiceImpl(AccountRepos accountRepos) {
         this.accountRepos = accountRepos;
-        this.passwordEncoderConfig = passwordEncoderConfig;
-        createTestAccount();
     }
 
-    private void createTestAccount() {
-        for (int i = 0; i < 4; i++) {
-            if (accountRepos.findByEmail((i % 2 > 0 ? "admin" :"test") + (i/2+1) + "@example.com").isPresent()) {
-                continue;
+    @EventListener(ApplicationReadyEvent.class)
+    public void initEscrowAccount() {
+        log.info("Configured escrow account id: {}", escrowAccountId);
+
+        if (escrowAccountId != null && escrowAccountId > 0) {
+            var acc = findById(escrowAccountId);
+            if (acc == null) {
+                escrowAccountId = 0L;
+                log.info("Cannot find escrow account. Falling back to default...");
+            } else if (acc.getRole() != Role.ADMIN) {
+                escrowAccountId = 0L;
+                log.info("Escrow account is not ADMIN. Falling back to default...");
+            } else {
+                return;
             }
-            createTestAccount(i);
         }
+
+        var acc = accountRepos.findByEmail(DEFAULT_ESCROW_EMAIL).orElse(null);
+        if (acc != null) {
+            escrowAccountId = acc.getAccountId();
+            log.info("Picked account id {} as escrow", escrowAccountId);
+            return;
+        }
+
+        acc = Account.builder()
+                .email(DEFAULT_ESCROW_EMAIL)
+                .isVerified(true)
+                .verifiedAt(LocalDateTime.now())
+                .firstName("Escrow")
+                .role(Role.ADMIN)
+                .balance(BigDecimal.ZERO)
+                .build();
+        acc = accountRepos.save(acc);
+        escrowAccountId = acc.getAccountId();
+        log.info("Created escrow account id {}", escrowAccountId);
     }
 
-    private Account createTestAccount(Integer accountId) {
-        Account account = new Account();
-        account.setEmail((accountId % 2 > 0 ? "admin" :"test") + (accountId/2+1)  + "@example.com");
-        account.setPassword(passwordEncoderConfig.bcryptEncoder().encode("12345")   );
-        account.setVisible(true);
-        account.setBalance(BigDecimal.valueOf(0));
-        account.setVerified(false);
-        account.setRole(accountId % 2 > 0 ? Role.ADMIN : Role.CLIENT);
-        account.setFirstName("John");
-        account.setLastName(accountId % 2 > 0 ? "Admin" : "Doe");
-        return create(account);
+    @Override
+    public long getEscrowAccountId() {
+        return escrowAccountId;
     }
 
     @Override
