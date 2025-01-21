@@ -10,5 +10,8 @@ public interface MessageService {
     Message findByMessageId(long messageId);
     void deleteById(long messageId);
     Page<Message> getAll(Pageable pageable, String filter);
-    Page<Message> getAllBySenderOrReceiver( Long senderId,Pageable pageable, String filter);
+    Page<Message> getAllInvolving(long participantId, Pageable pageable, String filter, String search, boolean includeInvisible);
+    default Page<Message> getAllInvolving(long participantId, Pageable pageable, String filter, String search) {
+        return getAllInvolving(participantId, pageable, filter, search, false);
+    }
 }

@@ -1,5 +1,6 @@
 package com.fptgang.backend.model;
 
+import com.fptgang.backend.util.Searchable;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -24,6 +25,7 @@ public class ProjectCategory {
     private Long projectCategoryId;
 
     @Column(columnDefinition = "NVARCHAR(255)", length = 255, nullable = false)
+    @Searchable
     private String name;
 
     @CreationTimestamp

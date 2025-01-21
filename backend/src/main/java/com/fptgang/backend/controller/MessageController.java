@@ -1,12 +1,12 @@
 package com.fptgang.backend.controller;
 
 import com.fptgang.backend.api.controller.MessagesApi;
-import com.fptgang.backend.api.model.GetAccountsPageableParameter;
 import com.fptgang.backend.api.model.GetMessages200Response;
 import com.fptgang.backend.api.model.MessageDto;
+import com.fptgang.backend.api.model.Pageable;
 import com.fptgang.backend.mapper.MessageMapper;
-import com.fptgang.backend.model.Account;
 import com.fptgang.backend.model.Message;
+import com.fptgang.backend.model.Role;
 import com.fptgang.backend.service.AccountService;
 import com.fptgang.backend.service.MessageService;
 import com.fptgang.backend.util.OpenApiHelper;
@@ -21,8 +21,6 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -48,18 +46,16 @@ public class MessageController implements MessagesApi {
     private MessageMapper messageMapper;
 
     @Override
-    public ResponseEntity<GetMessages200Response> getMessages(GetAccountsPageableParameter pageable, String filter) {
+    public ResponseEntity<GetMessages200Response> getMessages(Pageable pageable, String filter, String search) {
         log.info("Getting messages");
-        log.info(filter);
-        log.info(pageable.toString());
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        Account account = accountService.findByEmail(authentication.getName());
         var page = OpenApiHelper.toPageable(pageable);
-        Page<MessageDto> res = null;
-        if (account.getAccountId() != null) {
-            log.info(account.getAccountId().toString());
-            res = messageService.getAllBySenderOrReceiver(account.getAccountId(), page, filter).map(messageMapper::toDTO);
-        }
+        var userEmail = SecurityUtil.requireCurrentUserEmail();
+        var account = accountService.findByEmail(userEmail);
+        var userId = account.getAccountId();
+        var includeInvisible = SecurityUtil.hasPermission(Role.ADMIN);
+        Page<MessageDto> res = messageService
+                .getAllInvolving(userId, page, filter, search, includeInvisible)
+                .map(messageMapper::toDTO);
         return OpenApiHelper.respondPage(res, GetMessages200Response.class);
     }
 

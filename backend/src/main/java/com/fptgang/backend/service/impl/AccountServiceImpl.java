@@ -105,8 +105,9 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public Page<Account> getAll(Pageable pageable, String filter, boolean includeInvisible) {
-        var spec = OpenApiHelper.<Account>toSpecification(filter);
+    public Page<Account> getAll(Pageable pageable, String filter, String search, boolean includeInvisible) {
+        var spec = OpenApiHelper.<Account>filterToSpec(filter);
+        spec = spec.and(OpenApiHelper.searchToSpec(search));
         if (!includeInvisible) {
             spec = spec.and((a, _, cb) -> cb.isTrue(a.get("isVisible")));
         }

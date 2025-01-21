@@ -14,7 +14,4 @@ import java.util.Optional;
 @Repository
 public interface ProjectCategoryRepos extends JpaRepository<ProjectCategory,Long>, JpaSpecificationExecutor<ProjectCategory> {
     Optional<ProjectCategory> findByProjectCategoryId(Long projectCategoryId);
-
-    @Query("SELECT a FROM ProjectCategory a WHERE a.isVisible = true")
-    Page<ProjectCategory> findAllByVisibleTrue(Pageable pageable, Specification<ProjectCategory> spec);
 }

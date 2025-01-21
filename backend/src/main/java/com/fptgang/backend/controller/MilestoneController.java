@@ -3,8 +3,10 @@ package com.fptgang.backend.controller;
 import com.fptgang.backend.api.controller.MilestonesApi;
 import com.fptgang.backend.api.model.*;
 import com.fptgang.backend.mapper.MilestoneMapper;
+import com.fptgang.backend.model.Role;
 import com.fptgang.backend.service.MilestoneService;
 import com.fptgang.backend.util.OpenApiHelper;
+import com.fptgang.backend.util.SecurityUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -42,10 +44,13 @@ public class MilestoneController implements MilestonesApi {
     }
 
     @Override
-    public ResponseEntity<GetMilestones200Response> getMilestones(GetAccountsPageableParameter pageable, String filter) {
+    public ResponseEntity<GetMilestones200Response> getMilestones(Pageable pageable, String filter, String search) {
         log.info("Getting milestone");
         var page = OpenApiHelper.toPageable(pageable);
-        var res = milestoneService.getAll(page, filter).map(milestoneMapper::toDTO);
+        var includeInvisible = SecurityUtil.hasPermission(Role.ADMIN);
+        var res = milestoneService
+                .getAll(page, filter, search, includeInvisible)
+                .map(milestoneMapper::toDTO);
         return OpenApiHelper.respondPage(res, GetMilestones200Response.class);
     }
 

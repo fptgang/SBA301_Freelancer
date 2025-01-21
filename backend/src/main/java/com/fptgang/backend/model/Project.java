@@ -1,5 +1,6 @@
 package com.fptgang.backend.model;
 
+import com.fptgang.backend.util.Searchable;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -33,9 +34,11 @@ public class Project {
     private Account client;
 
     @Column(columnDefinition = "NVARCHAR(255)", length = 255, nullable = false)
+    @Searchable
     private String title;
 
     @Column(columnDefinition = "TEXT", length = 10000000, nullable = false)
+    @Searchable
     private String description;
 
     @Enumerated(EnumType.STRING)

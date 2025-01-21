@@ -1,7 +1,6 @@
 package com.fptgang.backend.service.impl;
 
 import com.fptgang.backend.exception.InvalidInputException;
-import com.fptgang.backend.model.Project;
 import com.fptgang.backend.model.Skill;
 import com.fptgang.backend.repository.SkillRepos;
 import com.fptgang.backend.service.SkillService;
@@ -48,14 +47,12 @@ public class SkillServiceImpl implements SkillService {
     }
 
     @Override
-    public Page<Skill> getAll(Pageable pageable, String filter) {
-        var spec = OpenApiHelper.<Skill>toSpecification(filter);
+    public Page<Skill> getAll(Pageable pageable, String filter, String search, boolean includeInvisible) {
+        var spec = OpenApiHelper.<Skill>filterToSpec(filter);
+        spec = spec.and(OpenApiHelper.searchToSpec(search));
+        if (!includeInvisible) {
+            spec = spec.and((a, _, cb) -> cb.isTrue(a.get("isVisible")));
+        }
         return skillRepos.findAll(spec, pageable);
-    }
-
-    @Override
-    public Page<Skill> getAllVisible(Pageable pageable, String filter) {
-        var spec = OpenApiHelper.<Skill>toSpecification(filter);
-        return skillRepos.findAllByVisibleTrue(pageable, spec);
     }
 }

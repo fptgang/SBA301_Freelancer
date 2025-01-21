@@ -14,6 +14,4 @@ import java.util.Optional;
 @Repository
 public interface SkillRepos extends JpaRepository<Skill, Long>, JpaSpecificationExecutor<Skill> {
     Optional<Skill> findBySkillId(Long skillId);
-    @Query("SELECT a FROM Skill a WHERE a.isVisible = true")
-    Page<Skill> findAllByVisibleTrue(Pageable pageable, Specification<Skill> spec);
 }

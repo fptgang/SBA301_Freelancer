@@ -10,6 +10,9 @@ public interface TransactionService {
     Transaction create(Transaction transaction);
     Transaction findById(long id);
     Transaction update(Transaction transaction);
-    Page<Transaction> getAll(Pageable pageable, String filter);
+    Page<Transaction> getAll(Pageable pageable, String filter, String search);
+    default Page<Transaction> getAll(Pageable pageable, String filter) {
+        return getAll(pageable, filter, null);
+    }
     Page<Transaction> getAll(Pageable pageable, BigDecimal minAmount, BigDecimal maxAmount);
 }

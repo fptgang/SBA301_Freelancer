@@ -48,8 +48,12 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public Page<Project> getAll(Pageable pageable, String filter) {
-        var spec = OpenApiHelper.<Project>toSpecification(filter);
+    public Page<Project> getAll(Pageable pageable, String filter, String search, boolean includeInvisible) {
+        var spec = OpenApiHelper.<Project>filterToSpec(filter);
+        spec = spec.and(OpenApiHelper.searchToSpec(search));
+        if (!includeInvisible) {
+            spec = spec.and((a, _, cb) -> cb.isTrue(a.get("isVisible")));
+        }
         return projectRepos.findAll(spec, pageable);
     }
 }

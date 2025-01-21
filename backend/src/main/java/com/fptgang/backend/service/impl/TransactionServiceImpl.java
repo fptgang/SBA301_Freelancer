@@ -40,8 +40,9 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public Page<Transaction> getAll(Pageable pageable, String filter) {
-        var spec = OpenApiHelper.<Transaction>toSpecification(filter);
+    public Page<Transaction> getAll(Pageable pageable, String filter, String search) {
+        var spec = OpenApiHelper.<Transaction>filterToSpec(filter);
+        spec = spec.and(OpenApiHelper.searchToSpec(search));
         return transactionRepos.findAll(spec, pageable);
     }
 

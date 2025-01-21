@@ -1,9 +1,7 @@
 package com.fptgang.backend.service.impl;
 
 import com.fptgang.backend.exception.InvalidInputException;
-import com.fptgang.backend.model.Message;
 import com.fptgang.backend.model.Profile;
-import com.fptgang.backend.model.Project;
 import com.fptgang.backend.repository.ProfileRepos;
 import com.fptgang.backend.service.ProfileService;
 import com.fptgang.backend.util.OpenApiHelper;
@@ -47,8 +45,12 @@ public class ProfileServiceImpl implements ProfileService {
     }
 
     @Override
-    public Page<Profile> getAll(Pageable pageable, String filter) {
-        var spec = OpenApiHelper.<Profile>toSpecification(filter);
+    public Page<Profile> getAll(Pageable pageable, String filter, String search, boolean includeInvisible) {
+        var spec = OpenApiHelper.<Profile>filterToSpec(filter);
+        spec = spec.and(OpenApiHelper.searchToSpec(search));
+        if (!includeInvisible) {
+            spec = spec.and((a, _, cb) -> cb.isTrue(a.get("isVisible")));
+        }
         return profileRepos.findAll(spec, pageable);
     }
 

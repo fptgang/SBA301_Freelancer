@@ -1,0 +1,18 @@
+Pageable:
+  type: object
+  properties:
+    page:
+      type: integer
+      description: The page number to retrieve (zero-based index)
+      default: 0
+    size:
+      type: integer
+      description: The size of the page to retrieve
+      default: 20
+    sort:
+      type: array
+      items:
+        type: string
+        description: Sort fields in the format `field,asc|desc`
+        example: createdAt,desc
+      description: Sorting criteria

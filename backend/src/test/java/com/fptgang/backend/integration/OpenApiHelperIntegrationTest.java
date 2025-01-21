@@ -69,42 +69,42 @@ public class OpenApiHelperIntegrationTest {
     public void testStringOperators() {
         // Equals
         assertThat(accountRepos.findAll(
-                OpenApiHelper.toSpecification("email,eq,test1@example.com")
+                OpenApiHelper.filterToSpec("email,eq,test1@example.com")
         )).hasSize(1);
 
         // Not Equal
         assertThat(accountRepos.findAll(
-                OpenApiHelper.toSpecification("email,ne,test1@example.com")
+                OpenApiHelper.filterToSpec("email,ne,test1@example.com")
         )).hasSize(2);
 
         // Contains
         assertThat(accountRepos.findAll(
-                OpenApiHelper.toSpecification("email,contains,test1")
+                OpenApiHelper.filterToSpec("email,contains,test1")
         )).hasSize(1);
 
         // Not Contains
         assertThat(accountRepos.findAll(
-                OpenApiHelper.toSpecification("email,ncontains,test1")
+                OpenApiHelper.filterToSpec("email,ncontains,test1")
         )).hasSize(2);
 
         // StartsWith
         assertThat(accountRepos.findAll(
-                OpenApiHelper.toSpecification("email,startswith,test")
+                OpenApiHelper.filterToSpec("email,startswith,test")
         )).hasSize(3);
 
         // Not StartsWith
         assertThat(accountRepos.findAll(
-                OpenApiHelper.toSpecification("email,nstartswith,test")
+                OpenApiHelper.filterToSpec("email,nstartswith,test")
         )).hasSize(0);
 
         // EndsWith
         assertThat(accountRepos.findAll(
-                OpenApiHelper.toSpecification("email,endswith,@example.com")
+                OpenApiHelper.filterToSpec("email,endswith,@example.com")
         )).hasSize(3);
 
         // Not EndsWith
         assertThat(accountRepos.findAll(
-                OpenApiHelper.toSpecification("email,nendswith,@example.com")
+                OpenApiHelper.filterToSpec("email,nendswith,@example.com")
         )).hasSize(0);
     }
 
@@ -113,32 +113,32 @@ public class OpenApiHelperIntegrationTest {
     public void testBigDecimalOperators() {
         // Equals
         assertThat(accountRepos.findAll(
-                OpenApiHelper.toSpecification("balance,eq,5000")
+                OpenApiHelper.filterToSpec("balance,eq,5000")
         )).hasSize(1);
 
         // Not Equal
         assertThat(accountRepos.findAll(
-                OpenApiHelper.toSpecification("balance,ne,5000")
+                OpenApiHelper.filterToSpec("balance,ne,5000")
         )).hasSize(2);
 
         // Greater Than
         assertThat(accountRepos.findAll(
-                OpenApiHelper.toSpecification("balance,gt,2000")
+                OpenApiHelper.filterToSpec("balance,gt,2000")
         )).hasSize(2);
 
         // Less Than
         assertThat(accountRepos.findAll(
-                OpenApiHelper.toSpecification("balance,lt,2000")
+                OpenApiHelper.filterToSpec("balance,lt,2000")
         )).hasSize(1);
 
         // Greater Than or Equal
         assertThat(accountRepos.findAll(
-                OpenApiHelper.toSpecification("balance,gte,5000")
+                OpenApiHelper.filterToSpec("balance,gte,5000")
         )).hasSize(2);
 
         // Less Than or Equal
         assertThat(accountRepos.findAll(
-                OpenApiHelper.toSpecification("balance,lte,5000")
+                OpenApiHelper.filterToSpec("balance,lte,5000")
         )).hasSize(2);
     }
 
@@ -147,22 +147,22 @@ public class OpenApiHelperIntegrationTest {
     public void testEnumOperators() {
         // Equals
         assertThat(accountRepos.findAll(
-                OpenApiHelper.toSpecification("role,eq,ADMIN")
+                OpenApiHelper.filterToSpec("role,eq,ADMIN")
         )).hasSize(1);
 
         // Not Equal
         assertThat(accountRepos.findAll(
-                OpenApiHelper.toSpecification("role,ne,ADMIN")
+                OpenApiHelper.filterToSpec("role,ne,ADMIN")
         )).hasSize(2);
 
         // In (comma separated)
         assertThat(accountRepos.findAll(
-                OpenApiHelper.toSpecification("role,in,ADMIN,CLIENT")
+                OpenApiHelper.filterToSpec("role,in,ADMIN,CLIENT")
         )).hasSize(2);
 
         // Not In (comma separated)
         assertThat(accountRepos.findAll(
-                OpenApiHelper.toSpecification("role,nin,ADMIN,CLIENT")
+                OpenApiHelper.filterToSpec("role,nin,ADMIN,CLIENT")
         )).hasSize(1);
     }
 
@@ -171,22 +171,22 @@ public class OpenApiHelperIntegrationTest {
     public void testBooleanOperators() {
         // Equals True
         assertThat(accountRepos.findAll(
-                OpenApiHelper.toSpecification("isVisible,eq,true")
+                OpenApiHelper.filterToSpec("isVisible,eq,true")
         )).hasSize(2);
 
         // Equals False
         assertThat(accountRepos.findAll(
-                OpenApiHelper.toSpecification("isVisible,eq,false")
+                OpenApiHelper.filterToSpec("isVisible,eq,false")
         )).hasSize(1);
 
         // Not Equals True
         assertThat(accountRepos.findAll(
-                OpenApiHelper.toSpecification("isVisible,ne,true")
+                OpenApiHelper.filterToSpec("isVisible,ne,true")
         )).hasSize(1);
 
         // Not Equals False
         assertThat(accountRepos.findAll(
-                OpenApiHelper.toSpecification("isVisible,ne,false")
+                OpenApiHelper.filterToSpec("isVisible,ne,false")
         )).hasSize(2);
     }
 
@@ -197,22 +197,22 @@ public class OpenApiHelperIntegrationTest {
 
         // Less Than
         assertThat(accountRepos.findAll(
-                OpenApiHelper.toSpecification("createdAt,lt," + currentTime.plusDays(1))
+                OpenApiHelper.filterToSpec("createdAt,lt," + currentTime.plusDays(1))
         )).hasSize(3);
 
         // Greater Than
         assertThat(accountRepos.findAll(
-                OpenApiHelper.toSpecification("createdAt,gt," + currentTime.minusDays(1))
+                OpenApiHelper.filterToSpec("createdAt,gt," + currentTime.minusDays(1))
         )).hasSize(3);
 
         // Less Than or Equal
         assertThat(accountRepos.findAll(
-                OpenApiHelper.toSpecification("createdAt,lte," + currentTime.plusDays(1))
+                OpenApiHelper.filterToSpec("createdAt,lte," + currentTime.plusDays(1))
         )).hasSize(3);
 
         // Greater Than or Equal
         assertThat(accountRepos.findAll(
-                OpenApiHelper.toSpecification("createdAt,gte," + currentTime.minusDays(1))
+                OpenApiHelper.filterToSpec("createdAt,gte," + currentTime.minusDays(1))
         )).hasSize(3);
     }
 }

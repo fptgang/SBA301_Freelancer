@@ -1,6 +1,7 @@
 package com.fptgang.backend.model;
 
 
+import com.fptgang.backend.util.Searchable;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -26,18 +27,22 @@ public class Profile {
 
     @Column(columnDefinition = "TEXT", length = 100000)
     @Nullable
+    @Searchable
     private String overview;
 
     @Column(columnDefinition = "NVARCHAR(255)")
     @Nullable
+    @Searchable
     private String education;
 
     @Column(columnDefinition = "NVARCHAR(255)")
     @Nullable
+    @Searchable
     private String phoneNumber;
 
     @Column(columnDefinition = "NVARCHAR(255)")
     @Nullable
+    @Searchable
     private String language;
 
     @CreationTimestamp

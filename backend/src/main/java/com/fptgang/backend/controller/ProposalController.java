@@ -10,7 +10,6 @@ import com.fptgang.backend.util.OpenApiHelper;
 import com.fptgang.backend.util.SecurityUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -47,13 +46,12 @@ public class ProposalController implements ProposalsApi {
     }
 
     @Override
-    public ResponseEntity<GetProposals200Response> getProposals(GetAccountsPageableParameter pageable, String filter) {
+    public ResponseEntity<GetProposals200Response> getProposals(Pageable pageable, String filter, String search) {
         var page = OpenApiHelper.toPageable(pageable);
-        Page<ProposalDto> res;
-        if (Role.ADMIN.hasPermission(SecurityUtil.getCurrentUserRole())) {
-            res = proposalService.getAll(page, filter).map(proposalMapper::toDTO);
-        } else
-            res = proposalService.getAllVisible(page, filter).map(proposalMapper::toDTO);
+        var includeInvisible = SecurityUtil.hasPermission(Role.ADMIN);
+        var res = proposalService
+                .getAll(page, filter, search, includeInvisible)
+                .map(proposalMapper::toDTO);
         return OpenApiHelper.respondPage(res, GetProposals200Response.class);
     }
 

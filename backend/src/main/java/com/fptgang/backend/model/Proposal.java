@@ -1,6 +1,7 @@
 package com.fptgang.backend.model;
 
 
+import com.fptgang.backend.util.Searchable;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -33,6 +34,7 @@ public class Proposal {
     private Account freelancer;
 
     @Column(columnDefinition = "TEXT", length = 10000000)
+    @Searchable
     private String notes;
 
     @Enumerated(EnumType.STRING)
