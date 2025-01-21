@@ -43,6 +43,6 @@ public class SkillMapper extends BaseMapper<SkillDto, Skill> {
             skill.setVisible(dto.getIsVisible());
         }
 
-        return skill;
+        return null;
     }
 }

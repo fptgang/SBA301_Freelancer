@@ -17,9 +17,9 @@ import { AppIcon } from "./components/app-icon";
 import { Header } from "./components/header";
 import { ColorModeContextProvider } from "./contexts/color-mode";
 
-import { ForgotPassword } from "./pages/auth/forgotPassword";
-import { Login } from "./pages/auth/login";
-import { Register } from "./pages/auth/register";
+import { ForgotPassword } from "./pages/forgotPassword";
+import { Login } from "./pages/login";
+import { Register } from "./pages/register";
 import { accessControlProvider } from "./providers/access-control-provider";
 import { dataProvider } from "./providers/data-provider";
 import { API_URL } from "./utils/constants";
@@ -35,14 +35,14 @@ import {
   ProjectCategoriesEdit,
   ProjectCategoriesList,
   ProjectCategoriesShow,
-} from "./pages/admin/projectcategories";
+} from "./pages/projectcategories";
 import {
   UsersCreate,
   AccountsEdit,
   AccountsList,
   AccountsShow,
-} from "./pages/admin/accounts";
-import ResetPassword from "./pages/auth/reset-password";
+} from "./pages/accounts";
+import ResetPassword from "./pages/reset-password";
 import { notificationProvider } from "./providers/notification-provider";
 import axiosInstance from "./config/axios-config";
 import {
@@ -50,41 +50,7 @@ import {
   ProjectsEdit,
   ProjectsList,
   ProjectsShow,
-} from "./pages/admin/projects";
-import {
-  SkillsCreate,
-  SkillsEdit,
-  SkillsList,
-  SkillsShow,
-} from "./pages/admin/skills";
-import {
-  ProfilesCreate,
-  ProfilesEdit,
-  ProfilesList,
-  ProfilesShow,
-} from "./pages/admin/profiles";
-import {
-  ProposalsCreate,
-  ProposalsEdit,
-  ProposalsList,
-  ProposalsShow,
-} from "./pages/admin/proposals";
-import {
-  TransactionsCreate,
-  TransactionsEdit,
-  TransactionsList,
-  TransactionsShow,
-} from "./pages/admin/transactions";
-import {
-  AppstoreOutlined,
-  DollarCircleFilled,
-  FileTextOutlined,
-  IdcardOutlined,
-  MoneyCollectFilled,
-  ProjectOutlined,
-  ToolOutlined,
-  UserOutlined,
-} from "@ant-design/icons";
+} from "./pages/projects";
 
 function App() {
   return (
@@ -96,7 +62,7 @@ function App() {
               <Refine
                 dataProvider={dataProvider(API_URL, axiosInstance)}
                 notificationProvider={notificationProvider}
-                // accessControlProvider={accessControlProvider}
+                accessControlProvider={accessControlProvider}
                 authProvider={authProvider}
                 routerProvider={routerBindings}
                 resources={[
@@ -109,7 +75,6 @@ function App() {
                     meta: {
                       label: "Accounts",
                       canDelete: true,
-                      icon: <UserOutlined />,
                     },
                   },
                   {
@@ -121,7 +86,6 @@ function App() {
                     meta: {
                       label: "Project Categories",
                       canDelete: true,
-                      icon: <AppstoreOutlined />,
                     },
                   },
                   {
@@ -130,51 +94,6 @@ function App() {
                     create: "/admin/projects/create",
                     edit: "/admin/projects/edit/:id",
                     show: "/admin/projects/show/:id",
-                    meta: {
-                      icon: <ProjectOutlined />,
-                    },
-                  },
-                  {
-                    name: "profiles",
-                    list: "/admin/profiles",
-                    create: "/admin/profiles/create",
-                    edit: "/admin/profiles/edit/:id",
-                    show: "/admin/profiles/show/:id",
-                    meta: {
-                      hide: true,
-                      icon: <IdcardOutlined />,
-                    },
-                  },
-                  {
-                    name: "proposals",
-                    list: "/admin/proposals",
-                    create: "/admin/proposals/create",
-                    edit: "/admin/proposals/edit/:id",
-                    show: "/admin/proposals/show/:id",
-                    meta: {
-                      hide: true,
-                      icon: <FileTextOutlined />,
-                    },
-                  },
-                  {
-                    name: "skills",
-                    list: "/admin/skills",
-                    create: "/admin/skills/create",
-                    edit: "/admin/skills/edit/:id",
-                    show: "/admin/skills/show/:id",
-                    meta: {
-                      icon: <ToolOutlined />,
-                    },
-                  },
-                  {
-                    name: "transactions",
-                    list: "/admin/transactions",
-                    create: "/admin/transactions/create",
-                    edit: "/admin/transactions/edit/:id",
-                    show: "/admin/transactions/show/:id",
-                    meta: {
-                      icon: <DollarCircleFilled />,
-                    },
                   },
                 ]}
                 options={{
@@ -256,24 +175,6 @@ function App() {
                         path="show/:id"
                         element={<ProjectCategoriesShow />}
                       />
-                    </Route>
-                    <Route path="profiles">
-                      <Route index element={<ProfilesList />} />
-                      <Route path="create" element={<ProfilesCreate />} />
-                      <Route path="edit/:id" element={<ProfilesEdit />} />
-                      <Route path="show/:id" element={<ProfilesShow />} />
-                    </Route>
-                    <Route path="skills">
-                      <Route index element={<SkillsList />} />
-                      <Route path="create" element={<SkillsCreate />} />
-                      <Route path="edit/:id" element={<SkillsEdit />} />
-                      <Route path="show/:id" element={<SkillsShow />} />
-                    </Route>
-                    <Route path="transactions">
-                      <Route index element={<TransactionsList />} />
-                      <Route path="create" element={<TransactionsCreate />} />
-                      <Route path="edit/:id" element={<TransactionsEdit />} />
-                      <Route path="show/:id" element={<TransactionsShow />} />
                     </Route>
                     <Route path="*" element={<ErrorComponent />} />
                   </Route>

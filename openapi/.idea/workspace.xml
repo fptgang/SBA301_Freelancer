@@ -5,63 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="d21bfcd3-12cd-4298-bc9e-f7b2eb78a303" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/../frontend/src/pages/admin/profiles/create.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../frontend/src/pages/admin/profiles/edit.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../frontend/src/pages/admin/profiles/list.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../frontend/src/pages/admin/profiles/show.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../frontend/src/pages/admin/proposals/create.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../frontend/src/pages/admin/proposals/edit.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../frontend/src/pages/admin/proposals/list.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../frontend/src/pages/admin/proposals/show.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../frontend/src/pages/admin/skills/create.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../frontend/src/pages/admin/skills/edit.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../frontend/src/pages/admin/skills/index.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../frontend/src/pages/admin/skills/list.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../frontend/src/pages/admin/skills/show.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../frontend/src/pages/admin/transactions/create.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../frontend/src/pages/admin/transactions/edit.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../frontend/src/pages/admin/transactions/index.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../frontend/src/pages/admin/transactions/list.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../frontend/src/pages/admin/transactions/show.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/discord.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/swagger-settings.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/com/fptgang/backend/controller/MilestoneController.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/com/fptgang/backend/controller/MilestoneController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/com/fptgang/backend/controller/ProfileController.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/com/fptgang/backend/controller/ProfileController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/com/fptgang/backend/controller/ProposalController.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/com/fptgang/backend/controller/ProposalController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/com/fptgang/backend/controller/SkillController.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/com/fptgang/backend/controller/SkillController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/com/fptgang/backend/controller/TransactionController.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/com/fptgang/backend/controller/TransactionController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/com/fptgang/backend/mapper/SkillMapper.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/com/fptgang/backend/mapper/SkillMapper.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../frontend/src/App.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/src/App.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../frontend/src/pages/accounts/create.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/src/pages/admin/accounts/create.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../frontend/src/pages/accounts/edit.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/src/pages/admin/accounts/edit.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../frontend/src/pages/accounts/index.ts" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/src/pages/admin/accounts/index.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../frontend/src/pages/accounts/list.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/src/pages/admin/accounts/list.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../frontend/src/pages/accounts/show.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/src/pages/admin/accounts/show.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../frontend/src/pages/blog-posts/create.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../frontend/src/pages/blog-posts/edit.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../frontend/src/pages/blog-posts/index.ts" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/src/pages/admin/projects/index.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../frontend/src/pages/blog-posts/list.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../frontend/src/pages/blog-posts/show.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../frontend/src/pages/categories/create.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../frontend/src/pages/categories/edit.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../frontend/src/pages/categories/index.ts" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/src/pages/admin/proposals/index.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../frontend/src/pages/categories/list.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../frontend/src/pages/categories/show.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../frontend/src/pages/forgotPassword/index.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/src/pages/auth/forgotPassword/index.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../frontend/src/pages/login/index.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/src/pages/auth/login/index.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../frontend/src/pages/projectcategories/create.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/src/pages/admin/projectcategories/create.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../frontend/src/pages/projectcategories/edit.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/src/pages/admin/projectcategories/edit.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../frontend/src/pages/projectcategories/index.ts" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/src/pages/admin/profiles/index.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../frontend/src/pages/projectcategories/list.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/src/pages/admin/projectcategories/list.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../frontend/src/pages/projectcategories/show.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/src/pages/admin/projectcategories/show.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../frontend/src/pages/projects/create.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/src/pages/admin/projects/create.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../frontend/src/pages/projects/edit.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/src/pages/admin/projects/edit.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../frontend/src/pages/projects/index.ts" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/src/pages/admin/projectcategories/index.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../frontend/src/pages/projects/list.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/src/pages/admin/projects/list.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../frontend/src/pages/projects/show.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/src/pages/admin/projects/show.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../frontend/src/pages/register/index.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/src/pages/auth/register/index.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../frontend/src/pages/reset-password/index.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/src/pages/auth/reset-password/index.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../frontend/src/utils/query-utils.ts" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/src/utils/query-utils.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/src/test/java/com/fptgang/backend/service/AccountServiceTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/test/java/com/fptgang/backend/service/AccountServiceTest.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/src/test/java/com/fptgang/backend/service/MilestoneServiceTest.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/test/java/com/fptgang/backend/service/MilestoneServiceTest.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -78,12 +23,12 @@
     &quot;assignee&quot;: &quot;phucvjp&quot;
   }
 }</component>
-  <component name="GithubPullRequestsUISettings"><![CDATA[{
-  "selectedUrlAndAccountId": {
-    "url": "https://github.com/fptgang/SBA301_Freelancer.git",
-    "accountId": "867b3737-359d-4ad5-8bb2-e467bb5808da"
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/fptgang/SBA301_Freelancer.git&quot;,
+    &quot;accountId&quot;: &quot;66af897d-e781-4921-a41d-7d7699c60918&quot;
   }
-}]]></component>
+}</component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 6
 }</component>
@@ -92,53 +37,36 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "com.codeium.enabled": "true",
-    "git-widget-placeholder": "develop",
-    "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "/Users/vidz/Documents/GitHub/SBA301_Freelancer/openapi",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;com.codeium.enabled&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;Backend/Phuc__SBA-4&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;D:/GitHub/SBA301_Freelancer/openapi&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
       <recent name="C:\Users\phucx\OneDrive\Documents\GitHub\SBA301_Freelancer\openapi\path" />
     </key>
   </component>
   <component name="RunManager">
-    <configuration default="true" type="AZURE_FUNCTION_SUPPORT" factoryName="Run Functions">
-      <option name="appName" />
-      <option name="appServicePlanName" />
-      <option name="appServicePlanResourceGroup" />
-      <option name="appSettingsKey" value="db55a4f1-b2e7-4d53-8de3-222cd15f950d" />
-      <option name="artifact" />
-      <option name="debugOptions" />
-      <option name="deployment" />
-      <option name="deploymentStagingDirectoryPath" />
-      <option name="funcPath" />
-      <option name="functionHostArguments" />
-      <option name="hostJsonPath" />
-      <option name="insightsName" />
-      <option name="instrumentationKey" />
-      <option name="javaVersion" />
-      <option name="localSettingsJsonPath" />
-      <option name="moduleName" />
-      <option name="os" />
-      <option name="pricingTier" />
-      <option name="providerMap">
-        <map />
-      </option>
-      <option name="region" />
-      <option name="resourceGroup" />
-      <option name="stagingFolder" />
-      <option name="subscription" />
+    <configuration default="true" type="JetRunConfigurationType">
+      <module name="openapi" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration default="true" type="KotlinStandaloneScriptRunConfigurationType">
+      <module name="openapi" />
+      <option name="filePath" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
@@ -147,8 +75,8 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-jdk-9823dce3aa75-28b599e66164-intellij.indexing.shared.core-IU-242.23339.11" />
-        <option value="bundled-js-predefined-d6986cc7102b-5c90d61e3bab-JavaScript-IU-242.23339.11" />
+        <option value="bundled-jdk-9823dce3aa75-28b599e66164-intellij.indexing.shared.core-IU-242.24807.4" />
+        <option value="bundled-js-predefined-d6986cc7102b-5c90d61e3bab-JavaScript-IU-242.24807.4" />
       </set>
     </attachedChunks>
   </component>
@@ -173,7 +101,6 @@
       <workItem from="1736932824375" duration="807000" />
       <workItem from="1736935532852" duration="66000" />
       <workItem from="1736977935170" duration="595000" />
-      <workItem from="1737430388910" duration="664000" />
     </task>
     <servers />
   </component>

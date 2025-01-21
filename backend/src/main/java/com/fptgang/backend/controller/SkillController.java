@@ -58,7 +58,6 @@ public class SkillController implements SkillsApi {
 
     @Override
     public ResponseEntity<SkillDto> updateSkill(Integer skillId, SkillDto skillDto) {
-        skillDto.setSkillId(Long.valueOf(skillId));
         return new ResponseEntity<>(skillMapper.toDTO(skillService.update(skillMapper.toEntity(skillDto))), HttpStatus.OK);
     }
 }
