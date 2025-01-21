@@ -183,7 +183,7 @@ class ProposalServiceTest {
         Pageable pageable = PageRequest.of(0, 10);
         Page<Proposal> proposalsPage = proposalService.getAll(pageable, null);
 
-        assertTrue(proposalsPage.getTotalElements() >= 2);
+        assertTrue(proposalsPage.getTotalElements() == 2);
     }
 
     @Test
@@ -191,10 +191,17 @@ class ProposalServiceTest {
     void getAllProposalsWithFilter() {
         Proposal proposal1 = createTestProposal(1);
         Proposal proposal2 = createTestProposal(3);
-
+        Project project = createTestProject(5);
+        Account freelancer = createTestAccount(5+1);
+        Proposal proposal = new Proposal();
+        proposal.setProject(project);
+        proposal.setFreelancer(freelancer);
+        proposal.setStatus(Proposal.ProposalStatus.ACCEPTED);
+        proposal.setVisible(true);
+        proposalService.create(proposal);
         Pageable pageable = PageRequest.of(0, 10);
         Page<Proposal> proposalsPage = proposalService.getAll(pageable, "status,contains,PENDING");
 
-        assertTrue(proposalsPage.getTotalElements() >= 2);
+        assertTrue(proposalsPage.getTotalElements() == 2);
     }
 }

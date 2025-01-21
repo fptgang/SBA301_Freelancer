@@ -6,6 +6,7 @@ import com.fptgang.backend.repository.AccountRepos;
 import com.fptgang.backend.repository.MilestoneRepos;
 import com.fptgang.backend.repository.ProjectCategoryRepos;
 import com.fptgang.backend.repository.ProjectRepos;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -21,6 +22,7 @@ import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@Slf4j
 @SpringBootTest
 @TestConfiguration(proxyBeanMethods = false)
 @Testcontainers
@@ -189,7 +191,7 @@ class MilestoneServiceTest {
         Pageable pageable = PageRequest.of(0, 10);
         Page<Milestone> milestonesPage = milestoneService.getAll(pageable, null);
 
-        assertTrue(milestonesPage.getTotalElements() >= 2);
+        assertTrue(milestonesPage.getTotalElements() == 2);
     }
 
     @Test
@@ -198,9 +200,18 @@ class MilestoneServiceTest {
         Milestone milestone1 = createTestMilestone(1);
         Milestone milestone2 = createTestMilestone(2);
 
-        Pageable pageable = PageRequest.of(0, 10);
-        Page<Milestone> milestonesPage = milestoneService.getAll(pageable, "title,contains,Milestone");
+        Milestone milestone = new Milestone();
+        Project project = createTestProject(3);
+        milestone.setTitle("Unfiltered Milestone "+3);
+        milestone.setBudget(BigDecimal.valueOf(1000));
+        milestone.setDeadline(LocalDateTime.now().plusDays(30));
+        milestone.setStatus(Milestone.MilestoneStatus.PENDING);
+        milestone.setVisible(true);
+        milestone.setProject(project);
+        milestoneService.create(milestone);
 
-        assertTrue(milestonesPage.getTotalElements() >= 2);
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Milestone> milestonesPage = milestoneService.getAll(pageable, "title,startswith,Milestone");
+        assertTrue(milestonesPage.getTotalElements() == 2);
     }
 }
