@@ -47,4 +47,10 @@ public class MessageServiceImpl implements MessageService {
         var spec = OpenApiHelper.<Message>toSpecification(filter);
         return messageRepos.findAll(spec,pageable);
     }
+
+    @Override
+    public Page<Message> getAllBySenderOrReceiver(Long senderId,Pageable pageable,  String filter) {
+        var spec = OpenApiHelper.<Message>toSpecification(filter);
+        return messageRepos.findAllBySenderOrReceiver(senderId,pageable,spec);
+    }
 }

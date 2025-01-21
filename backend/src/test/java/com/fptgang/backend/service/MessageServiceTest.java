@@ -3,11 +3,10 @@ package com.fptgang.backend.service;
 
 import com.fptgang.backend.TestcontainersConfiguration;
 import com.fptgang.backend.exception.InvalidInputException;
-import com.fptgang.backend.model.Account;
-import com.fptgang.backend.model.Message;
-import com.fptgang.backend.model.Role;
+import com.fptgang.backend.model.*;
 import com.fptgang.backend.repository.AccountRepos;
 import com.fptgang.backend.repository.MessageRepos;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -23,6 +22,7 @@ import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@Slf4j
 @SpringBootTest
 @TestConfiguration(proxyBeanMethods = false)
 @Testcontainers
@@ -183,5 +183,27 @@ public class MessageServiceTest {
 
         // Act & Assert
         assertThrows(RuntimeException.class, () -> messageService.create(testMessage));
+    }
+
+    @Test
+    @Order(10)
+    void getAllMessagesWithFilter() {
+        var testMessage = new Message();
+        testMessage.setSender(sender);
+        testMessage.setReceiver(receiver);
+        testMessage.setContent("Test Message Content");
+        testMessage.setCreatedAt(LocalDateTime.now());
+        testMessage.setVisible(true);
+        messageService.create(testMessage);
+        var testMessage2 = new Message();
+        testMessage2.setSender(sender);
+        testMessage2.setReceiver(receiver);
+        testMessage2.setContent("unfiltered Message Content");
+        testMessage2.setCreatedAt(LocalDateTime.now());
+        testMessage2.setVisible(true);
+        messageService.create(testMessage2);
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Message> messagePage = messageService.getAll(pageable, "content,startswith,Test");
+        assertTrue(messagePage.getTotalElements() == 1);
     }
 }

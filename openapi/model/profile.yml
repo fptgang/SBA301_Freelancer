@@ -1,6 +1,9 @@
 ProfileDto:
   type: object
   properties:
+    profileId:
+      type: integer
+      format: int64
     accountId:
       type: integer
       format: int64
