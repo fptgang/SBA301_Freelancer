@@ -659,4 +659,48 @@ public class OpenApiHelperTest {
                     mock(CriteriaBuilder.class));
         }
     }
+
+    @Nested
+    class SpecificationNestedFilterTest {
+
+        @Test
+        public void testToSpecificationWith2NestedFields() {
+            Specification<String> expectedSpec = (root, query, criteriaBuilder) ->
+                    criteriaBuilder.equal(root.get("parent").get("child"), "100.001");
+            Specification<String> actualSpec = OpenApiHelper.toSpecification("parent.child,eq,100.001");
+            Predicate expectedPredicate = getPredicate(expectedSpec, "parent.child");
+            Predicate actualPredicate = getPredicate(actualSpec, "parent.child");
+            assertEquals(expectedPredicate, actualPredicate);
+        }
+
+        @Test
+        public void testToSpecificationWith3NestedFields() {
+            Specification<String> expectedSpec = (root, query, criteriaBuilder) ->
+                    criteriaBuilder.equal(root.get("grandparent").get("parent").get("child"), "100.001");
+            Specification<String> actualSpec = OpenApiHelper.toSpecification("grandparent.parent.child,eq,100.001");
+            Predicate expectedPredicate = getPredicate(expectedSpec, "grandparent.parent.child");
+            Predicate actualPredicate = getPredicate(actualSpec, "grandparent.parent.child");
+            assertEquals(expectedPredicate, actualPredicate);
+        }
+
+        private Predicate getPredicate(Specification<String> spec, String path) {
+            var root = mock(Root.class);
+
+            // Split the path by dot delimiter for nested path support
+            String[] pathSegments = path.split("\\.");
+            Path<?> currentPath = root;
+
+            // Mock each segment in the path
+            for (String segment : pathSegments) {
+                var nextPath = mock(Path.class);
+                when(currentPath.get(segment)).thenReturn(nextPath);
+                currentPath = nextPath;
+            }
+
+            return spec.toPredicate(
+                    root,
+                    mock(CriteriaQuery.class),
+                    mock(CriteriaBuilder.class));
+        }
+    }
 }
