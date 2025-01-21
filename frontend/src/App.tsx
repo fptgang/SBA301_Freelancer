@@ -51,6 +51,31 @@ import {
   ProjectsList,
   ProjectsShow,
 } from "./pages/projects";
+import {
+  SkillsCreate,
+  SkillsEdit,
+  SkillsList,
+  SkillsShow,
+} from "./pages/skills";
+import {
+  ProfilesCreate,
+  ProfilesEdit,
+  ProfilesList,
+  ProfilesShow,
+} from "./pages/profiles";
+import {
+  ProposalsCreate,
+  ProposalsEdit,
+  ProposalsList,
+  ProposalsShow,
+} from "./pages/proposals";
+import {
+  TransactionsCreate,
+  TransactionsEdit,
+  TransactionsList,
+  TransactionsShow,
+} from "./pages/transactions";
+import { DollarCircleFilled, MoneyCollectFilled } from "@ant-design/icons";
 
 function App() {
   return (
@@ -62,7 +87,7 @@ function App() {
               <Refine
                 dataProvider={dataProvider(API_URL, axiosInstance)}
                 notificationProvider={notificationProvider}
-                accessControlProvider={accessControlProvider}
+                // accessControlProvider={accessControlProvider}
                 authProvider={authProvider}
                 routerProvider={routerBindings}
                 resources={[
@@ -94,6 +119,43 @@ function App() {
                     create: "/admin/projects/create",
                     edit: "/admin/projects/edit/:id",
                     show: "/admin/projects/show/:id",
+                  },
+                  {
+                    name: "profiles",
+                    list: "/admin/profiles",
+                    create: "/admin/profiles/create",
+                    edit: "/admin/profiles/edit/:id",
+                    show: "/admin/profiles/show/:id",
+                    meta: {
+                      hide: true,
+                    },
+                  },
+                  {
+                    name: "proposals",
+                    list: "/admin/proposals",
+                    create: "/admin/proposals/create",
+                    edit: "/admin/proposals/edit/:id",
+                    show: "/admin/proposals/show/:id",
+                    meta: {
+                      hide: true,
+                    },
+                  },
+                  {
+                    name: "skills",
+                    list: "/admin/skills",
+                    create: "/admin/skills/create",
+                    edit: "/admin/skills/edit/:id",
+                    show: "/admin/skills/show/:id",
+                  },
+                  {
+                    name: "transactions",
+                    list: "/admin/transactions",
+                    create: "/admin/transactions/create",
+                    edit: "/admin/transactions/edit/:id",
+                    show: "/admin/transactions/show/:id",
+                    meta: {
+                      icon: <DollarCircleFilled />,
+                    },
                   },
                 ]}
                 options={{
@@ -175,6 +237,24 @@ function App() {
                         path="show/:id"
                         element={<ProjectCategoriesShow />}
                       />
+                    </Route>
+                    <Route path="profiles">
+                      <Route index element={<ProfilesList />} />
+                      <Route path="create" element={<ProfilesCreate />} />
+                      <Route path="edit/:id" element={<ProfilesEdit />} />
+                      <Route path="show/:id" element={<ProfilesShow />} />
+                    </Route>
+                    <Route path="skills">
+                      <Route index element={<SkillsList />} />
+                      <Route path="create" element={<SkillsCreate />} />
+                      <Route path="edit/:id" element={<SkillsEdit />} />
+                      <Route path="show/:id" element={<SkillsShow />} />
+                    </Route>
+                    <Route path="transactions">
+                      <Route index element={<TransactionsList />} />
+                      <Route path="create" element={<TransactionsCreate />} />
+                      <Route path="edit/:id" element={<TransactionsEdit />} />
+                      <Route path="show/:id" element={<TransactionsShow />} />
                     </Route>
                     <Route path="*" element={<ErrorComponent />} />
                   </Route>

@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/v1/proposal")
+@RequestMapping("/api/v1")
 @Slf4j
 public class ProposalController implements ProposalsApi {
     private final ProposalService proposalService;

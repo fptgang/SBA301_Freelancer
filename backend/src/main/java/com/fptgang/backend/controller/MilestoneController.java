@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/v1/milestone")
+@RequestMapping("/api/v1")
 public class MilestoneController implements MilestonesApi {
 
     private final MilestoneMapper milestoneMapper;
