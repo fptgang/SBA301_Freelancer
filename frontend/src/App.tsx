@@ -17,9 +17,9 @@ import { AppIcon } from "./components/app-icon";
 import { Header } from "./components/header";
 import { ColorModeContextProvider } from "./contexts/color-mode";
 
-import { ForgotPassword } from "./pages/forgotPassword";
-import { Login } from "./pages/login";
-import { Register } from "./pages/register";
+import { ForgotPassword } from "./pages/auth/forgotPassword";
+import { Login } from "./pages/auth/login";
+import { Register } from "./pages/auth/register";
 import { accessControlProvider } from "./providers/access-control-provider";
 import { dataProvider } from "./providers/data-provider";
 import { API_URL } from "./utils/constants";
@@ -35,14 +35,14 @@ import {
   ProjectCategoriesEdit,
   ProjectCategoriesList,
   ProjectCategoriesShow,
-} from "./pages/projectcategories";
+} from "./pages/admin/projectcategories";
 import {
   UsersCreate,
   AccountsEdit,
   AccountsList,
   AccountsShow,
-} from "./pages/accounts";
-import ResetPassword from "./pages/reset-password";
+} from "./pages/admin/accounts";
+import ResetPassword from "./pages/auth/reset-password";
 import { notificationProvider } from "./providers/notification-provider";
 import axiosInstance from "./config/axios-config";
 import {
@@ -50,32 +50,41 @@ import {
   ProjectsEdit,
   ProjectsList,
   ProjectsShow,
-} from "./pages/projects";
+} from "./pages/admin/projects";
 import {
   SkillsCreate,
   SkillsEdit,
   SkillsList,
   SkillsShow,
-} from "./pages/skills";
+} from "./pages/admin/skills";
 import {
   ProfilesCreate,
   ProfilesEdit,
   ProfilesList,
   ProfilesShow,
-} from "./pages/profiles";
+} from "./pages/admin/profiles";
 import {
   ProposalsCreate,
   ProposalsEdit,
   ProposalsList,
   ProposalsShow,
-} from "./pages/proposals";
+} from "./pages/admin/proposals";
 import {
   TransactionsCreate,
   TransactionsEdit,
   TransactionsList,
   TransactionsShow,
-} from "./pages/transactions";
-import { DollarCircleFilled, MoneyCollectFilled } from "@ant-design/icons";
+} from "./pages/admin/transactions";
+import {
+  AppstoreOutlined,
+  DollarCircleFilled,
+  FileTextOutlined,
+  IdcardOutlined,
+  MoneyCollectFilled,
+  ProjectOutlined,
+  ToolOutlined,
+  UserOutlined,
+} from "@ant-design/icons";
 
 function App() {
   return (
@@ -100,6 +109,7 @@ function App() {
                     meta: {
                       label: "Accounts",
                       canDelete: true,
+                      icon: <UserOutlined />,
                     },
                   },
                   {
@@ -111,6 +121,7 @@ function App() {
                     meta: {
                       label: "Project Categories",
                       canDelete: true,
+                      icon: <AppstoreOutlined />,
                     },
                   },
                   {
@@ -119,6 +130,9 @@ function App() {
                     create: "/admin/projects/create",
                     edit: "/admin/projects/edit/:id",
                     show: "/admin/projects/show/:id",
+                    meta: {
+                      icon: <ProjectOutlined />,
+                    },
                   },
                   {
                     name: "profiles",
@@ -128,6 +142,7 @@ function App() {
                     show: "/admin/profiles/show/:id",
                     meta: {
                       hide: true,
+                      icon: <IdcardOutlined />,
                     },
                   },
                   {
@@ -138,6 +153,7 @@ function App() {
                     show: "/admin/proposals/show/:id",
                     meta: {
                       hide: true,
+                      icon: <FileTextOutlined />,
                     },
                   },
                   {
@@ -146,6 +162,9 @@ function App() {
                     create: "/admin/skills/create",
                     edit: "/admin/skills/edit/:id",
                     show: "/admin/skills/show/:id",
+                    meta: {
+                      icon: <ToolOutlined />,
+                    },
                   },
                   {
                     name: "transactions",

@@ -175,18 +175,20 @@ export const SkillsList: React.FC = () => {
                   className="text-green-600 hover:text-green-700"
                 />
               </Tooltip>
-              <Tooltip title="Delete Skill">
-                <DeleteButton
-                  hideText
-                  size="small"
-                  recordItemId={record.skillId}
-                  className="text-red-600 hover:text-red-700"
-                  confirmTitle="Delete Skill"
-                  confirmOkText="Delete"
-                  confirmCancelText="Cancel"
-                  about="Are you sure you want to delete this skill? This action cannot be undone."
-                />
-              </Tooltip>
+              {record.isVisible && (
+                <Tooltip title="Delete Skill">
+                  <DeleteButton
+                    hideText
+                    size="small"
+                    recordItemId={record.skillId}
+                    className="text-red-600 hover:text-red-700"
+                    confirmTitle="Delete Skill"
+                    confirmOkText="Delete"
+                    confirmCancelText="Cancel"
+                    about="Are you sure you want to delete this skill? This action cannot be undone."
+                  />
+                </Tooltip>
+              )}
             </Space>
           )}
         />
