@@ -25,12 +25,11 @@ export const generateFilterQuery = (filters: LogicalFilter[]): string => {
     return "";
   }
 
-  let multiFilters  = [];
+  const multiFilters = [];
 
-  for (let filter of filters) {
+  for (const filter of filters) {
     const filterField = generateFilterField(filter);
-    if (filterField.length == 0)
-      continue;
+    if (filterField.length == 0) continue;
     multiFilters.push(filterField);
   }
 

@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/v1/transactions")
+@RequestMapping("/api/v1")
 public class TransactionController implements TransactionsApi {
     private final TransactionService transactionService;
     private final TransactionMapper transactionMapper;
