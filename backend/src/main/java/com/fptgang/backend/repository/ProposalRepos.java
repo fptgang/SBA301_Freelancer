@@ -13,6 +13,4 @@ import java.util.Optional;
 @Repository
 public interface ProposalRepos extends JpaRepository<Proposal, Long>, JpaSpecificationExecutor<Proposal> {
     Optional<Proposal> findByProposalId(Long proposalId);
-    @Query("SELECT a FROM Proposal a WHERE a.isVisible = true")
-    Page<Proposal> findAllByVisibleTrue(Pageable pageable, Specification<Proposal> spec);
 }

@@ -11,8 +11,11 @@ public interface AccountService {
     Account findByEmail(String email);
     Account update(Account account);
     Account deleteById(long id);
-    Page<Account> getAll(Pageable pageable, String filter, boolean includeInvisible);
+    Page<Account> getAll(Pageable pageable, String filter, String search, boolean includeInvisible);
+    default Page<Account> getAll(Pageable pageable, String filter, String search) {
+        return getAll(pageable, filter, search, false);
+    }
     default Page<Account> getAll(Pageable pageable, String filter) {
-        return getAll(pageable, filter, false);
+        return getAll(pageable, filter, null, false);
     }
 }

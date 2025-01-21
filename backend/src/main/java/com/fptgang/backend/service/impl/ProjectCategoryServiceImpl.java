@@ -52,14 +52,12 @@ public class ProjectCategoryServiceImpl implements ProjectCategoryService {
     }
 
     @Override
-    public Page<ProjectCategory> getAllVisible(Pageable pageable, String filter) {
-        var spec = OpenApiHelper.<ProjectCategory>toSpecification(filter);
-        return projectCategoryRepos.findAllByVisibleTrue(pageable, spec);
-    }
-
-    @Override
-    public Page<ProjectCategory> getAll(Pageable pageable, String filter) {
-        var spec = OpenApiHelper.<ProjectCategory>toSpecification(filter);
+    public Page<ProjectCategory> getAll(Pageable pageable, String filter, String search, boolean includeInvisible) {
+        var spec = OpenApiHelper.<ProjectCategory>filterToSpec(filter);
+        spec = spec.and(OpenApiHelper.searchToSpec(search));
+        if (!includeInvisible) {
+            spec = spec.and((a, _, cb) -> cb.isTrue(a.get("isVisible")));
+        }
         return projectCategoryRepos.findAll(spec, pageable);
     }
 }

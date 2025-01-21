@@ -1,0 +1,8 @@
+Search:
+  name: search
+  in: query
+  description: A search query
+  required: false
+  schema:
+    type: string
+    example: ""

@@ -158,11 +158,11 @@ public class ProjectCategoryServiceTest {
         Pageable pageable = PageRequest.of(0, 10);
 
         // Act
-        Page<ProjectCategory> page = projectCategoryService.getAllVisible(pageable, null);
+        Page<ProjectCategory> page = projectCategoryService.getAll(pageable, null, null, true);
 
         // Assert
         assertNotNull(page);
-        assertEquals(3, page.getTotalElements());
+        assertEquals(4, page.getTotalElements());
     }
 
     @Order(9)
@@ -185,10 +185,10 @@ public class ProjectCategoryServiceTest {
         Pageable pageable = PageRequest.of(0, 10);
 
         // Act
-        Page<ProjectCategory> page = projectCategoryService.getAllVisible(pageable, "name,contains,Category");
+        Page<ProjectCategory> page = projectCategoryService.getAll(pageable, "name,contains,Category", null, true);
 
         // Assert
         assertNotNull(page);
-        assertEquals(3, page.getTotalElements());
+        assertEquals(4, page.getTotalElements());
     }
 }

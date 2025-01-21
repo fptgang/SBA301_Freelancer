@@ -3,18 +3,14 @@ package com.fptgang.backend.controller;
 import com.fptgang.backend.api.controller.ProfilesApi;
 import com.fptgang.backend.api.model.*;
 import com.fptgang.backend.mapper.ProfileMapper;
-import com.fptgang.backend.model.Account;
+import com.fptgang.backend.model.Role;
 import com.fptgang.backend.service.ProfileService;
 import com.fptgang.backend.util.OpenApiHelper;
+import com.fptgang.backend.util.SecurityUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -50,10 +46,13 @@ public class ProfileController implements ProfilesApi {
     }
 
     @Override
-    public ResponseEntity<GetProfiles200Response> getProfiles(GetAccountsPageableParameter pageable, String filter) {
+    public ResponseEntity<GetProfiles200Response> getProfiles(Pageable pageable, String filter, String search) {
         log.info("Getting profiles");
         var page = OpenApiHelper.toPageable(pageable);
-        var res = profileService.getAll(page, filter).map(profileMapper::toDTO);
+        var includeInvisible = SecurityUtil.hasPermission(Role.ADMIN);
+        var res = profileService
+                .getAll(page, filter, search, includeInvisible)
+                .map(profileMapper::toDTO);
         return OpenApiHelper.respondPage(res, GetProfiles200Response.class);
     }
 

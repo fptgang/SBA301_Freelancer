@@ -6,6 +6,7 @@ get:
   parameters:
     - $ref: '../param/pageable.yml#/Pageable'
     - $ref: '../param/filter.yml#/Filter'
+    - $ref: '../param/search.yml#/Search'
   responses:
     '200':
       description: The operation was success

@@ -1,6 +1,7 @@
 package com.fptgang.backend.model;
 
 
+import com.fptgang.backend.util.Searchable;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -25,6 +26,7 @@ public class Skill {
     private Long skillId;
 
     @Column(nullable = false, columnDefinition = "NVARCHAR(255)")
+    @Searchable
     private String name;
 
     @CreationTimestamp

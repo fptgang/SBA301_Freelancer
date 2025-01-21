@@ -16,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 
+import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -80,18 +81,46 @@ public class OpenApiHelper {
         return new ResponseEntity<>(toPage(page, clazz), HttpStatus.OK);
     }
 
-    public static <T> Specification<T> toSpecification(String filterString) {
-        if (filterString == null)
+    public static <T> Specification<T> searchToSpec(String search) {
+        if (search == null)
             return Specification.anyOf();
 
-        filterString = filterString.trim();
+        search = search.trim();
 
-        if (filterString.isEmpty())
+        if (search.isEmpty())
             return Specification.anyOf();
 
-        if (filterString.startsWith("[") && filterString.endsWith("]")) {
+        final String normalizedSearch = search.toLowerCase();
+
+        return (root, query, criteriaBuilder) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            Field[] fields = root.getJavaType().getDeclaredFields();
+
+            for (Field field : fields) {
+                if (field.isAnnotationPresent(Searchable.class)) {
+                    predicates.add(criteriaBuilder.like(
+                            criteriaBuilder.lower(root.get(field.getName()).as(String.class)),
+                            "%" + normalizedSearch + "%"
+                    ));
+                }
+            }
+
+            return criteriaBuilder.or(predicates.toArray(new Predicate[0]));
+        };
+    }
+
+    public static <T> Specification<T> filterToSpec(String filter) {
+        if (filter == null)
+            return Specification.anyOf();
+
+        filter = filter.trim();
+
+        if (filter.isEmpty())
+            return Specification.anyOf();
+
+        if (filter.startsWith("[") && filter.endsWith("]")) {
             try {
-                String[] args = OBJECT_MAPPER.readValue(filterString, String[].class);
+                String[] args = OBJECT_MAPPER.readValue(filter, String[].class);
                 if (args.length == 0) {
                     return Specification.anyOf();
                 }
@@ -111,7 +140,7 @@ public class OpenApiHelper {
             }
         }
 
-        return toSpecificationSingle(filterString);
+        return toSpecificationSingle(filter);
     }
 
     private static <T> Specification<T> toSpecificationSingle(String filterString) {

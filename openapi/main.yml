@@ -12,6 +12,14 @@ components:
       scheme: bearer
       bearerFormat: JWT
 
+  parameters:
+    Pageable:
+      $ref: 'param/pageable.yml#/Pageable'
+    Filter:
+      $ref: 'param/filter.yml#/Filter'
+    Search:
+      $ref: 'param/search.yml#/Search'
+
   schemas:
     FileDto:
       $ref: 'model/file.yml#/FileDto'
@@ -78,11 +86,11 @@ paths:
   /messages:
      $ref: 'path/message.yml'
   /messages/{messagesId}:
-    $ref: 'path/message-messageId.yml'   
+    $ref: 'path/message-messageId.yml'
   /files:
      $ref: 'path/file.yml'
   /files/{fileId}:
-    $ref: 'path/file-fileId.yml'   
+    $ref: 'path/file-fileId.yml'
   /skills:
     $ref: 'path/skill.yml'
   /skills/{skillId}:

@@ -9,6 +9,11 @@ public interface ProjectCategoryService {
     ProjectCategory update(ProjectCategory projectCategory);
     ProjectCategory findByProjectCategoryId(long projectCategoryId);
     void deleteById(long projectCategoryId);
-    Page<ProjectCategory> getAllVisible(Pageable pageable, String filter);
-    Page<ProjectCategory> getAll(Pageable pageable, String filter);
+    Page<ProjectCategory> getAll(Pageable pageable, String filter, String search, boolean includeInvisible);
+    default Page<ProjectCategory> getAll(Pageable pageable, String filter, String search) {
+        return getAll(pageable, filter, search, false);
+    }
+    default Page<ProjectCategory> getAll(Pageable pageable, String filter) {
+        return getAll(pageable, filter, null, false);
+    }
 }

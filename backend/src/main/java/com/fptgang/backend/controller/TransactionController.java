@@ -1,13 +1,11 @@
 package com.fptgang.backend.controller;
 
-import com.fptgang.backend.api.controller.ProjectsApi;
 import com.fptgang.backend.api.controller.TransactionsApi;
 import com.fptgang.backend.api.model.*;
 import com.fptgang.backend.mapper.TransactionMapper;
 import com.fptgang.backend.service.TransactionService;
 import com.fptgang.backend.util.OpenApiHelper;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -42,10 +40,12 @@ public class TransactionController implements TransactionsApi {
     }
 
     @Override
-    public ResponseEntity<GetTransactions200Response> getTransactions(GetAccountsPageableParameter pageable, String filter) {
+    public ResponseEntity<GetTransactions200Response> getTransactions(Pageable pageable, String filter, String search) {
         log.info("Getting transactions");
         var page = OpenApiHelper.toPageable(pageable);
-        var res = transactionService.getAll(page, filter).map(transactionMapper::toDTO);
+        var res = transactionService
+                .getAll(page, filter, search)
+                .map(transactionMapper::toDTO);
         return OpenApiHelper.respondPage(res, GetTransactions200Response.class);
     }
 

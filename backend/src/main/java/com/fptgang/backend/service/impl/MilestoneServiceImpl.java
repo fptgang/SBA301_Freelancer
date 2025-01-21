@@ -39,8 +39,12 @@ public class MilestoneServiceImpl implements MilestoneService {
     }
 
     @Override
-    public Page<Milestone> getAll(Pageable pageable, String filter) {
-        var spec = OpenApiHelper.<Milestone>toSpecification(filter);
+    public Page<Milestone> getAll(Pageable pageable, String filter, String search, boolean includeInvisible) {
+        var spec = OpenApiHelper.<Milestone>filterToSpec(filter);
+        spec = spec.and(OpenApiHelper.searchToSpec(search));
+        if (!includeInvisible) {
+            spec = spec.and((a, _, cb) -> cb.isTrue(a.get("isVisible")));
+        }
         return proposalRepos.findAll(spec, pageable);
     }
 }

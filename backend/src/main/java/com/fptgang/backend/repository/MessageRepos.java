@@ -14,7 +14,4 @@ import java.util.Optional;
 @Repository
 public interface MessageRepos extends JpaRepository<Message, Long>, JpaSpecificationExecutor<Message> {
     Optional<Message> findByMessageId(Long messageId);
-
-    @Query("SELECT m FROM Message m WHERE (m.receiver.accountId = ?1 OR m.sender.accountId = ?1) AND m.createdAt = (SELECT MAX(m2.createdAt) FROM Message m2 WHERE m2.sender = m.sender AND m2.receiver = m.receiver)")
-    Page<Message> findAllBySenderOrReceiver(Long accountId, Pageable pageable, Specification<Message> spec);
 }

@@ -1,20 +1,17 @@
 package com.fptgang.backend.controller;
 
 import com.fptgang.backend.api.controller.ProjectsApi;
-import com.fptgang.backend.api.model.GetAccounts200Response;
-import com.fptgang.backend.api.model.GetAccountsPageableParameter;
 import com.fptgang.backend.api.model.GetProjects200Response;
+import com.fptgang.backend.api.model.Pageable;
 import com.fptgang.backend.api.model.ProjectDto;
 import com.fptgang.backend.mapper.ProjectMapper;
+import com.fptgang.backend.model.Role;
 import com.fptgang.backend.service.ProjectService;
 import com.fptgang.backend.util.OpenApiHelper;
+import com.fptgang.backend.util.SecurityUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -49,10 +46,13 @@ public class ProjectController implements ProjectsApi {
     }
 
     @Override
-    public ResponseEntity<GetProjects200Response> getProjects(GetAccountsPageableParameter pageable, String filter) {
-        log.info("Getting accounts");
+    public ResponseEntity<GetProjects200Response> getProjects(Pageable pageable, String filter, String search) {
+        log.info("Getting projects");
         var page = OpenApiHelper.toPageable(pageable);
-        var res = projectService.getAll(page, filter).map(projectMapper::toDTO);
+        var includeInvisible = SecurityUtil.hasPermission(Role.ADMIN);
+        var res = projectService
+                .getAll(page, filter, search, includeInvisible)
+                .map(projectMapper::toDTO);
         return OpenApiHelper.respondPage(res, GetProjects200Response.class);
     }
 

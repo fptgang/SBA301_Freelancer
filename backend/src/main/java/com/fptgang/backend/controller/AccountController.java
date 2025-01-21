@@ -3,7 +3,7 @@ package com.fptgang.backend.controller;
 import com.fptgang.backend.api.controller.AccountsApi;
 import com.fptgang.backend.api.model.AccountDto;
 import com.fptgang.backend.api.model.GetAccounts200Response;
-import com.fptgang.backend.api.model.GetAccountsPageableParameter;
+import com.fptgang.backend.api.model.Pageable;
 import com.fptgang.backend.mapper.AccountMapper;
 import com.fptgang.backend.model.Role;
 import com.fptgang.backend.service.AccountService;
@@ -53,10 +53,13 @@ public class AccountController implements AccountsApi {
     }
 
     @Override
-    public ResponseEntity<GetAccounts200Response> getAccounts(GetAccountsPageableParameter pageable, String filter) {
+    public ResponseEntity<GetAccounts200Response> getAccounts(Pageable pageable, String filter, String search) {
         log.info("Getting accounts");
         var page = OpenApiHelper.toPageable(pageable);
-        var res = accountService.getAll(page, filter).map(accountMapper::toDTO);
+        var includeInvisible = SecurityUtil.hasPermission(Role.ADMIN);
+        var res = accountService
+                .getAll(page, filter, search, includeInvisible)
+                .map(accountMapper::toDTO);
         return OpenApiHelper.respondPage(res, GetAccounts200Response.class);
     }
 

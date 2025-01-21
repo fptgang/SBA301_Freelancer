@@ -44,13 +44,21 @@ public class MessageServiceImpl implements MessageService {
 
     @Override
     public Page<Message> getAll(Pageable pageable, String filter) {
-        var spec = OpenApiHelper.<Message>toSpecification(filter);
+        var spec = OpenApiHelper.<Message>filterToSpec(filter);
         return messageRepos.findAll(spec,pageable);
     }
 
     @Override
-    public Page<Message> getAllBySenderOrReceiver(Long senderId,Pageable pageable,  String filter) {
-        var spec = OpenApiHelper.<Message>toSpecification(filter);
-        return messageRepos.findAllBySenderOrReceiver(senderId,pageable,spec);
+    public Page<Message> getAllInvolving(long participantId, Pageable pageable, String filter, String search, boolean includeInvisible) {
+        var spec = OpenApiHelper.<Message>filterToSpec(filter);
+        spec = spec.and(OpenApiHelper.searchToSpec(search));
+        if (!includeInvisible) {
+            spec = spec.and((a, _, cb) -> cb.isTrue(a.get("isVisible")));
+        }
+        spec = spec.and((root, query, criteriaBuilder) -> criteriaBuilder.or(
+                criteriaBuilder.equal(root.get("sender").get("accountId"), participantId),
+                criteriaBuilder.equal(root.get("receiver").get("accountId"), participantId)
+        ));
+        return messageRepos.findAll(spec, pageable);
     }
 }
