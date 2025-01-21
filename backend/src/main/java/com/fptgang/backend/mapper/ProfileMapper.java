@@ -29,7 +29,7 @@ public class ProfileMapper extends BaseMapper<ProfileDto, Profile> {
         }
 
         ProfileDto dto = new ProfileDto();
-
+        dto.setProfileId(entity.getProfileId());
         dto.setAccountId(entity.getAccount().getAccountId());
         dto.setOverview(entity.getOverview());
         dto.setEducation(entity.getEducation());
@@ -50,7 +50,7 @@ public class ProfileMapper extends BaseMapper<ProfileDto, Profile> {
             return null;
         }
 
-        Optional<Profile> existingEntityOptional = profileRepos.findById(dto.getAccountId());
+        Optional<Profile> existingEntityOptional = profileRepos.findById(dto.getProfileId());
         if (existingEntityOptional.isPresent()) {
             Profile existingEntity = existingEntityOptional.get();
 

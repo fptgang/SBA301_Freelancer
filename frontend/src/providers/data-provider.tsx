@@ -40,7 +40,8 @@ export const dataProvider = (
     console.log("sorters", sorters);
     console.log("filters", filters);
     console.log("pagination", pagination);
-    const result = await _httpClient.get(url);
+    const headers = meta?.headers ?? {};
+    const result = await _httpClient.get(url, { headers });
     // TODO: send request to the API
     // const response = await httpClient.get(url, {});
 

@@ -10,4 +10,5 @@ public interface MessageService {
     Message findByMessageId(long messageId);
     void deleteById(long messageId);
     Page<Message> getAll(Pageable pageable, String filter);
+    Page<Message> getAllBySenderOrReceiver( Long senderId,Pageable pageable, String filter);
 }

@@ -26,29 +26,3 @@ get:
         application/json:
           schema:
             $ref: '../component/error.yml#/ErrorResponse'
-
-post:
-  summary: Create a message
-  operationId: createMessage
-  security:
-    - bearerAuth: []
-  requestBody:
-    description: Message to create
-    required: true
-    content:
-      application/json:
-        schema:
-          $ref: '../model/message.yml#/MessageDto'
-  responses:
-    '200':
-      description: The operation was successful
-      content:
-        application/json:
-          schema:
-            $ref: '../model/message.yml#/MessageDto'
-    '400':
-      description: The operation failed
-      content:
-        application/json:
-          schema:
-            $ref: '../component/error.yml#/ErrorResponse'
