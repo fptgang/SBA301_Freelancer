@@ -121,16 +121,24 @@ public class OpenApiHelper {
             throw new IllegalArgumentException("Invalid filter format. Expected: field,op,value");
         }
 
-        String field = filterParts[0];
-        String operator = filterParts[1].toLowerCase();
-        String value = filterParts.length == 3 ? filterParts[2] : "";
 
         return (root, query, criteriaBuilder) -> {
-            Path<?> fieldPath = root.get(field);
+            String[] fieldPaths = filterParts[0].split("\\.");
+            Path<?> fieldPath = root.get(fieldPaths[0]);
 
             if (fieldPath == null) {
                 return criteriaBuilder.or();
             }
+
+            for (int i = 1; i < Math.min(5, fieldPaths.length); i++) {
+                fieldPath = fieldPath.get(fieldPaths[i]);
+
+                if (fieldPath == null) {
+                    return criteriaBuilder.or();
+                }
+            }
+
+            String operator = filterParts[1].toLowerCase();
 
             // common operators
             if (operator.equals("null")) {
@@ -139,6 +147,7 @@ public class OpenApiHelper {
                 return criteriaBuilder.isNotNull(fieldPath);
             }
 
+            String value = filterParts.length == 3 ? filterParts[2] : "";
             Class<?> javaType = fieldPath.getJavaType();
 
             if (javaType == boolean.class || javaType == Boolean.class) {

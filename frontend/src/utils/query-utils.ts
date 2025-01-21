@@ -57,7 +57,7 @@ function generateFilterField(filter: LogicalFilter): string {
   const normalizedValue = Array.isArray(value) ? value.join(",") : value;
 
   // Ensure field only contains allowed characters
-  if (!/^[a-zA-Z0-9_]+$/.test(field)) {
+  if (!/^[a-zA-Z0-9_.]+$/.test(field)) {
     return "";
   }
 
