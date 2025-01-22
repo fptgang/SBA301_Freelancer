@@ -2,6 +2,7 @@ package com.fptgang.backend.util;
 
 import com.fptgang.backend.model.Role;
 import jakarta.validation.constraints.NotNull;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -24,7 +25,10 @@ public class SecurityUtil {
 
     @NotNull
     public static String requireCurrentUserEmail() {
-        return Objects.requireNonNull(getCurrentUserEmail());
+        var email = getCurrentUserEmail();
+        if (email == null)
+            throw new AccessDeniedException("User is not authenticated");
+        return email;
     }
 
     @Nullable
@@ -58,7 +62,10 @@ public class SecurityUtil {
 
     @NotNull
     public static Role requireCurrentUserRole() {
-        return Objects.requireNonNull(getCurrentUserRole());
+        var role = getCurrentUserRole();
+        if (role == null)
+            throw new AccessDeniedException("User is not authenticated");
+        return role;
     }
 
     @Nullable
@@ -101,7 +108,7 @@ public class SecurityUtil {
         try {
             return Role.valueOf(jwt.getClaimAsString("scope"));
         } catch (IllegalArgumentException e) {
-            return null;
+            throw new AccessDeniedException("JWT containing invalid role");
         }
     }
 }

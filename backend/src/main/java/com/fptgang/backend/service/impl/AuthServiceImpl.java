@@ -64,6 +64,10 @@ public class AuthServiceImpl implements AuthService {
         Account account = accountRepos.findByEmail(email)
                 .orElseThrow(() -> new InvalidInputException("User not found"));
 
+        if (account.getPassword() == null) {
+            throw new InvalidInputException("Cannot log in to this user using Email-Password method");
+        }
+
         if (passwordEncoderConfig.bcryptEncoder().matches(password, account.getPassword())) {
             Result result = authenticate(account, fingerprint);
             log.info("User {} logged using Email-Password: token = {}", email, result.jwt);
