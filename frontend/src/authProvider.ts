@@ -27,10 +27,10 @@ export const authProvider: AuthProvider = {
           success: true,
           redirectTo: "/admin",
         };
-      } else {
+      } else if(response?.accountResponseDTO?.role === AccountDtoRoleEnum.Client) {
         return {
           success: true,
-          redirectTo: "/",
+          redirectTo: "/find-work",
         };
       }
     }

@@ -5,63 +5,16 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="d21bfcd3-12cd-4298-bc9e-f7b2eb78a303" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/../frontend/src/pages/admin/profiles/create.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../frontend/src/pages/admin/profiles/edit.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../frontend/src/pages/admin/profiles/list.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../frontend/src/pages/admin/profiles/show.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../frontend/src/pages/admin/proposals/create.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../frontend/src/pages/admin/proposals/edit.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../frontend/src/pages/admin/proposals/list.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../frontend/src/pages/admin/proposals/show.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../frontend/src/pages/admin/skills/create.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../frontend/src/pages/admin/skills/edit.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../frontend/src/pages/admin/skills/index.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../frontend/src/pages/admin/skills/list.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../frontend/src/pages/admin/skills/show.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../frontend/src/pages/admin/transactions/create.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../frontend/src/pages/admin/transactions/edit.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../frontend/src/pages/admin/transactions/index.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../frontend/src/pages/admin/transactions/list.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../frontend/src/pages/admin/transactions/show.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/discord.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/swagger-settings.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/com/fptgang/backend/controller/MilestoneController.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/com/fptgang/backend/controller/MilestoneController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/com/fptgang/backend/controller/ProfileController.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/com/fptgang/backend/controller/ProfileController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/com/fptgang/backend/controller/ProposalController.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/com/fptgang/backend/controller/ProposalController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/com/fptgang/backend/controller/SkillController.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/com/fptgang/backend/controller/SkillController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/com/fptgang/backend/controller/TransactionController.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/com/fptgang/backend/controller/TransactionController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/com/fptgang/backend/mapper/SkillMapper.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/com/fptgang/backend/mapper/SkillMapper.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../frontend/src/pages/client/dashboard/index.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../frontend/src/pages/client/setting/components/client-profile-setting.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../frontend/src/pages/client/setting/components/client-security-setting.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../frontend/src/pages/freelancer/setting/index.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../frontend/src/App.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/src/App.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../frontend/src/pages/accounts/create.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/src/pages/admin/accounts/create.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../frontend/src/pages/accounts/edit.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/src/pages/admin/accounts/edit.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../frontend/src/pages/accounts/index.ts" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/src/pages/admin/accounts/index.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../frontend/src/pages/accounts/list.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/src/pages/admin/accounts/list.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../frontend/src/pages/accounts/show.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/src/pages/admin/accounts/show.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../frontend/src/pages/blog-posts/create.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../frontend/src/pages/blog-posts/edit.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../frontend/src/pages/blog-posts/index.ts" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/src/pages/admin/projects/index.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../frontend/src/pages/blog-posts/list.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../frontend/src/pages/blog-posts/show.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../frontend/src/pages/categories/create.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../frontend/src/pages/categories/edit.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../frontend/src/pages/categories/index.ts" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/src/pages/admin/proposals/index.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../frontend/src/pages/categories/list.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../frontend/src/pages/categories/show.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../frontend/src/pages/forgotPassword/index.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/src/pages/auth/forgotPassword/index.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../frontend/src/pages/login/index.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/src/pages/auth/login/index.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../frontend/src/pages/projectcategories/create.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/src/pages/admin/projectcategories/create.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../frontend/src/pages/projectcategories/edit.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/src/pages/admin/projectcategories/edit.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../frontend/src/pages/projectcategories/index.ts" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/src/pages/admin/profiles/index.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../frontend/src/pages/projectcategories/list.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/src/pages/admin/projectcategories/list.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../frontend/src/pages/projectcategories/show.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/src/pages/admin/projectcategories/show.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../frontend/src/pages/projects/create.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/src/pages/admin/projects/create.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../frontend/src/pages/projects/edit.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/src/pages/admin/projects/edit.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../frontend/src/pages/projects/index.ts" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/src/pages/admin/projectcategories/index.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../frontend/src/pages/projects/list.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/src/pages/admin/projects/list.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../frontend/src/pages/projects/show.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/src/pages/admin/projects/show.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../frontend/src/pages/register/index.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/src/pages/auth/register/index.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../frontend/src/pages/reset-password/index.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/src/pages/auth/reset-password/index.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../frontend/src/utils/query-utils.ts" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/src/utils/query-utils.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../frontend/src/authProvider.ts" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/src/authProvider.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../frontend/src/components/common/button/profile-dropdown-button.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/src/components/common/button/profile-dropdown-button.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../frontend/src/contexts/color-mode/index.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/src/contexts/color-mode/index.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../frontend/src/pages/profile/index.ts" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../frontend/src/pages/profile/profile.tsx" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -96,7 +49,7 @@
   "keyToString": {
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "com.codeium.enabled": "true",
-    "git-widget-placeholder": "develop",
+    "git-widget-placeholder": "Feature/Vi__Admin-crud",
     "kotlin-language-version-configured": "true",
     "last_opened_file_path": "/Users/vidz/Documents/GitHub/SBA301_Freelancer/openapi",
     "node.js.detected.package.eslint": "true",
@@ -173,7 +126,7 @@
       <workItem from="1736932824375" duration="807000" />
       <workItem from="1736935532852" duration="66000" />
       <workItem from="1736977935170" duration="595000" />
-      <workItem from="1737430388910" duration="664000" />
+      <workItem from="1737430388910" duration="993000" />
     </task>
     <servers />
   </component>

@@ -6,7 +6,7 @@ import {
   LinkedinOutlined,
 } from "@ant-design/icons";
 
-export default function Footer() {
+export default function FooterPage() {
   const { Footer } = Layout;
   const { Title, Text, Link } = Typography;
 
