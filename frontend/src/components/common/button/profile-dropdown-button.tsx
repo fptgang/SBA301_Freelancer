@@ -1,11 +1,13 @@
 import { UserOutlined } from "@ant-design/icons";
-import { useLogout } from "@refinedev/core";
+import { useGetIdentity, useLogout } from "@refinedev/core";
 import { Button, Dropdown } from "antd";
 import { useNavigate } from "react-router";
+import { AccountDto, AccountDtoRoleEnum } from "../../../../generated";
 
 export const ProfileDropdownButton = () => {
   const nav = useNavigate();
   const { mutate: logout } = useLogout();
+  const { data: user } = useGetIdentity<AccountDto>();
 
   const menuItems = [
     // Add Dashboard item conditionally for admin users
@@ -21,12 +23,19 @@ export const ProfileDropdownButton = () => {
     {
       key: "profile",
       label: "Profile",
-      onClick: () => nav("/profile"),
+      onClick: () => {
+        if (user?.role === AccountDtoRoleEnum.Client) nav("/client");
+        if (user?.role === AccountDtoRoleEnum.Freelancer) nav("/freelancer");
+      },
     },
     {
       key: "settings",
       label: "Settings",
-      onClick: () => nav("/settings"),
+      onClick: () => {
+        if (user?.role === AccountDtoRoleEnum.Client) nav("/client/settings");
+        if (user?.role === AccountDtoRoleEnum.Freelancer)
+          nav("/freelancer/settings");
+      },
     },
     {
       key: "logout",

@@ -23,7 +23,7 @@ import {
 import { ROLE_OPTIONS } from "../../../utils/constants";
 import { AccountDto } from "../../../../generated/models/AccountDto";
 
-export const UsersCreate: React.FC = () => {
+export const AccountsCreate: React.FC = () => {
   const { formProps, saveButtonProps } = useForm<AccountDto>();
 
   const emailValidationRules = [
