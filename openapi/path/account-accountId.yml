@@ -9,6 +9,7 @@ get:
       required: true
       schema:
         type: integer
+        format: int64
   responses:
     '200':
       description: The operation was success
@@ -33,6 +34,7 @@ put:
       required: true
       schema:
         type: integer
+        format: int64
   requestBody:
     description: Account to update
     required: true
@@ -64,6 +66,7 @@ delete:
       required: true
       schema:
         type: integer
+        format: int64
   responses:
     '200':
       description: The operation was success

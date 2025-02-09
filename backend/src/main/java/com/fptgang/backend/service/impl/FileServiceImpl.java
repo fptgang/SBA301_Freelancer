@@ -1,95 +1,77 @@
 package com.fptgang.backend.service.impl;
 
-import com.azure.storage.blob.BlobClient;
-import com.azure.storage.blob.BlobContainerClient;
-import com.azure.storage.blob.BlobServiceClient;
-import com.fptgang.backend.exception.InvalidInputException;
 import com.fptgang.backend.model.File;
-import com.fptgang.backend.model.Message;
-import com.fptgang.backend.model.Project;
-import com.fptgang.backend.model.Proposal;
 import com.fptgang.backend.repository.FileRepos;
+import com.fptgang.backend.service.AzureBlobService;
 import com.fptgang.backend.service.FileService;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
+import com.fptgang.backend.util.OpenApiHelper;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.io.ByteArrayInputStream;
-import java.util.Objects;
+import java.io.IOException;
 
 @Service
-@RequiredArgsConstructor
+@Slf4j
 public class FileServiceImpl implements FileService {
 
-    @Value("${COMPANY_NAME}")
-    private String containerName;
-
-    private final BlobServiceClient blobServiceClient;
-
+    private final AzureBlobService azureBlobService;
     private final FileRepos fileRepos;
 
-    private BlobContainerClient getContainerClient() {
-        return blobServiceClient.getBlobContainerClient(containerName);
-    }
-
-    private BlobClient getBlobClient(String fileName) {
-        return getContainerClient().getBlobClient(fileName);
+    @Autowired
+    public FileServiceImpl(FileRepos fileRepos, AzureBlobService azureBlobService) {
+        this.fileRepos = fileRepos;
+        this.azureBlobService = azureBlobService;
     }
 
     @Override
-    public File uploadFile(long accountId, String fileName, byte[] fileContent, Object object) {
-        validateInput(object, fileContent, fileName);
-        // Upload file to Azure Blob Storage
-        try (ByteArrayInputStream dataStream = new ByteArrayInputStream(fileContent)) {
-            getBlobClient(fileName).upload(dataStream, fileContent.length, true);
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to upload file: " + e.getMessage(), e);
+    public File create(File image, MultipartFile file) {
+        try {
+            image.setFileUrl(azureBlobService.upload(file, file.getName()));
+            return fileRepos.save(image);
+        } catch (IOException e) {
+            log.error(e.getMessage());
+            throw new RuntimeException(e);
         }
-        File file =  buildFileEntity(fileName, fileContent, object);
+    }
+
+    @Override
+    public File findById(long id) {
+        return fileRepos.findById(id).orElse(null);
+    }
+
+    @Override
+    public File update(File file, MultipartFile blob) {
+        if (file.getFileId() == null) {
+            throw new IllegalArgumentException("File does not exist");
+        }
+        try {
+            file.setFileUrl(azureBlobService.upload(blob, blob.getName()));
+            return fileRepos.save(file);
+        } catch (IOException e) {
+            log.error(e.getMessage());
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public File deleteById(long id) {
+        File file = fileRepos.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("File does not exist"));
+        file.setVisible(false);
         return fileRepos.save(file);
     }
 
-    private void validateInput(Object object, byte[] fileContent, String fileName) {
-        if (!(object instanceof Project || object instanceof Proposal || object instanceof Message)) {
-            throw new InvalidInputException("Object must be instance of Project, Proposal, or Message");
-        }
-        if (Objects.isNull(fileContent) || fileContent.length == 0) {
-            throw new InvalidInputException("File content cannot be empty");
-        }
-        if (Objects.isNull(fileName) || fileName.trim().isEmpty()) {
-            throw new InvalidInputException("File name cannot be empty");
-        }
-    }
-
-    private File buildFileEntity(String fileName, byte[] fileContent, Object object) {
-        return File.builder()
-                .fileName(fileName)
-                .fileUrl(getBlobClient(fileName).getBlobUrl())
-                .fileType(getBlobClient(fileName).getBlobUrl().split("\\.")[1])
-                .isVisible(true)
-                .project(object instanceof Project ? (Project) object : null)
-                .proposal(object instanceof Proposal ? (Proposal) object : null)
-                .message(object instanceof Message ? (Message) object : null)
-                .fileId((long) getBlobClient(fileName).getBlobUrl().hashCode())
-                .size(fileContent.length)
-                .build();
-    }
-
     @Override
-    public void deleteFile(long accountId, String fileName) {
-        try {
-            getBlobClient(fileName).deleteIfExists();
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to delete file: " + e.getMessage(), e);
+    public Page<File> getAll(Pageable pageable, String filter, String search, boolean includeInvisible) {
+        var spec = OpenApiHelper.<File>filterToSpec(filter);
+        spec = spec.and(OpenApiHelper.searchToSpec(search));
+        if (!includeInvisible) {
+            spec = spec.and((a, _, cb) -> cb.isTrue(a.get("isVisible")));
         }
-    }
-
-    @Override
-    public void deleteAllFiles(long accountId) {
-        try {
-            getContainerClient().deleteIfExists();
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to delete container: " + e.getMessage(), e);
-        }
+        return fileRepos.findAll(spec, pageable);
     }
 }

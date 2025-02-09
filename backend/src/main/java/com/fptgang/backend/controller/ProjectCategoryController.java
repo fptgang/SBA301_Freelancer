@@ -60,6 +60,8 @@ public class ProjectCategoryController implements ProjectCategoriesApi {
 
     @Override
     public ResponseEntity<ProjectCategoryDto> updateProjectCategory(Long projectCategoryId, ProjectCategoryDto projectCategoryDto) {
+        projectCategoryDto.setProjectCategoryId(projectCategoryId); // Override projectCategoryId
+
         return new ResponseEntity<>(projectCategoryMapper.toDTO(projectCategoryService.update(projectCategoryMapper.toEntity(projectCategoryDto))), HttpStatus.OK);
     }
 }

@@ -35,13 +35,13 @@ public class ProfileController implements ProfilesApi {
     }
 
     @Override
-    public ResponseEntity<Void> deleteProfile(Integer profileId) {
+    public ResponseEntity<Void> deleteProfile(Long profileId) {
         profileService.deleteById(profileId);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @Override
-    public ResponseEntity<ProfileDto> getProfileById(Integer profileId) {
+    public ResponseEntity<ProfileDto> getProfileById(Long profileId) {
         return new ResponseEntity<>(profileMapper.toDTO(profileService.findByProfileId(profileId)), HttpStatus.OK);
     }
 
@@ -57,7 +57,9 @@ public class ProfileController implements ProfilesApi {
     }
 
     @Override
-    public ResponseEntity<ProfileDto> updateProfile(Integer profileId, ProfileDto profileDto) {
+    public ResponseEntity<ProfileDto> updateProfile(Long profileId, ProfileDto profileDto) {
+        profileDto.setProfileId(profileId); // Override profileId
+
         return new ResponseEntity<>(profileMapper.toDTO(profileService.update(profileMapper.toEntity(profileDto))), HttpStatus.OK);
     }
 

@@ -33,13 +33,13 @@ public class MilestoneController implements MilestonesApi {
     }
 
     @Override
-    public ResponseEntity<Void> deleteMilestone(Integer milestoneId) {
+    public ResponseEntity<Void> deleteMilestone(Long milestoneId) {
         milestoneService.deleteById(milestoneId);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @Override
-    public ResponseEntity<MilestoneDto> getMilestoneById(Integer milestoneId) {
+    public ResponseEntity<MilestoneDto> getMilestoneById(Long milestoneId) {
         return new ResponseEntity<>(milestoneMapper.toDTO(milestoneService.findById(milestoneId)), HttpStatus.OK);
     }
 
@@ -55,7 +55,9 @@ public class MilestoneController implements MilestonesApi {
     }
 
     @Override
-    public ResponseEntity<MilestoneDto> updateMilestone(Integer milestoneId, MilestoneDto milestoneDto) {
+    public ResponseEntity<MilestoneDto> updateMilestone(Long milestoneId, MilestoneDto milestoneDto) {
+        milestoneDto.setMilestoneId(milestoneId); // Override milestoneId
+
         return new ResponseEntity<>(milestoneMapper.toDTO(milestoneService.update(milestoneMapper.toEntity(milestoneDto))), HttpStatus.OK);
     }
 }
