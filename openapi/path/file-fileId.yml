@@ -9,6 +9,7 @@ get:
       required: true
       schema:
         type: integer
+        format: int64
   responses:
     '200':
       description: The operation was successful
@@ -34,13 +35,14 @@ put:
       required: true
       schema:
         type: integer
+        format: int64
   requestBody:
     description: Metadata to update
     required: true
     content:
-      application/json:
+      multipart/form-data:
         schema:
-          $ref: '../model/file.yml#/FileDto'
+          $ref: '../model/file-blob.yml#/FileBlobDto'
   responses:
     '200':
       description: The operation was successful
@@ -66,6 +68,7 @@ delete:
       required: true
       schema:
         type: integer
+        format: int64
   responses:
     '200':
       description: The operation was successful

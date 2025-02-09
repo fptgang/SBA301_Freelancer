@@ -33,13 +33,13 @@ public class SkillController implements SkillsApi {
     }
 
     @Override
-    public ResponseEntity<Void> deleteSkill(Integer skillId) {
+    public ResponseEntity<Void> deleteSkill(Long skillId) {
         skillService.deleteById(skillId);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @Override
-    public ResponseEntity<SkillDto> getSkillById(Integer skillId) {
+    public ResponseEntity<SkillDto> getSkillById(Long skillId) {
         return new ResponseEntity<>(skillMapper.toDTO(skillService.findBySkillId(skillId)), HttpStatus.OK);
     }
 
@@ -54,8 +54,9 @@ public class SkillController implements SkillsApi {
     }
 
     @Override
-    public ResponseEntity<SkillDto> updateSkill(Integer skillId, SkillDto skillDto) {
-        skillDto.setSkillId(Long.valueOf(skillId));
+    public ResponseEntity<SkillDto> updateSkill(Long skillId, SkillDto skillDto) {
+        skillDto.setSkillId(skillId); // Override skillId
+
         return new ResponseEntity<>(skillMapper.toDTO(skillService.update(skillMapper.toEntity(skillDto))), HttpStatus.OK);
     }
 }

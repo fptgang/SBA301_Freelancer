@@ -60,18 +60,20 @@ public class MessageController implements MessagesApi {
     }
 
     @Override
-    public ResponseEntity<Void> deleteMessage(Integer messageId) {
+    public ResponseEntity<Void> deleteMessage(Long messageId) {
         messageService.deleteById(messageId);
         return ResponseEntity.ok().build();
     }
 
     @Override
-    public ResponseEntity<MessageDto> getMessageById(Integer messageId) {
+    public ResponseEntity<MessageDto> getMessageById(Long messageId) {
         return ResponseEntity.ok(messageMapper.toDTO(messageService.findByMessageId(messageId)));
     }
 
     @Override
-    public ResponseEntity<MessageDto> updateMessage(Integer messageId, MessageDto messageDto) {
+    public ResponseEntity<MessageDto> updateMessage(Long messageId, MessageDto messageDto) {
+        messageDto.setMessageId(messageId); // Override messageId
+
         return ResponseEntity.ok(messageMapper.toDTO(messageService.update(messageMapper.toEntity(messageDto))));
     }
 
