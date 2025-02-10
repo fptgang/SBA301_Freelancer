@@ -61,15 +61,12 @@ import ClientSettings from "./pages/client/setting";
 
 // Freelancer Pages
 import FreelancerDashboardPage from "./pages/freelancer/dashboard/dashboard";
-import FreelancerFindProjectPage from "./pages/freelancer/find-projects/find-project";
-import FreelancerMyProposalPage from "./pages/freelancer/my-proposal/my-proposal";
+import FreelancerMyProposalPage from "./pages/freelancer/proposal/my-proposal";
 import FreelancerActiveProject from "./pages/freelancer/active-projects/active-project";
 import FreeLancerMessagePage from "./pages/freelancer/messages/message";
 import FreeLancerSettings from "./pages/freelancer/setting/setting";
 
-// Public Pages
-import About from "./pages/about";
-import Pricing from "./pages/pricing";
+import Pricing from "./pages/public/pricing";
 
 
 // Providers and Config
@@ -86,7 +83,7 @@ import ClientLayout from "./components/layout/client-layout";
 import FreelancerLayout from "./components/layout/freelancer-layout";
 import ClientList from "./pages/client/projects/client-list";
 import {ForgotPassword} from "./pages/auth/forgotPassword";
-import LandingPage from "./pages/landing/landing-page";
+import LandingPage from "./pages/public/landing/landing-page";
 import {Login} from "./pages/auth/login";
 import {Register} from "./pages/auth/register";
 import ResetPassword from "./pages/auth/reset-password";
@@ -98,6 +95,13 @@ import {
     ProjectCategoriesShow
 } from "./pages/admin/projectcategories";
 import {ColorModeContextProvider} from "./contexts/color-mode";
+import FreelancerProfilePage from "./pages/freelancer/profile";
+import SearchPage from "./pages/public/search";
+import ClientProjectShow from "./pages/client/projects/client-show";
+import ChatPage from "./pages/shared/chat";
+import SettingPage from "./pages/shared/setting";
+import FreelancerProposalShow from "./pages/freelancer/proposal/show";
+import SharedProjectShow from "./pages/shared/projects/show";
 
 
 const resources = [
@@ -190,13 +194,22 @@ function App() {
                             <Routes>
                                 {/* Public Routes */}
                                 <Route element={<PublicLayout/>}>
-                                    <Route index element={<LandingPage/>}/>
-                                    <Route path="about" element={<About/>}/>
+                                        <Route index element={<LandingPage />} />
                                     <Route path="pricing" element={<Pricing/>}/>
                                     <Route path="login" element={<Login/>}/>
                                     <Route path="register" element={<Register/>}/>
                                     <Route path="forgot-password" element={<ForgotPassword/>}/>
                                     <Route path="reset-password" element={<ResetPassword/>}/>
+                                        <Route path="search" element={<SearchPage />} />
+                                    </Route>
+                                    <Route
+                                        element={
+                                            <Authenticated fallback={<Navigate to="/login" />} key={"authenticated-inner"}>
+                                                <PublicLayout />
+                                            </Authenticated>
+                                        }
+                                    >
+                                        <Route path="message" element={<Pricing />} />
                                 </Route>
 
                                 {/* Admin Routes */}
@@ -247,41 +260,50 @@ function App() {
                                     </Route>
                                 </Route>
 
+
                                 {/* Client Routes */}
-                                <Route
-                                    path="client"
-                                    element={
-                                        <Authenticated fallback={<Navigate to="/login"/>} key={"authenticated-inner"}>
-                                            <ClientLayout/>
-                                        </Authenticated>
-                                    }
-                                >
-                                    <Route index element={<Navigate to="/client/dashboard"/>}/>
-                                    <Route path="dashboard" element={<ClientDashboard/>}/>
-                                    <Route path="projects" element={<ClientList/>}/>
-                                    <Route path="proposals" element={<ClientProposalList/>}/>
-                                    <Route path="messages" element={<ClientMessageList/>}/>
-                                    <Route path="settings" element={<ClientSettings/>}/>
-                                    <Route path="transactions" element={<ClientTransactionList/>}/>
-                                </Route>
+                                    <Route path="client" element={<ClientLayout />}>
+                                        <Route index element={<Navigate to="dashboard" />} />
+                                        <Route path="dashboard" element={<ClientDashboard />} />
+
+                                        <Route path="projects">
+                                            <Route index element={<ClientList />} />
+                                            <Route path=":id" element={<ClientProjectShow />} />
+                                        </Route>
+                                        <Route path="wallet">
+                                            <Route index element={<Navigate to="transactions" />} />
+                                            {/* <Route path="deposit" element={<DepositFunds />} /> */}
+                                            {/* <Route path="withdraw" element={<WithdrawFunds />} /> */}
+                                            <Route path="transactions" element={<ClientTransactionList />} />
+                                        </Route>
+                                        <Route path="settings" element={<SettingPage />}/>
+                                        <Route path="chat" element={<ChatPage />} />
+
+                                    </Route>
 
                                 {/* Freelancer Routes */}
-                                <Route
-                                    path="freelancer"
-                                    element={
-                                        <Authenticated fallback={<Navigate to="/login"/>} key={"authenticated-inner"}>
-                                            <FreelancerLayout/>
-                                        </Authenticated>
-                                    }
-                                >
-                                    <Route index element={<Navigate to="/freelancer/dashboard"/>}/>
-                                    <Route path="dashboard" element={<FreelancerDashboardPage/>}/>
-                                    <Route path="find-projects" element={<FreelancerFindProjectPage/>}/>
-                                    <Route path="my-proposals" element={<FreelancerMyProposalPage/>}/>
-                                    <Route path="active-projects" element={<FreelancerActiveProject/>}/>
-                                    <Route path="messages" element={<FreeLancerMessagePage/>}/>
-                                    <Route path="settings" element={<FreeLancerSettings/>}/>
-                                </Route>
+                                    <Route path="freelancer" element={<FreelancerLayout />}>
+                                        <Route index element={<Navigate to="dashboard" />} />
+                                        <Route path="dashboard" element={<FreelancerDashboardPage />} />
+                                        <Route path="projects">
+                                            <Route path=":id" element={<SharedProjectShow />} />
+                                        </Route>
+
+                                        <Route path="proposals">
+                                            <Route index element={<FreelancerMyProposalPage />} />
+                                            <Route path=":id" element={<FreelancerProposalShow />} />
+                                        </Route>
+
+                                 
+                                        <Route path="profile" element={<FreelancerProfilePage />} />
+
+                                        <Route path="settings" element={<SettingPage />} />
+                                        <Route path="wallet">
+                                            <Route index element={<Navigate to="transactions" />} />
+                                            <Route path="transactions" element={<ClientTransactionList />} />
+                                        </Route>
+                                        <Route path="chat" element={<ChatPage />} />
+                                    </Route>
 
                                 <Route path="*" element={<ErrorComponent/>}/>
                             </Routes>
