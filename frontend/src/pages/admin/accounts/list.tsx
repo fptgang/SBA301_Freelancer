@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo } from "react";
 import { BaseRecord, useMany } from "@refinedev/core";
 import {
   useTable,
@@ -29,6 +29,7 @@ import {
 } from "@ant-design/icons";
 import { ROLE_COLOR_MAP } from "../../../utils/constants";
 import { AccountDto } from "../../../../generated/models/AccountDto";
+import { stompClient } from "../../../utils/stompClient";
 
 const { Text } = Typography;
 
@@ -57,7 +58,14 @@ export const AccountsList: React.FC = () => {
         },
       ],
     },
+    // liveMode: "manual",
   });
+
+  useEffect(() => {
+    return () => {
+      stompClient.unsubscribe("resources/accounts");
+    };
+  }, []);
 
   const getVerificationStatus = (isVerified: boolean | null) => {
     return isVerified ? (

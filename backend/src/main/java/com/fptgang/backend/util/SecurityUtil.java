@@ -53,7 +53,7 @@ public class SecurityUtil {
     @NotNull
     public static boolean isRole(Role... roles) {
         for (Role role : roles) {
-            if (isRole(role)) {
+            if (requireCurrentUserRole().equals(role)) {
                 return true;
             }
         }

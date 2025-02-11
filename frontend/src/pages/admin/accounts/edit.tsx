@@ -25,6 +25,7 @@ import { AccountDto } from "../../../../generated/models/AccountDto";
 export const AccountsEdit: React.FC = () => {
   const { formProps, saveButtonProps, queryResult } = useForm<AccountDto>({
     redirect: false,
+    liveMode: "manual",
   });
 
   const AccountDtosData = queryResult?.data?.data;
@@ -85,7 +86,7 @@ export const AccountsEdit: React.FC = () => {
                     </Tooltip>
                   </span>
                 }
-                name="AccountId"
+                name="accountId"
                 rules={[{ required: true }]}
               >
                 <Input
