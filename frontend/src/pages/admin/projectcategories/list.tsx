@@ -11,16 +11,7 @@ import {
   RefreshButton,
   CreateButton,
 } from "@refinedev/antd";
-import {
-  Table,
-  Space,
-  Tooltip,
-  Typography,
-  Input,
-  Badge,
-  Tag,
-  Button,
-} from "antd";
+import { Table, Space, Tooltip, Typography, Input, Badge, Tag } from "antd";
 import {
   FolderOutlined,
   CheckSquareOutlined,
@@ -86,18 +77,6 @@ export const ProjectCategoriesList: React.FC = () => {
         <CreateButton resource="projectCategories" />,
       ]}
     >
-      <Button
-        onClick={() => {
-          stompClient.unsubscribe("resources/projectCategories");
-          console.log("unsubscribe", {
-            channel: "resources/projectCategories",
-          });
-
-          console.log(stompClient);
-        }}
-      >
-        unsubscribe
-      </Button>
       <div className="mb-6">
         <Input.Search
           placeholder="Search project categories..."
