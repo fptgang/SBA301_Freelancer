@@ -32,7 +32,7 @@ public class JwtServiceImpl implements JwtService {
     }
 
     @Override
-    public @NotNull Jwt generateJwt(String email, Role role) {
+    public @NotNull Jwt generateJwt(long accountId, String email, Role role) {
         Instant now = Instant.now();
         JwtClaimsSet claims = JwtClaimsSet.builder()
                 .issuer("Backend")
@@ -40,6 +40,7 @@ public class JwtServiceImpl implements JwtService {
                 .expiresAt(now.plus(JWT_EXPIRY_DURATION))
                 .subject(email)
                 .claim("scope", role.name())
+                .claim("accountId", accountId)
                 .build();
         return this.encoder.encode(JwtEncoderParameters.from(claims));
     }
@@ -52,12 +53,12 @@ public class JwtServiceImpl implements JwtService {
         }
 
         Account account = refreshToken.getAccount();
-        return generateToken(account.getEmail(), account.getRole());
+        return generateToken(account.getAccountId(), account.getEmail(), account.getRole());
     }
 
     @Override
-    public @NotNull String generateToken(String email, Role role) {
-        return generateJwt(email, role).getTokenValue();
+    public @NotNull String generateToken(long accountId, String email, Role role) {
+        return generateJwt(accountId, email, role).getTokenValue();
     }
 
     @Nullable

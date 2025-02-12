@@ -1,6 +1,7 @@
 package com.fptgang.backend.util;
 
 import com.fptgang.backend.model.Role;
+import com.fptgang.backend.security.AppUser;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -21,6 +22,31 @@ public class SecurityUtil {
 
     public static boolean isGuest() {
         return !isAuthenticated();
+    }
+
+    @NotNull
+    public static long requireCurrentUserId() {
+        var userId = getCurrentUserId();
+        if (userId == null)
+            throw new AccessDeniedException("User is not authenticated");
+        return userId;
+    }
+
+    @Nullable
+    public static Long getCurrentUserId() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication instanceof JwtAuthenticationToken auth) {
+            return getIdFromJwt(auth.getToken());
+        } else if (authentication instanceof UsernamePasswordAuthenticationToken auth) {
+            if (auth.getPrincipal() instanceof AppUser appUser) {
+                return appUser.getAccountId();
+            } else {
+                throw new RuntimeException("Unable to obtain AppUser");
+            }
+        }
+
+        return null;
     }
 
     @NotNull
@@ -105,10 +131,24 @@ public class SecurityUtil {
 
     @Nullable
     public static Role getRoleFromJwt(Jwt jwt) {
+        String role = jwt.getClaimAsString("scope");
+        if (role == null)
+            return null;
         try {
-            return Role.valueOf(jwt.getClaimAsString("scope"));
+            return Role.valueOf(role);
         } catch (IllegalArgumentException e) {
             throw new AccessDeniedException("JWT containing invalid role");
+        }
+    }
+
+    public static long getIdFromJwt(Jwt jwt) {
+        String accountId = jwt.getClaimAsString("accountId");
+        if (accountId == null)
+            return 0;
+        try {
+            return Long.parseLong(accountId);
+        } catch (NumberFormatException e) {
+            throw new AccessDeniedException("JWT containing invalid id");
         }
     }
 }
