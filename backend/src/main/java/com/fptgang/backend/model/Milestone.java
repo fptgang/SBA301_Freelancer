@@ -12,6 +12,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "milestones")
@@ -50,6 +51,9 @@ public class Milestone {
 
     @UpdateTimestamp
     private LocalDateTime updatedAt;
+
+    @OneToMany( mappedBy = "milestone", fetch = FetchType.LAZY)
+    private List<File> deliverables;
 
     public enum MilestoneStatus {
         PENDING,

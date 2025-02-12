@@ -10,6 +10,9 @@ ProjectDto:
     clientId:
       type: integer
       format: int64
+    staffId:
+      type: integer
+      format: int64
     title:
       type: string
     description:

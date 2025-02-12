@@ -7,7 +7,7 @@ MessageDto:
     senderId:
       type: integer
       format: int64
-    receiverId:
+    projectId:
       type: integer
       format: int64
     content:

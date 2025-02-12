@@ -33,6 +33,10 @@ public class Project {
     @JoinColumn(name = "client_id", nullable = false)
     private Account client;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "staff_id", nullable = false)
+    private Account staff;
+
     @Column(columnDefinition = "NVARCHAR(255)", length = 255, nullable = false)
     @Searchable
     private String title;
@@ -65,6 +69,9 @@ public class Project {
 
     @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<ProjectSkill> requiredSkills = new ArrayList<>();
+
+    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Message> messages = new ArrayList<>();
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "active_proposal_id", unique = true)

@@ -7,5 +7,4 @@ ProfileSkillDto:
     skill:
       $ref: 'skill.yml#/SkillDto'
     proficiency:
-      type: string
-      enum: [ BEGINNER, INTERMEDIATE, ADVANCED, EXPERT ]
+      $ref: "proficiency.yml#/ProficiencyEnum"

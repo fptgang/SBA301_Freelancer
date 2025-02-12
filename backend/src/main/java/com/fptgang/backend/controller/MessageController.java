@@ -89,10 +89,10 @@ public class MessageController implements MessagesApi {
             Message message = messageMapper.toEntity(messageDto);
             message.setCreatedAt(LocalDateTime.now());
             message = messageService.create(message);
-            messagingTemplate.convertAndSend("/topic/private/" + message.getReceiver().getEmail(), "New message");
-            messagingTemplate.convertAndSend("/topic/private/" + message.getSender().getEmail(), "New message");
-            messagingTemplate.convertAndSend("/topic/private/" + message.getReceiver().getAccountId(), message);
-            messagingTemplate.convertAndSend("/topic/private/" + message.getSender().getAccountId(), message);
+//            messagingTemplate.convertAndSend("/topic/private/" + message.getReceiver().getEmail(), "New message");
+//            messagingTemplate.convertAndSend("/topic/private/" + message.getSender().getEmail(), "New message");
+//            messagingTemplate.convertAndSend("/topic/private/" + message.getReceiver().getAccountId(), message);
+//            messagingTemplate.convertAndSend("/topic/private/" + message.getSender().getAccountId(), message);
 
             return ResponseEntity.ok(message);
         } catch (Exception e) {

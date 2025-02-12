@@ -1,5 +1,6 @@
 package com.fptgang.backend.mapper;
 
+import com.fptgang.backend.api.model.ProficiencyEnum;
 import com.fptgang.backend.api.model.ProjectSkillDto;
 import com.fptgang.backend.model.Proficiency;
 import com.fptgang.backend.model.ProjectSkill;
@@ -32,7 +33,7 @@ public class ProjectSkillMapper extends BaseMapper<ProjectSkillDto, ProjectSkill
 
         dto.setProjectSkillId(entity.getProjectSkillId());
         dto.setSkill(skillMapper.toDTO(entity.getSkill()));
-        dto.setProficiency(ProjectSkillDto.ProficiencyEnum.valueOf(entity.getProficiency().name()));
+        dto.setProficiency(ProficiencyEnum.valueOf(entity.getProficiency().name()));
 
         return dto;
     }
