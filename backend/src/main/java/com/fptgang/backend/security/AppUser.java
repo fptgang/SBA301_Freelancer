@@ -2,20 +2,24 @@ package com.fptgang.backend.security;
 
 import com.fptgang.backend.model.Role;
 import jakarta.validation.constraints.NotNull;
+import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 
 import java.util.Collection;
 
 public class AppUser extends User {
+    @Getter
+    private final long accountId;
     private final Role role;
 
-    public AppUser(String username, String password, Collection<? extends GrantedAuthority> authorities) {
+    public AppUser(long accountId, String username, String password, Collection<? extends GrantedAuthority> authorities) {
         super(username, password, authorities);
 
         if (authorities.isEmpty())
             throw new IllegalArgumentException("Authorities cannot be empty");
 
+        this.accountId = accountId;
         role = Role.valueOf(getAuthorities().iterator().next().getAuthority());
     }
 
