@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { BaseRecord, useMany } from "@refinedev/core";
 import {
   useTable,
@@ -18,6 +18,7 @@ import {
   ClockCircleOutlined,
   EyeOutlined,
 } from "@ant-design/icons";
+import { stompClient } from "../../../utils/stompClient";
 
 const { Text } = Typography;
 
@@ -41,16 +42,23 @@ export const ProjectCategoriesList: React.FC = () => {
         },
       ],
     },
+    // liveMode: "manual",
   });
 
-  const { data: projectCategoryData, isLoading: projectCategoryIsLoading } =
-    useMany({
-      resource: "projectCategories",
-      ids: tableProps?.dataSource?.map((item) => item?.projectCategoryId) ?? [],
-      queryOptions: {
-        enabled: !!tableProps?.dataSource,
-      },
-    });
+  // const { data: projectCategoryData, isLoading: projectCategoryIsLoading } =
+  //   useMany({
+  //     resource: "projectCategories",
+  //     ids: tableProps?.dataSource?.map((item) => item?.projectCategoryId) ?? [],
+  //     queryOptions: {
+  //       enabled: !!tableProps?.dataSource,
+  //     },
+  //   });
+
+  useEffect(() => {
+    return () => {
+      stompClient.unsubscribe("resources/projectCategories");
+    };
+  }, []);
 
   const getVisibilityStatus = (isVisible: boolean) => {
     return isVisible ? (

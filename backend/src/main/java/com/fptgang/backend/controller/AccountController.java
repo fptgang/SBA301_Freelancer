@@ -12,6 +12,7 @@ import com.fptgang.backend.util.SecurityUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -22,19 +23,22 @@ import org.springframework.web.bind.annotation.RestController;
 public class AccountController implements AccountsApi {
     private final AccountService accountService;
     private final AccountMapper accountMapper;
+    private final SimpMessagingTemplate messagingTemplate;
 
-    public AccountController(AccountService accountService, AccountMapper accountMapper) {
+    public AccountController(AccountService accountService, AccountMapper accountMapper, SimpMessagingTemplate messagingTemplate) {
         this.accountService = accountService;
         this.accountMapper = accountMapper;
+        this.messagingTemplate = messagingTemplate;
     }
 
     @Override
     public ResponseEntity<AccountDto> createAccount(AccountDto accountDto) {
         log.info("Creating account");
+        accountDto = accountMapper
+                .toDTO(accountService.create(accountMapper.toEntity(accountDto)));
+        ResponseEntity<AccountDto> response = new ResponseEntity<>(accountDto, HttpStatus.CREATED);
 
-        ResponseEntity<AccountDto> response = new ResponseEntity<>(accountMapper
-                .toDTO(accountService.create(accountMapper.toEntity(accountDto))), HttpStatus.CREATED);
-        ;
+        messagingTemplate.convertAndSend("resources/accounts", accountDto);
         return response;
 
     }
@@ -43,6 +47,7 @@ public class AccountController implements AccountsApi {
     public ResponseEntity<Void> deleteAccount(Long accountId) {
         log.info("Deleting account" + accountId);
         accountService.deleteById(accountId);
+        messagingTemplate.convertAndSend("resources/accounts", "Deleted account " + accountId);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
@@ -87,7 +92,7 @@ public class AccountController implements AccountsApi {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
             }
         }
-
+        messagingTemplate.convertAndSend("resources/accounts", accountDto);
         return ResponseEntity.ok(accountMapper.toDTO(accountService.update(accountMapper.toEntity(accountDto))));
     }
 }

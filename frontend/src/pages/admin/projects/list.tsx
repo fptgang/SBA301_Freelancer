@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useMany, useOne } from "@refinedev/core";
 import {
   useTable,
@@ -22,6 +22,7 @@ import {
   ProjectDto,
   ProjectDtoStatusEnum,
 } from "../../../../generated";
+import { stompClient } from "../../../utils/stompClient";
 
 const { Text } = Typography;
 
@@ -88,6 +89,13 @@ export const ProjectsList: React.FC = () => {
       <Badge status="default" text="Hidden" />
     );
   };
+
+  useEffect(() => {
+    return () => {
+      stompClient.unsubscribe("resources/projects");
+      stompClient.unsubscribe("resources/projectCategories");
+    };
+  }, []);
 
   return (
     <List>
