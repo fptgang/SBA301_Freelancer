@@ -1,6 +1,5 @@
 import React from "react";
-import {Breadcrumb, Layout, Menu} from "antd";
-import {ThemedHeaderV2} from "@refinedev/antd";
+import {Layout} from "antd";
 import {Outlet} from "react-router";
 import NavBar from "../navigation/navbar";
 import FooterPage from "../common/footer/footer";

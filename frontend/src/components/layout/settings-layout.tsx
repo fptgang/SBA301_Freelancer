@@ -1,49 +1,69 @@
 import React from "react";
-import { Layout, Menu } from "antd";
-import { Outlet } from "react-router";
+import { Breadcrumb, Layout, Menu, MenuProps, theme } from "antd";
+import { Outlet, useNavigate } from "react-router";
+import NavBar from "../navigation/navbar";
+import FooterPage from "../common/footer/footer";
+import { UserOutlined, LockOutlined, GlobalOutlined } from '@ant-design/icons';
 
-const { Sider, Content } = Layout;
+const { Header, Content, Footer, Sider } = Layout;
 
-interface MenuItems {
-    key: string;
-    icon: JSX.Element;
-    label: string;
-    onClick: () => string | void;
-}
+const SettingsLayout: React.FC = ({ }) => {
+    const {
+        token: { colorBgContainer, borderRadiusLG },
+    } = theme.useToken();
+    const navigate = useNavigate();
 
-interface SettingsLayoutProps {
-    menuItems: MenuItems[];
-}
+    const menuItems: MenuProps['items'] = [
+        {
+            key: 'account',
+            icon: <UserOutlined />,
+            label: 'Account Settings',
+            onClick: () => navigate('/settings/account')
+        },
+        {
+            key: 'security',
+            icon: <LockOutlined />,
+            label: 'Security Settings',
+            onClick: () => navigate('/settings/security')
+        },
+        {
+            key: 'local',
+            icon: <GlobalOutlined />,
+            label: 'Local Settings',
+            onClick: () => navigate('/settings/local')
+        }
+    ];
 
-const SettingsLayout: React.FC<SettingsLayoutProps> = ({ menuItems }) => {
     return (
-        <Layout className="min-h-screen">
-            <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <Layout className="bg-transparent flex flex-col lg:flex-row">
-                    {/* Sidebar that becomes horizontal on mobile */}
-                    <Sider
-                        width={280}
-                        className="bg-slate-50 lg:bg-slate-50 lg:min-h-screen"
-                        breakpoint="lg"
-                        collapsedWidth={0}
-                    >
-                        <div className="p-4">
-                            <h2 className="text-xl font-semibold text-gray-800">Settings</h2>
-                        </div>
+        <Layout>
+            <Header className="bg-inherit">
+                <NavBar />
+            </Header>
+            <div style={{ padding: '0 48px' }}>
+                <Breadcrumb style={{ margin: '16px 0' }}>
+                    <Breadcrumb.Item>Home</Breadcrumb.Item>
+                    <Breadcrumb.Item>List</Breadcrumb.Item>
+                    <Breadcrumb.Item>App</Breadcrumb.Item>
+                </Breadcrumb>
+                <Layout
+                    style={{ padding: '24px 0', background: colorBgContainer, borderRadius: borderRadiusLG }}
+                >
+                    <Sider style={{ background: colorBgContainer }} width={200}>
                         <Menu
                             mode="inline"
-                            defaultSelectedKeys={["profile"]}
+                            defaultSelectedKeys={['account']}
+                            style={{ height: '100%' }}
                             items={menuItems}
-                            className="border-r-0 lg:h-full"
                         />
                     </Sider>
-
-                    {/* Main content */}
-                    <Content className="p-4 sm:p-6 lg:p-8 bg-white flex-1">
+                    <Content style={{ padding: '0 24px', minHeight: 280 }}>
                         <Outlet />
                     </Content>
                 </Layout>
             </div>
+            <Footer style={{ textAlign: "center" }}>
+                <FooterPage />
+            </Footer>
         </Layout>
     );
 };

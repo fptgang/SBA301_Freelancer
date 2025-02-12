@@ -122,7 +122,7 @@ const NavBar: React.FC = () => {
     };
 
     return (
-        <Header
+        <nav
             className="sticky top-0 z-50 px-6 h-16 flex items-center border-b border-solid w-full rounded-b-2xl"
             style={{
                 backgroundColor: token.colorBgElevated,
@@ -232,7 +232,7 @@ const NavBar: React.FC = () => {
                     </div>
                 </div>
             </Drawer>
-        </Header>
+        </nav>
     );
 };
 

@@ -9,7 +9,7 @@ import {
 
 type ColorModeContextType = {
   mode: string;
-  setMode: (mode: string) => void;
+  setMode: (mode: 'light' | 'dark') => void;
 };
 
 export const ColorModeContext = createContext<ColorModeContextType>(
@@ -33,12 +33,8 @@ export const ColorModeContextProvider: React.FC<PropsWithChildren> = ({
     window.localStorage.setItem("colorMode", mode);
   }, [mode]);
 
-  const setColorMode = () => {
-    if (mode === "light") {
-      setMode("dark");
-    } else {
-      setMode("light");
-    }
+  const setColorMode = (newMode: 'light' | 'dark') => {
+    setMode(newMode);
   };
 
   const { darkAlgorithm, defaultAlgorithm } = theme;
