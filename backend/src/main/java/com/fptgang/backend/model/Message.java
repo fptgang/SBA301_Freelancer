@@ -28,8 +28,8 @@ public class Message {
     private Account sender;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "receiver_id", nullable = false)
-    private Account receiver;
+    @JoinColumn(name = "project_id", nullable = false)
+    private Project project;
 
     @Column(columnDefinition = "TEXT", length = 100000, nullable = false)
     @Searchable

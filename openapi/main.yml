@@ -37,7 +37,8 @@ components:
       $ref: 'model/skill.yml#/SkillDto'
     TransactionDto:
       $ref: 'model/transaction.yml#/TransactionDto'
-
+    ProficiencyEnum:
+      $ref: 'model/proficiency.yml#/ProficiencyEnum'
 paths:
   /auth/me:
     $ref: 'path/auth/me.yml'

@@ -6,6 +6,8 @@ import com.fptgang.backend.exception.InvalidInputException;
 import com.fptgang.backend.model.*;
 import com.fptgang.backend.repository.AccountRepos;
 import com.fptgang.backend.repository.MessageRepos;
+import com.fptgang.backend.repository.ProjectCategoryRepos;
+import com.fptgang.backend.repository.ProjectRepos;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,43 +44,66 @@ public class MessageServiceTest {
     @Autowired
     private AccountRepos accountRepos;
 
+    @Autowired
+    private ProjectService projectService;
+
     private Message testMessage;
 
-    private Account receiver;
+    private Project project;
 
     private Account sender;
+    @Autowired
+    private ProjectCategoryRepos projectCategoryRepos;
+    @Autowired
+    private ProjectRepos projectRepos;
 
+    Account createTestAccount(int id) {
+        Account account = new Account();
+        account.setEmail("MessageTest"+id+"@example.com");
+        account.setPassword("password");
+        account.setVisible(true);
+        account.setBalance(BigDecimal.valueOf(0));
+        account.setVerified(false);
+        account.setRole(Role.CLIENT);
+        account.setFirstName("John");
+        account.setLastName("Doe");
+        return accountService.create(account);
+    }
+
+    Project createTestProject(int id){
+        Account employer = createTestAccount(id+1);
+        // First create and save the category
+        ProjectCategory testCategory = new ProjectCategory();
+        testCategory.setName("Test Category");
+        testCategory.setVisible(true);
+        testCategory = projectCategoryRepos.save(testCategory);
+
+        // Then create the project with the saved category
+        Project testProject = new Project();
+        testProject.setTitle("Test Project");
+        testProject.setDescription("Test Description");
+        testProject.setCategory(testCategory);
+        testProject.setClient(employer);
+        testProject.setStatus(Project.ProjectStatus.OPEN);
+        testProject.setVisible(true);
+
+        return projectService.create(testProject);
+        // Set other necessary fields
+    }
 
     @BeforeEach
     void setUp() {
         // Create mock accounts
-        sender = new Account();
-        sender.setEmail("Sender@example.com");
-        sender.setPassword("password");
-        sender.setRole(Role.ADMIN);
-        sender.setVisible(true);
-        sender.setBalance(BigDecimal.valueOf(0));
-        sender.setVerified(false);
-        sender.setFirstName("John");
-        sender.setLastName("Doe");
-        accountService.create(sender);
+//        sender = createTestAccount(0);
 
-        receiver = new Account();
-        receiver.setEmail("Receiver@example.com");
-        receiver.setPassword("password");
-        receiver.setRole(Role.CLIENT);
-        receiver.setVisible(true);
-        receiver.setBalance(BigDecimal.valueOf(0));
-        receiver.setVerified(false);
-        receiver.setFirstName("John");
-        receiver.setLastName("Wick");
-        accountService.create(receiver);
+        project = createTestProject(1);
 
+        sender = project.getClient();
 
         // Create test message
         testMessage = new Message();
         testMessage.setSender(sender);
-        testMessage.setReceiver(receiver);
+        testMessage.setProject(project);
         testMessage.setContent("Test Message Content");
         testMessage.setCreatedAt(LocalDateTime.now());
         testMessage.setVisible(true);
@@ -87,6 +112,7 @@ public class MessageServiceTest {
     @AfterEach
     void tearDown() {
         messageRepos.deleteAll();
+        projectRepos.deleteAll();
         accountRepos.deleteAll();
     }
 
@@ -160,7 +186,7 @@ public class MessageServiceTest {
         for (int i = 0; i < 3; i++) {
             Message message = new Message();
             message.setSender(testMessage.getSender());
-            message.setReceiver(testMessage.getReceiver());
+            message.setProject(testMessage.getProject());
             message.setContent("Message " + i);
             messageService.create(message);
         }
@@ -190,14 +216,14 @@ public class MessageServiceTest {
     void getAllMessagesWithFilter() {
         var testMessage = new Message();
         testMessage.setSender(sender);
-        testMessage.setReceiver(receiver);
+        testMessage.setProject(project);
         testMessage.setContent("Test Message Content");
         testMessage.setCreatedAt(LocalDateTime.now());
         testMessage.setVisible(true);
         messageService.create(testMessage);
         var testMessage2 = new Message();
         testMessage2.setSender(sender);
-        testMessage2.setReceiver(receiver);
+        testMessage2.setProject(project);
         testMessage2.setContent("unfiltered Message Content");
         testMessage2.setCreatedAt(LocalDateTime.now());
         testMessage2.setVisible(true);
