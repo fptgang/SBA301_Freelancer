@@ -34,7 +34,7 @@ public class Project {
     private Account client;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "staff_id", nullable = false)
+    @JoinColumn(name = "staff_id")
     private Account staff;
 
     @Column(columnDefinition = "NVARCHAR(255)", length = 255, nullable = false)
