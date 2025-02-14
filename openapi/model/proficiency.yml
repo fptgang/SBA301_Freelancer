@@ -1,0 +1,3 @@
+ProficiencyEnum:
+  type: string
+  enum: [ BEGINNER, INTERMEDIATE, ADVANCED, EXPERT ]

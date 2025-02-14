@@ -35,13 +35,13 @@ public class ProjectController implements ProjectsApi {
     }
 
     @Override
-    public ResponseEntity<Void> deleteProject(Integer projectId) {
+    public ResponseEntity<Void> deleteProject(Long projectId) {
         projectService.deleteById(projectId);
         return ResponseEntity.ok().build();
     }
 
     @Override
-    public ResponseEntity<ProjectDto> getProjectById(Integer projectId) {
+    public ResponseEntity<ProjectDto> getProjectById(Long projectId) {
         return ResponseEntity.ok(projectMapper.toDTO(projectService.findByProjectId(projectId)));
     }
 
@@ -57,7 +57,9 @@ public class ProjectController implements ProjectsApi {
     }
 
     @Override
-    public ResponseEntity<ProjectDto> updateProject(Integer projectId, ProjectDto projectDto) {
+    public ResponseEntity<ProjectDto> updateProject(Long projectId, ProjectDto projectDto) {
+        projectDto.setProjectId(projectId); // Override projectId
+
         return ResponseEntity.ok(projectMapper.toDTO(projectService.update(projectMapper.toEntity(projectDto))));
 
     }

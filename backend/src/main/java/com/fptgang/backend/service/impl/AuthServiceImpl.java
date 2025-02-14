@@ -211,7 +211,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     private Result authenticate(Account account, Fingerprint fingerprint) {
-        Jwt jwt = tokenService.generateJwt(account.getEmail(), account.getRole());
+        Jwt jwt = tokenService.generateJwt(account.getAccountId(), account.getEmail(), account.getRole());
         String token = jwt.getTokenValue();
 
         RefreshToken refreshToken = refreshTokenService.createRefreshToken(

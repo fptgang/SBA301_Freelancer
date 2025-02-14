@@ -12,6 +12,7 @@ import com.fptgang.backend.util.SecurityUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -22,34 +23,38 @@ import org.springframework.web.bind.annotation.RestController;
 public class AccountController implements AccountsApi {
     private final AccountService accountService;
     private final AccountMapper accountMapper;
+    private final SimpMessagingTemplate messagingTemplate;
 
-    public AccountController(AccountService accountService, AccountMapper accountMapper) {
+    public AccountController(AccountService accountService, AccountMapper accountMapper, SimpMessagingTemplate messagingTemplate) {
         this.accountService = accountService;
         this.accountMapper = accountMapper;
+        this.messagingTemplate = messagingTemplate;
     }
 
     @Override
     public ResponseEntity<AccountDto> createAccount(AccountDto accountDto) {
         log.info("Creating account");
+        accountDto = accountMapper
+                .toDTO(accountService.create(accountMapper.toEntity(accountDto)));
+        ResponseEntity<AccountDto> response = new ResponseEntity<>(accountDto, HttpStatus.CREATED);
 
-        ResponseEntity<AccountDto> response = new ResponseEntity<>(accountMapper
-                .toDTO(accountService.create(accountMapper.toEntity(accountDto))), HttpStatus.CREATED);
-        ;
+        messagingTemplate.convertAndSend("resources/accounts", accountDto);
         return response;
 
     }
 
     @Override
-    public ResponseEntity<Void> deleteAccount(Integer accountId) {
+    public ResponseEntity<Void> deleteAccount(Long accountId) {
         log.info("Deleting account" + accountId);
-        accountService.deleteById(Long.valueOf(accountId));
+        accountService.deleteById(accountId);
+        messagingTemplate.convertAndSend("resources/accounts", "Deleted account " + accountId);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @Override
-    public ResponseEntity<AccountDto> getAccountById(Integer accountId) {
+    public ResponseEntity<AccountDto> getAccountById(Long accountId) {
         log.info("Getting account by id ");
-        return new ResponseEntity<>(accountMapper.toDTO(accountService.findById(Long.valueOf(accountId))), HttpStatus.OK);
+        return new ResponseEntity<>(accountMapper.toDTO(accountService.findById(accountId)), HttpStatus.OK);
     }
 
     @Override
@@ -65,8 +70,9 @@ public class AccountController implements AccountsApi {
 
     @Override
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<AccountDto> updateAccount(Integer accountId, AccountDto accountDto) {
-        log.info("Updating account " + accountId);
+    public ResponseEntity<AccountDto> updateAccount(Long accountId, AccountDto accountDto) {
+        accountDto.setAccountId(accountId); // Override accountId
+        log.info("Updating account {}", accountId);
 
         if (!SecurityUtil.hasPermission(Role.ADMIN)) {
             accountDto.setBalance(null);
@@ -80,13 +86,11 @@ public class AccountController implements AccountsApi {
         }
 
         if (SecurityUtil.isRole(Role.CLIENT, Role.FREELANCER)) {
-            if (!accountService.findByEmail(SecurityUtil.getCurrentUserEmail())
-                    .getAccountId()
-                    .equals(Long.valueOf(accountId))) {
+            if (SecurityUtil.requireCurrentUserId() != accountId) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
             }
         }
-
+        messagingTemplate.convertAndSend("resources/accounts", accountDto);
         return ResponseEntity.ok(accountMapper.toDTO(accountService.update(accountMapper.toEntity(accountDto))));
     }
 }

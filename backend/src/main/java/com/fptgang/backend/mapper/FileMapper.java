@@ -2,7 +2,7 @@ package com.fptgang.backend.mapper;
 
 import com.fptgang.backend.api.model.FileDto;
 import com.fptgang.backend.model.File;
-import com.fptgang.backend.repository.FileRepos;
+import com.fptgang.backend.repository.*;
 import com.fptgang.backend.util.DateTimeUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -15,6 +15,14 @@ public class FileMapper extends BaseMapper<FileDto, File> {
 
     @Autowired
     private FileRepos fileRepos;
+    @Autowired
+    private AccountRepos accountRepos;
+    @Autowired
+    private ProjectRepos projectRepos;
+    @Autowired
+    private ProposalRepos proposalRepos;
+    @Autowired
+    private MessageRepos messageRepos;
 
     @Override
     public FileDto toDTO(File entity) {
@@ -29,6 +37,10 @@ public class FileMapper extends BaseMapper<FileDto, File> {
         dto.setSize(entity.getSize());
         dto.setCreatedAt(DateTimeUtil.fromLocalToOffset(entity.getCreatedAt()));
         dto.setIsVisible(entity.isVisible());
+        dto.setUploaderId(entity.getUploader() != null ? entity.getUploader().getAccountId() : null);
+        dto.setProjectId(entity.getProject() != null ? entity.getProject().getProjectId() : null);
+        dto.setProposalId(entity.getProposal() != null ? entity.getProposal().getProposalId() : null);
+        dto.setMessageId(entity.getMessage() != null ? entity.getMessage().getMessageId() : null);
 
         return dto;
     }
@@ -75,6 +87,22 @@ public class FileMapper extends BaseMapper<FileDto, File> {
 
             if (dto.getIsVisible() != null) {
                 file.setVisible(dto.getIsVisible());
+            }
+
+            if (dto.getUploaderId() != null) {
+                file.setUploader(accountRepos.findByAccountId(dto.getUploaderId()).orElse(null));
+            }
+
+            if (dto.getProjectId() != null) {
+                file.setProject(projectRepos.findByProjectId(dto.getProjectId()).orElse(null));
+            }
+
+            if (dto.getProposalId() != null) {
+                file.setProposal(proposalRepos.findByProposalId(dto.getProposalId()).orElse(null));
+            }
+
+            if (dto.getMessageId() != null) {
+                file.setMessage(messageRepos.findByMessageId(dto.getMessageId()).orElse(null));
             }
 
             return file;

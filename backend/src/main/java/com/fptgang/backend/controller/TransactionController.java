@@ -49,9 +49,4 @@ public class TransactionController implements TransactionsApi {
         return OpenApiHelper.respondPage(res, GetTransactions200Response.class);
     }
 
-    @Override
-    public ResponseEntity<TransactionDto> updateTransaction(String transactionId, TransactionDto transactionDto) {
-        return new ResponseEntity<>(transactionMapper.toDTO(transactionService.update(transactionMapper.toEntity(transactionDto))), HttpStatus.OK);
-    }
-
 }

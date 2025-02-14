@@ -6,6 +6,7 @@ import com.fptgang.backend.model.Account;
 import com.fptgang.backend.model.Message;
 import com.fptgang.backend.repository.AccountRepos;
 import com.fptgang.backend.repository.MessageRepos;
+import com.fptgang.backend.repository.ProjectRepos;
 import com.fptgang.backend.util.DateTimeUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -20,6 +21,8 @@ public class MessageMapper extends BaseMapper<MessageDto, Message> {
 
     @Autowired
     private AccountRepos accountRepos;
+    @Autowired
+    private ProjectRepos projectRepos;
 
     @Override
     public MessageDto toDTO(Message entity) {
@@ -29,7 +32,7 @@ public class MessageMapper extends BaseMapper<MessageDto, Message> {
 
         MessageDto dto = new MessageDto();
 
-        dto.setReceiverId(entity.getReceiver().getAccountId());
+        dto.setProjectId(entity.getProject().getProjectId());
         dto.setSenderId(entity.getSender().getAccountId());
         dto.setMessageId(entity.getMessageId());
         dto.setContent(entity.getContent());
@@ -65,8 +68,9 @@ public class MessageMapper extends BaseMapper<MessageDto, Message> {
                 entity.setContent(dto.getContent());
             }
 
-            if (dto.getReceiverId() != null) {
-                entity.setReceiver(findAccount(dto.getReceiverId()));
+            if (dto.getProjectId() != null) {
+                entity.setProject(projectRepos.findByProjectId(dto.getProjectId())
+                        .orElseThrow(() -> new IllegalArgumentException("Project does not exist")));
             }
             if (dto.getSenderId() != null) {
                 entity.setSender(findAccount(dto.getSenderId()));

@@ -39,11 +39,7 @@ post:
     content:
       multipart/form-data:
         schema:
-          type: object
-          properties:
-            file:
-              type: string
-              format: binary
+          $ref: '../model/file-blob.yml#/FileBlobDto'
   responses:
     '200':
       description: The operation was successful

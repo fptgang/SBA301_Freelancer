@@ -1,6 +1,9 @@
 FileDto:
   type: object
   properties:
+    uploaderId:
+      type: integer
+      format: int64
     fileId:
       type: integer
       format: int64
@@ -18,3 +21,12 @@ FileDto:
     createdAt:
       type: string
       format: date-time
+    messageId:
+      type: integer
+      format: int64
+    proposalId:
+      type: integer
+      format: int64
+    projectId:
+      type: integer
+      format: int64

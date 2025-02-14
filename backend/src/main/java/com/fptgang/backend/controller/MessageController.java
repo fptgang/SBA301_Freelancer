@@ -60,18 +60,20 @@ public class MessageController implements MessagesApi {
     }
 
     @Override
-    public ResponseEntity<Void> deleteMessage(Integer messageId) {
+    public ResponseEntity<Void> deleteMessage(Long messageId) {
         messageService.deleteById(messageId);
         return ResponseEntity.ok().build();
     }
 
     @Override
-    public ResponseEntity<MessageDto> getMessageById(Integer messageId) {
+    public ResponseEntity<MessageDto> getMessageById(Long messageId) {
         return ResponseEntity.ok(messageMapper.toDTO(messageService.findByMessageId(messageId)));
     }
 
     @Override
-    public ResponseEntity<MessageDto> updateMessage(Integer messageId, MessageDto messageDto) {
+    public ResponseEntity<MessageDto> updateMessage(Long messageId, MessageDto messageDto) {
+        messageDto.setMessageId(messageId); // Override messageId
+
         return ResponseEntity.ok(messageMapper.toDTO(messageService.update(messageMapper.toEntity(messageDto))));
     }
 
@@ -87,10 +89,10 @@ public class MessageController implements MessagesApi {
             Message message = messageMapper.toEntity(messageDto);
             message.setCreatedAt(LocalDateTime.now());
             message = messageService.create(message);
-            messagingTemplate.convertAndSend("/topic/private/" + message.getReceiver().getEmail(), "New message");
-            messagingTemplate.convertAndSend("/topic/private/" + message.getSender().getEmail(), "New message");
-            messagingTemplate.convertAndSend("/topic/private/" + message.getReceiver().getAccountId(), message);
-            messagingTemplate.convertAndSend("/topic/private/" + message.getSender().getAccountId(), message);
+//            messagingTemplate.convertAndSend("/topic/private/" + message.getReceiver().getEmail(), "New message");
+//            messagingTemplate.convertAndSend("/topic/private/" + message.getSender().getEmail(), "New message");
+//            messagingTemplate.convertAndSend("/topic/private/" + message.getReceiver().getAccountId(), message);
+//            messagingTemplate.convertAndSend("/topic/private/" + message.getSender().getAccountId(), message);
 
             return ResponseEntity.ok(message);
         } catch (Exception e) {

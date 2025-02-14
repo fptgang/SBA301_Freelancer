@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -23,23 +24,28 @@ public class ProjectCategoryController implements ProjectCategoriesApi {
 
     private final ProjectCategoryService projectCategoryService;
     private final ProjectCategoryMapper projectCategoryMapper;
+    private final SimpMessagingTemplate messagingTemplate;
 
     @Autowired
     public ProjectCategoryController(ProjectCategoryService projectCategoryService,
-                                     ProjectCategoryMapper projectCategoryMapper) {
+                                     ProjectCategoryMapper projectCategoryMapper,
+                                     SimpMessagingTemplate messagingTemplate) {
         this.projectCategoryService = projectCategoryService;
         this.projectCategoryMapper = projectCategoryMapper;
+        this.messagingTemplate = messagingTemplate;
     }
 
     @Override
     public ResponseEntity<ProjectCategoryDto> createProjectCategory(ProjectCategoryDto projectCategoryDto) {
-        var projectCategory = projectCategoryMapper.toEntity(projectCategoryDto);
-        return new ResponseEntity<>(projectCategoryMapper.toDTO(projectCategoryService.create(projectCategory)), HttpStatus.OK);
+        var projectCategory = projectCategoryService.create(projectCategoryMapper.toEntity(projectCategoryDto));
+        messagingTemplate.convertAndSend("resources/projectCategories", projectCategoryMapper.toDTO(projectCategory));
+        return new ResponseEntity<>(projectCategoryMapper.toDTO(projectCategory), HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity<Void> deleteProjectCategory(Long projectCategoryId) {
         projectCategoryService.deleteById(projectCategoryId);
+        messagingTemplate.convertAndSend("resources/projectCategories", "Deleted projectCategory " + projectCategoryId);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
@@ -60,6 +66,8 @@ public class ProjectCategoryController implements ProjectCategoriesApi {
 
     @Override
     public ResponseEntity<ProjectCategoryDto> updateProjectCategory(Long projectCategoryId, ProjectCategoryDto projectCategoryDto) {
+        projectCategoryDto.setProjectCategoryId(projectCategoryId); // Override projectCategoryId
+        messagingTemplate.convertAndSend("resources/projectCategories", projectCategoryDto);
         return new ResponseEntity<>(projectCategoryMapper.toDTO(projectCategoryService.update(projectCategoryMapper.toEntity(projectCategoryDto))), HttpStatus.OK);
     }
 }

@@ -3,6 +3,7 @@ package com.fptgang.backend.service.impl;
 import com.fptgang.backend.model.Account;
 import com.fptgang.backend.model.Role;
 import com.fptgang.backend.repository.AccountRepos;
+import com.fptgang.backend.security.PasswordEncoderConfig;
 import com.fptgang.backend.service.AccountService;
 import com.fptgang.backend.util.OpenApiHelper;
 import lombok.extern.slf4j.Slf4j;
@@ -22,13 +23,15 @@ import java.time.LocalDateTime;
 public class AccountServiceImpl implements AccountService {
     private final String DEFAULT_ESCROW_EMAIL = "escrow@hirable.com";
     private final AccountRepos accountRepos;
+    private final PasswordEncoderConfig passwordEncoderConfig;
 
     @Value("${hirable.account.escrow:0}")
     private Long escrowAccountId;
 
     @Autowired
-    public AccountServiceImpl(AccountRepos accountRepos) {
+    public AccountServiceImpl(AccountRepos accountRepos, PasswordEncoderConfig passwordEncoderConfig) {
         this.accountRepos = accountRepos;
+        this.passwordEncoderConfig = passwordEncoderConfig;
     }
 
     @EventListener(ApplicationReadyEvent.class)
@@ -62,6 +65,7 @@ public class AccountServiceImpl implements AccountService {
                 .firstName("Escrow")
                 .role(Role.ADMIN)
                 .balance(BigDecimal.ZERO)
+                .password(passwordEncoderConfig.bcryptEncoder().encode("1"))
                 .build();
         acc = accountRepos.save(acc);
         escrowAccountId = acc.getAccountId();

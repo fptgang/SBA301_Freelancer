@@ -53,5 +53,13 @@ public class File {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "message_id")
     private Message message;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "uploader_id", nullable = false)
+    private Account uploader;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "milestone_id")
+    private Milestone milestone;
 }
 

@@ -1,19 +1,20 @@
-MessageDto:
+FileBlobDto:
   type: object
   properties:
+    uploaderId:
+      type: integer
+      format: int64
+    blob:
+      type: string
+      format: binary
+    isVisible:
+      type: boolean
     messageId:
       type: integer
       format: int64
-    senderId:
+    proposalId:
       type: integer
       format: int64
     projectId:
       type: integer
       format: int64
-    content:
-      type: string
-    isVisible:
-      type: boolean
-    createdAt:
-      type: string
-      format: date-time

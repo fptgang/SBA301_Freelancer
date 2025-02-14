@@ -1,5 +1,6 @@
 package com.fptgang.backend.mapper;
 
+import com.fptgang.backend.api.model.ProficiencyEnum;
 import com.fptgang.backend.api.model.ProfileSkillDto;
 import com.fptgang.backend.model.Proficiency;
 import com.fptgang.backend.model.ProfileSkill;
@@ -31,7 +32,7 @@ public class ProfileSkillMapper extends BaseMapper<ProfileSkillDto, ProfileSkill
 
         dto.setProfileSkillId(entity.getProfileSkillId());
         dto.setSkill(skillMapper.toDTO(entity.getSkill()));
-        dto.setProficiency(ProfileSkillDto.ProficiencyEnum.valueOf(entity.getProficiency().name()));
+        dto.setProficiency(ProficiencyEnum.valueOf(entity.getProficiency().name()));
 
         return dto;
     }

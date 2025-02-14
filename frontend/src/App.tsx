@@ -105,6 +105,12 @@ import ChatPage from "./pages/shared/chat";
 import SettingPage from "./pages/shared/setting";
 import FreelancerProposalShow from "./pages/freelancer/proposal/show";
 import SharedProjectShow from "./pages/shared/projects/show";
+import { liveProvider } from "./providers/live-provider";
+import { stompClient } from "./utils/stompClient";
+import SettingsLayout from "./components/layout/settings-layout";
+import AccountSettingsPage from "./pages/shared/setting/account";
+import SecuritySettingsPage from "./pages/shared/setting/security";
+import LocalSettingsPage from "./pages/shared/setting/local";
 
 const resources = [
   {
@@ -185,11 +191,13 @@ function App() {
                 accessControlProvider={accessControlProvider}
                 routerProvider={routerBindings}
                 resources={resources}
+                liveProvider={liveProvider(stompClient)}
                 options={{
                   syncWithLocation: true,
                   warnWhenUnsavedChanges: true,
                   useNewQueryKeys: true,
                   mutationMode: "pessimistic",
+                  liveMode: "auto",
                 }}
               >
                 <Routes>
@@ -202,7 +210,7 @@ function App() {
                   <Route path="login" element={<Login />} />
                   <Route path="register" element={<Register />} />
                   <Route path="forgot-password" element={<ForgotPassword />} />
-                  <Route path="reset-password" element={<ResetPassword />} />
+                    <Route path="reset-password" element={<ResetPassword />} />
                   <Route
                     element={
                       <Authenticated
@@ -233,7 +241,6 @@ function App() {
                       path="dashboard"
                       element={<NavigateToResource resource={"accounts"} />}
                     />
-
                     <Route path="accounts">
                       <Route index element={<AccountsList />} />
                       <Route path="create" element={<AccountsCreate />} />
@@ -297,7 +304,6 @@ function App() {
                         element={<ClientTransactionList />}
                       />
                     </Route>
-                    <Route path="settings" element={<SettingPage />} />
                     <Route path="chat" element={<ChatPage />} />
                   </Route>
 
@@ -316,8 +322,9 @@ function App() {
                       <Route index element={<FreelancerMyProposalPage />} />
                       <Route path=":id" element={<FreelancerProposalShow />} />
                     </Route>
+
                     <Route path="profile" element={<FreelancerProfilePage />} />
-                    <Route path="settings" element={<SettingPage />} />
+
                     <Route path="wallet">
                       <Route index element={<Navigate to="transactions" />} />
                       <Route
@@ -326,6 +333,13 @@ function App() {
                       />
                     </Route>
                     <Route path="chat" element={<ChatPage />} />
+                  </Route>
+
+                  <Route path="settings" element={<SettingsLayout />}>
+                    <Route index element={<Navigate to="account" />} />
+                    <Route path="account" element={<AccountSettingsPage />} />
+                    <Route path="security" element={<SecuritySettingsPage />} />
+                    <Route path="local" element={<LocalSettingsPage />} />
                   </Route>
 
                   <Route path="*" element={<ErrorComponent />} />

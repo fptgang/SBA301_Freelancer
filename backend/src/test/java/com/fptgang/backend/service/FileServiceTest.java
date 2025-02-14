@@ -1,13 +1,6 @@
 package com.fptgang.backend.service;
 
-import com.azure.storage.blob.BlobClient;
-import com.azure.storage.blob.BlobContainerClient;
-import com.azure.storage.blob.BlobServiceClient;
-import com.fptgang.backend.exception.InvalidInputException;
 import com.fptgang.backend.model.File;
-import com.fptgang.backend.model.Message;
-import com.fptgang.backend.model.Project;
-import com.fptgang.backend.model.Proposal;
 import com.fptgang.backend.repository.FileRepos;
 import com.fptgang.backend.service.impl.FileServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,9 +9,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.io.ByteArrayInputStream;
+import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -28,180 +21,106 @@ import static org.mockito.Mockito.*;
 class FileServiceTest {
 
     @Mock
-    private BlobServiceClient blobServiceClient;
+    private AzureBlobService azureBlobService;
 
     @Mock
     private FileRepos fileRepos;
 
-    @Mock
-    private BlobContainerClient containerClient;
-
-    @Mock
-    private BlobClient blobClient;
-
     @InjectMocks
     private FileServiceImpl fileService;
 
-    private static final String CONTAINER_NAME = "testContainer";
-    private static final String FILE_NAME = "test.txt";
-    private static final byte[] FILE_CONTENT = "test content".getBytes();
-    private static final String BLOB_URL = "https://test.blob.core.windows.net/test.txt";
+    @Mock
+    private MultipartFile multipartFile;
+
+    private File file;
 
     @BeforeEach
     void setUp() {
-        ReflectionTestUtils.setField(fileService, "containerName", CONTAINER_NAME);
+        file = new File();
+        file.setFileId(1L);
+        file.setFileName("test.txt");
+        file.setFileUrl("https://test.blob.core.windows.net/test.txt");
+        file.setVisible(true);
     }
 
     @Test
-    void uploadFile_WithValidProjectInput_ShouldSucceed() {
+    void createFile_ShouldReturnSavedFile() throws IOException {
         // Arrange
-        setupBlobMocks();
-        Project project = new Project();
-        File expectedFile = File.builder()
-                .fileName(FILE_NAME)
-                .fileUrl(BLOB_URL)
-                .fileType("txt")
-                .isVisible(true)
-                .project(project)
-                .fileId((long) BLOB_URL.hashCode())
-                .size(FILE_CONTENT.length)
-                .build();
+        when(azureBlobService.upload(any(MultipartFile.class), isNull()))
+                .thenReturn("https://test.blob.core.windows.net/test.txt");
 
-        when(fileRepos.save(any(File.class))).thenReturn(expectedFile);
-        doNothing().when(blobClient).upload(any(ByteArrayInputStream.class), anyLong(), anyBoolean());
+        when(fileRepos.save(any(File.class))).thenReturn(file);
 
         // Act
-        File result = fileService.uploadFile(1L, FILE_NAME, FILE_CONTENT, project);
+        File savedFile = fileService.create(file, multipartFile);
 
         // Assert
-        assertNotNull(result);
-        assertEquals(expectedFile.getFileName(), result.getFileName());
-        assertEquals(expectedFile.getFileUrl(), result.getFileUrl());
-        assertEquals(expectedFile.getFileType(), result.getFileType());
-        verify(blobClient).upload(any(ByteArrayInputStream.class), eq((long) FILE_CONTENT.length), eq(true));
-        verify(fileRepos).save(any(File.class));
-    }
-
-    private void setupBlobMocks() {
-        when(blobServiceClient.getBlobContainerClient(CONTAINER_NAME)).thenReturn(containerClient);
-        when(containerClient.getBlobClient(FILE_NAME)).thenReturn(blobClient);
-        when(blobClient.getBlobUrl()).thenReturn(BLOB_URL);
+        assertNotNull(savedFile);
+        assertEquals("https://test.blob.core.windows.net/test.txt", savedFile.getFileUrl());
+        verify(fileRepos, times(1)).save(any(File.class));
     }
 
     @Test
-    void uploadFile_WithNullContent_ShouldThrowException() {
+    void findById_ShouldReturnFile_WhenFileExists() {
         // Arrange
-        Project project = new Project();
-
-        // Act & Assert
-        assertThrows(InvalidInputException.class,
-                () -> fileService.uploadFile(1L, FILE_NAME, null, project),
-                "File content cannot be empty");
-    }
-
-    @Test
-    void uploadFile_WithEmptyFileName_ShouldThrowException() {
-        // Arrange
-        Project project = new Project();
-
-        // Act & Assert
-        assertThrows(InvalidInputException.class,
-                () -> fileService.uploadFile(1L, "", FILE_CONTENT, project),
-                "File name cannot be empty");
-    }
-
-    @Test
-    void uploadFile_WithInvalidObjectType_ShouldThrowException() {
-        // Arrange
-        Object invalidObject = new Object();
-
-        // Act & Assert
-        assertThrows(InvalidInputException.class,
-                () -> fileService.uploadFile(1L, FILE_NAME, FILE_CONTENT, invalidObject),
-                "Object must be instance of Project, Proposal, or Message");
-    }
-
-
-
-
-    @Test
-    void deleteAllFiles_ShouldSucceed() {
-        // Arrange
-        when(blobServiceClient.getBlobContainerClient(CONTAINER_NAME)).thenReturn(containerClient);
-        when(containerClient.deleteIfExists()).thenReturn(true);
+        when(fileRepos.findById(1L)).thenReturn(java.util.Optional.of(file));
 
         // Act
-        fileService.deleteAllFiles(1L);
+        File foundFile = fileService.findById(1L);
 
         // Assert
-        verify(containerClient).deleteIfExists();
+        assertNotNull(foundFile);
+        assertEquals(1L, foundFile.getFileId());
     }
 
     @Test
-    void deleteAllFiles_WhenExceptionOccurs_ShouldThrowRuntimeException() {
+    void findById_ShouldReturnNull_WhenFileDoesNotExist() {
         // Arrange
-        when(blobServiceClient.getBlobContainerClient(CONTAINER_NAME)).thenReturn(containerClient);
-        when(containerClient.deleteIfExists()).thenThrow(new RuntimeException("Azure error"));
+        when(fileRepos.findById(2L)).thenReturn(java.util.Optional.empty());
+
+        // Act
+        File foundFile = fileService.findById(2L);
+
+        // Assert
+        assertNull(foundFile);
+    }
+
+    @Test
+    void updateFile_ShouldReturnUpdatedFile() throws IOException {
+        // Arrange
+        when(azureBlobService.upload(any(MultipartFile.class), isNull()))
+                .thenReturn("https://test.blob.core.windows.net/updated.txt");
+
+        when(fileRepos.save(any(File.class))).thenReturn(file);
+
+        // Act
+        File updatedFile = fileService.update(file, multipartFile);
+
+        // Assert
+        assertNotNull(updatedFile);
+        assertEquals("https://test.blob.core.windows.net/updated.txt", updatedFile.getFileUrl());
+    }
+
+    @Test
+    void deleteById_ShouldSetFileInvisible() {
+        // Arrange
+        when(fileRepos.findById(1L)).thenReturn(java.util.Optional.of(file));
+        when(fileRepos.save(any(File.class))).thenReturn(file);
+
+        // Act
+        File deletedFile = fileService.deleteById(1L);
+
+        // Assert
+        assertFalse(deletedFile.isVisible());
+        verify(fileRepos, times(1)).save(file);
+    }
+
+    @Test
+    void deleteById_ShouldThrowException_WhenFileDoesNotExist() {
+        // Arrange
+        when(fileRepos.findById(2L)).thenReturn(java.util.Optional.empty());
 
         // Act & Assert
-        assertThrows(RuntimeException.class,
-                () -> fileService.deleteAllFiles(1L),
-                "Failed to delete container: Azure error");
-    }
-
-    @Test
-    void uploadFile_WithProposal_ShouldSucceed() {
-        // Arrange
-        setupBlobMocks();
-        Proposal proposal = new Proposal();
-        File expectedFile = File.builder()
-                .fileName(FILE_NAME)
-                .fileUrl(BLOB_URL)
-                .fileType("txt")
-                .isVisible(true)
-                .proposal(proposal)
-                .fileId((long) BLOB_URL.hashCode())
-                .size(FILE_CONTENT.length)
-                .build();
-
-        when(fileRepos.save(any(File.class))).thenReturn(expectedFile);
-        doNothing().when(blobClient).upload(any(ByteArrayInputStream.class), anyLong(), anyBoolean());
-
-        // Act
-        File result = fileService.uploadFile(1L, FILE_NAME, FILE_CONTENT, proposal);
-
-        // Assert
-        assertNotNull(result);
-        assertEquals(expectedFile.getFileName(), result.getFileName());
-        assertEquals(expectedFile.getProposal(), proposal);
-        verify(fileRepos).save(any(File.class));
-    }
-
-    @Test
-    void uploadFile_WithMessage_ShouldSucceed() {
-        // Arrange
-        setupBlobMocks();
-        Message message = new Message();
-        File expectedFile = File.builder()
-                .fileName(FILE_NAME)
-                .fileUrl(BLOB_URL)
-                .fileType("txt")
-                .isVisible(true)
-                .message(message)
-                .fileId((long) BLOB_URL.hashCode())
-                .size(FILE_CONTENT.length)
-                .build();
-
-        when(fileRepos.save(any(File.class))).thenReturn(expectedFile);
-        doNothing().when(blobClient).upload(any(ByteArrayInputStream.class), anyLong(), anyBoolean());
-
-        // Act
-        File result = fileService.uploadFile(1L, FILE_NAME, FILE_CONTENT, message);
-
-        // Assert
-        assertNotNull(result);
-        assertEquals(expectedFile.getFileName(), result.getFileName());
-        assertEquals(expectedFile.getMessage(), message);
-        verify(fileRepos).save(any(File.class));
+        assertThrows(IllegalArgumentException.class, () -> fileService.deleteById(2L));
     }
 }
