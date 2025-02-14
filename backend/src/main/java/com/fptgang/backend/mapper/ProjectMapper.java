@@ -1,5 +1,6 @@
 package com.fptgang.backend.mapper;
 
+import com.fptgang.backend.api.model.AccountResponseDto;
 import com.fptgang.backend.api.model.ProjectDto;
 import com.fptgang.backend.model.Project;
 import com.fptgang.backend.repository.AccountRepos;
@@ -37,9 +38,17 @@ public class ProjectMapper extends BaseMapper<ProjectDto, Project> {
         }
 
         ProjectDto dto = new ProjectDto();
+        AccountResponseDto clientDto = new AccountResponseDto();
+        clientDto.setAccountId(project.getClient().getAccountId());
+        clientDto.setFirstName(project.getClient().getFirstName());
+        clientDto.setLastName(project.getClient().getLastName());
+        clientDto.setEmail(project.getClient().getEmail());
+        clientDto.setIsVerified(project.getClient().isVerified());
+        clientDto.setAvatarUrl(project.getClient().getAvatarUrl());
+        clientDto.setCreatedAt(DateTimeUtil.fromLocalToOffset(project.getClient().getCreatedAt()));
         dto.setProjectId(project.getProjectId());
         dto.setProjectCategoryId(project.getCategory().getProjectCategoryId());
-        dto.setClientId(project.getClient().getAccountId());
+        dto.setClient(clientDto);
         dto.setTitle(project.getTitle());
         dto.setDescription(project.getDescription());
         dto.setStatus(ProjectDto.StatusEnum.fromValue(project.getStatus().name()));
@@ -89,8 +98,8 @@ public class ProjectMapper extends BaseMapper<ProjectDto, Project> {
                         .orElseThrow(() -> new IllegalArgumentException("Project category not found")));
             }
 
-            if (dto.getClientId() != null) {
-                project.setClient(accountRepos.findByAccountId(dto.getClientId())
+            if (dto.getClient() != null) {
+                project.setClient(accountRepos.findByAccountId(dto.getClient().getAccountId())
                         .orElseThrow(() -> new IllegalArgumentException("Client not found")));
             }
 

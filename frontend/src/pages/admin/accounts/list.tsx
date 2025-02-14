@@ -58,12 +58,12 @@ export const AccountsList: React.FC = () => {
         },
       ],
     },
-    // liveMode: "manual",
+    liveMode: "manual",
   });
 
   useEffect(() => {
     return () => {
-      stompClient.unsubscribe("resources/accounts");
+      stompClient?.unsubscribe("resources/accounts");
     };
   }, []);
 

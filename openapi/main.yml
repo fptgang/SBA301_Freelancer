@@ -39,6 +39,8 @@ components:
       $ref: 'model/transaction.yml#/TransactionDto'
     ProficiencyEnum:
       $ref: 'model/proficiency.yml#/ProficiencyEnum'
+    AccountResponseDto:
+      $ref: 'model/account-response.yml#/AccountResponseDto'
 paths:
   /auth/me:
     $ref: 'path/auth/me.yml'

@@ -59,6 +59,7 @@ export const ProjectsList: React.FC = () => {
         },
       ],
     },
+    liveMode: "manual",
   });
 
   const { data: projectData, isLoading: projectIsLoading } =
@@ -92,8 +93,8 @@ export const ProjectsList: React.FC = () => {
 
   useEffect(() => {
     return () => {
-      stompClient.unsubscribe("resources/projects");
-      stompClient.unsubscribe("resources/projectCategories");
+      stompClient?.unsubscribe("resources/projects");
+      stompClient?.unsubscribe("resources/projectCategories");
     };
   }, []);
 

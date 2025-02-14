@@ -42,7 +42,7 @@ export const ProjectCategoriesList: React.FC = () => {
         },
       ],
     },
-    // liveMode: "manual",
+    liveMode: "manual",
   });
 
   // const { data: projectCategoryData, isLoading: projectCategoryIsLoading } =
@@ -56,7 +56,7 @@ export const ProjectCategoriesList: React.FC = () => {
 
   useEffect(() => {
     return () => {
-      stompClient.unsubscribe("resources/projectCategories");
+      stompClient?.unsubscribe("resources/projectCategories");
     };
   }, []);
 
