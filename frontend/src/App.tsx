@@ -205,15 +205,12 @@ function App() {
                   <Route element={<PublicLayout />}>
                     <Route index element={<LandingPage />} />
                     <Route path="pricing" element={<Pricing />} />
-                    <Route path="login" element={<Login />} />
-                    <Route path="register" element={<Register />} />
-                    <Route
-                      path="forgot-password"
-                      element={<ForgotPassword />}
-                    />
-                    <Route path="reset-password" element={<ResetPassword />} />
                     <Route path="search" element={<SearchPage />} />
                   </Route>
+                  <Route path="login" element={<Login />} />
+                  <Route path="register" element={<Register />} />
+                  <Route path="forgot-password" element={<ForgotPassword />} />
+                    <Route path="reset-password" element={<ResetPassword />} />
                   <Route
                     element={
                       <Authenticated
@@ -244,7 +241,6 @@ function App() {
                       path="dashboard"
                       element={<NavigateToResource resource={"accounts"} />}
                     />
-
                     <Route path="accounts">
                       <Route index element={<AccountsList />} />
                       <Route path="create" element={<AccountsCreate />} />
