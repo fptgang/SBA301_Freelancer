@@ -8,7 +8,7 @@ import { Client } from "@stomp/stompjs";
 export const liveProvider = (client: Client): LiveProvider => ({
   subscribe: ({ callback, channel, types, params }) => {
     var id = channel;
-    client.subscribe(
+    client?.subscribe(
       channel,
       (message) => {
         console.log("message", message);

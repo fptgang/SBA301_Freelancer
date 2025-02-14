@@ -197,7 +197,7 @@ function App() {
                   warnWhenUnsavedChanges: true,
                   useNewQueryKeys: true,
                   mutationMode: "pessimistic",
-                  liveMode: "auto",
+                  liveMode: "off",
                 }}
               >
                 <Routes>

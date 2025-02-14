@@ -4,9 +4,8 @@ ProfileDto:
     profileId:
       type: integer
       format: int64
-    accountId:
-      type: integer
-      format: int64
+    account:
+      $ref: 'account-response.yml#/AccountResponseDto'
     overview:
       type: string
     education:

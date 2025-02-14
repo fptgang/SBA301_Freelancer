@@ -1,6 +1,6 @@
 import { Client } from "@stomp/stompjs";
 
-export const stompClient = new Client({
+const stompClient = new Client({
   //   brokerURL: `${WS_BACK_END}/hirable-ws`,
   brokerURL: `ws://localhost:8080/hirable-ws`,
   onConnect: () => {
@@ -20,4 +20,6 @@ export const stompClient = new Client({
   },
   maxWebSocketChunkSize: 1024 * 1024 * 10,
 });
-stompClient.activate();
+stompClient?.activate();
+
+export { stompClient };

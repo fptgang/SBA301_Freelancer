@@ -1,0 +1,19 @@
+AccountResponseDto:
+  type: object
+  properties:
+    accountId:
+      type: integer
+      format: int64
+    email:
+      type: string
+    firstName:
+      type: string
+    lastName:
+      type: string
+    avatarUrl:
+      type: string
+    isVerified:
+      type: boolean
+    createdAt:
+      type: string
+      format: date-time

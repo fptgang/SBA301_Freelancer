@@ -1,5 +1,6 @@
 package com.fptgang.backend.mapper;
 
+import com.fptgang.backend.api.model.AccountResponseDto;
 import com.fptgang.backend.api.model.ProfileDto;
 import com.fptgang.backend.model.Profile;
 import com.fptgang.backend.repository.AccountRepos;
@@ -21,6 +22,8 @@ public class ProfileMapper extends BaseMapper<ProfileDto, Profile> {
 
     @Autowired
     private AccountRepos accountRepos;
+    @Autowired
+    private AccountMapper accountMapper;
 
     @Override
     public ProfileDto toDTO(Profile entity) {
@@ -29,8 +32,16 @@ public class ProfileMapper extends BaseMapper<ProfileDto, Profile> {
         }
 
         ProfileDto dto = new ProfileDto();
+        AccountResponseDto account = new AccountResponseDto();
+        account.setAccountId(entity.getAccount().getAccountId());
+        account.email(entity.getAccount().getEmail());
+        account.setFirstName(entity.getAccount().getFirstName());
+        account.setLastName(entity.getAccount().getLastName());
+        account.setAvatarUrl(entity.getAccount().getAvatarUrl());
+        account.setIsVerified(entity.getAccount().isVerified());
+        account.setCreatedAt(DateTimeUtil.fromLocalToOffset(entity.getAccount().getCreatedAt()));
         dto.setProfileId(entity.getProfileId());
-        dto.setAccountId(entity.getAccount().getAccountId());
+        dto.setAccount(account);
         dto.setOverview(entity.getOverview());
         dto.setEducation(entity.getEducation());
         dto.setPhoneNumber(entity.getPhoneNumber());
@@ -68,7 +79,7 @@ public class ProfileMapper extends BaseMapper<ProfileDto, Profile> {
             return existingEntity;
         } else {
             Profile entity = new Profile();
-            entity.setAccount(accountRepos.findByAccountId(dto.getAccountId())
+            entity.setAccount(accountRepos.findByAccountId(dto.getAccount().getAccountId())
                     .orElseThrow(() -> new IllegalArgumentException("Account does not exist")));
 
             entity.setOverview(dto.getOverview());

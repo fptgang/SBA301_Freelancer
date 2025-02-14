@@ -7,9 +7,8 @@ ProjectDto:
     projectCategoryId:
       type: integer
       format: int64
-    clientId:
-      type: integer
-      format: int64
+    client:
+      $ref: 'account-response.yml#/AccountResponseDto'
     staffId:
       type: integer
       format: int64
