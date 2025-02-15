@@ -111,6 +111,10 @@ import SettingsLayout from "./components/layout/settings-layout";
 import AccountSettingsPage from "./pages/shared/setting/account";
 import SecuritySettingsPage from "./pages/shared/setting/security";
 import LocalSettingsPage from "./pages/shared/setting/local";
+import WalletPage from "./pages/shared/wallet";
+import WalletLayout from "./components/layout/wallet-layout";
+import DepositPage from "./pages/shared/wallet/deposit";
+import WithdrawPage from "./pages/shared/wallet/withdraw";
 
 const resources = [
   {
@@ -340,6 +344,12 @@ function App() {
                     <Route path="account" element={<AccountSettingsPage />} />
                     <Route path="security" element={<SecuritySettingsPage />} />
                     <Route path="local" element={<LocalSettingsPage />} />
+                  </Route>
+
+                  <Route path="wallet" element={<WalletLayout />}>
+                    <Route index element={<WalletPage />} />
+                    <Route path="deposit" element={<DepositPage />} />
+                    <Route path="withdraw" element={<WithdrawPage />} />
                   </Route>
 
                   <Route path="*" element={<ErrorComponent />} />
