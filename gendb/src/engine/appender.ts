@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 
 const TRUNCATE_SQL = `
-begin transaction;
+start transaction;
 
 use hirable;
 
