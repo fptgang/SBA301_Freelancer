@@ -45,7 +45,9 @@ const SearchPage = () => {
   const [searchText, setSearchText] = useState<string>(
     searchParam.get("keyword") || ""
   );
-  const [activeTab, setActiveTab] = useState("talents");
+  const [activeTab, setActiveTab] = useState(
+    searchParam.get("type") === "work" ? "projects" : "talents"
+  );
 
   useEffect(() => {
     setCurrent(1);
