@@ -2,6 +2,7 @@ import React from 'react';
 import {Col, Form, Row} from 'react-bootstrap';
 import {Controller, useForm} from 'react-hook-form';
 import * as config from '../engine/config';
+import bcrypt from 'bcryptjs';
 
 type ConfigFormType = {
   installDate: Date;
@@ -19,7 +20,7 @@ type ConfigFormType = {
 };
 
 export const ConfigForm: React.FC = () => {
-  const {control} = useForm<ConfigFormType>({
+  const {control, setValue} = useForm<ConfigFormType>({
     defaultValues: {
       installDate: config.installDate(),
       hashPass: config.hashPass(),
@@ -71,6 +72,19 @@ export const ConfigForm: React.FC = () => {
 
       <hr className="my-4"/>
 
+      {/* Pass */}
+      <Form.Group className="mb-3">
+        <Form.Label>Account Password</Form.Label>
+        <Form.Control
+          type="text"
+          onChange={(e) => {
+            const hash = bcrypt.hashSync(e.target.value);
+            config.setHashPass(hash);
+            setValue('hashPass', hash);
+          }}
+        />
+      </Form.Group>
+
       {/* Hash Pass */}
       <Form.Group className="mb-3">
         <Form.Label>Hash Pass</Form.Label>
@@ -82,10 +96,7 @@ export const ConfigForm: React.FC = () => {
             <Form.Control
               type="text"
               {...field}
-              onChange={(e) => {
-                field.onChange(e.target.value);
-                config.setHashPass(e.target.value);
-              }}
+              readOnly
             />
           )}
         />
