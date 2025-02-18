@@ -1,4 +1,5 @@
 import {Proposal} from "../model/Proposal.js";
+import {File} from "../model/File.js";
 import {ProposalStatus} from "../model/ProposalStatus.js";
 import {faker} from "@faker-js/faker";
 import {AccountPool} from "./account.js";
@@ -6,6 +7,8 @@ import {AccountRole} from "../model/AccountRole.js";
 import {ProjectStatus} from "../model/ProjectStatus.js";
 import {ProjectPool} from "./project.js";
 import {SqlFileAppender} from "../appender.js";
+import { proposalFileAmount } from "../config.js";
+import { FilePool } from "./file.js";
 
 export class proposalPool {
   private proposals: Proposal[] = [];
@@ -80,6 +83,25 @@ export const createProposal = (date: Date) => {
   );
 
   ProposalPool.add(proposal);
+
+  // create files
+  const numFiles = faker.number.int(proposalFileAmount());
+  for (let i = 0; i < numFiles; i++) {
+    FilePool.add(new File({
+      file_id: FilePool.getNextId(),
+      created_at: date,
+      file_name: faker.system.fileName(),
+      file_type: faker.system.fileExt(),
+      file_url: faker.image.url(),
+      is_visible: true,
+      size: faker.number.int(1000000),
+      message_id: null,
+      project_id: null,
+      proposal_id: proposal.proposal_id,
+      uploader_id: freelancer.account_id,
+      milestone_id: null
+    }));
+  }
 
   return proposal;
 }

@@ -30,7 +30,6 @@ export class Account {
     this.role = data.role || AccountRole.CLIENT;
     this.updated_at = data.updated_at || null;
     this.verified_at = data.verified_at || null;
-    this.profile = data.profile || null;
   }
 
   static dump(accounts: Account[]): string {

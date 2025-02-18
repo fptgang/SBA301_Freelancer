@@ -1,6 +1,6 @@
-import {installDate, simulationActionWeights} from "../config.js"
+import {targetMinFinishedProject, installDate, simulationActionWeights} from "../config.js"
 import {createAccount} from "./account.js";
-import {completeMilestone, createProject, startMilestone} from "./project.js";
+import {completeMilestone, createProject, ProjectPool, startMilestone} from "./project.js";
 import {chooseProposal, createProposal} from "./proposal.js";
 import {makeDeposit, requestWithdrawal} from "./transaction.js";
 
@@ -23,6 +23,17 @@ export const Simulate = (callbackProgress: (progress: number) => void) => {
     const progress = (date.getTime() - installDate().getTime()) / (new Date().getTime() - installDate().getTime());
     callbackProgress(progress);
 
+    let projectActionBuff = 1;
+
+    if (ProjectPool.countFinished() < targetMinFinishedProject()) {
+      if (progress > 0.8)
+        projectActionBuff = 8;
+      else if (progress > 0.6)
+        projectActionBuff = 4;
+      else if (progress > 0.5)
+        projectActionBuff = 2;
+    }
+
     const actions = [
       {
         action: () => {
@@ -41,7 +52,7 @@ export const Simulate = (callbackProgress: (progress: number) => void) => {
       {
         action: createProposal,
         name: 'createProposal',
-        weight: simulationActionWeights().createProposal
+        weight: simulationActionWeights().createProposal * projectActionBuff
       },
       {
         action: makeDeposit,
@@ -56,17 +67,17 @@ export const Simulate = (callbackProgress: (progress: number) => void) => {
       {
         action: chooseProposal,
         name: 'chooseProposal',
-        weight: simulationActionWeights().chooseProposal
+        weight: simulationActionWeights().chooseProposal * projectActionBuff
       },
       {
         action: startMilestone,
         name: 'startMilestone',
-        weight: simulationActionWeights().startMilestone
+        weight: simulationActionWeights().startMilestone * projectActionBuff
       },
       {
         action: completeMilestone,
         name: 'completeMilestone',
-        weight: simulationActionWeights().completeMilestone
+        weight: simulationActionWeights().completeMilestone * projectActionBuff
       }
     ];
 

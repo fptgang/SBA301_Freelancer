@@ -12,11 +12,16 @@ type ConfigFormType = {
   profileRequiredSkillAmount: typeof config.profileRequiredSkillAmount;
   profileOverviewLineAmount: typeof config.profileOverviewLineAmount;
   projectDescriptionLineAmount: typeof config.projectDescriptionLineAmount;
+  projectFileAmount: typeof config.projectFileAmount;
+  milestoneDeliverableFileAmount: typeof config.milestoneDeliverableFileAmount;
+  proposalFileAmount: typeof config.proposalFileAmount;
   milestoneAmount: typeof config.milestoneAmount;
+  milestoneDescriptionLineAmount: typeof config.milestoneDescriptionLineAmount;
   milestoneDeadlineIncreaseDays: typeof config.milestoneDeadlineIncreaseDays;
   milestoneBudget: typeof config.milestoneBudget;
   depositEscrowOnDemand: typeof config.depositEscrowOnDemand;
   simulationActionWeights: typeof config.simulationActionWeights;
+  targetMinFinishedProject: typeof config.targetMinFinishedProject;
 };
 
 export const ConfigForm: React.FC = () => {
@@ -29,11 +34,16 @@ export const ConfigForm: React.FC = () => {
       profileRequiredSkillAmount: config.profileRequiredSkillAmount(),
       profileOverviewLineAmount: config.profileOverviewLineAmount(),
       projectDescriptionLineAmount: config.projectDescriptionLineAmount(),
+      projectFileAmount: config.projectFileAmount(),
+      milestoneDeliverableFileAmount: config.milestoneDeliverableFileAmount(),
+      proposalFileAmount: config.proposalFileAmount(),
       milestoneAmount: config.milestoneAmount(),
+      milestoneDescriptionLineAmount: config.milestoneDescriptionLineAmount(),
       milestoneDeadlineIncreaseDays: config.milestoneDeadlineIncreaseDays(),
       milestoneBudget: config.milestoneBudget(),
       depositEscrowOnDemand: config.depositEscrowOnDemand(),
       simulationActionWeights: config.simulationActionWeights(),
+      targetMinFinishedProject: config.targetMinFinishedProject(),
     },
   });
 
@@ -76,6 +86,7 @@ export const ConfigForm: React.FC = () => {
       <Form.Group className="mb-3">
         <Form.Label>Account Password</Form.Label>
         <Form.Control
+          placeholder="Default: 1"
           type="text"
           onChange={(e) => {
             const hash = bcrypt.hashSync(e.target.value);
@@ -157,51 +168,6 @@ export const ConfigForm: React.FC = () => {
 
       <hr className="my-4"/>
 
-      {/* Project Required Skill Amount */}
-      <Form.Group className="mb-3">
-        <Form.Label>Project Required Skills Range</Form.Label>
-        <Row>
-          <Col>
-            <Controller
-              name="projectRequiredSkillAmount.min"
-              control={control}
-              rules={{required: true, min: 1}}
-              render={({field}) => (
-                <Form.Control
-                  type="number"
-                  placeholder="Min"
-                  {...field}
-                  onChange={(e) => {
-                    field.onChange(Number(e.target.value));
-                    config.projectRequiredSkillAmount().min = Number(e.target.value);
-                  }}
-                />
-              )}
-            />
-          </Col>
-          <Col>
-            <Controller
-              name="projectRequiredSkillAmount.max"
-              control={control}
-              rules={{required: true, max: 10}}
-              render={({field}) => (
-                <Form.Control
-                  type="number"
-                  placeholder="Max"
-                  {...field}
-                  onChange={(e) => {
-                    field.onChange(Number(e.target.value));
-                    config.projectRequiredSkillAmount().max = Number(e.target.value);
-                  }}
-                />
-              )}
-            />
-          </Col>
-        </Row>
-      </Form.Group>
-
-      <hr className="my-4"/>
-
       {/* Profile Required Skill Amount */}
       <Form.Group className="mb-3">
         <Form.Label>Profile Required Skills Range</Form.Label>
@@ -245,7 +211,6 @@ export const ConfigForm: React.FC = () => {
         </Row>
       </Form.Group>
 
-      <hr className="my-4"/>
 
       {/* Profile Overview Line Amount */}
       <Form.Group className="mb-3">
@@ -291,6 +256,90 @@ export const ConfigForm: React.FC = () => {
       </Form.Group>
 
       <hr className="my-4"/>
+      <Form.Group className="mb-3">
+        <Form.Label>Project File Amount</Form.Label>
+        <Row>
+          <Col>
+            <Controller
+              name="projectFileAmount.min"
+              control={control}
+              rules={{required: true, min: 1}}
+              render={({field}) => (
+                <Form.Control
+                  type="number"
+                  placeholder="Min"
+                  {...field}
+                  onChange={(e) => {
+                    field.onChange(Number(e.target.value));
+                    config.projectFileAmount().min = Number(e.target.value);
+                  }}
+                />
+              )}
+            />
+          </Col>
+          <Col>
+            <Controller
+              name="projectFileAmount.max"
+              control={control}
+              rules={{required: true, max: 10}}
+              render={({field}) => (
+                <Form.Control
+                  type="number"
+                  placeholder="Max"
+                  {...field}
+                  onChange={(e) => {
+                    field.onChange(Number(e.target.value));
+                    config.projectFileAmount().max = Number(e.target.value);
+                  }}
+                />
+              )}
+            />
+          </Col>
+        </Row>
+      </Form.Group>
+
+      {/* Project Required Skill Amount */}
+      <Form.Group className="mb-3">
+        <Form.Label>Project Required Skills Range</Form.Label>
+        <Row>
+          <Col>
+            <Controller
+              name="projectRequiredSkillAmount.min"
+              control={control}
+              rules={{required: true, min: 1}}
+              render={({field}) => (
+                <Form.Control
+                  type="number"
+                  placeholder="Min"
+                  {...field}
+                  onChange={(e) => {
+                    field.onChange(Number(e.target.value));
+                    config.projectRequiredSkillAmount().min = Number(e.target.value);
+                  }}
+                />
+              )}
+            />
+          </Col>
+          <Col>
+            <Controller
+              name="projectRequiredSkillAmount.max"
+              control={control}
+              rules={{required: true, max: 10}}
+              render={({field}) => (
+                <Form.Control
+                  type="number"
+                  placeholder="Max"
+                  {...field}
+                  onChange={(e) => {
+                    field.onChange(Number(e.target.value));
+                    config.projectRequiredSkillAmount().max = Number(e.target.value);
+                  }}
+                />
+              )}
+            />
+          </Col>
+        </Row>
+      </Form.Group>
 
       {/* Project Description Line Amount */}
       <Form.Group className="mb-3">
@@ -337,11 +386,96 @@ export const ConfigForm: React.FC = () => {
 
       <hr className="my-4"/>
 
+      {/* Project Description Line Amount */}
+      <Form.Group className="mb-3">
+        <Form.Label>Milestone Description Lines Range</Form.Label>
+        <Row>
+          <Col>
+            <Controller
+              name="milestoneDescriptionLineAmount.min"
+              control={control}
+              rules={{required: true, min: 1}}
+              render={({field}) => (
+                <Form.Control
+                  type="number"
+                  placeholder="Min"
+                  {...field}
+                  onChange={(e) => {
+                    field.onChange(Number(e.target.value));
+                    config.milestoneDescriptionLineAmount().min = Number(e.target.value);
+                  }}
+                />
+              )}
+            />
+          </Col>
+          <Col>
+            <Controller
+              name="milestoneDescriptionLineAmount.max"
+              control={control}
+              rules={{required: true, max: 100}}
+              render={({field}) => (
+                <Form.Control
+                  type="number"
+                  placeholder="Max"
+                  {...field}
+                  onChange={(e) => {
+                    field.onChange(Number(e.target.value));
+                    config.milestoneDescriptionLineAmount().max = Number(e.target.value);
+                  }}
+                />
+              )}
+            />
+          </Col>
+        </Row>
+      </Form.Group>
+
+<Form.Group className="mb-3">
+  <Form.Label>Milestone Deliverable File Amount</Form.Label>
+  <Row>
+    <Col>
+      <Controller
+        name="milestoneDeliverableFileAmount.min"
+        control={control}
+        rules={{required: true, min: 1}}
+        render={({field}) => (
+          <Form.Control
+            type="number"
+            placeholder="Min"
+            {...field}
+            onChange={(e) => {
+              field.onChange(Number(e.target.value));
+              config.milestoneDeliverableFileAmount().min = Number(e.target.value);
+            }}
+          />
+        )}
+      />
+    </Col>
+    <Col>
+      <Controller
+        name="milestoneDeliverableFileAmount.max"
+        control={control}
+        rules={{required: true, max: 10}}
+        render={({field}) => (
+          <Form.Control
+            type="number"
+            placeholder="Max"
+            {...field}
+            onChange={(e) => {
+              field.onChange(Number(e.target.value));
+              config.milestoneDeliverableFileAmount().max = Number(e.target.value);
+            }}
+          />
+        )}
+      />
+    </Col>
+  </Row>
+</Form.Group>
+
       {/* Milestone Budget Ranges */}
       <Form.Group className="mb-3">
         <Form.Label>Milestone Budget Ranges</Form.Label>
         {['Casual', 'Standard', 'Professional', 'Enterprise', 'Corporate'].map((level, index) => (
-          <Row key={level} className="mb-2">
+          <Row key={level} className="mb-2 mx-2">
             <Form.Label>{level}</Form.Label>
             <Col>
               <Controller
@@ -382,6 +516,48 @@ export const ConfigForm: React.FC = () => {
           </Row>
         ))}
       </Form.Group>
+
+      <Form.Group className="mb-3">
+  <Form.Label>Proposal File Amount</Form.Label>
+  <Row>
+    <Col>
+      <Controller
+        name="proposalFileAmount.min"
+        control={control}
+        rules={{required: true, min: 1}}
+        render={({field}) => (
+          <Form.Control
+            type="number"
+            placeholder="Min"
+            {...field}
+            onChange={(e) => {
+              field.onChange(Number(e.target.value));
+              config.proposalFileAmount().min = Number(e.target.value);
+            }}
+          />
+        )}
+      />
+    </Col>
+    <Col>
+      <Controller
+        name="proposalFileAmount.max"
+        control={control}
+        rules={{required: true, max: 10}}
+        render={({field}) => (
+          <Form.Control
+            type="number"
+            placeholder="Max"
+            {...field}
+            onChange={(e) => {
+              field.onChange(Number(e.target.value));
+              config.proposalFileAmount().max = Number(e.target.value);
+            }}
+          />
+        )}
+      />
+    </Col>
+  </Row>
+</Form.Group>
 
       <hr className="my-4"/>
 
@@ -435,6 +611,28 @@ export const ConfigForm: React.FC = () => {
             </Col>
           </Row>
         ))}
+      </Form.Group>
+
+      <hr className="my-4"/>
+
+      {/* Target Min Finished Project */}
+      <Form.Group className="mb-3">
+        <Form.Label>Target Min Finished Project</Form.Label>
+        <Controller
+          name="targetMinFinishedProject"
+          control={control}
+          rules={{required: true, min: 0}}
+          render={({field}) => (
+            <Form.Control
+              type="number"
+              {...field}
+              onChange={(e) => {
+                field.onChange(Number(e.target.value));
+                config.setTargetMinFinishedProject(Number(e.target.value));
+              }}
+            />
+          )}
+        />
       </Form.Group>
     </Form>
   );
