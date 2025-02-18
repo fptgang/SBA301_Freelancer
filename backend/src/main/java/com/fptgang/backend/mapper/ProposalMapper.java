@@ -48,9 +48,9 @@ public class ProposalMapper extends BaseMapper<ProposalDto, Proposal> {
         if (dto == null) {
             return null;
         }
-        Optional<Proposal> existingEntityOptional = proposalRepos.findByProposalId(dto.getProposalId());
+        Optional<Proposal> existingEntityOptional = proposalRepos.findByProposalId(dto.getProposalId() == null ? 0 : dto.getProposalId());
 
-        if (existingEntityOptional.isPresent()) {
+        if (existingEntityOptional.isPresent() && dto.getProposalId() != null) {
             Proposal existEntity = existingEntityOptional.get();
 
             // DTO chi duoc sua status va visible
@@ -64,7 +64,7 @@ public class ProposalMapper extends BaseMapper<ProposalDto, Proposal> {
 
         else{
             Proposal proposal = new Proposal();
-            proposal.setProposalId(dto.getProposalId());
+//            proposal.setProposalId(dto.getProposalId());
 
             if (dto.getProjectId() != null) {
                 proposal.setProject(projectRepos.findByProjectId(dto.getProjectId())

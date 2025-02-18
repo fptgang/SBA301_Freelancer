@@ -35,7 +35,7 @@ public class MilestoneMapper extends BaseMapper<MilestoneDto, Milestone> {
         milestoneDto.setCreatedAt(DateTimeUtil.fromLocalToOffset(entity.getCreatedAt()));
         milestoneDto.setUpdatedAt(DateTimeUtil.fromLocalToOffset(entity.getUpdatedAt()));
         milestoneDto.setIsVisible(entity.isVisible());
-
+        milestoneDto.setDescription(entity.getDescription());
         return milestoneDto;
     }
 
@@ -44,9 +44,9 @@ public class MilestoneMapper extends BaseMapper<MilestoneDto, Milestone> {
             return null;
         }
 
-        Optional<Milestone> existingEntityOptional = milestoneRepos.findByMilestoneId(dto.getMilestoneId());
+        Optional<Milestone> existingEntityOptional = milestoneRepos.findByMilestoneId(dto.getMilestoneId() == null ? 0 : dto.getMilestoneId());
 
-        if (existingEntityOptional.isPresent()) {
+        if (existingEntityOptional.isPresent() && dto.getMilestoneId() != null) {
             Milestone existEntity = existingEntityOptional.get();
 
             existEntity.setTitle(dto.getTitle() != null ? dto.getTitle() : existEntity.getTitle());
@@ -54,7 +54,7 @@ public class MilestoneMapper extends BaseMapper<MilestoneDto, Milestone> {
             existEntity.setDeadline(dto.getDeadline() != null ? DateTimeUtil.fromOffsetToLocal(dto.getDeadline()) : existEntity.getDeadline());
             existEntity.setStatus(dto.getStatus() != null ? mapStatusEntity(dto.getStatus()) : existEntity.getStatus());
             existEntity.setVisible(dto.getIsVisible() != null ? dto.getIsVisible() : existEntity.isVisible());
-
+            existEntity.setDescription(dto.getDescription() != null ? dto.getDescription() : existEntity.getDescription());
             // NOTE: Cannot change linked proposal
             //existEntity.setProposal(dto.getProposalId() != null ? proposalRepos.findByProposalId(dto.getProposalId())
             //        .orElseThrow(() -> new IllegalArgumentException("Proposal not found")) : existEntity.getProposal()); // Add JobId
@@ -82,6 +82,9 @@ public class MilestoneMapper extends BaseMapper<MilestoneDto, Milestone> {
             }
             if (dto.getIsVisible() != null) {
                 milestone.setVisible(dto.getIsVisible());
+            }
+            if (dto.getDescription() != null) {
+                milestone.setDescription(dto.getDescription());
             }
 
             return milestone;

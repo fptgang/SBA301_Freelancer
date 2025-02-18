@@ -115,6 +115,7 @@ import WalletPage from "./pages/shared/wallet";
 import WalletLayout from "./components/layout/wallet-layout";
 import DepositPage from "./pages/shared/wallet/deposit";
 import WithdrawPage from "./pages/shared/wallet/withdraw";
+import ProjectDetailsScreen from "./pages/public/project";
 
 const resources = [
   {
@@ -210,11 +211,15 @@ function App() {
                     <Route index element={<LandingPage />} />
                     <Route path="pricing" element={<Pricing />} />
                     <Route path="search" element={<SearchPage />} />
+                    <Route
+                      path="project/:id"
+                      element={<ProjectDetailsScreen />}
+                    />
                   </Route>
                   <Route path="login" element={<Login />} />
                   <Route path="register" element={<Register />} />
                   <Route path="forgot-password" element={<ForgotPassword />} />
-                    <Route path="reset-password" element={<ResetPassword />} />
+                  <Route path="reset-password" element={<ResetPassword />} />
                   <Route
                     element={
                       <Authenticated

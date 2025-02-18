@@ -164,16 +164,6 @@ const ProfileDrawer: React.FC<{
         >
           Hire {profile.account?.firstName}
         </Button>
-      ) : role === "ADMIN" ? (
-        <Button
-          type="primary"
-          block
-          onClick={(e) => {
-            navigate(`/admin/accounts/show/${profile.account?.accountId}`);
-          }}
-        >
-          View Projects
-        </Button>
       ) : role === "FREELANCER" ? null : (
         <Button
           type="primary"

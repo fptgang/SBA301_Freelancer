@@ -32,8 +32,8 @@ public class SkillMapper extends BaseMapper<SkillDto, Skill> {
             return null;
         }
 
-        Skill skill = skillRepos.findBySkillId(dto.getSkillId())
-                .orElseGet(() -> Skill.builder().skillId(dto.getSkillId()).build());
+        Skill skill = skillRepos.findBySkillId(dto.getSkillId() == null ? 0 : dto.getSkillId())
+                .orElseGet(() -> Skill.builder().build());
 
         if (dto.getName() != null) {
             skill.setName(dto.getName());

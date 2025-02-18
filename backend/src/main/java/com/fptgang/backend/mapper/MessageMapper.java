@@ -49,8 +49,8 @@ public class MessageMapper extends BaseMapper<MessageDto, Message> {
             return null;
         }
 
-        Optional<Message> existingEntityOptional = messageRepos.findByMessageId(dto.getMessageId());
-        if (existingEntityOptional.isPresent()) {
+        Optional<Message> existingEntityOptional = messageRepos.findByMessageId(dto.getMessageId() == null ? 0 : dto.getMessageId());
+        if (existingEntityOptional.isPresent() && dto.getMessageId() != null) {
             Message existEntity = existingEntityOptional.get();
 
             // NOTE: can only change visibility
@@ -62,7 +62,7 @@ public class MessageMapper extends BaseMapper<MessageDto, Message> {
             return existEntity;
         } else {
             Message entity = new Message();
-            entity.setMessageId(dto.getMessageId());
+//            entity.setMessageId(dto.getMessageId());
 
             if (dto.getContent() != null) {
                 entity.setContent(dto.getContent());
