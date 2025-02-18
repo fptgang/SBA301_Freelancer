@@ -61,8 +61,8 @@ public class ProfileMapper extends BaseMapper<ProfileDto, Profile> {
             return null;
         }
 
-        Optional<Profile> existingEntityOptional = profileRepos.findById(dto.getProfileId());
-        if (existingEntityOptional.isPresent()) {
+        Optional<Profile> existingEntityOptional = profileRepos.findById(dto.getProfileId() == null ? 0 : dto.getProfileId());
+        if (existingEntityOptional.isPresent() && dto.getProfileId() != null) {
             Profile existingEntity = existingEntityOptional.get();
 
             existingEntity.setOverview(dto.getOverview() != null ? dto.getOverview() : existingEntity.getOverview());

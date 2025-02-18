@@ -44,8 +44,8 @@ public class ProjectSkillMapper extends BaseMapper<ProjectSkillDto, ProjectSkill
             return null;
         }
 
-        Optional<ProjectSkill> existingEntityOptional = projectSkillRepos.findById(dto.getProjectSkillId());
-        if (existingEntityOptional.isPresent()) {
+        Optional<ProjectSkill> existingEntityOptional = projectSkillRepos.findById(dto.getProjectSkillId() == null ? 0 : dto.getProjectSkillId());
+        if (existingEntityOptional.isPresent() && dto.getProjectSkillId() != null) {
             ProjectSkill existEntity = existingEntityOptional.get();
 
             if (dto.getSkill() != null) {
@@ -60,7 +60,7 @@ public class ProjectSkillMapper extends BaseMapper<ProjectSkillDto, ProjectSkill
         } else {
             ProjectSkill entity = new ProjectSkill();
 
-            entity.setProjectSkillId(dto.getProjectSkillId());
+//            entity.setProjectSkillId(dto.getProjectSkillId());
             if (dto.getSkill() != null) {
                 entity.setSkill(findSkill(dto.getSkill().getSkillId()));
             }

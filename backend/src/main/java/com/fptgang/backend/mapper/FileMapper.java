@@ -52,8 +52,8 @@ public class FileMapper extends BaseMapper<FileDto, File> {
             return null;
         }
 
-        Optional<File> existingFileOptional = fileRepos.findByFileId(dto.getFileId());
-        if(existingFileOptional.isPresent()){
+        Optional<File> existingFileOptional = fileRepos.findByFileId(dto.getFileId() == null ? 0 : dto.getFileId());
+        if(existingFileOptional.isPresent() && dto.getFileId() != null){
             File existFile = existingFileOptional.get();
 
             // NOTE: can only change visibility
@@ -67,7 +67,7 @@ public class FileMapper extends BaseMapper<FileDto, File> {
         }
         else{
             File file = new File();
-            file.setFileId(dto.getFileId());
+//            file.setFileId(dto.getFileId());
 
             if (dto.getFileName() != null) {
                 file.setFileName(dto.getFileName());

@@ -6,7 +6,6 @@ import {
   ProjectDtoStatusEnum,
 } from "../../../../generated";
 import { HttpError, useList, useOne } from "@refinedev/core";
-import { T } from "react-router/dist/development/fog-of-war-DLtn2OLr";
 import { renderSkillTags } from "./renderSkillTags";
 import { useNavigate } from "react-router";
 
@@ -109,15 +108,7 @@ const ProjectDrawer: React.FC<{
       </Typography.Text>
       <br />
       <br />
-      {role === "ADMIN" ? (
-        <Button
-          block
-          type="primary"
-          onClick={() => navigate(`/admin/projects/edit/${project.projectId}`)}
-        >
-          Edit
-        </Button>
-      ) : role === "CLIENT" ? (
+      {role === "CLIENT" ? (
         <Button
           block
           type="primary"
@@ -127,7 +118,7 @@ const ProjectDrawer: React.FC<{
         >
           Post a Project Like This
         </Button>
-      ) : role === "CLIENT" ? (
+      ) : role === "FREELANCER" ? (
         <Button
           block
           type="primary"

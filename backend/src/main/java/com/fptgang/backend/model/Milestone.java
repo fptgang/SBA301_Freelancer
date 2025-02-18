@@ -33,6 +33,10 @@ public class Milestone {
     @Searchable
     private String title;
 
+    @Column(columnDefinition = "TEXT", length = 10000000)
+    @Searchable
+    private String description;
+
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal budget;
 

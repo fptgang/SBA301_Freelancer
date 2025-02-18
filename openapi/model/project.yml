@@ -12,6 +12,16 @@ ProjectDto:
     staffId:
       type: integer
       format: int64
+    proposalCount:
+      type: integer
+      format: int32
+    estimateBudget:
+      type: number
+      format: double
+    milestones:
+      type: array
+      items:
+        $ref: 'milestone.yml#/MilestoneDto'
     title:
       type: string
     description:

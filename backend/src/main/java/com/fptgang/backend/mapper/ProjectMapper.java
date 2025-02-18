@@ -11,6 +11,7 @@ import com.fptgang.backend.util.DateTimeUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -31,6 +32,8 @@ public class ProjectMapper extends BaseMapper<ProjectDto, Project> {
 
     @Autowired
     private ProjectSkillMapper projectSkillMapper;
+    @Autowired
+    private MilestoneMapper milestoneMapper;
 
     public ProjectDto toDTO(Project project) {
         if (project == null) {
@@ -57,7 +60,9 @@ public class ProjectMapper extends BaseMapper<ProjectDto, Project> {
         dto.setCreatedAt(DateTimeUtil.fromLocalToOffset(project.getCreatedAt()));
         dto.setUpdatedAt(DateTimeUtil.fromLocalToOffset(project.getUpdatedAt()));
         dto.setRequiredSkills(project.getRequiredSkills().stream().map(projectSkillMapper::toDTO).collect(Collectors.toList()));
-
+        dto.setEstimateBudget(project.getMilestones().stream().map(milestone -> milestone.getBudget()).reduce(BigDecimal.ZERO, BigDecimal::add));
+        dto.setProposalCount(project.getProposals().size());
+        dto.setMilestones(project.getMilestones().stream().map(milestoneMapper::toDTO).collect(Collectors.toList()));
         return dto;
     }
 
@@ -66,9 +71,9 @@ public class ProjectMapper extends BaseMapper<ProjectDto, Project> {
             return null;
         }
 
-        Optional<Project> existingEntityOptional = projectRepos.findByProjectId(dto.getProjectId());
+        Optional<Project> existingEntityOptional = projectRepos.findByProjectId(dto.getProjectId() == null ? 0 : dto.getProjectId());
 
-        if (existingEntityOptional.isPresent()) {
+        if (existingEntityOptional.isPresent() && dto.getProjectId() != null) {
             Project existEntity = existingEntityOptional.get();
 
             existEntity.setTitle(dto.getTitle() != null ? dto.getTitle() : existEntity.getTitle());
@@ -81,17 +86,18 @@ public class ProjectMapper extends BaseMapper<ProjectDto, Project> {
                     existEntity.getCategory());
             existEntity.setActiveProposal(dto.getActiveProposalId() != null ?
                     proposalRepos.findByProposalId(dto.getActiveProposalId())
-                        .orElseThrow(() -> new IllegalArgumentException("Proposal not found")) :
+                            .orElseThrow(() -> new IllegalArgumentException("Proposal not found")) :
                     existEntity.getActiveProposal());
             existEntity.setRequiredSkills(dto.getRequiredSkills() != null ?
                     dto.getRequiredSkills().stream().map(projectSkillMapper::toEntity).collect(Collectors.toList()) :
                     existEntity.getRequiredSkills());
-
+            existEntity.setMilestones(dto.getMilestones() != null ? dto.getMilestones().stream().map(milestoneMapper::toEntity)
+                    .collect(Collectors.toList()) : existEntity.getMilestones());
             return existEntity;
 
         } else {
             Project project = new Project();
-            project.setProjectId(dto.getProjectId());
+//            project.setProjectId(dto.getProjectId());
 
             if (dto.getProjectCategoryId() != null) {
                 project.setCategory(projectCategoryRepos.findByProjectCategoryId(dto.getProjectCategoryId())
@@ -118,6 +124,12 @@ public class ProjectMapper extends BaseMapper<ProjectDto, Project> {
             if (dto.getRequiredSkills() != null) {
                 project.setRequiredSkills(dto.getRequiredSkills().stream()
                         .map(projectSkillMapper::toEntity)
+                        .collect(Collectors.toList()));
+            }
+
+            if (dto.getMilestones() != null) {
+                project.setMilestones(dto.getMilestones().stream()
+                        .map(milestoneMapper::toEntity)
                         .collect(Collectors.toList()));
             }
 

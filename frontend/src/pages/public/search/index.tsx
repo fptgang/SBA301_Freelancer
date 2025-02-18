@@ -1,16 +1,5 @@
 import { useEffect, useState } from "react";
-import {
-  Layout,
-  Tabs,
-  Input,
-  Select,
-  List,
-  Tag,
-  Space,
-  Typography,
-  Row,
-  Col,
-} from "antd";
+import { Layout, Tabs, Input, List, Row, Col } from "antd";
 import {
   SearchOutlined,
   UserOutlined,
@@ -19,17 +8,15 @@ import {
 import {
   ProfileDto,
   ProjectDto,
-  ProfileSkillDto,
-  ProjectSkillDto,
   SkillDto,
   ProficiencyEnum,
   ProjectCategoryDto,
 } from "../../../../generated";
 import { HttpError, useList } from "@refinedev/core";
 import { useSearchParams } from "react-router";
-import ProjectCard from "./projectCard";
-import ProfileCard from "./profileCard";
-import { renderSkillTags } from "./renderSkillTags";
+import ProjectCard from "../../../components/pages/search/projectCard";
+import ProfileCard from "../../../components/pages/search/profileCard";
+import RenderFilter from "../../../components/pages/search/renderFilter";
 
 const { Content, Sider } = Layout;
 
@@ -48,6 +35,12 @@ const SearchPage = () => {
   const [activeTab, setActiveTab] = useState(
     searchParam.get("type") === "work" ? "projects" : "talents"
   );
+  const [typedSearch, setTypedSearch] = useState(searchText);
+
+  useEffect(() => {
+    setTypedSearch(searchParam.get("keyword") || "");
+    setSearchText(searchParam.get("keyword") || "");
+  }, [searchParam.get("keyword")]); // Update search text when URL search param changes
 
   useEffect(() => {
     setCurrent(1);
@@ -176,86 +169,6 @@ const SearchPage = () => {
         pagination: { current, pageSize },
       });
 
-  const renderFilter = () => {
-    return (
-      <div
-        style={{
-          backgroundColor: "white",
-          padding: "16px",
-          height: "100%",
-          borderRadius: "8px",
-        }}
-      >
-        <Typography.Title level={4}>Filter by Skills</Typography.Title>
-        <Select
-          mode="multiple"
-          style={{ width: "100%" }}
-          placeholder="Select skills"
-          loading={isSkillsLoading}
-          className="mb-4"
-          onChange={(value) => {
-            setSelectedSkills(
-              skillsData?.data?.filter((skill) =>
-                value.includes(skill.skillId)
-              ) || []
-            );
-          }}
-          value={selectedSkills.map((skill) => skill.skillId)}
-        >
-          {skillsData?.data?.map((skill) => (
-            <Select.Option key={skill.skillId} value={skill.skillId}>
-              {skill.name}
-            </Select.Option>
-          ))}
-        </Select>
-
-        <Select
-          mode="multiple"
-          style={{ width: "100%" }}
-          placeholder="Select Proficiency Level"
-          className="mb-4"
-          onChange={(value) => {
-            setSelectedLevel(value);
-            console.log(value);
-          }}
-          value={selectedLevel}
-        >
-          {levelOptions?.map((level) => (
-            <Select.Option key={level} value={level}>
-              {level}
-            </Select.Option>
-          ))}
-        </Select>
-        {activeTab === "projects" && (
-          <Select
-            mode="multiple"
-            style={{ width: "100%" }}
-            placeholder="Select Project Categories"
-            className="mb-4"
-            onChange={(value) => {
-              setSelectedCategories(
-                categoriesData?.data?.filter((c) =>
-                  value.includes(c.projectCategoryId)
-                ) || []
-              );
-              console.log(value);
-            }}
-            value={selectedCategories.map((c) => c.projectCategoryId)}
-          >
-            {categoriesData?.data?.map((c) => (
-              <Select.Option
-                key={c.projectCategoryId}
-                value={c.projectCategoryId}
-              >
-                {c.name}
-              </Select.Option>
-            ))}
-          </Select>
-        )}
-      </div>
-    );
-  };
-
   const handlePageChange = (page: number, newPageSize: number) => {
     setCurrent(page);
     setPageSize(newPageSize);
@@ -270,8 +183,11 @@ const SearchPage = () => {
             activeTab === "projects" ? "projects" : "talents"
           }...`}
           prefix={<SearchOutlined />}
-          onPressEnter={(e) => setSearchText(e.target.value)}
-          defaultValue={searchText}
+          onPressEnter={(e) =>
+            setSearchText((e.target as HTMLInputElement).value)
+          }
+          value={typedSearch}
+          onChange={(e) => setTypedSearch(e.target.value)}
           className="mb-4"
         />
 
@@ -294,7 +210,22 @@ const SearchPage = () => {
           />
         </Tabs>
         <Row gutter={16} className="mb-4">
-          <Col span={6}>{renderFilter()}</Col>
+          <Col span={6}>
+            <RenderFilter
+              activeTab={activeTab}
+              selectedSkills={selectedSkills}
+              setSelectedSkills={setSelectedSkills}
+              selectedLevel={selectedLevel}
+              setSelectedLevel={setSelectedLevel}
+              selectedCategories={selectedCategories}
+              setSelectedCategories={setSelectedCategories}
+              skillsData={skillsData}
+              isSkillsLoading={isSkillsLoading}
+              categoriesData={categoriesData}
+              isCategoriesLoading={isCategoriesLoading}
+              levelOptions={levelOptions}
+            />
+          </Col>
           <Col span={18}>
             {activeTab === "talents" ? (
               <List

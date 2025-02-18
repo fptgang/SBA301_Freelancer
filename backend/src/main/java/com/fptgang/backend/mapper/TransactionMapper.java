@@ -45,9 +45,9 @@ public class TransactionMapper extends BaseMapper<TransactionDto, Transaction> {
             return null;
         }
 
-        Optional<Transaction> existingEntityOptional = transactionRepos.findByTransactionId(dto.getTransactionId());
+        Optional<Transaction> existingEntityOptional = transactionRepos.findByTransactionId(dto.getTransactionId() == null ? 0 : dto.getTransactionId());
 
-        if (existingEntityOptional.isPresent()) {
+        if (existingEntityOptional.isPresent() && dto.getTransactionId() != null) {
             Transaction existEntity = existingEntityOptional.get();
 
             // NOTE: DTO can only update status
@@ -60,7 +60,7 @@ public class TransactionMapper extends BaseMapper<TransactionDto, Transaction> {
             return existEntity;
         } else {
             Transaction entity = new Transaction();
-            entity.setTransactionId(dto.getTransactionId());
+//            entity.setTransactionId(dto.getTransactionId());
             if (dto.getFromAccountId() != null) {
                 entity.setFromAccount(findFromToAccount(dto.getFromAccountId())); // Mapping field name change
             }

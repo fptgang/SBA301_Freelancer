@@ -26,7 +26,7 @@ const NavBar: React.FC = () => {
 
   const handleSearch = (value: string) => {
     setSearchTerm(value);
-    navigate(`/search?q=${encodeURIComponent(value)}`);
+    navigate(`/search?keyword=${encodeURIComponent(value)}`);
   };
 
   const handleLogin = () => {
@@ -178,8 +178,10 @@ const NavBar: React.FC = () => {
           <Input
             placeholder="Search..."
             prefix={<SearchOutlined className="text-gray-400" />}
-            value={searchTerm}
-            onChange={(e) => handleSearch(e.target.value)}
+            defaultValue={searchTerm}
+            onPressEnter={(e) =>
+              handleSearch((e.target as HTMLInputElement).value)
+            }
             className="w-48 lg:w-64"
             style={{ backgroundColor: token.colorBgContainer }}
           />

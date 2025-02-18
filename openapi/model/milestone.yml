@@ -7,6 +7,8 @@ MilestoneDto:
     projectId:
       type: integer
       format: int64
+    description:
+      type: string
     title:
       type: string
     budget:

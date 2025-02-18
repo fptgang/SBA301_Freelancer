@@ -43,8 +43,8 @@ public class ProfileSkillMapper extends BaseMapper<ProfileSkillDto, ProfileSkill
             return null;
         }
 
-        Optional<ProfileSkill> existingEntityOptional = profileSkillRepos.findById(dto.getProfileSkillId());
-        if (existingEntityOptional.isPresent()) {
+        Optional<ProfileSkill> existingEntityOptional = profileSkillRepos.findById(dto.getProfileSkillId() == null ? 0 : dto.getProfileSkillId());
+        if (existingEntityOptional.isPresent() && dto.getProfileSkillId() != null) {
             ProfileSkill existEntity = existingEntityOptional.get();
 
             if (dto.getSkill() != null) {
@@ -59,7 +59,7 @@ public class ProfileSkillMapper extends BaseMapper<ProfileSkillDto, ProfileSkill
         } else {
             ProfileSkill entity = new ProfileSkill();
 
-            entity.setProfileSkillId(dto.getProfileSkillId());
+//            entity.setProfileSkillId(dto.getProfileSkillId());
             if (dto.getSkill() != null) {
                 entity.setSkill(findSkill(dto.getSkill().getSkillId()));
             }
