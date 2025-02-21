@@ -11,6 +11,7 @@ import com.fptgang.backend.service.AccountService;
 import com.fptgang.backend.service.MessageService;
 import com.fptgang.backend.util.OpenApiHelper;
 import com.fptgang.backend.util.SecurityUtil;
+import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +20,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
+import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -78,25 +80,19 @@ public class MessageController implements MessagesApi {
     }
 
 
-    @MessageMapping("/chat.sendMessage/{receiverId}")
+    @MessageMapping("/chat.sendMessage/{projectId}")
+    @Transactional
 //    @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<?> sendMessage(@Payload MessageDto messageDto,
-                                         SimpMessageHeaderAccessor headerAccessor) {
-        if (headerAccessor.getSessionAttributes().get("email") == null) {
-            headerAccessor.getSessionAttributes().put("email", SecurityUtil.requireCurrentUserEmail());
-        }
+    public void sendMessage(@Payload MessageDto messageDto) {
         try {
             Message message = messageMapper.toEntity(messageDto);
-            message.setCreatedAt(LocalDateTime.now());
-            message = messageService.create(message);
-//            messagingTemplate.convertAndSend("/topic/private/" + message.getReceiver().getEmail(), "New message");
-//            messagingTemplate.convertAndSend("/topic/private/" + message.getSender().getEmail(), "New message");
-//            messagingTemplate.convertAndSend("/topic/private/" + message.getReceiver().getAccountId(), message);
-//            messagingTemplate.convertAndSend("/topic/private/" + message.getSender().getAccountId(), message);
-
-            return ResponseEntity.ok(message);
+            messageDto = messageMapper.toDTO(messageService.create(message));
+            messagingTemplate.convertAndSend("message/"+message.getSender().getEmail(), messageDto);
+            if(message.getProject().getActiveProposal() != null)
+            messagingTemplate.convertAndSend("message/"+message.getProject().getActiveProposal().getFreelancer().getEmail(), messageDto);
+            log.info("Sending message: {} to {} and {}", message.getContent(), "message/"+message.getSender().getAccountId(), message.getProject().getActiveProposal().getFreelancer().getAccountId());
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+            throw new RuntimeException(e);
         }
     }
 }

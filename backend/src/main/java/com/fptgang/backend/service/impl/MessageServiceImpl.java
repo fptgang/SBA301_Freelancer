@@ -56,8 +56,8 @@ public class MessageServiceImpl implements MessageService {
             spec = spec.and((a, _, cb) -> cb.isTrue(a.get("isVisible")));
         }
         spec = spec.and((root, query, criteriaBuilder) -> criteriaBuilder.or(
-                criteriaBuilder.equal(root.get("sender").get("accountId"), participantId),
-                criteriaBuilder.equal(root.get("receiver").get("accountId"), participantId)
+                criteriaBuilder.equal(root.get("project").get("client").get("accountId"), participantId),
+                criteriaBuilder.equal(root.get("project").get("activeProposal").get("freelancer").get("accountId"), participantId)
         ));
         return messageRepos.findAll(spec, pageable);
     }

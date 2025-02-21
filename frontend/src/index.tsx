@@ -8,8 +8,8 @@ const container = document.getElementById("root") as HTMLElement;
 const root = createRoot(container);
 
 root.render(
-  <React.StrictMode>
+  <>
     <App />
     <ToastContainer />
-  </React.StrictMode>
+  </>
 );

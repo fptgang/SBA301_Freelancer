@@ -23,6 +23,8 @@ public class MessageMapper extends BaseMapper<MessageDto, Message> {
     private AccountRepos accountRepos;
     @Autowired
     private ProjectRepos projectRepos;
+    @Autowired
+    private FileMapper fileMapper;
 
     @Override
     public MessageDto toDTO(Message entity) {
@@ -38,7 +40,7 @@ public class MessageMapper extends BaseMapper<MessageDto, Message> {
         dto.setContent(entity.getContent());
         dto.setCreatedAt(DateTimeUtil.fromLocalToOffset(entity.getCreatedAt()));
         dto.setIsVisible(entity.isVisible());
-
+        dto.setFiles(entity.getFiles().stream().map(fileMapper::toDTO).toList());
         return dto;
     }
 
@@ -58,7 +60,9 @@ public class MessageMapper extends BaseMapper<MessageDto, Message> {
             //existEntity.setReceiver(dto.getReceiverId() != null ? findAccount(dto.getReceiverId()) : existEntity.getReceiver());
             //existEntity.setSender(dto.getSenderId() != null ? findAccount(dto.getSenderId()) : existEntity.getSender());
             existEntity.setVisible(dto.getIsVisible() != null ? dto.getIsVisible() : existEntity.isVisible());
-
+            if(dto.getFiles() != null) {
+                existEntity.setFiles(dto.getFiles().stream().map(fileMapper::toEntity).toList());
+            }
             return existEntity;
         } else {
             Message entity = new Message();
@@ -77,6 +81,9 @@ public class MessageMapper extends BaseMapper<MessageDto, Message> {
             }
             if (dto.getIsVisible() != null) {
                 entity.setVisible(dto.getIsVisible());
+            }
+            if(dto.getFiles() != null) {
+                entity.setFiles(dto.getFiles().stream().map(fileMapper::toEntity).toList());
             }
 
             return entity;

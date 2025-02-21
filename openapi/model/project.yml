@@ -36,6 +36,8 @@ ProjectDto:
     activeProposalId:
       type: integer
       format: int64
+    latestMessage:
+      $ref: 'message.yml#/MessageDto'
     isVisible:
       type: boolean
     createdAt:
