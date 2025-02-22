@@ -116,6 +116,8 @@ import WalletLayout from "./components/layout/wallet-layout";
 import DepositPage from "./pages/shared/wallet/deposit";
 import WithdrawPage from "./pages/shared/wallet/withdraw";
 import ProjectDetailsScreen from "./pages/public/project";
+import { Message } from "./pages/public/message";
+import MessageLayout from "./components/layout/message-layout";
 
 const resources = [
   {
@@ -226,11 +228,11 @@ function App() {
                         fallback={<Navigate to="/login" />}
                         key={"authenticated-inner"}
                       >
-                        <PublicLayout />
+                        <MessageLayout />
                       </Authenticated>
                     }
                   >
-                    <Route path="message" element={<Pricing />} />
+                    <Route path="message" element={<Message />} />
                   </Route>
 
                   {/* Admin Routes */}

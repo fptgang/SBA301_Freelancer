@@ -2,16 +2,19 @@ package com.fptgang.backend.mapper;
 
 import com.fptgang.backend.api.model.AccountResponseDto;
 import com.fptgang.backend.api.model.ProjectDto;
+import com.fptgang.backend.model.Message;
 import com.fptgang.backend.model.Project;
 import com.fptgang.backend.repository.AccountRepos;
 import com.fptgang.backend.repository.ProjectCategoryRepos;
 import com.fptgang.backend.repository.ProjectRepos;
 import com.fptgang.backend.repository.ProposalRepos;
 import com.fptgang.backend.util.DateTimeUtil;
+import com.fptgang.backend.util.SecurityUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
+import java.util.Comparator;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -34,6 +37,8 @@ public class ProjectMapper extends BaseMapper<ProjectDto, Project> {
     private ProjectSkillMapper projectSkillMapper;
     @Autowired
     private MilestoneMapper milestoneMapper;
+    @Autowired
+    private MessageMapper messageMapper;
 
     public ProjectDto toDTO(Project project) {
         if (project == null) {
@@ -63,6 +68,11 @@ public class ProjectMapper extends BaseMapper<ProjectDto, Project> {
         dto.setEstimateBudget(project.getMilestones().stream().map(milestone -> milestone.getBudget()).reduce(BigDecimal.ZERO, BigDecimal::add));
         dto.setProposalCount(project.getProposals().size());
         dto.setMilestones(project.getMilestones().stream().map(milestoneMapper::toDTO).collect(Collectors.toList()));
+        if(SecurityUtil.getCurrentUserId()==project.getClient().getAccountId()
+                ||(project.getActiveProposal()!=null&&SecurityUtil.getCurrentUserId()==project.getActiveProposal().getFreelancer().getAccountId())
+                ||(project.getStaff()!=null&&project.getStaff().getAccountId()==SecurityUtil.getCurrentUserId())){
+            dto.setLatestMessage(messageMapper.toDTO(project.getMessages().stream().max(Comparator.comparing(Message::getCreatedAt)).orElse(null)));
+        }
         return dto;
     }
 

@@ -45,7 +45,7 @@ export const liveProvider = (client: Client): LiveProvider => ({
       destination: channel,
       body: JSON.stringify(payload),
       headers: {
-        type,
+        Authorization: `Bearer ${localStorage.getItem("refine-auth")}`,
       },
     });
     console.log("publish", {
