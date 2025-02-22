@@ -21,6 +21,7 @@ import {
 } from "../engine/sim/transaction.js";
 import toast from 'react-hot-toast';
 import {DumpProfiles, ResetProfilePool} from '../engine/sim/profile.js';
+import {DumpFiles, ResetFilePool} from '../engine/sim/file.js';
 
 const Home: React.FC = () => {
   const [code, setCode] = useState('');
@@ -72,6 +73,7 @@ const Home: React.FC = () => {
                   await new Promise(resolve => setTimeout(resolve, 1000));
                   const startTime = performance.now();
 
+                  ResetFilePool();
                   ResetCategories();
                   ResetSkills();
                   ResetAccountPool();
@@ -92,6 +94,7 @@ const Home: React.FC = () => {
                   DumpProjects(); // including milestones and project_skills
                   DumpProposals();
                   DumpActiveProposalId();
+                  DumpFiles();
 
                   const endTime = performance.now();
                   setGenerateTime(endTime - startTime);

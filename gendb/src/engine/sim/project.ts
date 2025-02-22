@@ -3,6 +3,7 @@ import {Project} from "../model/Project.js";
 import {ProjectStatus} from "../model/ProjectStatus.js";
 import {ProjectRequiredSkill} from "../model/ProjectRequiredSkill.js";
 import {ProficiencyLevel} from "../model/ProficiencyLevel.js";
+import {File} from "../model/File.js";
 import {Milestone} from "../model/Milestone.js";
 import {MilestoneStatus} from "../model/MilestoneStatus.js";
 import {AccountPool} from "./account.js";
@@ -12,11 +13,16 @@ import {PickCategory} from "../seed/CategoryDump.js";
 import {
   milestoneAmount,
   milestoneBudget,
-  milestoneDeadlineIncreaseDays, projectDescriptionLineAmount,
+  milestoneDeadlineIncreaseDays,
+  milestoneDeliverableFileAmount,
+  milestoneDescriptionLineAmount,
+  projectDescriptionLineAmount,
+  projectFileAmount,
   projectRequiredSkillAmount
 } from "../config.js";
 import {SqlFileAppender} from "../appender.js";
 import {TransactionPool} from "./transaction.js";
+import { FilePool } from "./file.js";
 
 export class projectPool {
   private projects: Project[] = [];
@@ -70,6 +76,10 @@ export class projectPool {
 
     const randomIndex = Math.floor(Math.random() * eligibleProjects.length);
     return eligibleProjects[randomIndex];
+  }
+
+  countFinished(): number {
+    return this.projects.filter(p => p.status === ProjectStatus.FINISHED).length;
   }
 }
 
@@ -131,6 +141,7 @@ export const createProject = (date: Date) => {
       currentDeadline,
       MilestoneStatus.PENDING,
       faker.commerce.productAdjective() + " " + faker.commerce.productName(),
+      faker.datatype.boolean() ? faker.lorem.paragraph(milestoneDescriptionLineAmount()) : null,
       project.project_id,
       true,
       date,
@@ -139,6 +150,25 @@ export const createProject = (date: Date) => {
   }
 
   ProjectPool.add(project);
+
+  // create files
+  const numFiles = faker.number.int(projectFileAmount());
+  for (let i = 0; i < numFiles; i++) {
+    FilePool.add(new File({
+      file_id: FilePool.getNextId(),
+      created_at: date,
+      file_name: faker.system.fileName(),
+      file_type: faker.system.fileExt(),
+      file_url: faker.image.url(),
+      is_visible: true,
+      size: faker.number.int(1000000),
+      message_id: null,
+      project_id: project.project_id,
+      proposal_id: null,
+      uploader_id: client.account_id,
+      milestone_id: null
+    }));
+  }
 
   return project;
 };
@@ -191,6 +221,27 @@ export const completeMilestone = (date: Date) => {
   if (!project.nextMilestone()) {
     project.status = ProjectStatus.FINISHED;
     project.updated_at = date;
+
+    // create deliverable files
+    const numFiles = faker.number.int(milestoneDeliverableFileAmount());
+    console.log(`Creating ${numFiles} deliverable files for milestone ${milestone.milestoneId}`);
+    for (let i = 0; i < numFiles; i++) {
+      FilePool.add(new File({
+        file_id: FilePool.getNextId(),
+        created_at: date,
+        file_name: faker.system.fileName(),
+        file_type: faker.system.fileExt(),
+        file_url: faker.image.url(),
+        is_visible: true,
+        size: faker.number.int(1000000),
+        message_id: null,
+        project_id: null,
+        proposal_id: null,
+        uploader_id: project.client_id,
+        milestone_id: milestone.milestoneId
+      }));
+    }
+
     return;
   }
   startMilestone(date);

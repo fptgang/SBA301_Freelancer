@@ -9,6 +9,7 @@ export class Milestone {
   isVisible: boolean;
   status: MilestoneStatus;
   title: string;
+  description: string | null;
   updatedAt: Date | null;
   projectId: number;
 
@@ -18,6 +19,7 @@ export class Milestone {
     deadline: Date,
     status: MilestoneStatus,
     title: string,
+    description: string | null,
     projectId: number,
     isVisible: boolean = true,
     createdAt: Date | null = null,
@@ -29,6 +31,7 @@ export class Milestone {
     this.isVisible = isVisible;
     this.status = status;
     this.title = title;
+    this.description = description;
     this.projectId = projectId;
     this.createdAt = createdAt;
     this.updatedAt = updatedAt;
@@ -45,6 +48,7 @@ export class Milestone {
       'is_visible',
       'status',
       'title',
+      'description',
       'updated_at',
       'project_id'
     ];
@@ -60,6 +64,7 @@ export class Milestone {
         `${milestone.isVisible ? 1 : 0},` +
         `'${milestone.status}',` +
         `'${escapeSingleQuotes(milestone.title)}',` +
+        (milestone.description ? `'${escapeSingleQuotes(milestone.description)}'` : `NULL`) + `,` +
         `${formatDate(milestone.updatedAt)},` +
         `${milestone.projectId})`;
     }).join(',\n');
