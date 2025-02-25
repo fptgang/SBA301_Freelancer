@@ -34,7 +34,7 @@ export const ProfileDropdownButton = () => {
       onClick: () => {
         if (user?.role === AccountDtoRoleEnum.Client) nav("/client/settings");
         if (user?.role === AccountDtoRoleEnum.Freelancer)
-          nav("/freelancer/settings");
+          nav("/settings");
       },
     },
     {

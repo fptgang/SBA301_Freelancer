@@ -5,25 +5,14 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="d21bfcd3-12cd-4298-bc9e-f7b2eb78a303" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/com/fptgang/backend/controller/EntityFileController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/com/fptgang/backend/service/EntityFileService.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/com/fptgang/backend/service/impl/EntityFileServiceImpl.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/path/entityFile-batch.yml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/path/entityFile-entityType-entityId.yml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/path/entityFile-fileId.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/com/fptgang/backend/mapper/ProjectMapper.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/com/fptgang/backend/mapper/ProjectMapper.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/com/fptgang/backend/repository/FileRepos.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/com/fptgang/backend/repository/FileRepos.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/com/fptgang/backend/service/impl/ProjectServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/com/fptgang/backend/service/impl/ProjectServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../frontend/src/App.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/src/App.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../frontend/src/components/pages/search/projectDrawer.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/src/components/pages/search/projectDrawer.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/com/fptgang/backend/controller/EntityFileController.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/com/fptgang/backend/controller/EntityFileController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/com/fptgang/backend/service/impl/AzureBlobServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/com/fptgang/backend/service/impl/AzureBlobServiceImpl.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../frontend/src/components/project-details/ActionCard.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/src/components/project-details/ActionCard.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../frontend/src/pages/client/dashboard/index.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/src/pages/client/dashboard/index.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../frontend/src/pages/client/projects/client-list.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/src/pages/client/projects/client-list.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/discord.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/discord.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../frontend/src/pages/freelancer/proposal/freelancer-create.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/src/pages/freelancer/proposal/freelancer-create.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/swagger-settings.xml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.yml" beforeDir="false" afterPath="$PROJECT_DIR$/main.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/model/file-blob.yml" beforeDir="false" afterPath="$PROJECT_DIR$/model/file-blob.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/model/file.yml" beforeDir="false" afterPath="$PROJECT_DIR$/model/file.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/path/entityFile-entityType-entityId.yml" beforeDir="false" afterPath="$PROJECT_DIR$/path/entityFile-entityType-entityId.yml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -39,12 +28,12 @@
     &quot;assignee&quot;: &quot;phucvjp&quot;
   }
 }</component>
-  <component name="GithubPullRequestsUISettings"><![CDATA[{
-  "selectedUrlAndAccountId": {
-    "url": "https://github.com/fptgang/SBA301_Freelancer.git",
-    "accountId": "867b3737-359d-4ad5-8bb2-e467bb5808da"
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/fptgang/SBA301_Freelancer.git&quot;,
+    &quot;accountId&quot;: &quot;867b3737-359d-4ad5-8bb2-e467bb5808da&quot;
   }
-}]]></component>
+}</component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 6
 }</component>
@@ -56,21 +45,21 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "com.codeium.enabled": "true",
-    "git-widget-placeholder": "Frontend/FixAPIIssue",
-    "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "/Users/vidz/Documents/GitHub/SBA301_Freelancer/openapi",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;com.codeium.enabled&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;Frontend/FixAPIIssue&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/Users/vidz/Documents/GitHub/SBA301_Freelancer/openapi&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
       <recent name="C:\Users\phucx\OneDrive\Documents\GitHub\SBA301_Freelancer\openapi\path" />
@@ -143,7 +132,8 @@
       <workItem from="1739925323564" duration="1832000" />
       <workItem from="1739976658773" duration="617000" />
       <workItem from="1740013695615" duration="1225000" />
-      <workItem from="1740465976193" duration="2338000" />
+      <workItem from="1740465976193" duration="3989000" />
+      <workItem from="1740481010362" duration="2298000" />
     </task>
     <servers />
   </component>

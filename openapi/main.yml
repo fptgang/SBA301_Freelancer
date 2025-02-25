@@ -102,6 +102,5 @@ paths:
     $ref: 'path/entityfile-entitytype-entityid.yml'
   /entityFiles/{entityType}/{entityId}/batch:
     $ref: 'path/entityfile-batch.yml'
-  /entityFiles/{fileId}:
-    $ref: 'path/entityfile-fileid.yml'
+
 

@@ -5,9 +5,14 @@ import {
   UserOutlined,
   MenuOutlined,
   CloseOutlined,
-  StarFilled,
+  DashboardOutlined,
+  ProjectOutlined,
+  MessageOutlined,
+  WalletOutlined,
+  FileTextOutlined,
+  ProfileOutlined,
 } from "@ant-design/icons";
-import { useNavigate } from "react-router";
+import { useNavigate, useLocation } from "react-router";
 import { Authenticated, useGetIdentity } from "@refinedev/core";
 import { ProfileDropdownButton } from "../common/button/profile-dropdown-button";
 import { AccountDto, AccountDtoRoleEnum } from "../../../generated";
@@ -22,11 +27,14 @@ const NavBar: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
   const { data: user } = useGetIdentity<AccountDto>();
 
   const handleSearch = (value: string) => {
     setSearchTerm(value);
-    navigate(`/search?keyword=${encodeURIComponent(value)}`);
+    if (value.trim()) {
+      navigate(`/search?keyword=${encodeURIComponent(value)}`);
+    }
   };
 
   const handleLogin = () => {
@@ -44,44 +52,40 @@ const NavBar: React.FC = () => {
     setMobileMenuOpen(false);
   };
 
-  // Navigation menu items for different user roles
+  // Navigation menu items for different user roles - aligned with actual routes in App.tsx
   const publicMenuItems = [
-    { key: "find-talent", label: "Find Talent", path: "/search" },
-    { key: "find-work", label: "Find Work", path: "/search?type=work" },
+    { key: "find-talent", label: "Find Talent", path: "/search", icon: <SearchOutlined /> },
+    { key: "find-work", label: "Find Work", path: "/search?type=work", icon: <SearchOutlined /> },
+    { key: "pricing", label: "Pricing", path: "/pricing", icon: <WalletOutlined /> },
   ];
 
   const clientMenuItems = [
-    { key: "dashboard", label: "Dashboard", path: "/client/dashboard" },
-    { key: "projects", label: "Projects", path: "/client/projects" },
-    { key: "proposals", label: "Proposals", path: "/client/proposals" },
-    { key: "messages", label: "Messages", path: "/client/messages" },
+    { key: "dashboard", label: "Dashboard", path: "/client/dashboard", icon: <DashboardOutlined /> },
+    { key: "projects", label: "Projects", path: "/client/projects", icon: <ProjectOutlined /> },
+    { key: "wallet", label: "Wallet", path: "/wallet", icon: <WalletOutlined /> },
+    { key: "chat", label: "Messages", path: "/message", icon: <MessageOutlined /> },
   ];
 
   const freelancerMenuItems = [
-    { key: "dashboard", label: "Dashboard", path: "/freelancer/dashboard" },
-    {
-      key: "find-projects",
-      label: "Find Projects",
-      path: "/freelancer/find-projects",
-    },
-    {
-      key: "proposals",
-      label: "My Proposals",
-      path: "/freelancer/my-proposals",
-    },
-    {
-      key: "active-projects",
-      label: "Active Projects",
-      path: "/freelancer/active-projects",
-    },
+    { key: "dashboard", label: "Dashboard", path: "/freelancer/dashboard", icon: <DashboardOutlined /> },
+    { key: "proposals", label: "My Proposals", path: "/freelancer/proposals", icon: <FileTextOutlined /> },
+    { key: "profile", label: "Profile", path: "/freelancer/profile", icon: <ProfileOutlined /> },
+    { key: "wallet", label: "Wallet", path: "/wallet", icon: <WalletOutlined /> },
+    { key: "chat", label: "Messages", path: "/message", icon: <MessageOutlined /> },
   ];
 
   const adminMenuItems = [
-    { key: "dashboard", label: "Dashboard", path: "/admin/dashboard" },
-    { key: "accounts", label: "Accounts", path: "/admin/accounts" },
-    { key: "projects", label: "Projects", path: "/admin/projects" },
-    { key: "skills", label: "Skills", path: "/admin/skills" },
+    { key: "dashboard", label: "Dashboard", path: "/admin/dashboard", icon: <DashboardOutlined /> },
+    { key: "accounts", label: "Accounts", path: "/admin/accounts", icon: <UserOutlined /> },
+    { key: "projects", label: "Projects", path: "/admin/projects", icon: <ProjectOutlined /> },
+    { key: "project-categories", label: "Categories", path: "/admin/project-categories", icon: <ProjectOutlined /> },
+    { key: "skills", label: "Skills", path: "/admin/skills", icon: <ProfileOutlined /> },
+    { key: "transactions", label: "Transactions", path: "/admin/transactions", icon: <WalletOutlined /> },
   ];
+
+  const isActive = (path: string) => {
+    return location.pathname === path || location.pathname.startsWith(`${path}/`);
+  };
 
   const renderNavigationMenu = () => {
     if (!user) {
@@ -91,8 +95,11 @@ const NavBar: React.FC = () => {
             <a
               key={item.key}
               onClick={() => navigate(item.path)}
-              className="text-gray-500 hover:text-gray-900 cursor-pointer"
+              className={`flex items-center text-gray-500 hover:text-gray-900 cursor-pointer ${
+                isActive(item.path) ? "font-semibold text-gray-900" : ""
+              }`}
             >
+              {item.icon && <span className="mr-1">{item.icon}</span>}
               {item.label}
             </a>
           ))}
@@ -104,9 +111,7 @@ const NavBar: React.FC = () => {
       case AccountDtoRoleEnum.Client:
         return <NavDropdown label="Client Area" items={clientMenuItems} />;
       case AccountDtoRoleEnum.Freelancer:
-        return (
-          <NavDropdown label="Freelancer Area" items={freelancerMenuItems} />
-        );
+        return <NavDropdown label="Freelancer Area" items={freelancerMenuItems} />;
       case AccountDtoRoleEnum.Admin:
         return <NavDropdown label="Admin Area" items={adminMenuItems} />;
       default:
@@ -120,20 +125,24 @@ const NavBar: React.FC = () => {
         ? clientMenuItems
         : user.role === AccountDtoRoleEnum.Freelancer
         ? freelancerMenuItems
-        : adminMenuItems
+        : user.role === AccountDtoRoleEnum.Admin
+        ? adminMenuItems
+        : publicMenuItems
       : publicMenuItems;
 
     return (
-      <div className="flex flex-col space-y-4">
+      <div className="flex flex-col space-y-2">
         {menuItems.map((item) => (
           <Button
             key={item.key}
             type="text"
             block
+            icon={item.icon}
             onClick={() => {
               navigate(item.path);
               setMobileMenuOpen(false);
             }}
+            className={isActive(item.path) ? "font-semibold bg-gray-100" : ""}
           >
             {item.label}
           </Button>
@@ -201,12 +210,44 @@ const NavBar: React.FC = () => {
         </div>
 
         {/* Mobile menu button */}
-        <Button
-          type="text"
-          icon={mobileMenuOpen ? <CloseOutlined /> : <MenuOutlined />}
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          className="md:hidden"
-        />
+        <div className="flex md:hidden items-center space-x-2">
+          <Button
+            type="text"
+            icon={<SearchOutlined />}
+            onClick={() => {
+              const searchInput = document.createElement('input');
+              searchInput.type = 'text';
+              searchInput.placeholder = 'Search...';
+              searchInput.style.position = 'fixed';
+              searchInput.style.top = '16px';
+              searchInput.style.left = '50%';
+              searchInput.style.transform = 'translateX(-50%)';
+              searchInput.style.zIndex = '1000';
+              searchInput.style.padding = '8px';
+              searchInput.style.borderRadius = '4px';
+              searchInput.style.width = '80%';
+              document.body.appendChild(searchInput);
+              searchInput.focus();
+              
+              searchInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                  handleSearch(searchInput.value);
+                  document.body.removeChild(searchInput);
+                }
+              });
+              
+              searchInput.addEventListener('blur', () => {
+                document.body.removeChild(searchInput);
+              });
+            }}
+          />
+          
+          <Button
+            type="text"
+            icon={mobileMenuOpen ? <CloseOutlined /> : <MenuOutlined />}
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          />
+        </div>
       </div>
 
       {/* Mobile Drawer */}
@@ -217,20 +258,18 @@ const NavBar: React.FC = () => {
         width={280}
         styles={{
           body: {
-            padding: 0,
+            padding: 16,
             backgroundColor: token.colorBgContainer,
           },
         }}
+        title={
+          <div className="flex items-center">
+            <img src="/public/icon.svg" alt="Logo" className="h-6 w-auto mr-2" />
+            <Title level={5} className="!m-0">Hirable</Title>
+          </div>
+        }
       >
-        <div className="p-4 flex flex-col space-y-4">
-          <Input
-            placeholder="Search..."
-            prefix={<SearchOutlined />}
-            value={searchTerm}
-            onChange={(e) => handleSearch(e.target.value)}
-            style={{ backgroundColor: token.colorBgContainer }}
-          />
-
+        <div className="flex flex-col space-y-6">
           {renderMobileMenu()}
 
           <div
@@ -248,7 +287,6 @@ const NavBar: React.FC = () => {
                   type="primary"
                   onClick={handleSignup}
                   block
-                  className="bg-green-600"
                 >
                   Sign up
                 </Button>

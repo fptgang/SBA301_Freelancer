@@ -25,29 +25,7 @@ public class EntityFileController implements EntityFilesApi {
     private final EntityFileService entityFileService;
     private final FileMapper fileMapper;
 
-    @Override
-    public ResponseEntity<FileDto> uploadEntityFile(
-            String entityTypeStr,
-            Long entityId,
-            MultipartFile file,
-            String description,
-            Boolean isVisible) {
 
-        log.info("Uploading file for {} with ID {}", entityTypeStr, entityId);
-
-        try {
-            EntityType entityType = EntityType.valueOf(entityTypeStr.toUpperCase());
-            var uploadedFile = entityFileService.uploadFile(file, entityType, entityId, description, isVisible);
-
-            return new ResponseEntity<>(fileMapper.toDTO(uploadedFile), HttpStatus.CREATED);
-        } catch (IllegalArgumentException e) {
-            log.error("Invalid entity type: {}", entityTypeStr, e);
-            return ResponseEntity.badRequest().build();
-        } catch (Exception e) {
-            log.error("Error uploading file for {} with ID {}: {}", entityTypeStr, entityId, e.getMessage(), e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
-    }
 
     @Override
     public ResponseEntity<List<FileDto>> uploadEntityFiles(
@@ -57,6 +35,27 @@ public class EntityFileController implements EntityFilesApi {
             Boolean isVisible) {
 
         log.info("Uploading {} files for {} with ID {}", files.size(), entityTypeStr, entityId);
+        try {
+            EntityType entityType = EntityType.valueOf(entityTypeStr.toUpperCase());
+            var uploadedFiles = entityFileService.uploadFiles(files, entityType, entityId, isVisible);
+
+            var dtos = uploadedFiles.stream()
+                    .map(fileMapper::toDTO)
+                    .collect(Collectors.toList());
+
+            return new ResponseEntity<>(dtos, HttpStatus.CREATED);
+        } catch (IllegalArgumentException e) {
+            log.error("Invalid entity type: {}", entityTypeStr, e);
+            return ResponseEntity.badRequest().build();
+        } catch (Exception e) {
+            log.error("Error uploading files for {} with ID {}: {}", entityTypeStr, entityId, e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @Override
+    public ResponseEntity<List<FileDto>> uploadEntityFilesBatch(String entityTypeStr, Long entityId, List<MultipartFile> files, Boolean isVisible) {
+        log.info("Uploading batch of {} files for {} with ID {}", files.size(), entityTypeStr, entityId);
 
         try {
             EntityType entityType = EntityType.valueOf(entityTypeStr.toUpperCase());

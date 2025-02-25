@@ -1,9 +1,9 @@
 import React from "react";
-import { useShow, useOne } from "@refinedev/core";
+import { useShow, useOne, useGetIdentity } from "@refinedev/core";
 import { HttpError } from "@refinedev/core";
 import { Col, Row, Spin, Typography } from "antd";
 import { useNavigate, useParams } from "react-router";
-import { ProjectDto, ProjectCategoryDto } from "../../../../generated";
+import { ProjectDto, ProjectCategoryDto, AccountDto } from "../../../../generated";
 
 import { ProjectDescription } from "../../../components/project-details/ProjectDescription";
 import { ProjectActivity } from "../../../components/project-details/ProjectActivity";
@@ -14,6 +14,7 @@ import { ProjectHeader } from "../../../components/project-details/ProjectHeader
 
 const ProjectDetailsScreen: React.FC = () => {
   const { id } = useParams<{ id: string }>();
+  const { data: identity } = useGetIdentity<any>();
   const { query } = useShow<ProjectDto, HttpError>({
     resource: "projects",
     id,
@@ -81,7 +82,7 @@ const ProjectDetailsScreen: React.FC = () => {
         {/* Right Column */}
         <Col xs={24} md={8}>
           {project && <ClientInformation project={project} />}
-          {project && <ActionCard project={project} role={role} />}
+          {project && <ActionCard project={project} role={role} freelancerId={identity?.id} />}
         </Col>
       </Row>
     </div>
