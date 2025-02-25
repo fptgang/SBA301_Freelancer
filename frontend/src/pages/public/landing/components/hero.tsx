@@ -33,12 +33,16 @@ const Hero: React.FC = () => {
     if (!auth?.authenticated) {
       console.log("Authenticated");
       nav("/login", { replace: true });
+    }else{
+      nav("/search", { replace: true });
     }
   };
 
   const handleLearnMore = () => {
     if (!auth?.authenticated) {
       nav("/login", { replace: true });
+    }else{
+      nav("/search", { replace: true });
     }
   };
 

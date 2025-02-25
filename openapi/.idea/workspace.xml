@@ -5,14 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="d21bfcd3-12cd-4298-bc9e-f7b2eb78a303" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/com/fptgang/backend/controller/EntityFileController.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/com/fptgang/backend/controller/EntityFileController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/com/fptgang/backend/service/impl/AzureBlobServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/com/fptgang/backend/service/impl/AzureBlobServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../frontend/src/components/project-details/ActionCard.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/src/components/project-details/ActionCard.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../frontend/src/pages/freelancer/proposal/freelancer-create.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/src/pages/freelancer/proposal/freelancer-create.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/swagger-settings.xml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.yml" beforeDir="false" afterPath="$PROJECT_DIR$/main.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/path/entityFile-entityType-entityId.yml" beforeDir="false" afterPath="$PROJECT_DIR$/path/entityFile-entityType-entityId.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/path/entityFile-fileId.yml" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -133,7 +128,7 @@
       <workItem from="1739976658773" duration="617000" />
       <workItem from="1740013695615" duration="1225000" />
       <workItem from="1740465976193" duration="3989000" />
-      <workItem from="1740481010362" duration="2298000" />
+      <workItem from="1740481010362" duration="2923000" />
     </task>
     <servers />
   </component>
