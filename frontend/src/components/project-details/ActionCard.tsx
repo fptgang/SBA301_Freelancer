@@ -7,6 +7,7 @@ import {
 } from "@ant-design/icons";
 import { useNavigate } from "react-router";
 import { ProjectDto, ProjectDtoStatusEnum } from "../../../generated";
+import FreelancerCreateProposalButton from "../../pages/freelancer/proposal/freelancer-create";
 
 interface ActionCardProps {
   project: ProjectDto;
@@ -34,17 +35,7 @@ export const ActionCard: React.FC<ActionCardProps> = ({ project, role }) => {
           <></>
         ) : role === "FREELANCER" ? (
           <>
-            <Button
-              block
-              type="primary"
-              size="large"
-              style={{ backgroundColor: "#0f993e" }}
-              onClick={() =>
-                navigate(`/freelancer/projects/apply/${project?.projectId}`)
-              }
-            >
-              Apply Now
-            </Button>
+            <FreelancerCreateProposalButton projectId={project.projectId} />
             <Typography.Text
               type="secondary"
               style={{ textAlign: "center", display: "block" }}

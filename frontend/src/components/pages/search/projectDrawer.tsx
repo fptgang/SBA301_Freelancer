@@ -27,6 +27,15 @@ const ProjectDrawer: React.FC<{
 
   const role = localStorage.getItem("role");
 
+  const onApplyJobClick = () => {
+    if (project.status === ProjectDtoStatusEnum.Open) {
+      navigate(`/projects/${project.projectId}`);
+    } else {
+      // Could add a message here that the project is no longer open
+      console.log("Project is not open for applications");
+    }
+  };
+
   return (
     <Drawer
       title={`Project Details: ${project.title}`}
@@ -119,13 +128,7 @@ const ProjectDrawer: React.FC<{
           Post a Project Like This
         </Button>
       ) : role === "FREELANCER" ? (
-        <Button
-          block
-          type="primary"
-          onClick={() =>
-            navigate(`/freelancer/projects/apply/${project.projectId}`)
-          }
-        >
+        <Button block type="primary" onClick={onApplyJobClick}>
           Apply for this Project
         </Button>
       ) : (

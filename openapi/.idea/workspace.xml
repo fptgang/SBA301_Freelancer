@@ -5,17 +5,25 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="d21bfcd3-12cd-4298-bc9e-f7b2eb78a303" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/com/fptgang/backend/model/Contract.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/com/fptgang/backend/mapper/MessageMapper.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/com/fptgang/backend/mapper/MessageMapper.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/com/fptgang/backend/controller/EntityFileController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/com/fptgang/backend/service/EntityFileService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../backend/src/main/java/com/fptgang/backend/service/impl/EntityFileServiceImpl.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/path/entityFile-batch.yml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/path/entityFile-entityType-entityId.yml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/path/entityFile-fileId.yml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../backend/src/main/java/com/fptgang/backend/mapper/ProjectMapper.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/com/fptgang/backend/mapper/ProjectMapper.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/com/fptgang/backend/service/impl/MessageServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/com/fptgang/backend/service/impl/MessageServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../backend/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/resources/application.properties" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../frontend/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/package-lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../frontend/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/com/fptgang/backend/repository/FileRepos.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/com/fptgang/backend/repository/FileRepos.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/com/fptgang/backend/service/impl/ProjectServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/com/fptgang/backend/service/impl/ProjectServiceImpl.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../frontend/src/App.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/src/App.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../frontend/src/components/pages/search/projectDrawer.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/src/components/pages/search/projectDrawer.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../frontend/src/components/project-details/ActionCard.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/src/components/project-details/ActionCard.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../frontend/src/pages/client/dashboard/index.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/src/pages/client/dashboard/index.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../frontend/src/pages/client/projects/client-list.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/src/pages/client/projects/client-list.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/discord.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/discord.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/model/message.yml" beforeDir="false" afterPath="$PROJECT_DIR$/model/message.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/model/project.yml" beforeDir="false" afterPath="$PROJECT_DIR$/model/project.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.yml" beforeDir="false" afterPath="$PROJECT_DIR$/main.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/model/file-blob.yml" beforeDir="false" afterPath="$PROJECT_DIR$/model/file-blob.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/model/file.yml" beforeDir="false" afterPath="$PROJECT_DIR$/model/file.yml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -31,35 +39,38 @@
     &quot;assignee&quot;: &quot;phucvjp&quot;
   }
 }</component>
-  <component name="GithubPullRequestsUISettings">{
-  &quot;selectedUrlAndAccountId&quot;: {
-    &quot;url&quot;: &quot;https://github.com/fptgang/SBA301_Freelancer.git&quot;,
-    &quot;accountId&quot;: &quot;66af897d-e781-4921-a41d-7d7699c60918&quot;
+  <component name="GithubPullRequestsUISettings"><![CDATA[{
+  "selectedUrlAndAccountId": {
+    "url": "https://github.com/fptgang/SBA301_Freelancer.git",
+    "accountId": "867b3737-359d-4ad5-8bb2-e467bb5808da"
   }
-}</component>
+}]]></component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 6
 }</component>
   <component name="ProjectId" id="2rcpczw1lmykUppjEi61OrCtBDR" />
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;com.codeium.enabled&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;develop&quot;,
-    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/Users/vidz/Documents/GitHub/SBA301_Freelancer/openapi&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "com.codeium.enabled": "true",
+    "git-widget-placeholder": "Frontend/FixAPIIssue",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "/Users/vidz/Documents/GitHub/SBA301_Freelancer/openapi",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
       <recent name="C:\Users\phucx\OneDrive\Documents\GitHub\SBA301_Freelancer\openapi\path" />
@@ -100,8 +111,8 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-jdk-9823dce3aa75-28b599e66164-intellij.indexing.shared.core-IU-242.24807.4" />
-        <option value="bundled-js-predefined-d6986cc7102b-5c90d61e3bab-JavaScript-IU-242.24807.4" />
+        <option value="bundled-jdk-9823dce3aa75-28b599e66164-intellij.indexing.shared.core-IU-242.23339.11" />
+        <option value="bundled-js-predefined-d6986cc7102b-5c90d61e3bab-JavaScript-IU-242.23339.11" />
       </set>
     </attachedChunks>
   </component>
@@ -132,6 +143,7 @@
       <workItem from="1739925323564" duration="1832000" />
       <workItem from="1739976658773" duration="617000" />
       <workItem from="1740013695615" duration="1225000" />
+      <workItem from="1740465976193" duration="2338000" />
     </task>
     <servers />
   </component>

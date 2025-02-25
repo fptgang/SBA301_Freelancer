@@ -1,0 +1,51 @@
+post:
+  summary: Upload multiple files for an entity
+  operationId: uploadEntityFilesBatch
+  security:
+    - bearerAuth: []
+  parameters:
+    - name: entityType
+      in: path
+      required: true
+      schema:
+        type: string
+        enum: [project, proposal, message, milestone]
+      description: The type of entity
+    - name: entityId
+      in: path
+      required: true
+      schema:
+        type: integer
+        format: int64
+      description: The ID of the entity
+  requestBody:
+    content:
+      multipart/form-data:
+        schema:
+          type: object
+          properties:
+            files:
+              type: array
+              items:
+                type: string
+                format: binary
+            isVisible:
+              type: boolean
+              default: true
+          required:
+            - files
+  responses:
+    '201':
+      description: Files uploaded successfully
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '../model/file.yml#/FileDto'
+    '400':
+      description: The operation failed
+      content:
+        application/json:
+          schema:
+            $ref: '../component/error.yml#/ErrorResponse'

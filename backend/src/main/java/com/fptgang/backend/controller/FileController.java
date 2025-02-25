@@ -32,36 +32,7 @@ public class FileController implements FilesApi {
         this.fileMapper = fileMapper;
     }
 
-    @Override
-    public ResponseEntity<FileDto> uploadFile(Long uploaderId, MultipartFile blob, Boolean isVisible, Long messageId, Long proposalId, Long projectId) {
-        FileDto dto = new FileDto()
-                .uploaderId(uploaderId)
-                .fileName(blob.getName())
-                .fileType(blob.getContentType())
-                .size(blob.getSize())
-                .messageId(messageId)
-                .proposalId(proposalId)
-                .projectId(projectId)
-                .isVisible(isVisible);
-        return new ResponseEntity<>(fileMapper
-                .toDTO(fileService.create(fileMapper.toEntity(dto), blob)), HttpStatus.CREATED);
-    }
 
-    @Override
-    public ResponseEntity<FileDto> updateFile(Long fileId, Long uploaderId, MultipartFile blob, Boolean isVisible, Long messageId, Long proposalId, Long projectId) {
-        FileDto dto = new FileDto()
-                .fileId(fileId)
-                .uploaderId(uploaderId)
-                .fileName(blob.getName())
-                .fileType(blob.getContentType())
-                .size(blob.getSize())
-                .messageId(messageId)
-                .proposalId(proposalId)
-                .projectId(projectId)
-                .isVisible(isVisible);
-        return ResponseEntity.ok(fileMapper
-                .toDTO(fileService.update(fileMapper.toEntity(dto), blob)));
-    }
 
     @Override
     public ResponseEntity<Void> deleteFile(Long fileId) {
