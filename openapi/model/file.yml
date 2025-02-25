@@ -30,3 +30,8 @@ FileDto:
     projectId:
       type: integer
       format: int64
+    milestoneId:
+      type: integer
+      format: int64
+    description:
+      type: string

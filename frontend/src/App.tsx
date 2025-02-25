@@ -214,7 +214,7 @@ function App() {
                     <Route path="pricing" element={<Pricing />} />
                     <Route path="search" element={<SearchPage />} />
                     <Route
-                      path="project/:id"
+                      path="projects/:id"
                       element={<ProjectDetailsScreen />}
                     />
                   </Route>
@@ -301,7 +301,6 @@ function App() {
                   <Route path="client" element={<ClientLayout />}>
                     <Route index element={<Navigate to="dashboard" />} />
                     <Route path="dashboard" element={<ClientDashboard />} />
-
                     <Route path="projects">
                       <Route index element={<ClientList />} />
                       <Route path=":id" element={<ClientProjectShow />} />

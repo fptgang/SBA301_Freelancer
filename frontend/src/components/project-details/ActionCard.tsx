@@ -6,14 +6,17 @@ import {
   UserOutlined,
 } from "@ant-design/icons";
 import { useNavigate } from "react-router";
-import { ProjectDto, ProjectDtoStatusEnum } from "../../../generated";
+import { AccountDto, ProjectDto, ProjectDtoStatusEnum } from "../../../generated";
+import FreelancerCreateProposalButton from "../../pages/freelancer/proposal/freelancer-create";
+import { useGetIdentity } from "@refinedev/core";
 
 interface ActionCardProps {
   project: ProjectDto;
+  freelancerId?: number;
   role: string | null;
 }
 
-export const ActionCard: React.FC<ActionCardProps> = ({ project, role }) => {
+export const ActionCard: React.FC<ActionCardProps> = ({ project, role, freelancerId }) => {
   const navigate = useNavigate();
 
   return (
@@ -34,17 +37,9 @@ export const ActionCard: React.FC<ActionCardProps> = ({ project, role }) => {
           <></>
         ) : role === "FREELANCER" ? (
           <>
-            <Button
-              block
-              type="primary"
-              size="large"
-              style={{ backgroundColor: "#0f993e" }}
-              onClick={() =>
-                navigate(`/freelancer/projects/apply/${project?.projectId}`)
-              }
-            >
-              Apply Now
-            </Button>
+            <FreelancerCreateProposalButton project={project} freelancerId={
+                freelancerId
+            } />
             <Typography.Text
               type="secondary"
               style={{ textAlign: "center", display: "block" }}

@@ -85,7 +85,6 @@ public class ProjectMapper extends BaseMapper<ProjectDto, Project> {
 
         if (existingEntityOptional.isPresent() && dto.getProjectId() != null) {
             Project existEntity = existingEntityOptional.get();
-
             existEntity.setTitle(dto.getTitle() != null ? dto.getTitle() : existEntity.getTitle());
             existEntity.setDescription(dto.getDescription() != null ? dto.getDescription() : existEntity.getDescription());
             existEntity.setStatus(dto.getStatus() != null ? Project.ProjectStatus.valueOf(dto.getStatus().getValue()) : existEntity.getStatus());
@@ -108,6 +107,9 @@ public class ProjectMapper extends BaseMapper<ProjectDto, Project> {
         } else {
             Project project = new Project();
 //            project.setProjectId(dto.getProjectId());
+            if(dto.getClient()!=null){
+                project.setProjectId(dto.getProjectId());
+            }
 
             if (dto.getProjectCategoryId() != null) {
                 project.setCategory(projectCategoryRepos.findByProjectCategoryId(dto.getProjectCategoryId())

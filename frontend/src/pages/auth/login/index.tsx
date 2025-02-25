@@ -5,7 +5,7 @@ export const Login = () => {
     <AuthPage
       type="login"
       formProps={{
-        initialValues: { email: "vi89012@gmail.com", password: "123456" },
+        initialValues: { email: "diana.glover6@yahoo.com", password: "1234567" },
       }}
     />
   );

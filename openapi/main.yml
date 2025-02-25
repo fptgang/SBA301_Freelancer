@@ -98,4 +98,9 @@ paths:
     $ref: 'path/skill.yml'
   /skills/{skillId}:
     $ref: 'path/skill-skillId.yml'
+  /entityFiles/{entityType}/{entityId}:
+    $ref: 'path/entityFile-entityType-entityId.yml'
+  /entityFiles/{entityType}/{entityId}/batch:
+    $ref: 'path/entityFile-batch.yml'
+
 

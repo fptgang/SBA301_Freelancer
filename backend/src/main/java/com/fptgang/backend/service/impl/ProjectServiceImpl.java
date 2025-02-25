@@ -23,12 +23,34 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public Project create(Project project) {
-        return projectRepos.save(project);
+        // First save the project without milestones
+        var milestones = project.getMilestones();
+        var skills = project.getRequiredSkills();
+        project.setRequiredSkills(null);
+        project.setMilestones(null);
+        project = projectRepos.save(project);
+        // Then set and save milestones if present
+        if (milestones != null && !milestones.isEmpty()
+                && skills != null && !skills.isEmpty()
+        ) {
+            Project finalProject = project;
+            milestones.forEach(milestone -> {
+                milestone.setProject(finalProject);
+            });
+            skills.forEach(skill -> {
+                skill.setProject(finalProject);
+            });
+            project.setRequiredSkills(skills);
+            project.setMilestones(milestones);
+            project = projectRepos.save(project);
+        }
+
+        return project;
     }
 
     @Override
     public Project update(Project project) {
-        if(project.getProjectId() == null || projectRepos.existsById(project.getProjectId())){
+        if (project.getProjectId() == null || projectRepos.existsById(project.getProjectId())) {
             throw new InvalidInputException("Prject does not exist");
         }
         return projectRepos.save(project);
