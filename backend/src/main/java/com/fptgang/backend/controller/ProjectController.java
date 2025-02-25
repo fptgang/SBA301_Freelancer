@@ -46,12 +46,12 @@ public class ProjectController implements ProjectsApi {
     }
 
     @Override
-    public ResponseEntity<GetProjects200Response> getProjects(Pageable pageable, String filter, String search) {
+    public ResponseEntity<GetProjects200Response> getProjects(Pageable pageable, String filter, String search,Long participantId) {
         log.info("Getting projects");
         var page = OpenApiHelper.toPageable(pageable);
         var includeInvisible = SecurityUtil.hasPermission(Role.ADMIN);
         var res = projectService
-                .getAll(page, filter, search, includeInvisible)
+                .getAll(page, filter, search, includeInvisible,participantId)
                 .map(projectMapper::toDTO);
         return OpenApiHelper.respondPage(res, GetProjects200Response.class);
     }

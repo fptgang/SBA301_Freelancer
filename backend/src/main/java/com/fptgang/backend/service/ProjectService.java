@@ -10,7 +10,10 @@ public interface ProjectService {
     Project update(Project account);
     Project findByProjectId(long projectId);
     void deleteById(long projectId);
-    Page<Project> getAll(Pageable pageable, String filter, String search, boolean includeInvisible);
+    Page<Project> getAll(Pageable pageable, String filter, String search, boolean includeInvisible, Long participantId);
+    default Page<Project> getAll(Pageable pageable, String filter, String search, boolean includeInvisible) {
+        return getAll(pageable, filter, search, false, null);
+    }
     default Page<Project> getAll(Pageable pageable, String filter, String search) {
         return getAll(pageable, filter, search, false);
     }

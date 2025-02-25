@@ -19,13 +19,16 @@ export const Message: React.FC = () => {
   const [selectedProject, setSelectedProject] = useState<ProjectDto>();
   const [files, setFiles] = useState<File[]>([]);
   const [newMessage, setNewMessage] = useState<MessageDto>();
-  const [pageSize, setPageSize] = useState(10);
+  const [pageSize, setPageSize] = useState(20);
 
   // Fetch projects where current user is participant
   const { data: projects, refetch } = useList<ProjectDto>({
     resource: "projects",
-    filters: [{ field: "client.accountId", operator: "eq", value: user?.id }],
     pagination: { pageSize },
+    // sorters: [{ field: "messages.createdAt", order: "desc" }],
+    meta: {
+      param: [{ field: "participantId", value: user?.id }],
+    },
   });
 
   useSubscription({
@@ -59,13 +62,31 @@ export const Message: React.FC = () => {
   //       return newMessage.project;
   //     });
   //   }
+
+  const handleScroll = (e: any) => {
+    if (
+      e.currentTarget.scrollTop + e.currentTarget.clientHeight ===
+      e.currentTarget.scrollHeight
+    ) {
+      if (projects?.data?.length === pageSize) {
+        setPageSize((size: number) => size + 10);
+      }
+    }
+  };
   return (
     <Layout hasSider>
       <ProjectSidebar
-        projects={projects?.data || []}
+        projects={
+          projects?.data?.sort(
+            (a, b) =>
+              new Date(b.latestMessage?.createdAt || "").getTime() -
+              new Date(a.latestMessage?.createdAt || "").getTime()
+          ) || []
+        }
         selectedProject={selectedProject}
         onSelectProject={setSelectedProject}
         newMessage={newMessage}
+        handleScroll={handleScroll}
         // collapsed={!screens.md}
       />
 

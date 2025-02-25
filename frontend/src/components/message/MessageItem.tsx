@@ -51,12 +51,13 @@ export const MessageItem: React.FC<MessageItemProps> = ({
               maxWidth: "70%",
               background: isCurrentUser ? "#1890ff" : "#f0f2f5",
               cursor: "pointer",
+              opacity: msg.isVisible ? 1 : 0.4,
             }}
           >
             <Space direction="vertical">
               <Typography.Text
                 style={{
-                  color: isCurrentUser ? "white" : "inherit",
+                  color: isCurrentUser ? "white" : "black",
                   display: "block",
                 }}
               >

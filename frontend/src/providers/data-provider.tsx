@@ -1,17 +1,21 @@
 import { DataProvider, LogicalFilter } from "@refinedev/core";
 import { Axios } from "axios";
-import { generateSortQuery, generateFilterQuery } from "../utils/query-utils";
-import {TOKEN_KEY} from "../authProvider";
+import {
+  generateSortQuery,
+  generateFilterQuery,
+  generateMetaQuery,
+} from "../utils/query-utils";
+import { TOKEN_KEY } from "../authProvider";
 
 function buildHeaders(headers: any) {
   headers = headers || {};
 
   const token: string | null = localStorage.getItem(TOKEN_KEY);
   if (token) {
-    headers["Authorization"] = `Bearer ${token}`
+    headers["Authorization"] = `Bearer ${token}`;
   }
 
-  return headers
+  return headers;
 }
 
 /**
@@ -32,6 +36,10 @@ export const dataProvider = (
     if (filters) {
       filterQuery = generateFilterQuery(filters as LogicalFilter[]);
     }
+    let metaQuery = "";
+    if (meta) {
+      metaQuery = generateMetaQuery(meta?.param);
+    }
 
     let currentPage = pagination?.current ?? 0;
     if (currentPage > 0) {
@@ -39,7 +47,9 @@ export const dataProvider = (
     }
     const url = `${apiUrl}/${resource}?page=${currentPage}&pageSize=${
       pagination?.pageSize ?? 20
-    }&size=${pagination?.pageSize ?? 20}&${sortQuery}&${filterQuery}`;
+    }&size=${pagination?.pageSize ?? 20}${"&" + sortQuery}${"&" + filterQuery}${
+      "&" + metaQuery
+    }`;
     console.log("getList", {
       resource,
       pagination,
@@ -52,7 +62,9 @@ export const dataProvider = (
     console.log("sorters", sorters);
     console.log("filters", filters);
     console.log("pagination", pagination);
-    const result = await _httpClient.get(url, { headers: buildHeaders(meta?.headers) });
+    const result = await _httpClient.get(url, {
+      headers: buildHeaders(meta?.headers),
+    });
     // TODO: send request to the API
     // const response = await httpClient.get(url, {});
 
@@ -70,7 +82,9 @@ export const dataProvider = (
     });
     const url = `${apiUrl}/${resource}`;
 
-    const result = await _httpClient.get(url, { headers: buildHeaders(meta?.headers) });
+    const result = await _httpClient.get(url, {
+      headers: buildHeaders(meta?.headers),
+    });
 
     // TODO: send request to the API
     // const response = await httpClient.get(url, {});
@@ -86,7 +100,11 @@ export const dataProvider = (
       variables,
       meta,
     });
-    const response = await _httpClient.post(`${apiUrl}/${resource}`, variables, { headers: buildHeaders(meta?.headers) });
+    const response = await _httpClient.post(
+      `${apiUrl}/${resource}`,
+      variables,
+      { headers: buildHeaders(meta?.headers) }
+    );
 
     return {
       data: response.data,
@@ -123,7 +141,9 @@ export const dataProvider = (
 
     // TODO: send request to the API
     // const response = await httpClient.get(url, {});
-    const response = await _httpClient.get(`${apiUrl}/${resource}/${id}`, { headers: buildHeaders(meta?.headers) });
+    const response = await _httpClient.get(`${apiUrl}/${resource}/${id}`, {
+      headers: buildHeaders(meta?.headers),
+    });
     return {
       data: response.data,
     };
@@ -139,7 +159,9 @@ export const dataProvider = (
 
     // TODO: send request to the API
     // const response = await httpClient.post(url, {});
-    const response = await _httpClient.delete(`${apiUrl}/${resource}/${id}`, { headers: buildHeaders(meta?.headers) });
+    const response = await _httpClient.delete(`${apiUrl}/${resource}/${id}`, {
+      headers: buildHeaders(meta?.headers),
+    });
     console.log(response);
     return {
       data: {} as any,
