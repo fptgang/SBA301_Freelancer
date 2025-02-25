@@ -40,8 +40,17 @@ public class Transaction {
     @Column(nullable = false)
     private TransactionStatus status;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private PaymentMethod paymentMethod;
+
     @CreationTimestamp
     private LocalDateTime createdAt;
+
+    public enum PaymentMethod{
+        VNPAY,
+        MANUAL
+    }
 
     public enum TransactionType {
         DEPOSIT,

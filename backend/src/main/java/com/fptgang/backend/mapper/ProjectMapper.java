@@ -39,6 +39,8 @@ public class ProjectMapper extends BaseMapper<ProjectDto, Project> {
     private MilestoneMapper milestoneMapper;
     @Autowired
     private MessageMapper messageMapper;
+    @Autowired
+    private FileMapper fileMapper;
 
     public ProjectDto toDTO(Project project) {
         if (project == null) {
@@ -68,6 +70,7 @@ public class ProjectMapper extends BaseMapper<ProjectDto, Project> {
         dto.setEstimateBudget(project.getMilestones().stream().map(milestone -> milestone.getBudget()).reduce(BigDecimal.ZERO, BigDecimal::add));
         dto.setProposalCount(project.getProposals().size());
         dto.setMilestones(project.getMilestones().stream().map(milestoneMapper::toDTO).collect(Collectors.toList()));
+        dto.setFiles(project.getFiles().stream().map(fileMapper::toDTO).collect(Collectors.toList()));
         if(SecurityUtil.getCurrentUserId()==project.getClient().getAccountId()
                 ||(project.getActiveProposal()!=null&&SecurityUtil.getCurrentUserId()==project.getActiveProposal().getFreelancer().getAccountId())
                 ||(project.getStaff()!=null&&project.getStaff().getAccountId()==SecurityUtil.getCurrentUserId())){
@@ -102,6 +105,8 @@ public class ProjectMapper extends BaseMapper<ProjectDto, Project> {
                     existEntity.getRequiredSkills());
             existEntity.setMilestones(dto.getMilestones() != null ? dto.getMilestones().stream().map(milestoneMapper::toEntity)
                     .collect(Collectors.toList()) : existEntity.getMilestones());
+            existEntity.setFiles(dto.getFiles() != null ? dto.getFiles().stream().map(fileMapper::toEntity)
+                    .collect(Collectors.toList()) : existEntity.getFiles());
             return existEntity;
 
         } else {
@@ -147,6 +152,12 @@ public class ProjectMapper extends BaseMapper<ProjectDto, Project> {
 
             if (dto.getIsVisible() != null) {
                 project.setVisible(dto.getIsVisible());
+            }
+
+            if (dto.getFiles() != null) {
+                project.setFiles(dto.getFiles().stream()
+                        .map(fileMapper::toEntity)
+                        .collect(Collectors.toList()));
             }
 
             return project;

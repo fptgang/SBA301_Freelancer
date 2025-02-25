@@ -10,6 +10,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.annotation.Nullable;
 import java.util.Objects;
@@ -150,5 +152,14 @@ public class SecurityUtil {
         } catch (NumberFormatException e) {
             throw new AccessDeniedException("JWT containing invalid id");
         }
+    }
+
+    @NotNull
+    public static String getRemoteAddress() {
+        ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+        if (attributes != null) {
+            return attributes.getRequest().getRemoteAddr();
+        }
+        throw new IllegalStateException("Request attributes are not available");
     }
 }

@@ -1,0 +1,22 @@
+ContractDto:
+  type: object
+  properties:
+    contractId:
+      type: integer
+      format: int64
+    proposalId:
+      type: integer
+      format: int64
+    projectId:
+      type: integer
+      format: int64
+    file:
+      $ref: 'file.yml#/FileDto'
+    createdAt:
+      type: string
+      format: date-time
+    updatedAt:
+      type: string
+      format: date-time
+    isVisible:
+      type: boolean

@@ -18,6 +18,8 @@ public class MilestoneMapper extends BaseMapper<MilestoneDto, Milestone> {
 
     @Autowired
     private ProjectRepos projectRepos;
+    @Autowired
+    private FileMapper fileMapper;
 
     @Override
     public MilestoneDto toDTO(Milestone entity) {
@@ -36,6 +38,7 @@ public class MilestoneMapper extends BaseMapper<MilestoneDto, Milestone> {
         milestoneDto.setUpdatedAt(DateTimeUtil.fromLocalToOffset(entity.getUpdatedAt()));
         milestoneDto.setIsVisible(entity.isVisible());
         milestoneDto.setDescription(entity.getDescription());
+        milestoneDto.setDeliverables(entity.getDeliverables().stream().map(fileMapper::toDTO).toList());
         return milestoneDto;
     }
 
@@ -55,6 +58,7 @@ public class MilestoneMapper extends BaseMapper<MilestoneDto, Milestone> {
             existEntity.setStatus(dto.getStatus() != null ? mapStatusEntity(dto.getStatus()) : existEntity.getStatus());
             existEntity.setVisible(dto.getIsVisible() != null ? dto.getIsVisible() : existEntity.isVisible());
             existEntity.setDescription(dto.getDescription() != null ? dto.getDescription() : existEntity.getDescription());
+            existEntity.setDeliverables(dto.getDeliverables() != null ? fileMapper.toEntities(dto.getDeliverables()) : existEntity.getDeliverables());
             // NOTE: Cannot change linked proposal
             //existEntity.setProposal(dto.getProposalId() != null ? proposalRepos.findByProposalId(dto.getProposalId())
             //        .orElseThrow(() -> new IllegalArgumentException("Proposal not found")) : existEntity.getProposal()); // Add JobId
@@ -85,6 +89,9 @@ public class MilestoneMapper extends BaseMapper<MilestoneDto, Milestone> {
             }
             if (dto.getDescription() != null) {
                 milestone.setDescription(dto.getDescription());
+            }
+            if (dto.getDeliverables() != null) {
+                milestone.setDeliverables(fileMapper.toEntities(dto.getDeliverables()));
             }
 
             return milestone;

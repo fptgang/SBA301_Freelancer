@@ -66,6 +66,8 @@ paths:
     $ref: 'path/project.yml'
   /projects/{projectId}:
     $ref: 'path/project-projectId.yml'
+  /projects/{projectId}/{proposalId}:
+    $ref: 'path/project-projectId-proposalId.yml'
   /projectCategories:
     $ref: 'path/projectCategory.yml'
   /projectCategories/{projectCategoryId}:
@@ -102,5 +104,9 @@ paths:
     $ref: 'path/entityFile-entityType-entityId.yml'
   /entityFiles/{entityType}/{entityId}/batch:
     $ref: 'path/entityFile-batch.yml'
+  /contracts:
+    $ref: 'path/contract.yml'
+  /contracts/{contractId}:
+    $ref: 'path/contract-contractId.yml'
 
 

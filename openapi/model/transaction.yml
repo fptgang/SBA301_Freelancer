@@ -19,6 +19,9 @@ TransactionDto:
     status:
       type: string
       enum: [SUCCESS, FAILED]
+    paymentMethod:
+      type: string
+      enum: [ VNPAY, MANUAL ]
     createdAt:
       type: string
       format: date-time

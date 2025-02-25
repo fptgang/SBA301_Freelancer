@@ -5,6 +5,7 @@ import com.fptgang.backend.api.model.*;
 import com.fptgang.backend.mapper.TransactionMapper;
 import com.fptgang.backend.service.TransactionService;
 import com.fptgang.backend.util.OpenApiHelper;
+import com.fptgang.backend.util.SecurityUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,12 +26,12 @@ public class TransactionController implements TransactionsApi {
     }
 
     @Override
-    public ResponseEntity<TransactionDto> createTransaction(TransactionDto transactionDto) {
+    public ResponseEntity<String> createTransaction(TransactionDto transactionDto) {
         log.info("Creating transaction");
 
-        ResponseEntity<TransactionDto> response = new ResponseEntity<>(transactionMapper
-                .toDTO(transactionService.create(transactionMapper.toEntity(transactionDto))), HttpStatus.OK);
-        ;
+        ResponseEntity<String> response = new ResponseEntity<>(transactionService
+                .create(transactionMapper.toEntity(transactionDto), SecurityUtil.getRemoteAddress()),
+                HttpStatus.OK);
         return response;
 
     }

@@ -23,6 +23,8 @@ public class ProposalMapper extends BaseMapper<ProposalDto, Proposal> {
 
     @Autowired
     private AccountRepos accountRepos;
+    @Autowired
+    private FileMapper fileMapper;
 
     @Override
     public ProposalDto toDTO(Proposal entity) {
@@ -39,6 +41,7 @@ public class ProposalMapper extends BaseMapper<ProposalDto, Proposal> {
         proposalDto.setUpdatedAt(DateTimeUtil.fromLocalToOffset(entity.getUpdatedAt()));
         proposalDto.setIsVisible(entity.isVisible());
         proposalDto.setNotes(entity.getNotes());
+        proposalDto.setFiles(entity.getFiles().stream().map(fileMapper::toDTO).toList());
 
         return proposalDto;
     }
@@ -58,7 +61,6 @@ public class ProposalMapper extends BaseMapper<ProposalDto, Proposal> {
             //existEntity.setFreelancer(dto.getFreelancerId() != null ? account : existEntity.getFreelancer());
             existEntity.setStatus(dto.getStatus() != null ? mapRoleEntity(dto.getStatus()) : existEntity.getStatus());
             existEntity.setVisible(dto.getIsVisible() != null ? dto.getIsVisible() : existEntity.isVisible());
-
             return existEntity;
         }
 
@@ -86,6 +88,10 @@ public class ProposalMapper extends BaseMapper<ProposalDto, Proposal> {
 
             if (dto.getNotes() != null) {
                 proposal.setNotes(dto.getNotes());
+            }
+
+            if (dto.getFiles() != null) {
+                proposal.setFiles(fileMapper.toEntities(dto.getFiles()));
             }
 
             return proposal;
