@@ -20,6 +20,18 @@ function generateSortField({ field, order }: Sort) {
   return `${field},${order}`;
 }
 
+export const generateMetaQuery = (meta: any[]) => {
+  if (!meta || meta.length === 0) {
+    return "";
+  }
+  const metaQuery = meta.map((m) => generateMetaField(m)).join("&");
+  return `${metaQuery}`;
+};
+
+function generateMetaField({ field, value }: any) {
+  return `${field}=${encodeURIComponent(value)}`;
+}
+
 export const generateFilterQuery = (filters: LogicalFilter[]): string => {
   if (!filters || filters.length === 0) {
     return "";

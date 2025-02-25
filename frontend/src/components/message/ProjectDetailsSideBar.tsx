@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Layout, Tabs, List, Typography, Space } from "antd";
+import { Layout, Tabs, List, Typography, Space, Grid } from "antd";
 import { ProjectDto } from "../../../generated";
 
 interface ProjectDetailsSidebarProps {
@@ -9,13 +9,14 @@ interface ProjectDetailsSidebarProps {
 export const ProjectDetailsSidebar: React.FC<ProjectDetailsSidebarProps> = ({
   project,
 }) => {
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(true);
+  const screens = Grid.useBreakpoint();
 
   return (
     <Layout.Sider
       width={400}
       theme="light"
-      collapsible
+      collapsible={screens.xs ? false : true}
       collapsed={collapsed}
       onCollapse={(value) => setCollapsed(value)}
       reverseArrow

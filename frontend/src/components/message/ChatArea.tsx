@@ -16,6 +16,7 @@ import { MessageDto, AccountDto, ProjectDto } from "../../../generated";
 import { MessageItem } from "./MessageItem";
 import { useEffect, useState } from "react";
 import { formatDistanceToNow, set } from "date-fns";
+import { time } from "console";
 
 interface ChatAreaProps {
   selectedProject?: ProjectDto;
@@ -34,12 +35,15 @@ export const ChatArea: React.FC<ChatAreaProps> = ({
 }) => {
   const [content, setContent] = useState("");
   const publish = usePublish();
-  const [size, setSize] = useState(10);
+  const [size, setSize] = useState(20);
+  const [loading, setLoading] = useState(false);
 
   const {
     data: messages,
     isLoading,
     isError,
+    isSuccess,
+    refetch,
   } = useList<MessageDto>({
     resource: "messages",
     filters: [
@@ -79,7 +83,7 @@ export const ChatArea: React.FC<ChatAreaProps> = ({
   };
 
   useEffect(() => {
-    setSize(10);
+    setSize(20);
     setNewMessages([]);
     const chatArea = document.querySelector(".ant-list") as HTMLElement;
     chatArea?.scrollTo({ top: chatArea.scrollHeight });
@@ -87,24 +91,36 @@ export const ChatArea: React.FC<ChatAreaProps> = ({
 
   useEffect(() => {
     const chatArea = document.querySelector(".ant-list") as HTMLElement;
-    chatArea?.addEventListener("scroll", () => {
-      if (
-        chatArea.scrollTop ===
-        chatArea.clientHeight - chatArea.scrollHeight
-      ) {
-        if (messages?.data?.length === size) setSize(size + 10);
+    const handleScroll = () => {
+      if (chatArea.scrollTop == chatArea.clientHeight - chatArea.scrollHeight) {
+        console.log(messages, size, loading);
+        if (messages?.data?.length === size && !loading) {
+          const oldScrollTop = chatArea.scrollTop;
+          setSize(size + 10);
+          setLoading(true);
+          setTimeout(() => {
+            chatArea?.scrollTo({ top: oldScrollTop });
+            setLoading(false);
+          }, 1000);
+        }
       }
-    });
+    };
+
+    chatArea?.addEventListener("scroll", handleScroll);
 
     return () => {
-      chatArea?.removeEventListener("scroll", () => {});
+      chatArea?.removeEventListener("scroll", handleScroll);
     };
-  }, [messages]);
+  }, [size, loading]);
 
   useEffect(() => {
-    console.log(newMessages);
+    // console.log(newMessages);
+    // if (newMessage?.projectId === selectedProject?.projectId && newMessage) {
+    //   setNewMessages((prev) => [...prev, newMessage]);
+    // }
     if (newMessage?.projectId === selectedProject?.projectId && newMessage) {
-      setNewMessages((prev) => [...prev, newMessage]);
+      setSize(size + 1);
+      refetch();
     }
   }, [newMessage]);
 
@@ -147,18 +163,17 @@ export const ChatArea: React.FC<ChatAreaProps> = ({
               minHeight: "calc(100vh - 13rem)",
             }}
             dataSource={
-              (newMessages &&
-                (messages?.data.find(
-                  (m) => m.messageId != newMessage?.messageId
-                )
-                  ? messages?.data?.push(...newMessages)
-                  : true) &&
-                messages?.data?.sort(
-                  (a, b) =>
-                    new Date(a.createdAt || 0).getTime() -
-                    new Date(b.createdAt || 0).getTime()
-                )) ||
-              []
+              // newMessages &&
+              // (messages?.data.find(
+              //   (m) => m.messageId != newMessage?.messageId
+              // )
+              //   ? messages?.data?.push(...newMessages)
+              //   : true) &&
+              messages?.data?.sort(
+                (a, b) =>
+                  new Date(a.createdAt || 0).getTime() -
+                  new Date(b.createdAt || 0).getTime()
+              ) || []
             }
             renderItem={(msg, i) => (
               <>
@@ -190,6 +205,7 @@ export const ChatArea: React.FC<ChatAreaProps> = ({
                 )}
               </>
             )}
+            loading={loading}
           />
 
           <Space.Compact style={{ width: "100%" }}>

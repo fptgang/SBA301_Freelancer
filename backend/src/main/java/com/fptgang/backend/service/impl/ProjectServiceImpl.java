@@ -48,9 +48,15 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public Page<Project> getAll(Pageable pageable, String filter, String search, boolean includeInvisible) {
+    public Page<Project> getAll(Pageable pageable, String filter, String search, boolean includeInvisible, Long participantId) {
         var spec = OpenApiHelper.<Project>filterToSpec(filter);
         spec = spec.and(OpenApiHelper.searchToSpec(search));
+        if (participantId != null) {
+            spec = spec.and((root, query, criteriaBuilder) -> criteriaBuilder.or(
+                    criteriaBuilder.equal(root.get("client").get("accountId"), participantId),
+                    criteriaBuilder.equal(root.get("activeProposal").get("freelancer").get("accountId"), participantId)
+            ));
+        }
         if (!includeInvisible) {
             spec = spec.and((a, _, cb) -> cb.isTrue(a.get("isVisible")));
         }

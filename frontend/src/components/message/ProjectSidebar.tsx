@@ -1,4 +1,4 @@
-import { Typography, Layout, Menu, MenuProps, Badge } from "antd";
+import { Typography, Layout, Menu, MenuProps, Badge, Grid } from "antd";
 import { MessageOutlined } from "@ant-design/icons";
 import { MessageDto, ProjectDto } from "../../../generated";
 import { useState } from "react";
@@ -10,6 +10,7 @@ interface ProjectSidebarProps {
   selectedProject?: ProjectDto;
   onSelectProject: (project: ProjectDto) => void;
   newMessage?: MessageDto;
+  handleScroll?: any;
 }
 
 export const ProjectSidebar: React.FC<ProjectSidebarProps> = ({
@@ -17,8 +18,10 @@ export const ProjectSidebar: React.FC<ProjectSidebarProps> = ({
   selectedProject,
   onSelectProject,
   newMessage,
+  handleScroll,
 }) => {
-  const [collapsed, setCollapsed] = useState(false);
+  const screens = Grid.useBreakpoint();
+  const [collapsed, setCollapsed] = useState(true);
 
   // Ensure menu items match the correct TypeScript definition
   const menuItems: MenuProps["items"] = projects.map((project) => ({
@@ -39,8 +42,10 @@ export const ProjectSidebar: React.FC<ProjectSidebarProps> = ({
       />
     ),
     style: {
-      background:
-        selectedProject?.projectId === project.projectId ? "#f0f2f5" : "white",
+      filter:
+        selectedProject?.projectId === project.projectId
+          ? "grayscale(30%)"
+          : "none",
       height: 80,
       display: "flex",
     },
@@ -51,14 +56,15 @@ export const ProjectSidebar: React.FC<ProjectSidebarProps> = ({
     <Layout.Sider
       width={300}
       theme="light"
-      collapsible
+      collapsible={screens.xs ? false : true}
       collapsed={collapsed}
       onCollapse={setCollapsed}
       style={{
         overflow: "auto",
         left: 0,
-        maxHeight: "90vh",
+        maxHeight: "93vh",
       }}
+      onScroll={handleScroll}
     >
       <Menu
         mode="inline"
