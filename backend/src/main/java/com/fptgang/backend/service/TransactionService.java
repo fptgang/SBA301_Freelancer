@@ -7,7 +7,7 @@ import org.springframework.data.domain.Pageable;
 import java.math.BigDecimal;
 
 public interface TransactionService {
-    Transaction create(Transaction transaction);
+    String create(Transaction transaction, String vnp_IpAddr);
     Transaction findById(long id);
     Transaction update(Transaction transaction);
     Page<Transaction> getAll(Pageable pageable, String filter, String search);

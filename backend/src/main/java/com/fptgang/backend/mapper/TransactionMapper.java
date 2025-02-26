@@ -35,7 +35,7 @@ public class TransactionMapper extends BaseMapper<TransactionDto, Transaction> {
         dto.setType(mapTransactionType(transaction.getType())); // Convert enum type
         dto.setStatus(mapTransactionStatus(transaction.getStatus())); // Convert enum status
         dto.setCreatedAt(DateTimeUtil.fromLocalToOffset(transaction.getCreatedAt()));
-
+        dto.setPaymentMethod(TransactionDto.PaymentMethodEnum.valueOf(transaction.getPaymentMethod().name()));
         return dto;
     }
 
@@ -75,6 +75,9 @@ public class TransactionMapper extends BaseMapper<TransactionDto, Transaction> {
             }
             if (dto.getStatus() != null) {
                 entity.setStatus(mapTransactionStatusReverse(dto.getStatus())); // Convert enum status back
+            }
+            if (dto.getPaymentMethod() != null) {
+                entity.setPaymentMethod(Transaction.PaymentMethod.valueOf(dto.getPaymentMethod().name()));
             }
             return  entity;
         }

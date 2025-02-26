@@ -22,6 +22,10 @@ ProjectDto:
       type: array
       items:
         $ref: 'milestone.yml#/MilestoneDto'
+    files:
+      type: array
+      items:
+        $ref: 'file.yml#/FileDto'
     title:
       type: string
     description:

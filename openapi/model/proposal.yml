@@ -23,3 +23,7 @@ ProposalDto:
     updatedAt:
       type: string
       format: date-time
+    files:
+      type: array
+      items:
+        $ref: 'file.yml#/FileDto'

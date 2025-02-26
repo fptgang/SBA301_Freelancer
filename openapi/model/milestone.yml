@@ -22,6 +22,10 @@ MilestoneDto:
       enum: [PENDING, TERMINATED, IN_PROGRESS, FINISHED]
     isVisible:
       type: boolean
+    deliverables:
+      type: array
+      items:
+        $ref: 'file.yml#/FileDto'
     createdAt:
       type: string
       format: date-time

@@ -1,6 +1,6 @@
 get:
-  summary: Get a list of transactions
-  operationId: getTransactions
+  summary: Get a list of contracts
+  operationId: getContracts
   security:
     - bearerAuth: []
   parameters:
@@ -20,7 +20,7 @@ get:
                   content:
                     type: array
                     items:
-                      $ref: '../model/transaction.yml#/TransactionDto'
+                      $ref: '../model/contract.yml#/ContractDto'
     '400':
       description: The operation failed
       content:
@@ -29,24 +29,24 @@ get:
             $ref: '../component/error.yml#/ErrorResponse'
 
 post:
-  summary: Create a transaction
-  operationId: createTransaction
+  summary: Create a contract
+  operationId: createContract
   security:
     - bearerAuth: []
   requestBody:
-    description: Transaction to create
+    description: Contract to create
     required: true
     content:
       application/json:
         schema:
-          $ref: '../model/transaction.yml#/TransactionDto'
+          $ref: '../model/contract.yml#/ContractDto'
   responses:
     '200':
       description: The operation was successful
       content:
         application/json:
           schema:
-            type: string
+            $ref: '../model/contract.yml#/ContractDto'
     '400':
       description: The operation failed
       content:

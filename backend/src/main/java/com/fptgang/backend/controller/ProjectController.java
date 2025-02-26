@@ -63,4 +63,20 @@ public class ProjectController implements ProjectsApi {
         return ResponseEntity.ok(projectMapper.toDTO(projectService.update(projectMapper.toEntity(projectDto))));
 
     }
+
+    @Override
+    public ResponseEntity<Void> acceptProjectProposal(Long projectId, Long proposalId) {
+        if(SecurityUtil.getCurrentUserId()!=projectService.findByProjectId(projectId).getClient().getAccountId())
+            throw new RuntimeException("You are not the client of this project");
+        projectService.acceptProjectProposal(projectId, proposalId);
+        return ResponseEntity.ok().build();
+    }
+
+    @Override
+    public ResponseEntity<Void> rejectProjectProposal(Long projectId, Long proposalId) {
+        if(SecurityUtil.getCurrentUserId()!=projectService.findByProjectId(projectId).getClient().getAccountId())
+            throw new RuntimeException("You are not the client of this project");
+        projectService.rejectProjectProposal(projectId, proposalId);
+        return ResponseEntity.ok().build();
+    }
 }
