@@ -11,38 +11,46 @@ import {
   Spin,
   Result,
 } from "antd";
-import { PaperClipOutlined, SendOutlined } from "@ant-design/icons";
-import { MessageDto, AccountDto, ProjectDto } from "../../../generated";
+import {
+  PaperClipOutlined,
+  SendOutlined,
+  SmileOutlined,
+} from "@ant-design/icons";
+import {
+  MessageDto,
+  AccountDto,
+  ProjectDto,
+  FileDto,
+} from "../../../generated";
 import { MessageItem } from "./MessageItem";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { formatDistanceToNow, set } from "date-fns";
-import { time } from "console";
+import EmojiPicker from "emoji-picker-react";
 
 interface ChatAreaProps {
   selectedProject?: ProjectDto;
   user?: AccountDto;
-  files: File[];
-  setFiles: (files: File[]) => void;
   newMessage?: MessageDto;
 }
 
 export const ChatArea: React.FC<ChatAreaProps> = ({
   selectedProject,
   user,
-  files,
-  setFiles,
   newMessage,
 }) => {
   const [content, setContent] = useState("");
   const publish = usePublish();
   const [size, setSize] = useState(20);
   const [loading, setLoading] = useState(false);
+  const [showEmoji, setShowEmoji] = useState(false);
+  const [files, setFiles] = useState<FileDto[]>([]);
+  const [inputFiles, setInputFiles] = useState<FileList | null>(null);
 
   const {
     data: messages,
     isLoading,
     isError,
-    isSuccess,
+    isFetching,
     refetch,
   } = useList<MessageDto>({
     resource: "messages",
@@ -58,9 +66,9 @@ export const ChatArea: React.FC<ChatAreaProps> = ({
     sorters: [{ field: "createdAt", order: "desc" }],
   });
 
-  const [newMessages, setNewMessages] = useState<MessageDto[]>([]);
+  const chatArea = useRef<HTMLDivElement>(null);
 
-  const handleSendMessage = () => {
+  const handleSendMessage = async () => {
     if (!content.trim() && files.length === 0) return;
 
     const data: MessageDto = {
@@ -84,34 +92,34 @@ export const ChatArea: React.FC<ChatAreaProps> = ({
 
   useEffect(() => {
     setSize(20);
-    setNewMessages([]);
-    const chatArea = document.querySelector(".ant-list") as HTMLElement;
-    chatArea?.scrollTo({ top: chatArea.scrollHeight });
+    chatArea?.current?.scrollTo({ top: chatArea?.current?.scrollHeight });
   }, [selectedProject]);
 
   useEffect(() => {
-    const chatArea = document.querySelector(".ant-list") as HTMLElement;
     const handleScroll = () => {
-      if (chatArea.scrollTop == chatArea.clientHeight - chatArea.scrollHeight) {
-        console.log(messages, size, loading);
+      const current = chatArea?.current;
+      if (
+        current &&
+        current.scrollTop === current.clientHeight - current.scrollHeight
+      ) {
         if (messages?.data?.length === size && !loading) {
-          const oldScrollTop = chatArea.scrollTop;
+          const oldScrollTop = chatArea?.current?.scrollTop;
           setSize(size + 10);
           setLoading(true);
           setTimeout(() => {
-            chatArea?.scrollTo({ top: oldScrollTop });
+            chatArea?.current?.scrollTo({ top: oldScrollTop });
             setLoading(false);
           }, 1000);
         }
       }
     };
 
-    chatArea?.addEventListener("scroll", handleScroll);
+    chatArea?.current?.addEventListener("scroll", handleScroll);
 
     return () => {
-      chatArea?.removeEventListener("scroll", handleScroll);
+      chatArea?.current?.removeEventListener("scroll", handleScroll);
     };
-  }, [size, loading]);
+  }, [size, loading, selectedProject, messages]);
 
   useEffect(() => {
     // console.log(newMessages);
@@ -153,6 +161,7 @@ export const ChatArea: React.FC<ChatAreaProps> = ({
           </Typography.Title>
 
           <List
+            ref={chatArea}
             style={{
               display: "flex",
               flexDirection: "column-reverse",
@@ -208,7 +217,44 @@ export const ChatArea: React.FC<ChatAreaProps> = ({
             loading={loading}
           />
 
-          <Space.Compact style={{ width: "100%" }}>
+          <Space.Compact style={{ width: "100%", position: "relative" }}>
+            {showEmoji && (
+              <EmojiPicker
+                onEmojiClick={(e) => {
+                  console.log(e);
+                  setContent(content + e.emoji);
+                }}
+                style={{
+                  position: "absolute",
+                  bottom: 50,
+                  left: 0,
+                }}
+              />
+            )}
+            {/* <Button
+              icon={<PaperClipOutlined />}
+              onClick={() => {
+                const input = document.createElement("input");
+                input.type = "file";
+                input.multiple = true;
+                input.accept = "image/*";
+                input.onchange = (e) => {
+                  console.log(e);
+                  const fileList = (e.target as HTMLInputElement).files;
+                  console.log(fileList);
+                  if (fileList) {
+                    setInputFiles(fileList);
+                  }
+                };
+                input.click();
+              }}
+            /> */}
+            <Button
+              icon={<SmileOutlined />}
+              onClick={() => {
+                setShowEmoji((prev) => !prev);
+              }}
+            />
             <Input
               placeholder="Type a message"
               value={content}

@@ -10,6 +10,7 @@ import com.fptgang.backend.util.OpenApiHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -87,6 +88,14 @@ public class ProjectServiceImpl implements ProjectService {
             spec = spec.and((a, _, cb) -> cb.isTrue(a.get("isVisible")));
         }
         return projectRepos.findAll(spec, pageable);
+    }
+
+    @Override
+    public Page<Project> getProjectsSortedByLatestMessage(Pageable pageable, Boolean includeInvisible, Long participantId) {
+        if(participantId == null) {
+            throw new InvalidInputException("You are not logged in");
+        }
+        return projectRepos.findAllSortedByLatestMessage(pageable,includeInvisible,participantId);
     }
 
     @Override

@@ -40,7 +40,8 @@ const SearchPage = () => {
   useEffect(() => {
     setTypedSearch(searchParam.get("keyword") || "");
     setSearchText(searchParam.get("keyword") || "");
-  }, [searchParam.get("keyword")]); // Update search text when URL search param changes
+    setActiveTab(searchParam.get("type") === "work" ? "projects" : "talents");
+  }, [searchParam]); // Update search text when URL search param changes
 
   useEffect(() => {
     setCurrent(1);
@@ -175,97 +176,97 @@ const SearchPage = () => {
   };
 
   return (
-    <Layout className="p-20">
-      <Content className="p-6">
-        <Input
-          size="large"
-          placeholder={`Search ${
-            activeTab === "projects" ? "projects" : "talents"
-          }...`}
-          prefix={<SearchOutlined />}
-          onPressEnter={(e) =>
-            setSearchText((e.target as HTMLInputElement).value)
-          }
-          value={typedSearch}
-          onChange={(e) => setTypedSearch(e.target.value)}
-          className="mb-4"
-        />
+    <Layout.Content className="p-20">
+      {/* <Content className="p-6"> */}
+      <Input
+        size="large"
+        placeholder={`Search ${
+          activeTab === "projects" ? "projects" : "talents"
+        }...`}
+        prefix={<SearchOutlined />}
+        onPressEnter={(e) =>
+          setSearchText((e.target as HTMLInputElement).value)
+        }
+        value={typedSearch}
+        onChange={(e) => setTypedSearch(e.target.value)}
+        className="mb-4"
+      />
 
-        <Tabs activeKey={activeTab} onChange={setActiveTab} className="mb-4">
-          <Tabs.TabPane
-            tab={
-              <span>
-                <UserOutlined /> Talents
-              </span>
-            }
-            key="talents"
+      <Tabs activeKey={activeTab} onChange={setActiveTab} className="mb-4">
+        <Tabs.TabPane
+          tab={
+            <span>
+              <UserOutlined /> Talents
+            </span>
+          }
+          key="talents"
+        />
+        <Tabs.TabPane
+          tab={
+            <span>
+              <ProjectOutlined /> Projects
+            </span>
+          }
+          key="projects"
+        />
+      </Tabs>
+      <Row gutter={16} className="mb-4">
+        <Col span={6}>
+          <RenderFilter
+            activeTab={activeTab}
+            selectedSkills={selectedSkills}
+            setSelectedSkills={setSelectedSkills}
+            selectedLevel={selectedLevel}
+            setSelectedLevel={setSelectedLevel}
+            selectedCategories={selectedCategories}
+            setSelectedCategories={setSelectedCategories}
+            skillsData={skillsData}
+            isSkillsLoading={isSkillsLoading}
+            categoriesData={categoriesData}
+            isCategoriesLoading={isCategoriesLoading}
+            levelOptions={levelOptions}
           />
-          <Tabs.TabPane
-            tab={
-              <span>
-                <ProjectOutlined /> Projects
-              </span>
-            }
-            key="projects"
-          />
-        </Tabs>
-        <Row gutter={16} className="mb-4">
-          <Col span={6}>
-            <RenderFilter
-              activeTab={activeTab}
-              selectedSkills={selectedSkills}
-              setSelectedSkills={setSelectedSkills}
-              selectedLevel={selectedLevel}
-              setSelectedLevel={setSelectedLevel}
-              selectedCategories={selectedCategories}
-              setSelectedCategories={setSelectedCategories}
-              skillsData={skillsData}
-              isSkillsLoading={isSkillsLoading}
-              categoriesData={categoriesData}
-              isCategoriesLoading={isCategoriesLoading}
-              levelOptions={levelOptions}
+        </Col>
+        <Col span={18}>
+          {activeTab === "talents" ? (
+            <List
+              dataSource={filteredItem?.data}
+              renderItem={(item) => <ProfileCard profile={item} />}
+              pagination={{
+                current: current,
+                pageSize: pageSize,
+                total: filteredItem?.total,
+                onChange: handlePageChange,
+                showSizeChanger: true,
+                showQuickJumper: true,
+                showTotal: (total) => `Total ${total} items`,
+                position: "bottom",
+                responsive: true,
+                pageSizeOptions: ["10", "20", "50"],
+              }}
             />
-          </Col>
-          <Col span={18}>
-            {activeTab === "talents" ? (
-              <List
-                dataSource={filteredItem?.data}
-                renderItem={(item) => <ProfileCard profile={item} />}
-                pagination={{
-                  current: current,
-                  pageSize: pageSize,
-                  total: filteredItem?.total,
-                  onChange: handlePageChange,
-                  showSizeChanger: true,
-                  showQuickJumper: true,
-                  showTotal: (total) => `Total ${total} items`,
-                  position: "bottom",
-                  responsive: true,
-                  pageSizeOptions: ["10", "20", "50"],
-                }}
-              />
-            ) : (
-              <List
-                dataSource={filteredItem?.data}
-                renderItem={(item) => <ProjectCard project={item} />}
-                pagination={{
-                  current: current,
-                  pageSize: pageSize,
-                  total: filteredItem?.total,
-                  onChange: handlePageChange,
-                  showSizeChanger: true,
-                  showQuickJumper: true,
-                  showTotal: (total) => `Total ${total} items`,
-                  position: "bottom",
-                  responsive: true,
-                  pageSizeOptions: ["10", "20", "50"],
-                }}
-              />
-            )}
-          </Col>
-        </Row>
-      </Content>
-    </Layout>
+          ) : (
+            <List
+              dataSource={filteredItem?.data}
+              renderItem={(item) => <ProjectCard project={item} />}
+              pagination={{
+                current: current,
+                pageSize: pageSize,
+                total: filteredItem?.total,
+                onChange: handlePageChange,
+                showSizeChanger: true,
+                showQuickJumper: true,
+                showTotal: (total) => `Total ${total} items`,
+                position: "bottom",
+                responsive: true,
+                pageSizeOptions: ["10", "20", "50"],
+              }}
+            />
+          )}
+        </Col>
+      </Row>
+      {/* </Content> */}
+    </Layout.Content>
   );
 };
 

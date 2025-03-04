@@ -12,6 +12,7 @@ public interface ProjectService {
     void deleteById(long projectId);
     void acceptProjectProposal(long projectId, long proposalId);
     void rejectProjectProposal(long projectId, long proposalId);
+    Page<Project> getProjectsSortedByLatestMessage(Pageable pageable,Boolean includeInvisible,Long participantId);
     Page<Project> getAll(Pageable pageable, String filter, String search, boolean includeInvisible, Long participantId);
     default Page<Project> getAll(Pageable pageable, String filter, String search, boolean includeInvisible) {
         return getAll(pageable, filter, search, false, null);
