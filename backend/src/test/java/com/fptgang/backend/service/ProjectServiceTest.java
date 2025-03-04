@@ -5,6 +5,7 @@ import com.fptgang.backend.model.Project;
 import com.fptgang.backend.model.ProjectCategory;
 import com.fptgang.backend.repository.ProjectCategoryRepos;
 import com.fptgang.backend.repository.ProjectRepos;
+import com.fptgang.backend.service.params.ListParams;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -153,9 +154,11 @@ class ProjectServiceTest {
         }
 
         Pageable pageable = PageRequest.of(0, 10);
-
+        var params = ListParams.builder()
+                .pageable(pageable)
+                .build();
         // Act
-        Page<Project> projectPage = projectService.getAll(pageable, null);
+        Page<Project> projectPage = projectService.getAll(params);
 
         // Assert
         assertNotNull(projectPage);
@@ -177,9 +180,12 @@ class ProjectServiceTest {
         projectService.create(specificProject);
 
         Pageable pageable = PageRequest.of(0, 10);
-
+        var params = ListParams.builder()
+                .pageable(pageable)
+                .filter("title,contains,Specific")
+                .build();
         // Act
-        Page<Project> projectPage = projectService.getAll(pageable, "Specific");
+        Page<Project> projectPage = projectService.getAll(params);
 
         // Assert
         assertNotNull(projectPage);

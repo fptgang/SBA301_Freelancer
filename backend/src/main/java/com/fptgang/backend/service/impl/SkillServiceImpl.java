@@ -4,6 +4,7 @@ import com.fptgang.backend.exception.InvalidInputException;
 import com.fptgang.backend.model.Skill;
 import com.fptgang.backend.repository.SkillRepos;
 import com.fptgang.backend.service.SkillService;
+import com.fptgang.backend.service.params.ListParams;
 import com.fptgang.backend.util.OpenApiHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -47,12 +48,8 @@ public class SkillServiceImpl implements SkillService {
     }
 
     @Override
-    public Page<Skill> getAll(Pageable pageable, String filter, String search, boolean includeInvisible) {
-        var spec = OpenApiHelper.<Skill>filterToSpec(filter);
-        spec = spec.and(OpenApiHelper.searchToSpec(search));
-        if (!includeInvisible) {
-            spec = spec.and((a, _, cb) -> cb.isTrue(a.get("isVisible")));
-        }
-        return skillRepos.findAll(spec, pageable);
+    public Page<Skill> getAll(ListParams params) {
+        var spec = OpenApiHelper.groupBy( params.<Skill>toSpec(), "skillId");
+        return skillRepos.findAll(spec, params.getPageable());
     }
 }

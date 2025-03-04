@@ -1,12 +1,13 @@
 package com.fptgang.backend.controller;
 
 import com.fptgang.backend.api.controller.ContractsApi;
+import com.fptgang.backend.api.model.ContractDto;
 import com.fptgang.backend.api.model.GetContracts200Response;
 import com.fptgang.backend.api.model.Pageable;
-import com.fptgang.backend.api.model.ContractDto;
 import com.fptgang.backend.mapper.ContractMapper;
 import com.fptgang.backend.model.Role;
 import com.fptgang.backend.service.ContractService;
+import com.fptgang.backend.service.params.ListParams;
 import com.fptgang.backend.util.OpenApiHelper;
 import com.fptgang.backend.util.SecurityUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -48,10 +49,15 @@ public class ContractController implements ContractsApi {
 
     @Override
     public ResponseEntity<GetContracts200Response> getContracts(Pageable pageable, String filter, String search) {
-        var page = OpenApiHelper.toPageable(pageable);
+
         var includeInvisible = SecurityUtil.hasPermission(Role.ADMIN);
+        var params = ListParams.builder()
+                .pageable(OpenApiHelper.toPageable(pageable))
+                .search(search)
+                .filter(filter)
+                .includeInvisible(includeInvisible);
         var res = contractService
-                .getAll(page, filter, search, includeInvisible)
+                .getAll(params.build())
                 .map(contractMapper::toDTO);
         return OpenApiHelper.respondPage(res, GetContracts200Response.class);
     }

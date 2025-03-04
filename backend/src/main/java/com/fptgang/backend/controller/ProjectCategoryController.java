@@ -7,6 +7,7 @@ import com.fptgang.backend.api.model.ProjectCategoryDto;
 import com.fptgang.backend.mapper.ProjectCategoryMapper;
 import com.fptgang.backend.model.Role;
 import com.fptgang.backend.service.ProjectCategoryService;
+import com.fptgang.backend.service.params.ListParams;
 import com.fptgang.backend.util.OpenApiHelper;
 import com.fptgang.backend.util.SecurityUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -53,8 +54,13 @@ public class ProjectCategoryController implements ProjectCategoriesApi {
     public ResponseEntity<GetProjectCategories200Response> getProjectCategories(Pageable pageable, String filter, String search) {
         var page = OpenApiHelper.toPageable(pageable);
         var includeInvisible = SecurityUtil.hasPermission(Role.ADMIN);
+        var params = ListParams.builder()
+                .pageable(page)
+                .search(search)
+                .filter(filter)
+                .includeInvisible(includeInvisible);
         var res = projectCategoryService
-                .getAll(page, filter, search, includeInvisible)
+                .getAll(params.build())
                 .map(projectCategoryMapper::toDTO);
         return OpenApiHelper.respondPage(res, GetProjectCategories200Response.class);
     }

@@ -4,6 +4,7 @@ import com.fptgang.backend.model.File;
 import com.fptgang.backend.repository.FileRepos;
 import com.fptgang.backend.service.AzureBlobService;
 import com.fptgang.backend.service.FileService;
+import com.fptgang.backend.service.params.ListParams;
 import com.fptgang.backend.util.OpenApiHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,12 +67,8 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
-    public Page<File> getAll(Pageable pageable, String filter, String search, boolean includeInvisible) {
-        var spec = OpenApiHelper.<File>filterToSpec(filter);
-        spec = spec.and(OpenApiHelper.searchToSpec(search));
-        if (!includeInvisible) {
-            spec = spec.and((a, _, cb) -> cb.isTrue(a.get("isVisible")));
-        }
-        return fileRepos.findAll(spec, pageable);
+    public Page<File> getAll(ListParams params) {
+        var spec = OpenApiHelper.groupBy( params.<File>toSpec(), "fileId");
+        return fileRepos.findAll(spec, params.getPageable());
     }
 }

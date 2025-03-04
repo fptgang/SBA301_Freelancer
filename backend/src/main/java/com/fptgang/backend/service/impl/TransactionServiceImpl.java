@@ -5,6 +5,7 @@ import com.fptgang.backend.model.Account;
 import com.fptgang.backend.model.Transaction;
 import com.fptgang.backend.repository.TransactionRepos;
 import com.fptgang.backend.service.TransactionService;
+import com.fptgang.backend.service.params.ListParams;
 import com.fptgang.backend.util.OpenApiHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -147,10 +148,9 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public Page<Transaction> getAll(Pageable pageable, String filter, String search) {
-        var spec = OpenApiHelper.<Transaction>filterToSpec(filter);
-        spec = spec.and(OpenApiHelper.searchToSpec(search));
-        return transactionRepos.findAll(spec, pageable);
+    public Page<Transaction> getAll(ListParams params) {
+        var spec = OpenApiHelper.groupBy( params.<Transaction>toSpec(), "transactionId");
+        return transactionRepos.findAll(spec, params.getPageable());
     }
 
     @Override

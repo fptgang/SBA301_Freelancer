@@ -5,6 +5,7 @@ import com.fptgang.backend.model.Role;
 import com.fptgang.backend.repository.AccountRepos;
 import com.fptgang.backend.security.PasswordEncoderConfig;
 import com.fptgang.backend.service.AccountService;
+import com.fptgang.backend.service.params.ListParams;
 import com.fptgang.backend.util.OpenApiHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -109,12 +110,8 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public Page<Account> getAll(Pageable pageable, String filter, String search, boolean includeInvisible) {
-        var spec = OpenApiHelper.<Account>filterToSpec(filter);
-        spec = spec.and(OpenApiHelper.searchToSpec(search));
-        if (!includeInvisible) {
-            spec = spec.and((a, _, cb) -> cb.isTrue(a.get("isVisible")));
-        }
-        return accountRepos.findAll(spec, pageable);
+    public Page<Account> getAll(ListParams params) {
+        var spec = OpenApiHelper.groupBy( params.<Account>toSpec(), "accountId");
+        return accountRepos.findAll(spec, params.getPageable());
     }
 }

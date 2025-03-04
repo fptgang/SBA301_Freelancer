@@ -6,6 +6,7 @@ import com.fptgang.backend.config.VnPayConfig;
 import com.fptgang.backend.mapper.TransactionMapper;
 import com.fptgang.backend.model.Transaction;
 import com.fptgang.backend.service.TransactionService;
+import com.fptgang.backend.service.params.ListParams;
 import com.fptgang.backend.util.OpenApiHelper;
 import com.fptgang.backend.util.SecurityUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -54,8 +55,12 @@ public class TransactionController implements TransactionsApi {
     public ResponseEntity<GetTransactions200Response> getTransactions(Pageable pageable, String filter, String search) {
         log.info("Getting transactions");
         var page = OpenApiHelper.toPageable(pageable);
+        var params = ListParams.builder()
+                .pageable(page)
+                .search(search)
+                .filter(filter);
         var res = transactionService
-                .getAll(page, filter, search)
+                .getAll(params.build())
                 .map(transactionMapper::toDTO);
         return OpenApiHelper.respondPage(res, GetTransactions200Response.class);
     }

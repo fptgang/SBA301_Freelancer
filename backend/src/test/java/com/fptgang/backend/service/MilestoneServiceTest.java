@@ -6,6 +6,7 @@ import com.fptgang.backend.repository.AccountRepos;
 import com.fptgang.backend.repository.MilestoneRepos;
 import com.fptgang.backend.repository.ProjectCategoryRepos;
 import com.fptgang.backend.repository.ProjectRepos;
+import com.fptgang.backend.service.params.ListParams;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -189,7 +190,11 @@ class MilestoneServiceTest {
         Milestone milestone2 = createTestMilestone(2);
 
         Pageable pageable = PageRequest.of(0, 10);
-        Page<Milestone> milestonesPage = milestoneService.getAll(pageable, null);
+
+        var params = ListParams.builder()
+                .pageable(pageable)
+                .build();
+        Page<Milestone> milestonesPage = milestoneService.getAll(params);
 
         assertTrue(milestonesPage.getTotalElements() == 2);
     }
@@ -211,7 +216,11 @@ class MilestoneServiceTest {
         milestoneService.create(milestone);
 
         Pageable pageable = PageRequest.of(0, 10);
-        Page<Milestone> milestonesPage = milestoneService.getAll(pageable, "title,startswith,Milestone");
+        var params = ListParams.builder()
+                .pageable(pageable)
+                .filter("title,startswith,Milestone")
+                .build();
+        Page<Milestone> milestonesPage = milestoneService.getAll(params);
         assertTrue(milestonesPage.getTotalElements() == 2);
     }
 }

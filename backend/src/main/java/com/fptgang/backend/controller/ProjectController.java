@@ -7,6 +7,7 @@ import com.fptgang.backend.api.model.ProjectDto;
 import com.fptgang.backend.mapper.ProjectMapper;
 import com.fptgang.backend.model.Role;
 import com.fptgang.backend.service.ProjectService;
+import com.fptgang.backend.service.params.ListParams;
 import com.fptgang.backend.util.OpenApiHelper;
 import com.fptgang.backend.util.SecurityUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -57,8 +58,13 @@ public class ProjectController implements ProjectsApi {
             );
             return OpenApiHelper.respondPage(res, GetProjects200Response.class);
         }
+        var params = ListParams.builder()
+                .pageable(page)
+                .search(search)
+                .filter(filter)
+                .includeInvisible(includeInvisible);
         var res = projectService
-                .getAll(page, filter, search, includeInvisible,participantId)
+                .getAll(params.build())
                 .map(projectMapper::toDTO);
         return OpenApiHelper.respondPage(res, GetProjects200Response.class);
     }

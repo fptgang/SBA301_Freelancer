@@ -19,9 +19,7 @@ import org.springframework.http.ResponseEntity;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 public class OpenApiHelper {
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
@@ -110,49 +108,58 @@ public class OpenApiHelper {
     }
 
     public static <T> Specification<T> filterToSpec(String filter) {
-        if (filter == null)
-            return Specification.anyOf();
+        return filtersToSpec(parseFilters(filter));
+    }
 
-        filter = filter.trim();
+    public static <T> Map<String, String[]> parseFilters(String filter) {
+        if (filter == null || filter.isEmpty()) {
+            return Collections.emptyMap();
+        }
 
-        if (filter.isEmpty())
-            return Specification.anyOf();
+        Map<String, String[]> filterMap = new LinkedHashMap<>();
+
+        String[] filters = new String[]{filter};
 
         if (filter.startsWith("[") && filter.endsWith("]")) {
             try {
-                String[] args = OBJECT_MAPPER.readValue(filter, String[].class);
-                if (args.length == 0) {
-                    return Specification.anyOf();
-                }
-
-                if (args.length == 1) {
-                    return toSpecificationSingle(args[0]);
-                }
-
-                //noinspection unchecked
-                return Specification.allOf(
-                        Arrays.stream(args)
-                                .map(OpenApiHelper::toSpecificationSingle)
-                                .toArray(Specification[]::new)
-                );
-            } catch (JsonProcessingException e) {
+                filters = OBJECT_MAPPER.readValue(filter, String[].class);
+            } catch (JsonProcessingException ignored) {
                 throw new IllegalArgumentException("Invalid multi-filter format");
             }
         }
 
-        return toSpecificationSingle(filter);
+        Map<String, String[]> map = new LinkedHashMap<>();
+
+        for (String str : filters) {
+            String[] filterParts = str.split(",", 3);
+
+            if (filterParts.length != 2 && filterParts.length != 3) {
+                throw new IllegalArgumentException("Invalid filter format. Expected: field,op,value");
+            }
+
+            filterMap.put(filterParts[0], new String[]{filterParts[1], filterParts[2]});
+        }
+
+        return filterMap;
     }
 
-    private static <T> Specification<T> toSpecificationSingle(String filterString) {
-        String[] filterParts = filterString.split(",", 3);
+    public static <T> Specification<T> filtersToSpec(Map<String, String[]> filters) {
+        //noinspection unchecked
+        Specification<T>[] specs = new Specification[filters.size()];
+        int i = 0;
+        for (Map.Entry<String, String[]> entry : filters.entrySet()) {
+            specs[i++] = toSpecificationSingle(entry.getKey(), entry.getValue());
+        }
+        return Specification.allOf(specs);
+    }
 
-        if (filterParts.length != 2 && filterParts.length != 3) {
+    private static <T> Specification<T> toSpecificationSingle(String path, String[] vals) {
+        if (vals.length != 1 && vals.length != 2) {
             throw new IllegalArgumentException("Invalid filter format. Expected: field,op,value");
         }
 
-
         return (root, query, criteriaBuilder) -> {
-            String[] fieldPaths = filterParts[0].split("\\.");
+            String[] fieldPaths = path.split("\\.");
             Path<?> fieldPath = root.get(fieldPaths[0]);
 
             if (fieldPath == null) {
@@ -167,7 +174,7 @@ public class OpenApiHelper {
                 }
             }
 
-            String operator = filterParts[1].toLowerCase();
+            String operator = vals[0].toLowerCase();
 
             // common operators
             if (operator.equals("null")) {
@@ -176,7 +183,7 @@ public class OpenApiHelper {
                 return criteriaBuilder.isNotNull(fieldPath);
             }
 
-            String value = filterParts.length == 3 ? filterParts[2] : "";
+            String value = vals.length == 2 ? vals[1] : "";
             Class<?> javaType = fieldPath.getJavaType();
 
             if (javaType == boolean.class || javaType == Boolean.class) {
@@ -369,6 +376,20 @@ public class OpenApiHelper {
                     criteriaBuilder.notLike(criteriaBuilder.lower(fieldPath), "%" + value.toLowerCase());
             default ->
                     throw new IllegalArgumentException("Unsupported operator: " + operator);
+        };
+    }
+
+    public static <T> Specification<T> groupBy(Specification<T> spec, String... groupByColumns) {
+        return (root, query, criteriaBuilder) -> {
+            // Apply the original specification
+            Predicate predicate = spec.toPredicate(root, query, criteriaBuilder);
+
+            // Add group by clauses
+            for (String column : groupByColumns) {
+                query.groupBy(root.get(column));
+            }
+
+            return predicate;
         };
     }
 }

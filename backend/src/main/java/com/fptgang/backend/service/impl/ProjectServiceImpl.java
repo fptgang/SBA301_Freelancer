@@ -6,6 +6,7 @@ import com.fptgang.backend.model.Proposal;
 import com.fptgang.backend.repository.ProjectRepos;
 import com.fptgang.backend.service.ProjectService;
 import com.fptgang.backend.service.ProposalService;
+import com.fptgang.backend.service.params.ListParams;
 import com.fptgang.backend.util.OpenApiHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -75,19 +76,9 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public Page<Project> getAll(Pageable pageable, String filter, String search, boolean includeInvisible, Long participantId) {
-        var spec = OpenApiHelper.<Project>filterToSpec(filter);
-        spec = spec.and(OpenApiHelper.searchToSpec(search));
-        if (participantId != null) {
-            spec = spec.and((root, query, criteriaBuilder) -> criteriaBuilder.or(
-                    criteriaBuilder.equal(root.get("client").get("accountId"), participantId),
-                    criteriaBuilder.equal(root.get("activeProposal").get("freelancer").get("accountId"), participantId)
-            ));
-        }
-        if (!includeInvisible) {
-            spec = spec.and((a, _, cb) -> cb.isTrue(a.get("isVisible")));
-        }
-        return projectRepos.findAll(spec, pageable);
+    public Page<Project> getAll(ListParams params) {
+        var spec = OpenApiHelper.groupBy( params.<Project>toSpec(), "projectId");
+        return projectRepos.findAll(spec, params.getPageable());
     }
 
     @Override

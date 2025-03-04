@@ -6,6 +6,7 @@ import com.fptgang.backend.api.model.ProposalDto;
 import com.fptgang.backend.mapper.ProposalMapper;
 import com.fptgang.backend.model.Role;
 import com.fptgang.backend.service.ProposalService;
+import com.fptgang.backend.service.params.ListParams;
 import com.fptgang.backend.util.OpenApiHelper;
 import com.fptgang.backend.util.SecurityUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -49,8 +50,13 @@ public class ProposalController implements ProposalsApi {
     public ResponseEntity<GetProposals200Response> getProposals(Pageable pageable, String filter, String search) {
         var page = OpenApiHelper.toPageable(pageable);
         var includeInvisible = SecurityUtil.hasPermission(Role.ADMIN);
+        var params = ListParams.builder()
+                .pageable(page)
+                .search(search)
+                .filter(filter)
+                .includeInvisible(includeInvisible);
         var res = proposalService
-                .getAll(page, filter, search, includeInvisible)
+                .getAll(params.build())
                 .map(proposalMapper::toDTO);
         return OpenApiHelper.respondPage(res, GetProposals200Response.class);
     }

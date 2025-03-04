@@ -3,6 +3,7 @@ package com.fptgang.backend.service.impl;
 import com.fptgang.backend.model.Milestone;
 import com.fptgang.backend.repository.MilestoneRepos;
 import com.fptgang.backend.service.MilestoneService;
+import com.fptgang.backend.service.params.ListParams;
 import com.fptgang.backend.util.OpenApiHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -39,12 +40,8 @@ public class MilestoneServiceImpl implements MilestoneService {
     }
 
     @Override
-    public Page<Milestone> getAll(Pageable pageable, String filter, String search, boolean includeInvisible) {
-        var spec = OpenApiHelper.<Milestone>filterToSpec(filter);
-        spec = spec.and(OpenApiHelper.searchToSpec(search));
-        if (!includeInvisible) {
-            spec = spec.and((a, _, cb) -> cb.isTrue(a.get("isVisible")));
-        }
-        return proposalRepos.findAll(spec, pageable);
+    public Page<Milestone> getAll(ListParams params) {
+        var spec = OpenApiHelper.groupBy( params.<Milestone>toSpec(), "milestoneId");
+        return proposalRepos.findAll(spec, params.getPageable());
     }
 }

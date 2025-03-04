@@ -7,6 +7,7 @@ import com.fptgang.backend.repository.AccountRepos;
 import com.fptgang.backend.repository.ProjectCategoryRepos;
 import com.fptgang.backend.repository.ProjectRepos;
 import com.fptgang.backend.repository.ProposalRepos;
+import com.fptgang.backend.service.params.ListParams;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -181,7 +182,10 @@ class ProposalServiceTest {
         Proposal proposal2 = createTestProposal(3);
 
         Pageable pageable = PageRequest.of(0, 10);
-        Page<Proposal> proposalsPage = proposalService.getAll(pageable, null);
+        var params = ListParams.builder()
+                .pageable(pageable)
+                .build();
+        Page<Proposal> proposalsPage = proposalService.getAll(params);
 
         assertTrue(proposalsPage.getTotalElements() == 2);
     }
@@ -200,7 +204,11 @@ class ProposalServiceTest {
         proposal.setVisible(true);
         proposalService.create(proposal);
         Pageable pageable = PageRequest.of(0, 10);
-        Page<Proposal> proposalsPage = proposalService.getAll(pageable, "status,contains,PENDING");
+        var params = ListParams.builder()
+                .pageable(pageable)
+                .filter("status,contains,PENDING")
+                .build();
+        Page<Proposal> proposalsPage = proposalService.getAll(params);
 
         assertTrue(proposalsPage.getTotalElements() == 2);
     }

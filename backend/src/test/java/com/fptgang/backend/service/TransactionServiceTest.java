@@ -8,6 +8,7 @@ import com.fptgang.backend.model.Transaction.TransactionStatus;
 import com.fptgang.backend.model.Transaction.TransactionType;
 import com.fptgang.backend.repository.AccountRepos;
 import com.fptgang.backend.repository.TransactionRepos;
+import com.fptgang.backend.service.params.ListParams;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -167,8 +168,12 @@ public class TransactionServiceTest {
 
         Pageable pageable = PageRequest.of(0, 10);
 
+        var params = ListParams.builder()
+                .pageable(pageable)
+                .build();
+
         // Act
-        Page<Transaction> transactions = transactionService.getAll(pageable, null);
+        Page<Transaction> transactions = transactionService.getAll(params);
 
         // Assert
         assertNotNull(transactions);

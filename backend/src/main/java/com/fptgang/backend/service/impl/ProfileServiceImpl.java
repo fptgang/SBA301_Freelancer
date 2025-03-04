@@ -4,6 +4,7 @@ import com.fptgang.backend.exception.InvalidInputException;
 import com.fptgang.backend.model.Profile;
 import com.fptgang.backend.repository.ProfileRepos;
 import com.fptgang.backend.service.ProfileService;
+import com.fptgang.backend.service.params.ListParams;
 import com.fptgang.backend.util.OpenApiHelper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -45,13 +46,9 @@ public class ProfileServiceImpl implements ProfileService {
     }
 
     @Override
-    public Page<Profile> getAll(Pageable pageable, String filter, String search, boolean includeInvisible) {
-        var spec = OpenApiHelper.<Profile>filterToSpec(filter);
-        spec = spec.and(OpenApiHelper.searchToSpec(search));
-        if (!includeInvisible) {
-            spec = spec.and((a, _, cb) -> cb.isTrue(a.get("isVisible")));
-        }
-        return profileRepos.findAll(spec, pageable);
+    public Page<Profile> getAll(ListParams params) {
+        var spec = OpenApiHelper.groupBy( params.<Profile>toSpec(), "profileId");
+        return profileRepos.findAll(spec, params.getPageable());
     }
 
 }
