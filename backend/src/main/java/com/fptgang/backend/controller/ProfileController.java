@@ -5,6 +5,7 @@ import com.fptgang.backend.api.model.*;
 import com.fptgang.backend.mapper.ProfileMapper;
 import com.fptgang.backend.model.Role;
 import com.fptgang.backend.service.ProfileService;
+import com.fptgang.backend.service.params.ListParams;
 import com.fptgang.backend.util.OpenApiHelper;
 import com.fptgang.backend.util.SecurityUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -50,8 +51,13 @@ public class ProfileController implements ProfilesApi {
         log.info("Getting profiles");
         var page = OpenApiHelper.toPageable(pageable);
         var includeInvisible = SecurityUtil.hasPermission(Role.ADMIN);
+        var params = ListParams.builder()
+                .pageable(page)
+                .search(search)
+                .filter(filter)
+                .includeInvisible(includeInvisible);
         var res = profileService
-                .getAll(page, filter, search, includeInvisible)
+                .getAll(params.build())
                 .map(profileMapper::toDTO);
         return OpenApiHelper.respondPage(res, GetProfiles200Response.class);
     }

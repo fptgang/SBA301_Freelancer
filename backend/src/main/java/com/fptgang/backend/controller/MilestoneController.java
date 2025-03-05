@@ -5,6 +5,7 @@ import com.fptgang.backend.api.model.*;
 import com.fptgang.backend.mapper.MilestoneMapper;
 import com.fptgang.backend.model.Role;
 import com.fptgang.backend.service.MilestoneService;
+import com.fptgang.backend.service.params.ListParams;
 import com.fptgang.backend.util.OpenApiHelper;
 import com.fptgang.backend.util.SecurityUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -46,10 +47,14 @@ public class MilestoneController implements MilestonesApi {
     @Override
     public ResponseEntity<GetMilestones200Response> getMilestones(Pageable pageable, String filter, String search) {
         log.info("Getting milestone");
-        var page = OpenApiHelper.toPageable(pageable);
         var includeInvisible = SecurityUtil.hasPermission(Role.ADMIN);
+        var params = ListParams.builder()
+                .pageable(OpenApiHelper.toPageable(pageable))
+                .search(search)
+                .filter(filter)
+                .includeInvisible(includeInvisible);
         var res = milestoneService
-                .getAll(page, filter, search, includeInvisible)
+                .getAll(params.build())
                 .map(milestoneMapper::toDTO);
         return OpenApiHelper.respondPage(res, GetMilestones200Response.class);
     }

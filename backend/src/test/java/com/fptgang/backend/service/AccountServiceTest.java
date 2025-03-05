@@ -4,6 +4,7 @@ import com.fptgang.backend.TestcontainersConfiguration;
 import com.fptgang.backend.model.Account;
 import com.fptgang.backend.model.Role;
 import com.fptgang.backend.repository.AccountRepos;
+import com.fptgang.backend.service.params.ListParams;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -164,7 +165,10 @@ class AccountServiceTest {
         Account account2 = createTestAccount(2);
 
         Pageable pageable = PageRequest.of(0, 10);
-        Page<Account> accountsPage = accountService.getAll(pageable,null);
+        var params = ListParams.builder()
+                .pageable(pageable)
+                .build();
+        Page<Account> accountsPage = accountService.getAll(params);
 
         assertTrue(accountsPage.getTotalElements() >= 2);
     }
@@ -191,7 +195,11 @@ class AccountServiceTest {
         accountService.create(account4);
 
         Pageable pageable = PageRequest.of(0, 10);
-        Page<Account> accountsPage = accountService.getAll(pageable, "email,contains,filtered");
+        var params = ListParams.builder()
+                .pageable(pageable)
+                .filter("email,contains,filtered")
+                .build();
+        Page<Account> accountsPage = accountService.getAll(params);
         for(Account account : accountsPage.getContent()){
             log.info(account.getEmail());
         }

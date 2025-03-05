@@ -4,6 +4,7 @@ import com.fptgang.backend.TestcontainersConfiguration;
 import com.fptgang.backend.exception.InvalidInputException;
 import com.fptgang.backend.model.ProjectCategory;
 import com.fptgang.backend.repository.ProjectCategoryRepos;
+import com.fptgang.backend.service.params.ListParams;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -130,9 +131,11 @@ public class ProjectCategoryServiceTest {
         }
 
         Pageable pageable = PageRequest.of(0, 10);
-
+        var params = ListParams.builder()
+                .pageable(pageable)
+                .build();
         // Act
-        Page<ProjectCategory> page = projectCategoryService.getAll(pageable, null);
+        Page<ProjectCategory> page = projectCategoryService.getAll(params);
 
         // Assert
         assertNotNull(page);
@@ -157,8 +160,12 @@ public class ProjectCategoryServiceTest {
 
         Pageable pageable = PageRequest.of(0, 10);
 
+        var params = ListParams.builder()
+                .pageable(pageable)
+                .includeInvisible(true)
+                .build();
         // Act
-        Page<ProjectCategory> page = projectCategoryService.getAll(pageable, null, null, true);
+        Page<ProjectCategory> page = projectCategoryService.getAll(params);
 
         // Assert
         assertNotNull(page);
@@ -183,9 +190,13 @@ public class ProjectCategoryServiceTest {
         projectCategoryService.create(hiddenCategory);
 
         Pageable pageable = PageRequest.of(0, 10);
-
+        var params = ListParams.builder()
+                .pageable(pageable)
+                .filter("name,contains,Category")
+                .includeInvisible(true)
+                .build();
         // Act
-        Page<ProjectCategory> page = projectCategoryService.getAll(pageable, "name,contains,Category", null, true);
+        Page<ProjectCategory> page = projectCategoryService.getAll(params);
 
         // Assert
         assertNotNull(page);

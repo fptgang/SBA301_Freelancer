@@ -3,6 +3,7 @@ package com.fptgang.backend.service.impl;
 import com.fptgang.backend.model.Contract;
 import com.fptgang.backend.repository.ContractRepos;
 import com.fptgang.backend.service.ContractService;
+import com.fptgang.backend.service.params.ListParams;
 import com.fptgang.backend.util.OpenApiHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -46,12 +47,8 @@ public class ContractServiceImpl implements ContractService {
     }
 
     @Override
-    public Page<Contract> getAll(Pageable pageable, String filter, String search, boolean includeInvisible) {
-        var spec = OpenApiHelper.<Contract>filterToSpec(filter);
-        spec = spec.and(OpenApiHelper.searchToSpec(search));
-        if (!includeInvisible) {
-            spec = spec.and((a, _, cb) -> cb.isTrue(a.get("isVisible")));
-        }
-        return contractRepos.findAll(spec, pageable);
+    public Page<Contract> getAll(ListParams params) {
+        var spec = OpenApiHelper.groupBy( params.<Contract>toSpec(), "contractId");
+        return contractRepos.findAll(spec, params.getPageable());
     }
 }

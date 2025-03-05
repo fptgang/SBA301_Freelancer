@@ -1,6 +1,7 @@
 package com.fptgang.backend.service;
 
 import com.fptgang.backend.model.Milestone;
+import com.fptgang.backend.service.params.ListParams;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -9,11 +10,5 @@ public interface MilestoneService {
     Milestone update(Milestone milestone);
     Milestone findById(long id);
     Milestone deleteById(long id);
-    Page<Milestone> getAll(Pageable pageable, String filter, String search, boolean includeInvisible);
-    default Page<Milestone> getAll(Pageable pageable, String filter, String search) {
-        return getAll(pageable, filter, search, false);
-    }
-    default Page<Milestone> getAll(Pageable pageable, String filter) {
-        return getAll(pageable, filter, null, false);
-    }
+    Page<Milestone> getAll(ListParams params);
 }

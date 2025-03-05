@@ -4,6 +4,7 @@ import com.fptgang.backend.exception.InvalidInputException;
 import com.fptgang.backend.model.ProjectCategory;
 import com.fptgang.backend.repository.ProjectCategoryRepos;
 import com.fptgang.backend.service.ProjectCategoryService;
+import com.fptgang.backend.service.params.ListParams;
 import com.fptgang.backend.util.OpenApiHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,12 +53,8 @@ public class ProjectCategoryServiceImpl implements ProjectCategoryService {
     }
 
     @Override
-    public Page<ProjectCategory> getAll(Pageable pageable, String filter, String search, boolean includeInvisible) {
-        var spec = OpenApiHelper.<ProjectCategory>filterToSpec(filter);
-        spec = spec.and(OpenApiHelper.searchToSpec(search));
-        if (!includeInvisible) {
-            spec = spec.and((a, _, cb) -> cb.isTrue(a.get("isVisible")));
-        }
-        return projectCategoryRepos.findAll(spec, pageable);
+    public Page<ProjectCategory> getAll(ListParams params) {
+        var spec = OpenApiHelper.groupBy( params.<ProjectCategory>toSpec(), "projectCategoryId");
+        return projectCategoryRepos.findAll(spec, params.getPageable());
     }
 }

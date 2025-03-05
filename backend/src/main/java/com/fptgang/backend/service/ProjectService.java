@@ -1,6 +1,7 @@
 package com.fptgang.backend.service;
 
 import com.fptgang.backend.model.Project;
+import com.fptgang.backend.service.params.ListParams;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -12,14 +13,6 @@ public interface ProjectService {
     void deleteById(long projectId);
     void acceptProjectProposal(long projectId, long proposalId);
     void rejectProjectProposal(long projectId, long proposalId);
-    Page<Project> getAll(Pageable pageable, String filter, String search, boolean includeInvisible, Long participantId);
-    default Page<Project> getAll(Pageable pageable, String filter, String search, boolean includeInvisible) {
-        return getAll(pageable, filter, search, false, null);
-    }
-    default Page<Project> getAll(Pageable pageable, String filter, String search) {
-        return getAll(pageable, filter, search, false);
-    }
-    default Page<Project> getAll(Pageable pageable, String filter) {
-        return getAll(pageable, filter, null, false);
-    }
+    Page<Project> getProjectsSortedByLatestMessage(Pageable pageable,Boolean includeInvisible,Long participantId);
+    Page<Project> getAll(ListParams params);
 }

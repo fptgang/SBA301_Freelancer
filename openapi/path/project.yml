@@ -7,12 +7,11 @@ get:
     - $ref: '../param/pageable.yml#/Pageable'
     - $ref: '../param/filter.yml#/Filter'
     - $ref: '../param/search.yml#/Search'
-    - name: participantId
+    - name: type
       in: query
       required: false
       schema:
-        type: integer
-        format: int64
+        type: string
   responses:
     '200':
       description: The operation was success

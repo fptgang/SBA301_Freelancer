@@ -5,6 +5,7 @@ import com.fptgang.backend.api.model.*;
 import com.fptgang.backend.mapper.SkillMapper;
 import com.fptgang.backend.model.Role;
 import com.fptgang.backend.service.SkillService;
+import com.fptgang.backend.service.params.ListParams;
 import com.fptgang.backend.util.OpenApiHelper;
 import com.fptgang.backend.util.SecurityUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -47,8 +48,13 @@ public class SkillController implements SkillsApi {
     public ResponseEntity<GetSkills200Response> getSkills(Pageable pageable, String filter, String search) {
         var page = OpenApiHelper.toPageable(pageable);
         var includeInvisible = SecurityUtil.hasPermission(Role.ADMIN);
+        var params = ListParams.builder()
+                .pageable(page)
+                .search(search)
+                .filter(filter)
+                .includeInvisible(includeInvisible);
         var res = skillService
-                .getAll(page, filter, search, includeInvisible)
+                .getAll(params.build())
                 .map(skillMapper::toDTO);
         return OpenApiHelper.respondPage(res, GetSkills200Response.class);
     }

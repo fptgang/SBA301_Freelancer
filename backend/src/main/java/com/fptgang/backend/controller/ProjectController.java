@@ -7,6 +7,7 @@ import com.fptgang.backend.api.model.ProjectDto;
 import com.fptgang.backend.mapper.ProjectMapper;
 import com.fptgang.backend.model.Role;
 import com.fptgang.backend.service.ProjectService;
+import com.fptgang.backend.service.params.ListParams;
 import com.fptgang.backend.util.OpenApiHelper;
 import com.fptgang.backend.util.SecurityUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -46,12 +47,24 @@ public class ProjectController implements ProjectsApi {
     }
 
     @Override
-    public ResponseEntity<GetProjects200Response> getProjects(Pageable pageable, String filter, String search,Long participantId) {
+    public ResponseEntity<GetProjects200Response> getProjects(Pageable pageable, String filter, String search,String type) {
         log.info("Getting projects");
         var page = OpenApiHelper.toPageable(pageable);
         var includeInvisible = SecurityUtil.hasPermission(Role.ADMIN);
+        Long participantId = SecurityUtil.getCurrentUserId();
+        if(type!=null && type.equalsIgnoreCase("chat")){
+            var res = projectService.getProjectsSortedByLatestMessage(page,includeInvisible,participantId).map(
+                    projectMapper::toDTO
+            );
+            return OpenApiHelper.respondPage(res, GetProjects200Response.class);
+        }
+        var params = ListParams.builder()
+                .pageable(page)
+                .search(search)
+                .filter(filter)
+                .includeInvisible(includeInvisible);
         var res = projectService
-                .getAll(page, filter, search, includeInvisible,participantId)
+                .getAll(params.build())
                 .map(projectMapper::toDTO);
         return OpenApiHelper.respondPage(res, GetProjects200Response.class);
     }

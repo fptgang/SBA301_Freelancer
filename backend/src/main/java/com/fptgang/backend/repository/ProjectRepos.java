@@ -1,12 +1,22 @@
 package com.fptgang.backend.repository;
 
 import com.fptgang.backend.model.Project;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 @Repository
 public interface ProjectRepos extends JpaRepository<Project,Long>, JpaSpecificationExecutor<Project> {
     Optional<Project> findByProjectId(Long projectId);
+    @Query("SELECT p FROM Project p LEFT JOIN p.messages m " +
+            "WHERE (p.isVisible=true OR NOT p.isVisible  = :includeInvisible) " +
+            "AND (p.activeProposal.freelancer.accountId" +
+            " = :participantId OR p.client.accountId = :participantId) " +
+            "GROUP BY p.projectId " +
+            "ORDER BY MAX(m.createdAt) DESC")
+    Page<Project> findAllSortedByLatestMessage (Pageable pageable,boolean includeInvisible,Long participantId);
 }

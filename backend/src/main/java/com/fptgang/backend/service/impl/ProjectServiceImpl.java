@@ -6,10 +6,12 @@ import com.fptgang.backend.model.Proposal;
 import com.fptgang.backend.repository.ProjectRepos;
 import com.fptgang.backend.service.ProjectService;
 import com.fptgang.backend.service.ProposalService;
+import com.fptgang.backend.service.params.ListParams;
 import com.fptgang.backend.util.OpenApiHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -74,19 +76,17 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public Page<Project> getAll(Pageable pageable, String filter, String search, boolean includeInvisible, Long participantId) {
-        var spec = OpenApiHelper.<Project>filterToSpec(filter);
-        spec = spec.and(OpenApiHelper.searchToSpec(search));
-        if (participantId != null) {
-            spec = spec.and((root, query, criteriaBuilder) -> criteriaBuilder.or(
-                    criteriaBuilder.equal(root.get("client").get("accountId"), participantId),
-                    criteriaBuilder.equal(root.get("activeProposal").get("freelancer").get("accountId"), participantId)
-            ));
+    public Page<Project> getAll(ListParams params) {
+        var spec = OpenApiHelper.groupBy( params.<Project>toSpec(), "projectId");
+        return projectRepos.findAll(spec, params.getPageable());
+    }
+
+    @Override
+    public Page<Project> getProjectsSortedByLatestMessage(Pageable pageable, Boolean includeInvisible, Long participantId) {
+        if(participantId == null) {
+            throw new InvalidInputException("You are not logged in");
         }
-        if (!includeInvisible) {
-            spec = spec.and((a, _, cb) -> cb.isTrue(a.get("isVisible")));
-        }
-        return projectRepos.findAll(spec, pageable);
+        return projectRepos.findAllSortedByLatestMessage(pageable,includeInvisible,participantId);
     }
 
     @Override

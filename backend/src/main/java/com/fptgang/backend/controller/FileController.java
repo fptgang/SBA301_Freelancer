@@ -9,6 +9,7 @@ import com.fptgang.backend.model.Account;
 import com.fptgang.backend.model.Role;
 import com.fptgang.backend.service.FileService;
 import com.fptgang.backend.service.ProfileService;
+import com.fptgang.backend.service.params.ListParams;
 import com.fptgang.backend.util.OpenApiHelper;
 import com.fptgang.backend.util.SecurityUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -47,9 +48,14 @@ public class FileController implements FilesApi {
 
     @Override
     public ResponseEntity<GetFiles200Response> getFiles(Pageable pageable, String filter, String search) {
-        var page = OpenApiHelper.toPageable(pageable);
         var includeInvisible = SecurityUtil.hasPermission(Role.ADMIN);
-        var res = fileService.getAll(page, filter, search, includeInvisible).map(fileMapper::toDTO);
+        var params = ListParams.builder()
+                .pageable(OpenApiHelper.toPageable(pageable))
+                .search(search)
+                .filter(filter)
+                .includeInvisible(includeInvisible)
+                .build();
+        var res = fileService.getAll(params).map(fileMapper::toDTO);
         return OpenApiHelper.respondPage(res, GetFiles200Response.class);
     }
 }

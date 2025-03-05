@@ -3,8 +3,7 @@ package com.fptgang.backend.service.impl;
 import com.fptgang.backend.exception.InvalidInputException;
 import com.fptgang.backend.model.*;
 import com.fptgang.backend.repository.*;
-import com.fptgang.backend.service.AzureBlobService;
-import com.fptgang.backend.service.EntityFileService;
+import com.fptgang.backend.service.*;
 import com.fptgang.backend.util.SecurityUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,11 +25,11 @@ import java.util.UUID;
 public class EntityFileServiceImpl implements EntityFileService {
 
     private final FileRepos fileRepos;
-    private final AccountRepos accountRepos;
-    private final ProjectRepos projectRepos;
-    private final ProposalRepos proposalRepos;
-    private final MessageRepos messageRepos;
-    private final MilestoneRepos milestoneRepos;
+    private final AccountService accountService;
+    private final ProjectService projectService;
+    private final ProposalService proposalService;
+    private final MessageService messageService;
+    private final MilestoneService milestoneService;
     private final AzureBlobService azureBlobService;
 
     /**
@@ -60,9 +59,10 @@ public class EntityFileServiceImpl implements EntityFileService {
             throw new InvalidInputException("User must be authenticated to upload files");
         }
 
-        Account uploader = accountRepos.findByAccountId(currentUserId)
-                .orElseThrow(() -> new InvalidInputException("User not found"));
-
+        Account uploader = accountService.findById(currentUserId);
+        if (uploader == null) {
+            throw new InvalidInputException("User not found");
+        }
         // Generate a unique filename
         String originalFilename = file.getOriginalFilename();
         String fileExtension = getFileExtension(originalFilename);
@@ -80,29 +80,29 @@ public class EntityFileServiceImpl implements EntityFileService {
         // Set appropriate entity reference based on entityType
         switch (entityType) {
             case PROJECT:
-                Project project = projectRepos.findByProjectId(entityId)
-                        .orElseThrow(() -> new InvalidInputException("Project not found"));
+                Project project = projectService.findByProjectId(entityId);
+
                 fileEntity.setProject(project);
                 validateUserPermission(uploader, project);
                 break;
 
             case PROPOSAL:
-                Proposal proposal = proposalRepos.findByProposalId(entityId)
-                        .orElseThrow(() -> new InvalidInputException("Proposal not found"));
+                Proposal proposal = proposalService.findById(entityId);
                 fileEntity.setProposal(proposal);
                 validateUserPermission(uploader, proposal);
                 break;
 
             case MESSAGE:
-                Message message = messageRepos.findByMessageId(entityId)
-                        .orElseThrow(() -> new InvalidInputException("Message not found"));
+                Message message = messageService.findByMessageId(entityId);
                 fileEntity.setMessage(message);
                 validateUserPermission(uploader, message);
                 break;
 
             case MILESTONE:
-                Milestone milestone = milestoneRepos.findByMilestoneId(entityId)
-                        .orElseThrow(() -> new InvalidInputException("Milestone not found"));
+                Milestone milestone = milestoneService.findById(entityId);
+                if(milestone == null) {
+                    throw new InvalidInputException("Milestone not found");
+                }
                 fileEntity.setMilestone(milestone);
                 validateUserPermission(uploader, milestone);
                 break;
