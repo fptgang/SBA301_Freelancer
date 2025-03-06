@@ -62,7 +62,7 @@ public class FileServiceImpl implements FileService {
     public File deleteById(long id) {
         File file = fileRepos.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("File does not exist"));
-        file.setVisible(false);
+        file.setIsVisible(false);
         return fileRepos.save(file);
     }
 

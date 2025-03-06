@@ -35,7 +35,7 @@ public class MilestoneServiceImpl implements MilestoneService {
     @Override
     public Milestone deleteById(long id) {
         var milestone = proposalRepos.findById(id).orElseThrow(() -> new IllegalArgumentException("Account does not exist"));
-        milestone.setVisible(false);
+        milestone.setIsVisible(false);
         return proposalRepos.save(milestone);
     }
 

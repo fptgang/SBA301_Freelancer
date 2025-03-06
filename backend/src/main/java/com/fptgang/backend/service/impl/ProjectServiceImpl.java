@@ -71,7 +71,7 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     public void deleteById(long projectId) {
         Project project = projectRepos.findByProjectId(projectId).orElseThrow(() -> new InvalidInputException("Project with project id " + projectId + "not found"));
-        project.setVisible(false);
+        project.setIsVisible(false);
         projectRepos.save(project);
     }
 
@@ -91,25 +91,25 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public void acceptProjectProposal(long projectId, long proposalId) {
-        Project project = projectRepos.findByProjectId(projectId).orElseThrow(
-                 () -> new InvalidInputException("Project with project id " + projectId + "not found"));
-        if(project.getActiveProposal() != null) {
-            throw new InvalidInputException("Project already has an active proposal");
-        }
-        Proposal proposal = proposalService.findById(proposalId);
-        if(proposal.getProject().getProjectId() != projectId) {
-            throw new InvalidInputException("Proposal does not belong to this project");
-        }
-        proposal.setStatus(Proposal.ProposalStatus.ACCEPTED);
-        proposal=proposalService.update(proposal);
-        project.setActiveProposal(proposal);
-        for(Proposal p : project.getProposals()) {
-            if(p.getProposalId() != proposalId) {
-                p.setStatus(Proposal.ProposalStatus.REJECTED);
-                proposalService.update(proposal);
-            }
-        }
-        projectRepos.save(project);
+//        Project project = projectRepos.findByProjectId(projectId).orElseThrow(
+//                 () -> new InvalidInputException("Project with project id " + projectId + "not found"));
+//        if(project.getActiveProposal() != null) {
+//            throw new InvalidInputException("Project already has an active proposal");
+//        }
+//        Proposal proposal = proposalService.findById(proposalId);
+//        if(proposal.getProject().getProjectId() != projectId) {
+//            throw new InvalidInputException("Proposal does not belong to this project");
+//        }
+//        proposal.setStatus(Proposal.ProposalStatus.ACCEPTED);
+//        proposal=proposalService.update(proposal);
+//        project.setActiveProposal(proposal);
+//        for(Proposal p : project.getProposals()) {
+//            if(p.getProposalId() != proposalId) {
+//                p.setStatus(Proposal.ProposalStatus.REJECTED);
+//                proposalService.update(proposal);
+//            }
+//        }
+//        projectRepos.save(project);
     }
 
     @Override

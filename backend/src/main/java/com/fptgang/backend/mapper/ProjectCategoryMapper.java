@@ -24,7 +24,7 @@ public class ProjectCategoryMapper extends BaseMapper<ProjectCategoryDto, Projec
         ProjectCategoryDto dto = new ProjectCategoryDto();
         dto.setProjectCategoryId(entity.getProjectCategoryId());
         dto.setName(entity.getName());
-        dto.setIsVisible(entity.isVisible());
+        dto.setIsVisible(entity.getIsVisible());
         dto.setCreatedAt(DateTimeUtil.fromLocalToOffset(entity.getCreatedAt()));
         dto.setUpdatedAt(DateTimeUtil.fromLocalToOffset(entity.getUpdatedAt()));
         return dto;
@@ -40,13 +40,13 @@ public class ProjectCategoryMapper extends BaseMapper<ProjectCategoryDto, Projec
         if (existingEntityOptional.isPresent() && dto.getProjectCategoryId() != null) {
             ProjectCategory existEntity = existingEntityOptional.get();
             existEntity.setName(dto.getName() != null ? dto.getName() : existEntity.getName());
-            existEntity.setVisible(dto.getIsVisible() != null ? dto.getIsVisible() : existEntity.isVisible());
+            existEntity.setIsVisible(dto.getIsVisible() != null ? dto.getIsVisible() : existEntity.getIsVisible());
             return existEntity;
         } else {
             ProjectCategory projectCategory = new ProjectCategory();
 //            projectCategory.setProjectCategoryId(dto.getProjectCategoryId());
             projectCategory.setName(dto.getName());
-            projectCategory.setVisible(dto.getIsVisible() != null ? dto.getIsVisible() : true);
+            projectCategory.setIsVisible(dto.getIsVisible() != null ? dto.getIsVisible() : true);
             return projectCategory;
         }
     }

@@ -48,12 +48,15 @@ public class Account {
     private String avatarUrl;
 
     @Column(precision = 10, scale = 2, columnDefinition = "DECIMAL(10,2) DEFAULT 0.00")
+    @Builder.Default
     private BigDecimal balance = BigDecimal.ZERO;
 
     @OneToMany(mappedBy = "fromAccount", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @Builder.Default
     private List<Transaction> outgoingTransactions = new ArrayList<>();
 
     @OneToMany(mappedBy = "toAccount", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @Builder.Default
     private List<Transaction> incomingTransactions = new ArrayList<>();
 
     @Column(nullable = false)
@@ -61,13 +64,14 @@ public class Account {
     private Role role;
 
     @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
-    private boolean isVerified;
+    private Boolean isVerified;
 
     @Nullable
     private LocalDateTime verifiedAt;
 
     @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT TRUE")
-    private boolean isVisible = true;
+    @Builder.Default
+    private Boolean isVisible = true;
 
     @CreationTimestamp
     private LocalDateTime createdAt;
@@ -76,6 +80,7 @@ public class Account {
     private LocalDateTime updatedAt;
 
     @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @Builder.Default
     private List<RefreshToken> refreshTokens = new ArrayList<>();
 
     @OneToOne(mappedBy = "account", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)

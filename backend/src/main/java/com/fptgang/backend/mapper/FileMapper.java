@@ -36,7 +36,7 @@ public class FileMapper extends BaseMapper<FileDto, File> {
         dto.setFileUrl(entity.getFileUrl());
         dto.setSize(entity.getSize());
         dto.setCreatedAt(DateTimeUtil.fromLocalToOffset(entity.getCreatedAt()));
-        dto.setIsVisible(entity.isVisible());
+        dto.setIsVisible(entity.getIsVisible());
         dto.setUploaderId(entity.getUploader() != null ? entity.getUploader().getAccountId() : null);
         dto.setProjectId(entity.getProject() != null ? entity.getProject().getProjectId() : null);
         dto.setProposalId(entity.getProposal() != null ? entity.getProposal().getProposalId() : null);
@@ -61,7 +61,7 @@ public class FileMapper extends BaseMapper<FileDto, File> {
             //existFile.setFileType(dto.getFileType() != null ? dto.getFileType(): existFile.getFileType());
             //existFile.setFileUrl(dto.getFileUrl() != null ? dto.getFileUrl(): existFile.getFileUrl());
             //existFile.setSize(dto.getSize() != null ? dto.getSize() : existFile.getSize());
-            existFile.setVisible(dto.getIsVisible() != null ? dto.getIsVisible() : existFile.isVisible());
+            existFile.setIsVisible(dto.getIsVisible() != null ? dto.getIsVisible() : existFile.getIsVisible());
 
             return existFile;
         }
@@ -86,7 +86,7 @@ public class FileMapper extends BaseMapper<FileDto, File> {
             }
 
             if (dto.getIsVisible() != null) {
-                file.setVisible(dto.getIsVisible());
+                file.setIsVisible(dto.getIsVisible());
             }
 
             if (dto.getUploaderId() != null) {

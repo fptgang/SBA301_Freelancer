@@ -1,5 +1,6 @@
 package com.fptgang.backend.model;
 
+import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -29,6 +30,10 @@ public class Transaction {
     @JoinColumn(name = "to_account_id", nullable = false)
     private Account toAccount;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "milestone_id")
+    private Milestone milestone;
+
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal amount;
 
@@ -41,15 +46,15 @@ public class Transaction {
     private TransactionStatus status;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column
+    @Nullable
     private PaymentMethod paymentMethod;
 
     @CreationTimestamp
     private LocalDateTime createdAt;
 
-    public enum PaymentMethod{
-        VNPAY,
-        MANUAL
+    public enum PaymentMethod {
+        VNPAY
     }
 
     public enum TransactionType {
@@ -61,6 +66,7 @@ public class Transaction {
     }
 
     public enum TransactionStatus {
+        PENDING,
         SUCCESS,
         FAILED
     }

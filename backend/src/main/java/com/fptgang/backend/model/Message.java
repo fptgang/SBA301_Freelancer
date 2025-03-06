@@ -39,8 +39,10 @@ public class Message {
     private LocalDateTime createdAt;
 
     @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT TRUE")
-    private boolean isVisible = true;
+    @Builder.Default
+    private Boolean isVisible = true;
 
     @OneToMany(mappedBy = "message", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @Builder.Default
     private List<File> files = new ArrayList<>();
 }

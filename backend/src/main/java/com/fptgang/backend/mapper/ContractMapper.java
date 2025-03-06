@@ -38,7 +38,6 @@ public class ContractMapper extends BaseMapper<ContractDto, Contract> {
         contractDto.setProjectId(entity.getProject().getProjectId());
         contractDto.setCreatedAt(DateTimeUtil.fromLocalToOffset(entity.getCreatedAt()));
         contractDto.setUpdatedAt(DateTimeUtil.fromLocalToOffset(entity.getUpdatedAt()));
-        contractDto.setIsVisible(entity.isVisible());
 
         return contractDto;
     }
@@ -53,7 +52,6 @@ public class ContractMapper extends BaseMapper<ContractDto, Contract> {
         if (existingEntityOptional.isPresent() && dto.getContractId() != null) {
             Contract existEntity = existingEntityOptional.get();
 
-            existEntity.setVisible(dto.getIsVisible() != null ? dto.getIsVisible() : existEntity.isVisible());
 
             return existEntity;
         }
@@ -70,10 +68,6 @@ public class ContractMapper extends BaseMapper<ContractDto, Contract> {
             if(dto.getProposalId() != null) {
                 contract.setProposal(proposalRepos.findByProposalId(dto.getProposalId())
                         .orElseThrow(() -> new IllegalArgumentException("Proposal not found")));
-            }
-
-            if (dto.getIsVisible() != null) {
-                contract.setVisible(dto.getIsVisible());
             }
 
             return contract;

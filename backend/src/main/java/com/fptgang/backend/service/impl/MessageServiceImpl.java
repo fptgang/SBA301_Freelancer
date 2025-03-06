@@ -38,7 +38,7 @@ public class MessageServiceImpl implements MessageService {
     public void deleteById(long messageId) {
         Message message = messageRepos.findByMessageId(messageId).orElseThrow(
                 () -> new InvalidInputException("Message with id " + messageId + "not found"));
-        message.setVisible(false);
+        message.setIsVisible(false);
         messageRepos.save(message);
     }
 

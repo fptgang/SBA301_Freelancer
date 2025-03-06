@@ -5,6 +5,7 @@ import com.fptgang.backend.util.Searchable;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
@@ -15,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 // Profile.java
+@Builder
 @Entity
 @Table(name = "profiles")
 @Data
@@ -52,13 +54,14 @@ public class Profile {
     private LocalDateTime updatedAt;
 
     @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT TRUE")
-    private boolean isVisible = true;
+    private Boolean isVisible = true;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "account_id")
     private Account account;
 
     @OneToMany(mappedBy = "profile", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @Builder.Default
     private List<ProfileSkill> skills = new ArrayList<>();
 
 }

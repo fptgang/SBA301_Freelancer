@@ -9,6 +9,5 @@ public interface ContractService {
     Contract create(Contract contract);
     Contract update(Contract contract);
     Contract findById(long id);
-    Contract deleteById(long id);
     Page<Contract> getAll(ListParams params);
 }

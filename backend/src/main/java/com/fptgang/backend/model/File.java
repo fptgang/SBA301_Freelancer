@@ -22,6 +22,10 @@ public class File {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long fileId;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "uploader_id", nullable = false)
+    private Account uploader;
+
     @Column(columnDefinition = "NVARCHAR(255)", length = 255, nullable = false)
     @Searchable
     private String fileName;
@@ -40,7 +44,8 @@ public class File {
     private LocalDateTime createdAt;
 
     @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT TRUE")
-    private boolean isVisible = true;
+    @Builder.Default
+    private Boolean isVisible = true;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "proposal_id")
@@ -53,10 +58,6 @@ public class File {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "message_id")
     private Message message;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "uploader_id", nullable = false)
-    private Account uploader;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "milestone_id")

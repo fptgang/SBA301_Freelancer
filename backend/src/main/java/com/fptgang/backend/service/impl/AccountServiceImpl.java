@@ -105,7 +105,7 @@ public class AccountServiceImpl implements AccountService {
     public Account deleteById(long id) {
         Account account = accountRepos.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Account does not exist"));
-        account.setVisible(false);
+        account.setIsVisible(false);
         return accountRepos.save(account);
     }
 

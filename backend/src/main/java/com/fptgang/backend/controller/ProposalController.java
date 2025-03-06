@@ -36,12 +36,6 @@ public class ProposalController implements ProposalsApi {
     }
 
     @Override
-    public ResponseEntity<Void> deleteProposal(Long proposalId) {
-        proposalService.deleteById(proposalId);
-        return new ResponseEntity<>(HttpStatus.OK);
-    }
-
-    @Override
     public ResponseEntity<ProposalDto> getProposalById(Long proposalId) {
         return new ResponseEntity<>(proposalMapper.toDTO(proposalService.findById(proposalId)), HttpStatus.OK);
     }

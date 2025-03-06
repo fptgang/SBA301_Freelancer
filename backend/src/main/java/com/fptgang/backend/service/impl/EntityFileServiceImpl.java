@@ -173,7 +173,7 @@ public class EntityFileServiceImpl implements EntityFileService {
         }
 
         // Soft delete by setting visibility to false
-        file.setVisible(false);
+        file.setIsVisible(false);
         fileRepos.save(file);
     }
 
@@ -245,16 +245,16 @@ public class EntityFileServiceImpl implements EntityFileService {
     }
 
     private void validateUserPermission(Account uploader, Milestone milestone) {
-        // Milestone files can be uploaded by project owner, freelancer associated with the project, or admin
-        Project project = milestone.getProject();
-        boolean isFreelancer = project.getActiveProposal() != null &&
-                project.getActiveProposal().getFreelancer().getAccountId().equals(uploader.getAccountId());
-
-        if (!project.getClient().getAccountId().equals(uploader.getAccountId()) &&
-                !isFreelancer &&
-                !SecurityUtil.hasPermission(Role.ADMIN)) {
-            throw new InvalidInputException("You don't have permission to upload files to this milestone");
-        }
+//        // Milestone files can be uploaded by project owner, freelancer associated with the project, or admin
+//        Project project = milestone.getProject();
+//        boolean isFreelancer = project.getActiveProposal() != null &&
+//                project.getActiveProposal().getFreelancer().getAccountId().equals(uploader.getAccountId());
+//
+//        if (!project.getClient().getAccountId().equals(uploader.getAccountId()) &&
+//                !isFreelancer &&
+//                !SecurityUtil.hasPermission(Role.ADMIN)) {
+//            throw new InvalidInputException("You don't have permission to upload files to this milestone");
+//        }
     }
 
     private boolean isEntityOwner(File file, Long userId) {

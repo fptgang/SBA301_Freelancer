@@ -38,7 +38,7 @@ public class ProfileMapper extends BaseMapper<ProfileDto, Profile> {
         account.setFirstName(entity.getAccount().getFirstName());
         account.setLastName(entity.getAccount().getLastName());
         account.setAvatarUrl(entity.getAccount().getAvatarUrl());
-        account.setIsVerified(entity.getAccount().isVerified());
+        account.setIsVerified(entity.getAccount().getIsVerified());
         account.setCreatedAt(DateTimeUtil.fromLocalToOffset(entity.getAccount().getCreatedAt()));
         dto.setProfileId(entity.getProfileId());
         dto.setAccount(account);

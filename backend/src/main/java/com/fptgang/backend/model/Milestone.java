@@ -1,8 +1,9 @@
 package com.fptgang.backend.model;
 
-
 import com.fptgang.backend.util.Searchable;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.DecimalMax;
+import jakarta.validation.constraints.DecimalMin;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -12,6 +13,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -38,7 +40,9 @@ public class Milestone {
     private String description;
 
     @Column(nullable = false, precision = 10, scale = 2)
-    private BigDecimal budget;
+    @DecimalMin("0.0")
+    @DecimalMax("1.0")
+    private BigDecimal budgetRatio;
 
     @Column(nullable = false)
     private LocalDateTime deadline;
@@ -48,7 +52,8 @@ public class Milestone {
     private MilestoneStatus status;
 
     @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT TRUE")
-    private boolean isVisible = true;
+    @Builder.Default
+    private Boolean isVisible = true;
 
     @CreationTimestamp
     private LocalDateTime createdAt;
@@ -56,8 +61,14 @@ public class Milestone {
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
-    @OneToMany( mappedBy = "milestone", fetch = FetchType.LAZY)
-    private List<File> deliverables;
+    @OneToMany(mappedBy = "milestone", fetch = FetchType.LAZY)
+    @Builder.Default
+    private List<File> deliverables = new ArrayList<>();
+
+    // A milestone can have up to 2 transactions
+    @OneToMany(mappedBy = "milestone", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @Builder.Default
+    private List<Transaction> transactions = new ArrayList<>();
 
     public enum MilestoneStatus {
         PENDING,

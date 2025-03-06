@@ -43,7 +43,7 @@ public class SkillServiceImpl implements SkillService {
     @Override
     public void deleteById(long skillId) {
         Skill skill = skillRepos.findBySkillId(skillId).orElseThrow(() -> new InvalidInputException("skill with project id " + skillId + "not found"));
-        skill.setVisible(false);
+        skill.setIsVisible(false);
         skillRepos.save(skill);
     }
 

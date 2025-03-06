@@ -31,12 +31,12 @@ public class MilestoneMapper extends BaseMapper<MilestoneDto, Milestone> {
         milestoneDto.setMilestoneId(entity.getMilestoneId());
         milestoneDto.setProjectId(entity.getProject().getProjectId());
         milestoneDto.setTitle(entity.getTitle());
-        milestoneDto.setBudget(entity.getBudget());
+//        milestoneDto.setBudget(entity.getBudget());
         milestoneDto.setDeadline(DateTimeUtil.fromLocalToOffset(entity.getDeadline()));
         milestoneDto.setStatus(mapStatusDto(entity.getStatus()));
         milestoneDto.setCreatedAt(DateTimeUtil.fromLocalToOffset(entity.getCreatedAt()));
         milestoneDto.setUpdatedAt(DateTimeUtil.fromLocalToOffset(entity.getUpdatedAt()));
-        milestoneDto.setIsVisible(entity.isVisible());
+        milestoneDto.setIsVisible(entity.getIsVisible());
         milestoneDto.setDescription(entity.getDescription());
         milestoneDto.setDeliverables(entity.getDeliverables().stream().map(fileMapper::toDTO).toList());
         return milestoneDto;
@@ -53,10 +53,10 @@ public class MilestoneMapper extends BaseMapper<MilestoneDto, Milestone> {
             Milestone existEntity = existingEntityOptional.get();
 
             existEntity.setTitle(dto.getTitle() != null ? dto.getTitle() : existEntity.getTitle());
-            existEntity.setBudget(dto.getBudget() != null ? dto.getBudget() : existEntity.getBudget());
+//            existEntity.setBudget(dto.getBudget() != null ? dto.getBudget() : existEntity.getBudget());
             existEntity.setDeadline(dto.getDeadline() != null ? DateTimeUtil.fromOffsetToLocal(dto.getDeadline()) : existEntity.getDeadline());
             existEntity.setStatus(dto.getStatus() != null ? mapStatusEntity(dto.getStatus()) : existEntity.getStatus());
-            existEntity.setVisible(dto.getIsVisible() != null ? dto.getIsVisible() : existEntity.isVisible());
+            existEntity.setIsVisible(dto.getIsVisible() != null ? dto.getIsVisible() : existEntity.getIsVisible());
             existEntity.setDescription(dto.getDescription() != null ? dto.getDescription() : existEntity.getDescription());
             existEntity.setDeliverables(dto.getDeliverables() != null ? fileMapper.toEntities(dto.getDeliverables()) : existEntity.getDeliverables());
             // NOTE: Cannot change linked proposal
@@ -75,9 +75,9 @@ public class MilestoneMapper extends BaseMapper<MilestoneDto, Milestone> {
             if (dto.getTitle() != null) {
                 milestone.setTitle(dto.getTitle());
             }
-            if (dto.getBudget() != null) {
-                milestone.setBudget(dto.getBudget());
-            }
+//            if (dto.getBudget() != null) {
+//                milestone.setBudget(dto.getBudget());
+//            }
             if (dto.getDeadline() != null) {
                 milestone.setDeadline(DateTimeUtil.fromOffsetToLocal(dto.getDeadline()));
             }
@@ -85,7 +85,7 @@ public class MilestoneMapper extends BaseMapper<MilestoneDto, Milestone> {
                 milestone.setStatus(mapStatusEntity(dto.getStatus()));
             }
             if (dto.getIsVisible() != null) {
-                milestone.setVisible(dto.getIsVisible());
+                milestone.setIsVisible(dto.getIsVisible());
             }
             if (dto.getDescription() != null) {
                 milestone.setDescription(dto.getDescription());

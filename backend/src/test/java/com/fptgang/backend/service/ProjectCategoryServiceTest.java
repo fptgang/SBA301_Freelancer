@@ -38,7 +38,7 @@ public class ProjectCategoryServiceTest {
     void setUp() {
         testCategory = new ProjectCategory();
         testCategory.setName("Test Category");
-        testCategory.setVisible(true);
+        testCategory.setIsVisible(true);
     }
 
     @AfterEach
@@ -115,7 +115,7 @@ public class ProjectCategoryServiceTest {
         // Assert
         Optional<ProjectCategory> deletedCategory = projectCategoryRepos.findByProjectCategoryId(savedCategory.getProjectCategoryId());
         assertTrue(deletedCategory.isPresent());
-        assertFalse(deletedCategory.get().isVisible());
+        assertFalse(deletedCategory.get().getIsVisible());
     }
 
     @Test
@@ -125,7 +125,7 @@ public class ProjectCategoryServiceTest {
         for (int i = 1; i <= 3; i++) {
             ProjectCategory category = ProjectCategory.builder()
                     .name("Category " + i)
-                    .isVisible(true)
+                    .getIsVisible(true)
                     .build();
             projectCategoryService.create(category);
         }
@@ -148,13 +148,13 @@ public class ProjectCategoryServiceTest {
         for (int i = 1; i <= 3; i++) {
             ProjectCategory category = ProjectCategory.builder()
                     .name("Category " + i)
-                    .isVisible(true)
+                    .getIsVisible(true)
                     .build();
             projectCategoryService.create(category);
         }
         ProjectCategory hiddenCategory = ProjectCategory.builder()
                 .name("Hidden Category")
-                .isVisible(false)
+                .getIsVisible(false)
                 .build();
         projectCategoryService.create(hiddenCategory);
 
@@ -179,13 +179,13 @@ public class ProjectCategoryServiceTest {
         for (int i = 1; i <= 3; i++) {
             ProjectCategory category = ProjectCategory.builder()
                     .name("Category " + i)
-                    .isVisible(true)
+                    .getIsVisible(true)
                     .build();
             projectCategoryService.create(category);
         }
         ProjectCategory hiddenCategory = ProjectCategory.builder()
                 .name("Hidden Category")
-                .isVisible(false)
+                .getIsVisible(false)
                 .build();
         projectCategoryService.create(hiddenCategory);
 
