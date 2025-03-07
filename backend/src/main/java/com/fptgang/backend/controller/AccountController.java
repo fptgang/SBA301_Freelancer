@@ -5,6 +5,7 @@ import com.fptgang.backend.api.model.AccountDto;
 import com.fptgang.backend.api.model.GetAccounts200Response;
 import com.fptgang.backend.api.model.Pageable;
 import com.fptgang.backend.mapper.AccountMapper;
+import com.fptgang.backend.mapper.DetailLevel;
 import com.fptgang.backend.model.Account;
 import com.fptgang.backend.model.Role;
 import com.fptgang.backend.service.AccountService;
@@ -37,7 +38,7 @@ public class AccountController implements AccountsApi {
     public ResponseEntity<AccountDto> createAccount(AccountDto accountDto) {
         log.info("Creating account");
         accountDto = accountMapper
-                .toDTO(accountService.create(accountMapper.toEntity(accountDto)));
+                .toDTO(accountService.create(accountMapper.toEntity(accountDto)), DetailLevel.FULL);
         ResponseEntity<AccountDto> response = new ResponseEntity<>(accountDto, HttpStatus.CREATED);
 
         messagingTemplate.convertAndSend("resources/accounts", accountDto);
@@ -56,7 +57,11 @@ public class AccountController implements AccountsApi {
     @Override
     public ResponseEntity<AccountDto> getAccountById(Long accountId) {
         log.info("Getting account by id ");
-        return new ResponseEntity<>(accountMapper.toDTO(accountService.findById(accountId)), HttpStatus.OK);
+        if(SecurityUtil.isRole(Role.CLIENT, Role.FREELANCER) && SecurityUtil.requireCurrentUserId() != accountId) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        return new ResponseEntity<>(accountMapper.toDTO(accountService.findById(accountId),DetailLevel.FULL), HttpStatus.OK);
     }
 
     @Override
@@ -75,7 +80,7 @@ public class AccountController implements AccountsApi {
         }
         var res = accountService
                 .getAll(params.build())
-                .map(accountMapper::toDTO);
+                .map((account) -> accountMapper.toDTO(account, DetailLevel.FULL));
         return OpenApiHelper.respondPage(res, GetAccounts200Response.class);
     }
 
@@ -102,6 +107,6 @@ public class AccountController implements AccountsApi {
             }
         }
         messagingTemplate.convertAndSend("resources/accounts", accountDto);
-        return ResponseEntity.ok(accountMapper.toDTO(accountService.update(accountMapper.toEntity(accountDto))));
+        return ResponseEntity.ok(accountMapper.toDTO(accountService.update(accountMapper.toEntity(accountDto)), DetailLevel.FULL));
     }
 }

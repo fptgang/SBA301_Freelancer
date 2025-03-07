@@ -19,6 +19,7 @@ import org.springframework.data.domain.Pageable;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -82,6 +83,9 @@ class ProposalServiceTest {
         testProject.setClient(employer);
         testProject.setStatus(Project.ProjectStatus.OPEN);
         testProject.setIsVisible(true);
+        testProject.setMaxBudget(BigDecimal.valueOf(1000));
+        testProject.setMinBudget(BigDecimal.valueOf(500));
+        testProject.setStartDate(LocalDateTime.now());
 
         return projectService.create(testProject);
         // Set other necessary fields
@@ -92,8 +96,8 @@ class ProposalServiceTest {
         Proposal proposal = new Proposal();
         proposal.setProject(project);
         proposal.setFreelancer(freelancer);
+        proposal.setBudget(BigDecimal.valueOf(700));
         proposal.setStatus(Proposal.ProposalStatus.PENDING);
-        proposal.setIsVisible(true);
         return proposalService.create(proposal);
     }
 
@@ -114,7 +118,6 @@ class ProposalServiceTest {
         freelancer.setAccountId(1L);
         proposal.setFreelancer(freelancer);
         proposal.setStatus(Proposal.ProposalStatus.PENDING);
-        proposal.setIsVisible(true);
 
         assertThrows(RuntimeException.class, () -> proposalService.create(proposal));
     }
@@ -154,26 +157,10 @@ class ProposalServiceTest {
         Proposal proposal = new Proposal();
         proposal.setProposalId(999L);
         proposal.setStatus(Proposal.ProposalStatus.PENDING);
-        proposal.setIsVisible(true);
 
         assertThrows(RuntimeException.class, () -> proposalService.update(proposal));
     }
 
-    @Test
-    @Order(7)
-    void deleteProposalByIdSuccessfully() {
-        Proposal proposal = createTestProposal(1);
-
-        proposalService.deleteById(proposal.getProposalId());
-
-        assertFalse(proposalService.findById(proposal.getProposalId()).getIsVisible());
-    }
-
-    @Test
-    @Order(8)
-    void deleteProposalByIdNotFound() {
-        assertThrows(RuntimeException.class, () -> proposalService.deleteById(999L));
-    }
 
     @Test
     @Order(9)
@@ -201,7 +188,7 @@ class ProposalServiceTest {
         proposal.setProject(project);
         proposal.setFreelancer(freelancer);
         proposal.setStatus(Proposal.ProposalStatus.ACCEPTED);
-        proposal.setIsVisible(true);
+        proposal.setBudget(BigDecimal.valueOf(700));
         proposalService.create(proposal);
         Pageable pageable = PageRequest.of(0, 10);
         var params = ListParams.builder()

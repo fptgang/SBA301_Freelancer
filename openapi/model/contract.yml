@@ -7,10 +7,16 @@ ContractDto:
     proposalId:
       type: integer
       format: int64
+    freelancerId:
+      type: integer
+      format: int64
     projectId:
       type: integer
       format: int64
-    file:
+    status:
+      type: string
+      enum: [UNSIGNED,SIGNED,TERMINATED]
+    contractFile:
       $ref: 'file.yml#/FileDto'
     createdAt:
       type: string
@@ -18,5 +24,3 @@ ContractDto:
     updatedAt:
       type: string
       format: date-time
-    isVisible:
-      type: boolean

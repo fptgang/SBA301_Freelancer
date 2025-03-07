@@ -125,7 +125,7 @@ public class ProjectCategoryServiceTest {
         for (int i = 1; i <= 3; i++) {
             ProjectCategory category = ProjectCategory.builder()
                     .name("Category " + i)
-                    .getIsVisible(true)
+                    .isVisible(true)
                     .build();
             projectCategoryService.create(category);
         }
@@ -148,13 +148,13 @@ public class ProjectCategoryServiceTest {
         for (int i = 1; i <= 3; i++) {
             ProjectCategory category = ProjectCategory.builder()
                     .name("Category " + i)
-                    .getIsVisible(true)
+                    .isVisible(true)
                     .build();
             projectCategoryService.create(category);
         }
         ProjectCategory hiddenCategory = ProjectCategory.builder()
                 .name("Hidden Category")
-                .getIsVisible(false)
+                .isVisible(false)
                 .build();
         projectCategoryService.create(hiddenCategory);
 
@@ -179,13 +179,13 @@ public class ProjectCategoryServiceTest {
         for (int i = 1; i <= 3; i++) {
             ProjectCategory category = ProjectCategory.builder()
                     .name("Category " + i)
-                    .getIsVisible(true)
+                    .isVisible(true)
                     .build();
             projectCategoryService.create(category);
         }
         ProjectCategory hiddenCategory = ProjectCategory.builder()
                 .name("Hidden Category")
-                .getIsVisible(false)
+                .isVisible(false)
                 .build();
         projectCategoryService.create(hiddenCategory);
 

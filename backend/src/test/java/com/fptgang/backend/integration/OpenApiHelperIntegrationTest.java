@@ -45,22 +45,25 @@ public class OpenApiHelperIntegrationTest {
                 .email("test1@example.com")
                 .firstName("Alice")
                 .role(Role.ADMIN)
-                .getIsVisible(true)
+                .isVisible(true)
                 .balance(BigDecimal.valueOf(5000))
+                .isVerified(false)
                 .build());
         accountRepos.save(Account.builder()
                 .email("test2@example.com")
                 .firstName("Bob")
                 .role(Role.STAFF)
-                .getIsVisible(false)
+                .isVisible(false)
                 .balance(BigDecimal.valueOf(1500))
+                .isVerified(true)
                 .build());
         accountRepos.save(Account.builder()
                 .email("test3@example.com")
                 .firstName("Charlie")
                 .role(Role.CLIENT)
-                .getIsVisible(true)
+                .isVisible(true)
                 .balance(BigDecimal.valueOf(10000))
+                .isVerified(true)
                 .build());
     }
 

@@ -4,6 +4,7 @@ import com.fptgang.backend.model.Milestone;
 import com.fptgang.backend.repository.MilestoneRepos;
 import com.fptgang.backend.service.MilestoneService;
 import com.fptgang.backend.service.params.ListParams;
+import com.fptgang.backend.util.EntityUtil;
 import com.fptgang.backend.util.OpenApiHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -19,11 +20,17 @@ public class MilestoneServiceImpl implements MilestoneService {
 
     @Override
     public Milestone create(Milestone milestone) {
+        milestone.setMilestoneId(null);
         return proposalRepos.save(milestone);
     }
 
     @Override
     public Milestone update(Milestone milestone) {
+        if(milestone.getMilestoneId() == null){
+            throw new IllegalArgumentException("Milestone does not exist");
+        }
+        var existing = proposalRepos.findById(milestone.getMilestoneId()).orElse(null);
+        EntityUtil.merge(existing, milestone);
         return proposalRepos.save(milestone);
     }
 

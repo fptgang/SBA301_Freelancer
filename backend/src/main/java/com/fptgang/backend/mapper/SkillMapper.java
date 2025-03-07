@@ -4,26 +4,16 @@ import com.fptgang.backend.api.model.SkillDto;
 import com.fptgang.backend.model.Skill;
 import com.fptgang.backend.repository.SkillRepos;
 import com.fptgang.backend.util.DateTimeUtil;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+@Slf4j
 @Component
 public class SkillMapper extends BaseMapper<SkillDto, Skill> {
-    @Autowired
-    private SkillRepos skillRepos;
+    private final SkillRepos skillRepos;
 
-    @Override
-    public SkillDto toDTO(Skill entity) {
-        if (entity == null) {
-            return null;
-        }
-        SkillDto dto = new SkillDto();
-        dto.setSkillId(entity.getSkillId());
-        dto.setName(entity.getName());
-        dto.setIsVisible(entity.getIsVisible());
-        dto.setCreatedAt(DateTimeUtil.fromLocalToOffset(entity.getCreatedAt()));
-        dto.setUpdatedAt(DateTimeUtil.fromLocalToOffset(entity.getUpdatedAt()));
-        return dto;
+    public SkillMapper(SkillRepos skillRepos) {
+        this.skillRepos = skillRepos;
     }
 
     @Override
@@ -32,17 +22,39 @@ public class SkillMapper extends BaseMapper<SkillDto, Skill> {
             return null;
         }
 
-        Skill skill = skillRepos.findBySkillId(dto.getSkillId() == null ? 0 : dto.getSkillId())
-                .orElseGet(() -> Skill.builder().build());
+        Skill entity = new Skill();
+        entity.setSkillId(dto.getSkillId());
+        entity.setName(dto.getName());
+        entity.setIsVisible(dto.getIsVisible());
+        entity.setCreatedAt(DateTimeUtil.fromOffsetToLocal(dto.getCreatedAt()));
+        entity.setUpdatedAt(DateTimeUtil.fromOffsetToLocal(dto.getUpdatedAt()));
 
-        if (dto.getName() != null) {
-            skill.setName(dto.getName());
+        return entity;
+    }
+
+    @Override
+    public SkillDto toDTO(Skill entity, DetailLevel level) {
+        if (entity == null) {
+            return null;
         }
 
-        if (dto.getIsVisible() != null) {
-            skill.setIsVisible(dto.getIsVisible());
+        SkillDto dto = new SkillDto();
+        dto.setSkillId(entity.getSkillId());
+        dto.setName(entity.getName());
+        dto.setIsVisible(entity.getIsVisible());
+        dto.setCreatedAt(DateTimeUtil.fromLocalToOffset(entity.getCreatedAt()));
+        dto.setUpdatedAt(DateTimeUtil.fromLocalToOffset(entity.getUpdatedAt()));
+
+        if (level == DetailLevel.REFERENCE) {
+            return dto; // those fields are enough
         }
 
-        return skill;
+        if (level == DetailLevel.SUMMARY) {
+            return dto; // those fields are enough
+        }
+
+        // Add more fields if needed for other detail levels
+
+        return dto;
     }
 }

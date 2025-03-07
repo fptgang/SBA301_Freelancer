@@ -28,7 +28,7 @@ public class AccountMapperTest {
                 .email("a@x.com")
                 .createdAt(LocalDateTime.now())
                 .build();
-        var dto = accountMapper.toDTO(entity);
+        var dto = accountMapper.toDTO(entity, DetailLevel.FULL);
         assertThat(dto.getEmail()).isEqualTo("a@x.com");
     }
 }

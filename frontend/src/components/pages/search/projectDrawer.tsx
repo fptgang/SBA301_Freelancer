@@ -7,7 +7,8 @@ import {
 } from "../../../../generated";
 import { HttpError, useList, useOne } from "@refinedev/core";
 import { renderSkillTags } from "./renderSkillTags";
-import { useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router";
+import { ArrowsAltOutlined, WindowsFilled } from "@ant-design/icons";
 
 const ProjectDrawer: React.FC<{
   project: ProjectDto;
@@ -44,6 +45,11 @@ const ProjectDrawer: React.FC<{
       visible={isDrawerVisible}
       width={500}
     >
+      <Link to={`/projects/${project.projectId}`}>
+        View {project.title} on full screen <ArrowsAltOutlined />
+      </Link>
+      <br />
+      <br />
       <Typography.Title level={5}>Description</Typography.Title>
       <Typography.Text>{project.description}</Typography.Text>
 

@@ -5,6 +5,7 @@ import com.fptgang.backend.model.Skill;
 import com.fptgang.backend.repository.SkillRepos;
 import com.fptgang.backend.service.SkillService;
 import com.fptgang.backend.service.params.ListParams;
+import com.fptgang.backend.util.EntityUtil;
 import com.fptgang.backend.util.OpenApiHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -23,14 +24,19 @@ public class SkillServiceImpl implements SkillService {
 
     @Override
     public Skill create(Skill skill) {
+        skill.setSkillId(null);
         return skillRepos.save(skill);
     }
 
     @Override
     public Skill update(Skill skill) {
-        if(skill.getSkillId() == null || !skillRepos.existsById(skill.getSkillId())){
+        if(skill.getSkillId() == null){
             throw new InvalidInputException("skill does not exist");
         }
+        var existing = skillRepos.findBySkillId(skill.getSkillId()).orElseThrow(
+                ()-> new InvalidInputException("skill does not exist"));
+        EntityUtil.merge(existing, skill);
+
         return skillRepos.save(skill);
     }
 

@@ -1,6 +1,7 @@
 package com.fptgang.backend.mapper;
 
 import com.fptgang.backend.api.model.AccountDto;
+import com.fptgang.backend.api.model.AccountResponseDto;
 import com.fptgang.backend.model.Account;
 import com.fptgang.backend.model.Role;
 import com.fptgang.backend.repository.AccountRepos;
@@ -76,7 +77,7 @@ public class AccountMapper extends BaseMapper<AccountDto, Account> {
     }
 
     @Override
-    public AccountDto toDTO(Account entity) {
+    public AccountDto toDTO(Account entity,DetailLevel detailLevel) {
         if (entity == null) {
             return null;
         }
@@ -138,4 +139,17 @@ public class AccountMapper extends BaseMapper<AccountDto, Account> {
         }
     }
 
+    public AccountResponseDto toResponseDto(AccountDto accountDto)
+    {
+        AccountResponseDto responseDto = new AccountResponseDto();
+        responseDto.setAvatarUrl(accountDto.getAvatarUrl());
+        responseDto.setAccountId(accountDto.getAccountId());
+        responseDto.setEmail(accountDto.getEmail());
+        responseDto.setFirstName(accountDto.getFirstName());
+        responseDto.setLastName(accountDto.getLastName());
+        responseDto.setIsVerified(accountDto.getIsVerified());
+        responseDto.setCreatedAt(accountDto.getCreatedAt());
+        return responseDto;
+
+    }
 }

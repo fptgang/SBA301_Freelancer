@@ -4,6 +4,7 @@ import com.fptgang.backend.api.controller.MessagesApi;
 import com.fptgang.backend.api.model.GetMessages200Response;
 import com.fptgang.backend.api.model.MessageDto;
 import com.fptgang.backend.api.model.Pageable;
+import com.fptgang.backend.mapper.DetailLevel;
 import com.fptgang.backend.mapper.MessageMapper;
 import com.fptgang.backend.model.Message;
 import com.fptgang.backend.model.Role;
@@ -57,7 +58,7 @@ public class MessageController implements MessagesApi {
         var includeInvisible = SecurityUtil.hasPermission(Role.ADMIN);
         Page<MessageDto> res = messageService
                 .getAllInvolving(userId, page, filter, search, includeInvisible)
-                .map(messageMapper::toDTO);
+                .map(message -> messageMapper.toDTO(message, DetailLevel.FULL));
         return OpenApiHelper.respondPage(res, GetMessages200Response.class);
     }
 
@@ -69,14 +70,14 @@ public class MessageController implements MessagesApi {
 
     @Override
     public ResponseEntity<MessageDto> getMessageById(Long messageId) {
-        return ResponseEntity.ok(messageMapper.toDTO(messageService.findByMessageId(messageId)));
+        return ResponseEntity.ok(messageMapper.toDTO(messageService.findByMessageId(messageId), DetailLevel.FULL));
     }
 
     @Override
     public ResponseEntity<MessageDto> updateMessage(Long messageId, MessageDto messageDto) {
         messageDto.setMessageId(messageId); // Override messageId
 
-        return ResponseEntity.ok(messageMapper.toDTO(messageService.update(messageMapper.toEntity(messageDto))));
+        return ResponseEntity.ok(messageMapper.toDTO(messageService.update(messageMapper.toEntity(messageDto)), DetailLevel.FULL));
     }
 
 
@@ -86,11 +87,12 @@ public class MessageController implements MessagesApi {
     public void sendMessage(@Payload MessageDto messageDto) {
         try {
             Message message = messageMapper.toEntity(messageDto);
-            messageDto = messageMapper.toDTO(messageService.create(message));
-            messagingTemplate.convertAndSend("message/"+message.getProject().getClient().getEmail(), messageDto);
-//            if(message.getProject().getActiveProposal() != null)
-//                messagingTemplate.convertAndSend("message/"+message.getProject().getActiveProposal().getFreelancer().getEmail(), messageDto);
-//            log.info("Sending message: {} to {} and {}", message.getContent(), "message/"+message.getSender().getAccountId(), message.getProject().getActiveProposal().getFreelancer().getAccountId());
+            messageDto = messageMapper.toDTO(messageService.create(message), DetailLevel.FULL);
+            messagingTemplate.convertAndSend("message/" + message.getProject().getClient().getEmail(), messageDto);
+            if (message.getProject().getContract().getFreelancer() != null) {
+                messagingTemplate.convertAndSend("message/" + message.getProject().getContract().getFreelancer().getEmail(), messageDto);
+                log.info("Sending message: {} to {} and {}", message.getContent(), "message/" + message.getSender().getAccountId(), message.getProject().getContract().getFreelancer().getAccountId());
+            }
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

@@ -61,7 +61,7 @@ class MilestoneServiceTest {
         Milestone milestone = new Milestone();
         Project project = createTestProject(id);
         milestone.setTitle("Milestone "+id);
-        milestone.setBudget(BigDecimal.valueOf(1000));
+        milestone.setBudgetRatio(BigDecimal.valueOf(1));
         milestone.setDeadline(LocalDateTime.now().plusDays(30));
         milestone.setStatus(Milestone.MilestoneStatus.PENDING);
         milestone.setIsVisible(true);
@@ -96,6 +96,9 @@ class MilestoneServiceTest {
         testProject.setCategory(testCategory);
         testProject.setClient(employer);
         testProject.setStatus(Project.ProjectStatus.OPEN);
+        testProject.setMaxBudget(BigDecimal.valueOf(1000));
+        testProject.setMinBudget(BigDecimal.valueOf(500));
+        testProject.setStartDate(LocalDateTime.now());
         testProject.setIsVisible(true);
 
         return projectService.create(testProject);
@@ -116,7 +119,7 @@ class MilestoneServiceTest {
     @Order(2)
     void createMilestoneWithNullTitle() {
         Milestone milestone = new Milestone();
-        milestone.setBudget(BigDecimal.valueOf(1000));
+        milestone.setBudgetRatio(BigDecimal.valueOf(1));
         milestone.setDeadline(LocalDateTime.now().plusDays(30));
         milestone.setStatus(Milestone.MilestoneStatus.PENDING);
         milestone.setIsVisible(true);
@@ -159,7 +162,7 @@ class MilestoneServiceTest {
         Milestone milestone = new Milestone();
         milestone.setMilestoneId(999L);
         milestone.setTitle("Milestone 1");
-        milestone.setBudget(BigDecimal.valueOf(1000));
+        milestone.setBudgetRatio(BigDecimal.valueOf(1));
         milestone.setDeadline(LocalDateTime.now().plusDays(30));
         milestone.setStatus(Milestone.MilestoneStatus.PENDING);
         milestone.setIsVisible(true);
@@ -208,7 +211,7 @@ class MilestoneServiceTest {
         Milestone milestone = new Milestone();
         Project project = createTestProject(3);
         milestone.setTitle("Unfiltered Milestone "+3);
-        milestone.setBudget(BigDecimal.valueOf(1000));
+        milestone.setBudgetRatio(BigDecimal.valueOf(1));
         milestone.setDeadline(LocalDateTime.now().plusDays(30));
         milestone.setStatus(Milestone.MilestoneStatus.PENDING);
         milestone.setIsVisible(true);

@@ -25,7 +25,7 @@ public class FileMapper extends BaseMapper<FileDto, File> {
     private MessageRepos messageRepos;
 
     @Override
-    public FileDto toDTO(File entity) {
+    public FileDto toDTO(File entity, DetailLevel detailLevel) {
         if (entity == null) {
             return null;
         }

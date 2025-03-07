@@ -4,6 +4,7 @@ import com.fptgang.backend.exception.InvalidInputException;
 import com.fptgang.backend.model.Message;
 import com.fptgang.backend.repository.MessageRepos;
 import com.fptgang.backend.service.MessageService;
+import com.fptgang.backend.util.EntityUtil;
 import com.fptgang.backend.util.OpenApiHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -17,14 +18,18 @@ public class MessageServiceImpl implements MessageService {
 
     @Override
     public Message create(Message message) {
+        message.setMessageId(null);
         return messageRepos.save(message);
     }
 
     @Override
     public Message update(Message message) {
-        if(message.getMessageId() == null || !messageRepos.existsById(message.getMessageId())){
+        if(message.getMessageId() == null){
             throw new InvalidInputException("Message does not exist");
         }
+        Message existing = messageRepos.findByMessageId(message.getMessageId()).orElseThrow(
+                () -> new InvalidInputException("Message does not exist"));
+        EntityUtil.merge(existing, message);
         return messageRepos.save(message);
     }
 

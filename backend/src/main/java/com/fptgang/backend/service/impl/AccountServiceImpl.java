@@ -6,6 +6,7 @@ import com.fptgang.backend.repository.AccountRepos;
 import com.fptgang.backend.security.PasswordEncoderConfig;
 import com.fptgang.backend.service.AccountService;
 import com.fptgang.backend.service.params.ListParams;
+import com.fptgang.backend.util.EntityUtil;
 import com.fptgang.backend.util.OpenApiHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -80,6 +81,10 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public Account create(Account account) {
+        account.setAccountId(null);
+        if(accountRepos.findByEmail(account.getEmail()).isPresent()) {
+            throw new IllegalArgumentException("Email already exists");
+        }
         return accountRepos.save(account);
     }
 
@@ -98,6 +103,9 @@ public class AccountServiceImpl implements AccountService {
         if (account.getAccountId() == null) {
             throw new IllegalArgumentException("Account does not exist");
         }
+        Account existing = accountRepos.findById(account.getAccountId())
+                .orElseThrow(() -> new IllegalArgumentException("Account does not exist"));
+        EntityUtil.merge(existing, account);
         return accountRepos.save(account);
     }
 

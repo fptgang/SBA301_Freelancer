@@ -182,6 +182,14 @@ export const dataProvider = (
     headers,
     meta,
   }) => {
+    const response = await _httpClient.request({
+      url,
+      method,
+      data: payload,
+      params: query,
+      headers: buildHeaders(headers),
+    });
+    console.log(response);
     console.log("custom", {
       url,
       method,
@@ -192,6 +200,9 @@ export const dataProvider = (
       headers,
       meta,
     });
+    return {
+      data: response.data,
+    };
 
     // TODO: send request to the API
     // const requestMethod = meta.method

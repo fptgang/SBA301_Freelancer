@@ -5,110 +5,119 @@ import com.fptgang.backend.model.Milestone;
 import com.fptgang.backend.repository.MilestoneRepos;
 import com.fptgang.backend.repository.ProjectRepos;
 import com.fptgang.backend.util.DateTimeUtil;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import java.util.Optional;
+import java.util.stream.Collectors;
 
+@Slf4j
 @Component
 public class MilestoneMapper extends BaseMapper<MilestoneDto, Milestone> {
+    private final MilestoneRepos milestoneRepos;
+    private final ProjectRepos projectRepos;
+    private final FileMapper fileMapper;
 
-    @Autowired
-    private MilestoneRepos milestoneRepos;
-
-    @Autowired
-    private ProjectRepos projectRepos;
-    @Autowired
-    private FileMapper fileMapper;
-
-    @Override
-    public MilestoneDto toDTO(Milestone entity) {
-        if (entity == null) {
-            return null;
-        }
-
-        MilestoneDto milestoneDto = new MilestoneDto();
-        milestoneDto.setMilestoneId(entity.getMilestoneId());
-        milestoneDto.setProjectId(entity.getProject().getProjectId());
-        milestoneDto.setTitle(entity.getTitle());
-//        milestoneDto.setBudget(entity.getBudget());
-        milestoneDto.setDeadline(DateTimeUtil.fromLocalToOffset(entity.getDeadline()));
-        milestoneDto.setStatus(mapStatusDto(entity.getStatus()));
-        milestoneDto.setCreatedAt(DateTimeUtil.fromLocalToOffset(entity.getCreatedAt()));
-        milestoneDto.setUpdatedAt(DateTimeUtil.fromLocalToOffset(entity.getUpdatedAt()));
-        milestoneDto.setIsVisible(entity.getIsVisible());
-        milestoneDto.setDescription(entity.getDescription());
-        milestoneDto.setDeliverables(entity.getDeliverables().stream().map(fileMapper::toDTO).toList());
-        return milestoneDto;
+    public MilestoneMapper(MilestoneRepos milestoneRepos, ProjectRepos projectRepos, FileMapper fileMapper) {
+        this.milestoneRepos = milestoneRepos;
+        this.projectRepos = projectRepos;
+        this.fileMapper = fileMapper;
     }
 
+    @Override
     public Milestone toEntity(MilestoneDto dto) {
         if (dto == null) {
             return null;
         }
 
-        Optional<Milestone> existingEntityOptional = milestoneRepos.findByMilestoneId(dto.getMilestoneId() == null ? 0 : dto.getMilestoneId());
+        Milestone entity = new Milestone();
+        entity.setMilestoneId(dto.getMilestoneId());
 
-        if (existingEntityOptional.isPresent() && dto.getMilestoneId() != null) {
-            Milestone existEntity = existingEntityOptional.get();
-
-            existEntity.setTitle(dto.getTitle() != null ? dto.getTitle() : existEntity.getTitle());
-//            existEntity.setBudget(dto.getBudget() != null ? dto.getBudget() : existEntity.getBudget());
-            existEntity.setDeadline(dto.getDeadline() != null ? DateTimeUtil.fromOffsetToLocal(dto.getDeadline()) : existEntity.getDeadline());
-            existEntity.setStatus(dto.getStatus() != null ? mapStatusEntity(dto.getStatus()) : existEntity.getStatus());
-            existEntity.setIsVisible(dto.getIsVisible() != null ? dto.getIsVisible() : existEntity.getIsVisible());
-            existEntity.setDescription(dto.getDescription() != null ? dto.getDescription() : existEntity.getDescription());
-            existEntity.setDeliverables(dto.getDeliverables() != null ? fileMapper.toEntities(dto.getDeliverables()) : existEntity.getDeliverables());
-            // NOTE: Cannot change linked proposal
-            //existEntity.setProposal(dto.getProposalId() != null ? proposalRepos.findByProposalId(dto.getProposalId())
-            //        .orElseThrow(() -> new IllegalArgumentException("Proposal not found")) : existEntity.getProposal()); // Add JobId
-
-            return existEntity;
-        } else {
-            Milestone milestone = new Milestone();
-            milestone.setMilestoneId(dto.getMilestoneId());
-
-            if (dto.getProjectId() != null) {
-                milestone.setProject(projectRepos.findByProjectId(dto.getProjectId())
-                        .orElseThrow(() -> new IllegalArgumentException("Project not found")));
-            }
-            if (dto.getTitle() != null) {
-                milestone.setTitle(dto.getTitle());
-            }
-//            if (dto.getBudget() != null) {
-//                milestone.setBudget(dto.getBudget());
-//            }
-            if (dto.getDeadline() != null) {
-                milestone.setDeadline(DateTimeUtil.fromOffsetToLocal(dto.getDeadline()));
-            }
-            if (dto.getStatus() != null) {
-                milestone.setStatus(mapStatusEntity(dto.getStatus()));
-            }
-            if (dto.getIsVisible() != null) {
-                milestone.setIsVisible(dto.getIsVisible());
-            }
-            if (dto.getDescription() != null) {
-                milestone.setDescription(dto.getDescription());
-            }
-            if (dto.getDeliverables() != null) {
-                milestone.setDeliverables(fileMapper.toEntities(dto.getDeliverables()));
-            }
-
-            return milestone;
+        if (dto.getTitle() != null) {
+            entity.setTitle(dto.getTitle());
         }
+
+        if (dto.getDescription() != null) {
+            entity.setDescription(dto.getDescription());
+        }
+
+        if (dto.getDeadline() != null) {
+            entity.setDeadline(DateTimeUtil.fromOffsetToLocal(dto.getDeadline()));
+        }
+
+        if (dto.getStatus() != null) {
+            entity.setStatus(mapStatusEntity(dto.getStatus()));
+        }
+
+        if (dto.getIsVisible() != null) {
+            entity.setIsVisible(dto.getIsVisible());
+        }
+
+        if (dto.getProjectId() != null) {
+            entity.setProject(projectRepos.findByProjectId(dto.getProjectId())
+                    .orElseThrow(() -> new IllegalArgumentException("Project not found")));
+        }
+
+        if (dto.getDeliverables() != null) {
+            entity.setDeliverables(dto.getDeliverables().stream()
+                    .map(fileMapper::toEntity)
+                    .collect(Collectors.toList()));
+        }
+
+
+        entity.setCreatedAt(DateTimeUtil.fromOffsetToLocal(dto.getCreatedAt()));
+        entity.setUpdatedAt(DateTimeUtil.fromOffsetToLocal(dto.getUpdatedAt()));
+
+        return entity;
     }
 
+    @Override
+    public MilestoneDto toDTO(Milestone entity, DetailLevel level) {
+        if (entity == null) {
+            return null;
+        }
+
+        MilestoneDto dto = new MilestoneDto();
+        dto.setMilestoneId(entity.getMilestoneId());
+        dto.setTitle(entity.getTitle());
+
+        if (level == DetailLevel.REFERENCE) {
+            return dto; // those fields are enough
+        }
+        dto.setDescription(entity.getDescription());
+        dto.setDeadline(DateTimeUtil.fromLocalToOffset(entity.getDeadline()));
+        dto.setStatus(mapStatusDto(entity.getStatus()));
+        dto.setIsVisible(entity.getIsVisible());
+
+        if (level == DetailLevel.SUMMARY) {
+            return dto; // those fields are enough
+        }
+
+        dto.setCreatedAt(DateTimeUtil.fromLocalToOffset(entity.getCreatedAt()));
+        dto.setUpdatedAt(DateTimeUtil.fromLocalToOffset(entity.getUpdatedAt()));
+
+        if (entity.getProject() != null) {
+            dto.setProjectId(entity.getProject().getProjectId());
+        }
+
+        if (entity.getDeliverables() != null) {
+            dto.setDeliverables(entity.getDeliverables().stream()
+                    .map(file -> fileMapper.toDTO(file, DetailLevel.REFERENCE))
+                    .collect(Collectors.toList()));
+        }
+
+        return dto;
+    }
 
     public MilestoneDto.StatusEnum mapStatusDto(Milestone.MilestoneStatus statusEnum) {
         if (statusEnum == null) {
-            return null; // Or a default Status, e.g., Status.PENDING
+            return null;
         }
 
         switch (statusEnum) {
             case PENDING:
                 return MilestoneDto.StatusEnum.PENDING;
             case TERMINATED:
-                return MilestoneDto.StatusEnum.TERMINATED;  // Example: map COMPLETED to FINISHED
+                return MilestoneDto.StatusEnum.TERMINATED;
             case IN_PROGRESS:
                 return MilestoneDto.StatusEnum.IN_PROGRESS;
             case FINISHED:
@@ -120,18 +129,18 @@ public class MilestoneMapper extends BaseMapper<MilestoneDto, Milestone> {
 
     public Milestone.MilestoneStatus mapStatusEntity(MilestoneDto.StatusEnum statusEnum) {
         if (statusEnum == null) {
-            return null; // Or a default Status, e.g., Status.PENDING
+            return null;
         }
 
         switch (statusEnum) {
             case PENDING:
                 return Milestone.MilestoneStatus.PENDING;
-            case FINISHED:
-                return Milestone.MilestoneStatus.FINISHED;  // Example: map FINISHED to COMPLETED
             case TERMINATED:
                 return Milestone.MilestoneStatus.TERMINATED;
             case IN_PROGRESS:
                 return Milestone.MilestoneStatus.IN_PROGRESS;
+            case FINISHED:
+                return Milestone.MilestoneStatus.FINISHED;
             default:
                 throw new IllegalArgumentException("Unknown StatusEnum: " + statusEnum);
         }

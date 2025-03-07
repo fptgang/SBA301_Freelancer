@@ -15,7 +15,10 @@ ProjectDto:
     proposalCount:
       type: integer
       format: int32
-    estimateBudget:
+    minBudget:
+      type: number
+      format: double
+    maxBudget:
       type: number
       format: double
     milestones:
@@ -37,9 +40,8 @@ ProjectDto:
     status:
       type: string
       enum: [OPEN, IN_PROGRESS, TERMINATED, FINISHED]
-    activeProposalId:
-      type: integer
-      format: int64
+    contract:
+      $ref: 'contract.yml#/ContractDto'
     latestMessage:
       $ref: 'message.yml#/MessageDto'
     isVisible:

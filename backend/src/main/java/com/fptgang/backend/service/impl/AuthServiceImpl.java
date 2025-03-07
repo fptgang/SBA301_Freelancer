@@ -6,6 +6,7 @@ import com.fptgang.backend.api.model.RegisterRequestDto;
 import com.fptgang.backend.api.model.ResetPasswordRequestDto;
 import com.fptgang.backend.exception.InvalidInputException;
 import com.fptgang.backend.mapper.AccountMapper;
+import com.fptgang.backend.mapper.DetailLevel;
 import com.fptgang.backend.model.Account;
 import com.fptgang.backend.model.RefreshToken;
 import com.fptgang.backend.model.Role;
@@ -130,6 +131,7 @@ public class AuthServiceImpl implements AuthService {
                                 .lastName(dto.getLastName())
                                 .role(Role.CLIENT)  // TODO CHANGE THIS
                                 .password(hashPass)
+                                .isVerified(false)
                                 .build());
                 log.info("User {} registered using Email-Password", dto.getEmail());
                 return true;
@@ -234,7 +236,7 @@ public class AuthServiceImpl implements AuthService {
                 .token(token)
                 .refreshToken(refreshToken.getToken())
                 .email(account.getEmail())
-                .accountResponseDTO(accountMapper.toDTO(account));
+                .accountResponseDTO(accountMapper.toDTO(account, DetailLevel.FULL));
 
         return new Result(token, dto);
     }

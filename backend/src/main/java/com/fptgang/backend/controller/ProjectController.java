@@ -4,6 +4,7 @@ import com.fptgang.backend.api.controller.ProjectsApi;
 import com.fptgang.backend.api.model.GetProjects200Response;
 import com.fptgang.backend.api.model.Pageable;
 import com.fptgang.backend.api.model.ProjectDto;
+import com.fptgang.backend.mapper.DetailLevel;
 import com.fptgang.backend.mapper.ProjectMapper;
 import com.fptgang.backend.model.Role;
 import com.fptgang.backend.service.ProjectService;
@@ -32,7 +33,7 @@ public class ProjectController implements ProjectsApi {
 
     @Override
     public ResponseEntity<ProjectDto> createProject(ProjectDto projectDto) {
-        return ResponseEntity.ok(projectMapper.toDTO(projectService.create(projectMapper.toEntity(projectDto))));
+        return ResponseEntity.ok(projectMapper.toDTO(projectService.create(projectMapper.toEntity(projectDto)), DetailLevel.FULL));
     }
 
     @Override
@@ -43,7 +44,7 @@ public class ProjectController implements ProjectsApi {
 
     @Override
     public ResponseEntity<ProjectDto> getProjectById(Long projectId) {
-        return ResponseEntity.ok(projectMapper.toDTO(projectService.findByProjectId(projectId)));
+        return ResponseEntity.ok(projectMapper.toDTO(projectService.findByProjectId(projectId), DetailLevel.FULL));
     }
 
     @Override
@@ -54,7 +55,7 @@ public class ProjectController implements ProjectsApi {
         Long participantId = SecurityUtil.getCurrentUserId();
         if(type!=null && type.equalsIgnoreCase("chat")){
             var res = projectService.getProjectsSortedByLatestMessage(page,includeInvisible,participantId).map(
-                    projectMapper::toDTO
+                    project -> projectMapper.toDTO(project, DetailLevel.REFERENCE)
             );
             return OpenApiHelper.respondPage(res, GetProjects200Response.class);
         }
@@ -65,7 +66,7 @@ public class ProjectController implements ProjectsApi {
                 .includeInvisible(includeInvisible);
         var res = projectService
                 .getAll(params.build())
-                .map(projectMapper::toDTO);
+                .map(project -> projectMapper.toDTO(project, DetailLevel.REFERENCE));
         return OpenApiHelper.respondPage(res, GetProjects200Response.class);
     }
 
@@ -73,7 +74,7 @@ public class ProjectController implements ProjectsApi {
     public ResponseEntity<ProjectDto> updateProject(Long projectId, ProjectDto projectDto) {
         projectDto.setProjectId(projectId); // Override projectId
 
-        return ResponseEntity.ok(projectMapper.toDTO(projectService.update(projectMapper.toEntity(projectDto))));
+        return ResponseEntity.ok(projectMapper.toDTO(projectService.update(projectMapper.toEntity(projectDto)), DetailLevel.FULL));
 
     }
 

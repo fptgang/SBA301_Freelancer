@@ -2,6 +2,7 @@ package com.fptgang.backend.controller;
 
 import com.fptgang.backend.api.controller.EntityFilesApi;
 import com.fptgang.backend.api.model.FileDto;
+import com.fptgang.backend.mapper.DetailLevel;
 import com.fptgang.backend.mapper.FileMapper;
 import com.fptgang.backend.service.EntityFileService;
 import com.fptgang.backend.service.EntityFileService.EntityType;
@@ -40,7 +41,7 @@ public class EntityFileController implements EntityFilesApi {
             var uploadedFiles = entityFileService.uploadFiles(files, entityType, entityId, isVisible);
 
             var dtos = uploadedFiles.stream()
-                    .map(fileMapper::toDTO)
+                    .map(file -> fileMapper.toDTO(file, DetailLevel.FULL))
                     .collect(Collectors.toList());
 
             return new ResponseEntity<>(dtos, HttpStatus.CREATED);
@@ -62,7 +63,7 @@ public class EntityFileController implements EntityFilesApi {
             var uploadedFiles = entityFileService.uploadFiles(files, entityType, entityId, isVisible);
 
             var dtos = uploadedFiles.stream()
-                    .map(fileMapper::toDTO)
+                    .map(file -> fileMapper.toDTO(file, DetailLevel.FULL))
                     .collect(Collectors.toList());
 
             return new ResponseEntity<>(dtos, HttpStatus.CREATED);
@@ -87,7 +88,7 @@ public class EntityFileController implements EntityFilesApi {
             var files = entityFileService.getFilesByEntity(entityType, entityId);
 
             var dtos = files.stream()
-                    .map(fileMapper::toDTO)
+                    .map(file -> fileMapper.toDTO(file, DetailLevel.FULL))
                     .collect(Collectors.toList());
 
             return ResponseEntity.ok(dtos);

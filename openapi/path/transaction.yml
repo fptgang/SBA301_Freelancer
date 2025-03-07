@@ -29,8 +29,8 @@ get:
             $ref: '../component/error.yml#/ErrorResponse'
 
 post:
-  summary: Create a transaction
-  operationId: createTransaction
+  summary: Create a deposit
+  operationId: createDeposit
   security:
     - bearerAuth: []
   requestBody:

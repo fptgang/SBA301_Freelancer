@@ -86,6 +86,9 @@ public class MessageServiceTest {
         testProject.setClient(employer);
         testProject.setStatus(Project.ProjectStatus.OPEN);
         testProject.setIsVisible(true);
+        testProject.setMaxBudget(BigDecimal.valueOf(1000));
+        testProject.setMinBudget(BigDecimal.valueOf(500));
+        testProject.setStartDate(LocalDateTime.now());
 
         return projectService.create(testProject);
         // Set other necessary fields

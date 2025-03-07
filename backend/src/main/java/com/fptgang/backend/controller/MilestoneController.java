@@ -2,6 +2,7 @@ package com.fptgang.backend.controller;
 
 import com.fptgang.backend.api.controller.MilestonesApi;
 import com.fptgang.backend.api.model.*;
+import com.fptgang.backend.mapper.DetailLevel;
 import com.fptgang.backend.mapper.MilestoneMapper;
 import com.fptgang.backend.model.Role;
 import com.fptgang.backend.service.MilestoneService;
@@ -30,7 +31,7 @@ public class MilestoneController implements MilestonesApi {
     @Override
     public ResponseEntity<MilestoneDto> createMilestone(MilestoneDto milestoneDto) {
         var milestone = milestoneMapper.toEntity(milestoneDto);
-        return new ResponseEntity<>(milestoneMapper.toDTO(milestoneService.create(milestone)), HttpStatus.OK);
+        return new ResponseEntity<>(milestoneMapper.toDTO(milestoneService.create(milestone), DetailLevel.FULL), HttpStatus.OK);
     }
 
     @Override
@@ -41,7 +42,7 @@ public class MilestoneController implements MilestonesApi {
 
     @Override
     public ResponseEntity<MilestoneDto> getMilestoneById(Long milestoneId) {
-        return new ResponseEntity<>(milestoneMapper.toDTO(milestoneService.findById(milestoneId)), HttpStatus.OK);
+        return new ResponseEntity<>(milestoneMapper.toDTO(milestoneService.findById(milestoneId),DetailLevel.FULL), HttpStatus.OK);
     }
 
     @Override
@@ -55,7 +56,7 @@ public class MilestoneController implements MilestonesApi {
                 .includeInvisible(includeInvisible);
         var res = milestoneService
                 .getAll(params.build())
-                .map(milestoneMapper::toDTO);
+                .map((milestone) -> milestoneMapper.toDTO(milestone, DetailLevel.REFERENCE));
         return OpenApiHelper.respondPage(res, GetMilestones200Response.class);
     }
 
@@ -63,6 +64,6 @@ public class MilestoneController implements MilestonesApi {
     public ResponseEntity<MilestoneDto> updateMilestone(Long milestoneId, MilestoneDto milestoneDto) {
         milestoneDto.setMilestoneId(milestoneId); // Override milestoneId
 
-        return new ResponseEntity<>(milestoneMapper.toDTO(milestoneService.update(milestoneMapper.toEntity(milestoneDto))), HttpStatus.OK);
+        return new ResponseEntity<>(milestoneMapper.toDTO(milestoneService.update(milestoneMapper.toEntity(milestoneDto)),DetailLevel.FULL), HttpStatus.OK);
     }
 }

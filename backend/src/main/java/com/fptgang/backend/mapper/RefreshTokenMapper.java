@@ -4,26 +4,17 @@ import com.fptgang.backend.api.model.RefreshTokenDto;
 import com.fptgang.backend.model.RefreshToken;
 import com.fptgang.backend.repository.AccountRepos;
 import com.fptgang.backend.util.DateTimeUtil;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+@Slf4j
 @Component
-public class RefreshTokenMapper extends BaseMapper<RefreshTokenDto,RefreshToken> {
+public class RefreshTokenMapper extends BaseMapper<RefreshTokenDto, RefreshToken> {
+    private final AccountRepos accountRepos;
 
-    @Autowired
-    private AccountRepos accountRepos;
-
-    @Override
-    public RefreshTokenDto toDTO(RefreshToken entity) {
-        RefreshTokenDto dto = new RefreshTokenDto();
-        dto.setRefreshTokenId(entity.getRefreshTokenId());
-        dto.setAccountId(entity.getAccount().getAccountId());
-        dto.setToken(entity.getToken());
-        dto.setExpiryDate(DateTimeUtil.fromInstantToOffset(entity.getExpiryDate()));
-
-        return dto;
+    public RefreshTokenMapper(AccountRepos accountRepos) {
+        this.accountRepos = accountRepos;
     }
-
 
     @Override
     public RefreshToken toEntity(RefreshTokenDto dto) {
@@ -31,19 +22,42 @@ public class RefreshTokenMapper extends BaseMapper<RefreshTokenDto,RefreshToken>
             return null;
         }
 
-        RefreshToken refreshToken = new RefreshToken();
-        refreshToken.setRefreshTokenId(dto.getRefreshTokenId());
+        RefreshToken entity = new RefreshToken();
+        entity.setRefreshTokenId(dto.getRefreshTokenId());
+
         if (dto.getAccountId() != null) {
-            refreshToken.setAccount(accountRepos.findByAccountId(dto.getAccountId())
-                    .orElseThrow(() -> new IllegalArgumentException("Account does not exist")));
-        }
-        if (dto.getToken() != null) {
-            refreshToken.setToken(dto.getToken());
-        }
-        if (dto.getExpiryDate() != null) {
-            refreshToken.setExpiryDate(dto.getExpiryDate().toInstant());
+            entity.setAccount(accountRepos.findByAccountId(dto.getAccountId())
+                    .orElseThrow(() -> new IllegalArgumentException("Account not found")));
         }
 
-        return refreshToken;
+        entity.setToken(dto.getToken());
+        entity.setExpiryDate(dto.getExpiryDate().toInstant());
+
+        return entity;
+    }
+
+    @Override
+    public RefreshTokenDto toDTO(RefreshToken entity, DetailLevel level) {
+        if (entity == null) {
+            return null;
+        }
+
+        RefreshTokenDto dto = new RefreshTokenDto();
+        dto.setRefreshTokenId(entity.getRefreshTokenId());
+        dto.setAccountId(entity.getAccount().getAccountId());
+        dto.setToken(entity.getToken());
+        dto.setExpiryDate(DateTimeUtil.fromInstantToOffset(entity.getExpiryDate()));
+
+        if (level == DetailLevel.REFERENCE) {
+            return dto; // those fields are enough
+        }
+
+        if (level == DetailLevel.SUMMARY) {
+            return dto; // those fields are enough
+        }
+
+        // Add more fields if needed for other detail levels
+
+        return dto;
     }
 }
