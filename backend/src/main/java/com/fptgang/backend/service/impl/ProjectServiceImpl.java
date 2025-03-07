@@ -15,6 +15,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Service
@@ -44,12 +45,17 @@ public class ProjectServiceImpl implements ProjectService {
         ) {
             Project finalProject = project;
             LocalDateTime lastDeadline = LocalDateTime.now();
+            BigDecimal totalBudgetRatio = BigDecimal.ZERO;
             for (var milestone : milestones) {
                 milestone.setProject(finalProject);
                 if (milestone.getDeadline() != null && milestone.getDeadline().isAfter(lastDeadline)) {
                     lastDeadline = milestone.getDeadline();
+                    totalBudgetRatio = totalBudgetRatio.add(milestone.getBudgetRatio());
                 } else
                     throw new InvalidInputException("Milestone deadline must be after the previous milestone");
+            }
+            if(totalBudgetRatio.compareTo(BigDecimal.ONE) != 0) {
+                throw new InvalidInputException("Total budget ratio must be 1");
             }
             skills.forEach(skill -> {
                 skill.setProject(finalProject);
