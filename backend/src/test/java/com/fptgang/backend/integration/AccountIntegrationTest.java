@@ -49,6 +49,7 @@ class AccountIntegrationTest {
                         .password("pwd")
                         .avatarUrl("string")
                         .role(Role.ADMIN)
+                        .isVerified(false)
                         .isVisible(true)
                         .build(),
                 Account.builder().email("b@test.com")

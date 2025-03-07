@@ -47,6 +47,7 @@ public class OpenApiHelperIntegrationTest {
                 .role(Role.ADMIN)
                 .isVisible(true)
                 .balance(BigDecimal.valueOf(5000))
+                .isVerified(false)
                 .build());
         accountRepos.save(Account.builder()
                 .email("test2@example.com")
@@ -54,6 +55,7 @@ public class OpenApiHelperIntegrationTest {
                 .role(Role.STAFF)
                 .isVisible(false)
                 .balance(BigDecimal.valueOf(1500))
+                .isVerified(true)
                 .build());
         accountRepos.save(Account.builder()
                 .email("test3@example.com")
@@ -61,6 +63,7 @@ public class OpenApiHelperIntegrationTest {
                 .role(Role.CLIENT)
                 .isVisible(true)
                 .balance(BigDecimal.valueOf(10000))
+                .isVerified(true)
                 .build());
     }
 
