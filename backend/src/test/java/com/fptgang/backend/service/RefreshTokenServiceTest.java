@@ -60,9 +60,9 @@ public class RefreshTokenServiceTest {
         testAccount.setEmail("Sender@example.com");
         testAccount.setPassword("password");
         testAccount.setRole(Role.ADMIN);
-        testAccount.setVisible(true);
+        testAccount.setIsVisible(true);
         testAccount.setBalance(BigDecimal.valueOf(0));
-        testAccount.setVerified(false);
+        testAccount.setIsVerified(false);
         testAccount.setFirstName("John");
         testAccount.setLastName("Doe");
         accountService.create(testAccount);

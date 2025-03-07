@@ -37,12 +37,6 @@ public class ContractController implements ContractsApi {
     }
 
     @Override
-    public ResponseEntity<Void> deleteContract(Long contractId) {
-        contractService.deleteById(contractId);
-        return new ResponseEntity<>(HttpStatus.OK);
-    }
-
-    @Override
     public ResponseEntity<ContractDto> getContractById(Long contractId) {
         return new ResponseEntity<>(contractMapper.toDTO(contractService.findById(contractId)), HttpStatus.OK);
     }

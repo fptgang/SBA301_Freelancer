@@ -88,9 +88,9 @@ public class MessageController implements MessagesApi {
             Message message = messageMapper.toEntity(messageDto);
             messageDto = messageMapper.toDTO(messageService.create(message));
             messagingTemplate.convertAndSend("message/"+message.getProject().getClient().getEmail(), messageDto);
-            if(message.getProject().getActiveProposal() != null)
-            messagingTemplate.convertAndSend("message/"+message.getProject().getActiveProposal().getFreelancer().getEmail(), messageDto);
-            log.info("Sending message: {} to {} and {}", message.getContent(), "message/"+message.getSender().getAccountId(), message.getProject().getActiveProposal().getFreelancer().getAccountId());
+//            if(message.getProject().getActiveProposal() != null)
+//                messagingTemplate.convertAndSend("message/"+message.getProject().getActiveProposal().getFreelancer().getEmail(), messageDto);
+//            log.info("Sending message: {} to {} and {}", message.getContent(), "message/"+message.getSender().getAccountId(), message.getProject().getActiveProposal().getFreelancer().getAccountId());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

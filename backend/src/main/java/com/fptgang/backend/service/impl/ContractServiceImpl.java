@@ -38,15 +38,6 @@ public class ContractServiceImpl implements ContractService {
     }
 
     @Override
-    public Contract deleteById(long id) {
-        Contract contract = findById(
-                id
-        );
-        contract.setVisible(false);
-        return contractRepos.save(contract);
-    }
-
-    @Override
     public Page<Contract> getAll(ListParams params) {
         var spec = OpenApiHelper.groupBy( params.<Contract>toSpec(), "contractId");
         return contractRepos.findAll(spec, params.getPageable());

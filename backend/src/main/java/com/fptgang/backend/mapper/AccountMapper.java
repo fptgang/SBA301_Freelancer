@@ -32,9 +32,9 @@ public class AccountMapper extends BaseMapper<AccountDto, Account> {
             existingAccount.setAvatarUrl(dto.getAvatarUrl() != null ? dto.getAvatarUrl() : existingAccount.getAvatarUrl());
             existingAccount.setBalance(dto.getBalance() != null ? dto.getBalance() : existingAccount.getBalance());
             existingAccount.setRole(dto.getRole() != null ? mapRoleAccount(dto.getRole()) : existingAccount.getRole());
-            existingAccount.setVerified(dto.getIsVerified() != null ? dto.getIsVerified() : existingAccount.isVerified());
+            existingAccount.setIsVerified(dto.getIsVerified() != null ? dto.getIsVerified() : existingAccount.getIsVerified());
             existingAccount.setVerifiedAt(dto.getVerifiedAt() != null ? DateTimeUtil.fromOffsetToLocal(dto.getVerifiedAt()) : existingAccount.getVerifiedAt());
-            existingAccount.setVisible(dto.getIsVisible() != null ? dto.getIsVisible() : existingAccount.isVisible());
+            existingAccount.setIsVisible(dto.getIsVisible() != null ? dto.getIsVisible() : existingAccount.getIsVisible());
 
             return existingAccount;
         } else {
@@ -63,10 +63,10 @@ public class AccountMapper extends BaseMapper<AccountDto, Account> {
                 entity.setVerifiedAt(DateTimeUtil.fromOffsetToLocal(dto.getVerifiedAt()));
             }
             if (dto.getIsVerified() != null) {
-                entity.setVerified(dto.getIsVerified());
+                entity.setIsVerified(dto.getIsVerified());
             }
             if (dto.getIsVisible() != null) {
-                entity.setVisible(dto.getIsVisible());
+                entity.setIsVisible(dto.getIsVisible());
             }
 
 
@@ -89,8 +89,8 @@ public class AccountMapper extends BaseMapper<AccountDto, Account> {
         dto.setLastName(entity.getLastName());
         dto.setPassword(entity.getPassword());
         dto.setRole(mapRoleAccountDto(entity.getRole()));
-        dto.setIsVerified(entity.isVerified());
-        dto.setIsVisible(entity.isVisible());
+        dto.setIsVerified(entity.getIsVerified());
+        dto.setIsVisible(entity.getIsVisible());
         // Nullable fields
         dto.setAvatarUrl(entity.getAvatarUrl());
         dto.setBalance(entity.getBalance());

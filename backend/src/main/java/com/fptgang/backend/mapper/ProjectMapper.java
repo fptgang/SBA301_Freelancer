@@ -53,7 +53,7 @@ public class ProjectMapper extends BaseMapper<ProjectDto, Project> {
         clientDto.setFirstName(project.getClient().getFirstName());
         clientDto.setLastName(project.getClient().getLastName());
         clientDto.setEmail(project.getClient().getEmail());
-        clientDto.setIsVerified(project.getClient().isVerified());
+        clientDto.setIsVerified(project.getClient().getIsVerified());
         clientDto.setAvatarUrl(project.getClient().getAvatarUrl());
         clientDto.setCreatedAt(DateTimeUtil.fromLocalToOffset(project.getClient().getCreatedAt()));
         dto.setProjectId(project.getProjectId());
@@ -62,20 +62,20 @@ public class ProjectMapper extends BaseMapper<ProjectDto, Project> {
         dto.setTitle(project.getTitle());
         dto.setDescription(project.getDescription());
         dto.setStatus(ProjectDto.StatusEnum.fromValue(project.getStatus().name()));
-        dto.setActiveProposalId(project.getActiveProposal() != null ? project.getActiveProposal().getProposalId() : null);
-        dto.setIsVisible(project.isVisible());
+       // dto.setActiveProposalId(project.getActiveProposal() != null ? project.getActiveProposal().getProposalId() : null);
+        dto.setIsVisible(project.getIsVisible());
         dto.setCreatedAt(DateTimeUtil.fromLocalToOffset(project.getCreatedAt()));
         dto.setUpdatedAt(DateTimeUtil.fromLocalToOffset(project.getUpdatedAt()));
         dto.setRequiredSkills(project.getRequiredSkills().stream().map(projectSkillMapper::toDTO).collect(Collectors.toList()));
-        dto.setEstimateBudget(project.getMilestones().stream().map(milestone -> milestone.getBudget()).reduce(BigDecimal.ZERO, BigDecimal::add));
+//        dto.setEstimateBudget(project.getMilestones().stream().map(milestone -> milestone.getBudget()).reduce(BigDecimal.ZERO, BigDecimal::add));
         dto.setProposalCount(project.getProposals().size());
         dto.setMilestones(project.getMilestones().stream().map(milestoneMapper::toDTO).collect(Collectors.toList()));
         dto.setFiles(project.getFiles().stream().map(fileMapper::toDTO).collect(Collectors.toList()));
-        if(SecurityUtil.getCurrentUserId()==project.getClient().getAccountId()
-                ||(project.getActiveProposal()!=null&&SecurityUtil.getCurrentUserId()==project.getActiveProposal().getFreelancer().getAccountId())
-                ||(project.getStaff()!=null&&project.getStaff().getAccountId()==SecurityUtil.getCurrentUserId())){
-            dto.setLatestMessage(messageMapper.toDTO(project.getMessages().stream().max(Comparator.comparing(Message::getCreatedAt)).orElse(null)));
-        }
+//        if(SecurityUtil.getCurrentUserId()==project.getClient().getAccountId()
+//                ||(project.getActiveProposal()!=null&&SecurityUtil.getCurrentUserId()==project.getActiveProposal().getFreelancer().getAccountId())
+//                ||(project.getStaff()!=null&&project.getStaff().getAccountId()==SecurityUtil.getCurrentUserId())){
+//            dto.setLatestMessage(messageMapper.toDTO(project.getMessages().stream().max(Comparator.comparing(Message::getCreatedAt)).orElse(null)));
+//        }
         return dto;
     }
 
@@ -91,15 +91,15 @@ public class ProjectMapper extends BaseMapper<ProjectDto, Project> {
             existEntity.setTitle(dto.getTitle() != null ? dto.getTitle() : existEntity.getTitle());
             existEntity.setDescription(dto.getDescription() != null ? dto.getDescription() : existEntity.getDescription());
             existEntity.setStatus(dto.getStatus() != null ? Project.ProjectStatus.valueOf(dto.getStatus().getValue()) : existEntity.getStatus());
-            existEntity.setVisible(dto.getIsVisible() != null ? dto.getIsVisible() : existEntity.isVisible());
+            existEntity.setIsVisible(dto.getIsVisible() != null ? dto.getIsVisible() : existEntity.getIsVisible());
             existEntity.setCategory(dto.getProjectCategoryId() != null ?
                     projectCategoryRepos.findByProjectCategoryId(dto.getProjectCategoryId())
                             .orElseThrow(() -> new IllegalArgumentException("Project category not found")) :
                     existEntity.getCategory());
-            existEntity.setActiveProposal(dto.getActiveProposalId() != null ?
-                    proposalRepos.findByProposalId(dto.getActiveProposalId())
-                            .orElseThrow(() -> new IllegalArgumentException("Proposal not found")) :
-                    existEntity.getActiveProposal());
+//            existEntity.setActiveProposal(dto.getActiveProposalId() != null ?
+//                    proposalRepos.findByProposalId(dto.getActiveProposalId())
+//                            .orElseThrow(() -> new IllegalArgumentException("Proposal not found")) :
+//                    existEntity.getActiveProposal());
             existEntity.setRequiredSkills(dto.getRequiredSkills() != null ?
                     dto.getRequiredSkills().stream().map(projectSkillMapper::toEntity).collect(Collectors.toList()) :
                     existEntity.getRequiredSkills());
@@ -132,11 +132,11 @@ public class ProjectMapper extends BaseMapper<ProjectDto, Project> {
             if (dto.getStatus() != null) {
                 project.setStatus(Project.ProjectStatus.valueOf(dto.getStatus().getValue()));
             }
-
-            if (dto.getActiveProposalId() != null) {
-                project.setActiveProposal(proposalRepos.findByProposalId(dto.getActiveProposalId())
-                        .orElseThrow(() -> new IllegalArgumentException("Proposal not found")));
-            }
+//
+//            if (dto.getActiveProposalId() != null) {
+//                project.setActiveProposal(proposalRepos.findByProposalId(dto.getActiveProposalId())
+//                        .orElseThrow(() -> new IllegalArgumentException("Proposal not found")));
+//            }
 
             if (dto.getRequiredSkills() != null) {
                 project.setRequiredSkills(dto.getRequiredSkills().stream()
@@ -151,7 +151,7 @@ public class ProjectMapper extends BaseMapper<ProjectDto, Project> {
             }
 
             if (dto.getIsVisible() != null) {
-                project.setVisible(dto.getIsVisible());
+                project.setIsVisible(dto.getIsVisible());
             }
 
             if (dto.getFiles() != null) {

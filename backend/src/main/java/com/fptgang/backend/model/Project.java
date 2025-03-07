@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -41,13 +42,22 @@ public class Project {
     @Searchable
     private String title;
 
-    @Column(columnDefinition = "TEXT", length = 10000000, nullable = false)
+    @Column(columnDefinition = "TEXT", length = 100_000, nullable = false)
     @Searchable
     private String description;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private ProjectStatus status;
+
+    @Column(nullable = false)
+    private LocalDateTime startDate;
+
+    @Column(nullable = false, precision = 10, scale = 2)
+    private BigDecimal minBudget;
+
+    @Column(nullable = false, precision = 10, scale = 2)
+    private BigDecimal maxBudget;
 
     @CreationTimestamp
     private LocalDateTime createdAt;
@@ -56,27 +66,31 @@ public class Project {
     private LocalDateTime updatedAt;
 
     @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT TRUE")
-    private boolean isVisible = true;
+    @Builder.Default
+    private Boolean isVisible = true;
 
     @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @Builder.Default
     private List<File> files = new ArrayList<>();
 
     @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @Builder.Default
     private List<Proposal> proposals = new ArrayList<>();
 
+    @OneToOne(mappedBy = "project", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    private Contract contract;
+
     @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @Builder.Default
     private List<Milestone> milestones = new ArrayList<>();
 
     @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @Builder.Default
     private List<ProjectSkill> requiredSkills = new ArrayList<>();
 
     @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @Builder.Default
     private List<Message> messages = new ArrayList<>();
-
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "active_proposal_id", unique = true)
-    @Nullable
-    private Proposal activeProposal;
 
     public enum ProjectStatus {
         OPEN, IN_PROGRESS, TERMINATED, FINISHED

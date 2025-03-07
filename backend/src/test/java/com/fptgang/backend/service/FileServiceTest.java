@@ -40,7 +40,7 @@ class FileServiceTest {
         file.setFileId(1L);
         file.setFileName("test.txt");
         file.setFileUrl("https://test.blob.core.windows.net/test.txt");
-        file.setVisible(true);
+        file.setIsVisible(true);
     }
 
     @Test
@@ -111,7 +111,7 @@ class FileServiceTest {
         File deletedFile = fileService.deleteById(1L);
 
         // Assert
-        assertFalse(deletedFile.isVisible());
+        assertFalse(deletedFile.getIsVisible());
         verify(fileRepos, times(1)).save(file);
     }
 

@@ -64,7 +64,7 @@ class MilestoneServiceTest {
         milestone.setBudget(BigDecimal.valueOf(1000));
         milestone.setDeadline(LocalDateTime.now().plusDays(30));
         milestone.setStatus(Milestone.MilestoneStatus.PENDING);
-        milestone.setVisible(true);
+        milestone.setIsVisible(true);
         milestone.setProject(project);
         return milestoneService.create(milestone);
     }
@@ -72,9 +72,9 @@ class MilestoneServiceTest {
         Account account = new Account();
         account.setEmail("MilestoneTest"+id+"@example.com");
         account.setPassword("password");
-        account.setVisible(true);
+        account.setIsVisible(true);
         account.setBalance(BigDecimal.valueOf(0));
-        account.setVerified(false);
+        account.setIsVerified(false);
         account.setRole(Role.CLIENT);
         account.setFirstName("John");
         account.setLastName("Doe");
@@ -86,7 +86,7 @@ class MilestoneServiceTest {
         // First create and save the category
         ProjectCategory testCategory = new ProjectCategory();
         testCategory.setName("Test Category");
-        testCategory.setVisible(true);
+        testCategory.setIsVisible(true);
         testCategory = projectCategoryRepos.save(testCategory);
 
         // Then create the project with the saved category
@@ -96,7 +96,7 @@ class MilestoneServiceTest {
         testProject.setCategory(testCategory);
         testProject.setClient(employer);
         testProject.setStatus(Project.ProjectStatus.OPEN);
-        testProject.setVisible(true);
+        testProject.setIsVisible(true);
 
         return projectService.create(testProject);
         // Set other necessary fields
@@ -119,7 +119,7 @@ class MilestoneServiceTest {
         milestone.setBudget(BigDecimal.valueOf(1000));
         milestone.setDeadline(LocalDateTime.now().plusDays(30));
         milestone.setStatus(Milestone.MilestoneStatus.PENDING);
-        milestone.setVisible(true);
+        milestone.setIsVisible(true);
 
         assertThrows(RuntimeException.class, () -> milestoneService.create(milestone));
     }
@@ -162,7 +162,7 @@ class MilestoneServiceTest {
         milestone.setBudget(BigDecimal.valueOf(1000));
         milestone.setDeadline(LocalDateTime.now().plusDays(30));
         milestone.setStatus(Milestone.MilestoneStatus.PENDING);
-        milestone.setVisible(true);
+        milestone.setIsVisible(true);
 
         assertThrows(RuntimeException.class, () -> milestoneService.update(milestone));
     }
@@ -174,7 +174,7 @@ class MilestoneServiceTest {
 
         milestoneService.deleteById(milestone.getMilestoneId());
 
-        assertFalse(milestoneService.findById(milestone.getMilestoneId()).isVisible());
+        assertFalse(milestoneService.findById(milestone.getMilestoneId()).getIsVisible());
     }
 
     @Test
@@ -211,7 +211,7 @@ class MilestoneServiceTest {
         milestone.setBudget(BigDecimal.valueOf(1000));
         milestone.setDeadline(LocalDateTime.now().plusDays(30));
         milestone.setStatus(Milestone.MilestoneStatus.PENDING);
-        milestone.setVisible(true);
+        milestone.setIsVisible(true);
         milestone.setProject(project);
         milestoneService.create(milestone);
 

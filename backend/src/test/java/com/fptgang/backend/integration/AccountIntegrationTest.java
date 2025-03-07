@@ -49,7 +49,7 @@ class AccountIntegrationTest {
                         .password("pwd")
                         .avatarUrl("string")
                         .role(Role.ADMIN)
-                        .isVisible(true)
+                        .getIsVisible(true)
                         .build(),
                 Account.builder().email("b@test.com")
                         .firstName("b")
@@ -57,8 +57,8 @@ class AccountIntegrationTest {
                         .password("pwd")
                         .avatarUrl("string")
                         .role(Role.ADMIN)
-                        .isVerified(true)
-                        .isVisible(true)
+                        .getIsVerified(true)
+                        .getIsVisible(true)
                         .build()
         ));
     }

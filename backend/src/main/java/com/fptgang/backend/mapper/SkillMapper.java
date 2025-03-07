@@ -20,7 +20,7 @@ public class SkillMapper extends BaseMapper<SkillDto, Skill> {
         SkillDto dto = new SkillDto();
         dto.setSkillId(entity.getSkillId());
         dto.setName(entity.getName());
-        dto.setIsVisible(entity.isVisible());
+        dto.setIsVisible(entity.getIsVisible());
         dto.setCreatedAt(DateTimeUtil.fromLocalToOffset(entity.getCreatedAt()));
         dto.setUpdatedAt(DateTimeUtil.fromLocalToOffset(entity.getUpdatedAt()));
         return dto;
@@ -40,7 +40,7 @@ public class SkillMapper extends BaseMapper<SkillDto, Skill> {
         }
 
         if (dto.getIsVisible() != null) {
-            skill.setVisible(dto.getIsVisible());
+            skill.setIsVisible(dto.getIsVisible());
         }
 
         return skill;

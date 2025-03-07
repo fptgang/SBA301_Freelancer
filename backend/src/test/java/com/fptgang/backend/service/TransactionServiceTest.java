@@ -61,9 +61,9 @@ public class TransactionServiceTest {
         fromAccount.setEmail("from@example.com");
         fromAccount.setPassword("password");
         fromAccount.setRole(Role.ADMIN);
-        fromAccount.setVisible(true);
+        fromAccount.setIsVisible(true);
         fromAccount.setBalance(BigDecimal.valueOf(0));
-        fromAccount.setVerified(false);
+        fromAccount.setIsVerified(false);
         fromAccount.setFirstName("John");
         fromAccount.setLastName("Doe");
         accountRepos.save(fromAccount);
@@ -72,9 +72,9 @@ public class TransactionServiceTest {
         toAccount.setEmail("to@example.com");
         toAccount.setPassword("password");
         toAccount.setRole(Role.CLIENT);
-        toAccount.setVisible(true);
+        toAccount.setIsVisible(true);
         toAccount.setBalance(BigDecimal.valueOf(0));
-        toAccount.setVerified(false);
+        toAccount.setIsVerified(false);
         toAccount.setFirstName("John");
         toAccount.setLastName("Wick");
         accountRepos.save(toAccount);

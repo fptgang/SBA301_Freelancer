@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -37,6 +38,9 @@ public class Proposal {
     @Searchable
     private String notes;
 
+    @Column(nullable = false, precision = 10, scale = 2)
+    private BigDecimal budget;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private ProposalStatus status;
@@ -47,16 +51,19 @@ public class Proposal {
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
-    @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT TRUE")
-    private boolean isVisible = true;
-
     @OneToMany(mappedBy = "proposal", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @Builder.Default
     private List<File> files = new ArrayList<>();
 
     public enum ProposalStatus {
         PENDING,
+        EXPIRED,
+        WITHDRAWN,
         ACCEPTED,
         REJECTED
     }
+
+    @OneToOne(mappedBy = "proposal", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    private Contract contract;
 }
 

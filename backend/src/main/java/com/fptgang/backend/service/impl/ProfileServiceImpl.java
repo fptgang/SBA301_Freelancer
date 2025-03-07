@@ -41,7 +41,7 @@ public class ProfileServiceImpl implements ProfileService {
     public void deleteById(long id) {
         Profile profile = profileRepos.findByProfileId(id).orElseThrow(
                 () -> new InvalidInputException("Profile with id " + id + "not found"));
-        profile.setVisible(false);
+        profile.setIsVisible(false);
         profileRepos.save(profile);
     }
 

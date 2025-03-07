@@ -38,15 +38,6 @@ public class ProposalServiceImpl implements ProposalService {
     }
 
     @Override
-    public Proposal deleteById(long id) {
-        Proposal proposal = findById(
-                id
-        );
-        proposal.setVisible(false);
-        return proposalRepos.save(proposal);
-    }
-
-    @Override
     public Page<Proposal> getAll(ListParams params) {
         var spec = OpenApiHelper.groupBy(params.<Proposal>toSpec(), "proposalId");
         return proposalRepos.findAll(spec, params.getPageable());

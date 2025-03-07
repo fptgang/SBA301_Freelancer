@@ -48,7 +48,7 @@ public class ProjectCategoryServiceImpl implements ProjectCategoryService {
     public void deleteById(long projectCategoryId) {
         ProjectCategory projectCategory = projectCategoryRepos.findByProjectCategoryId(projectCategoryId).orElseThrow(
                 () -> new InvalidInputException("Project Category with id " + projectCategoryId + "not found"));
-        projectCategory.setVisible(false);
+        projectCategory.setIsVisible(false);
         projectCategoryRepos.save(projectCategory);
     }
 

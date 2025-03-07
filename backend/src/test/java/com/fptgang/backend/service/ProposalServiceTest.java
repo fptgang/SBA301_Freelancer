@@ -57,9 +57,9 @@ class ProposalServiceTest {
         Account account = new Account();
         account.setEmail("ProposalTest"+id+"@example.com");
         account.setPassword("password");
-        account.setVisible(true);
+        account.setIsVisible(true);
         account.setBalance(BigDecimal.valueOf(0));
-        account.setVerified(false);
+        account.setIsVerified(false);
         account.setRole(Role.CLIENT);
         account.setFirstName("John");
         account.setLastName("Doe");
@@ -71,7 +71,7 @@ class ProposalServiceTest {
         // First create and save the category
         ProjectCategory testCategory = new ProjectCategory();
         testCategory.setName("Test Category");
-        testCategory.setVisible(true);
+        testCategory.setIsVisible(true);
         testCategory = projectCategoryRepos.save(testCategory);
 
         // Then create the project with the saved category
@@ -81,7 +81,7 @@ class ProposalServiceTest {
         testProject.setCategory(testCategory);
         testProject.setClient(employer);
         testProject.setStatus(Project.ProjectStatus.OPEN);
-        testProject.setVisible(true);
+        testProject.setIsVisible(true);
 
         return projectService.create(testProject);
         // Set other necessary fields
@@ -93,7 +93,7 @@ class ProposalServiceTest {
         proposal.setProject(project);
         proposal.setFreelancer(freelancer);
         proposal.setStatus(Proposal.ProposalStatus.PENDING);
-        proposal.setVisible(true);
+        proposal.setIsVisible(true);
         return proposalService.create(proposal);
     }
 
@@ -114,7 +114,7 @@ class ProposalServiceTest {
         freelancer.setAccountId(1L);
         proposal.setFreelancer(freelancer);
         proposal.setStatus(Proposal.ProposalStatus.PENDING);
-        proposal.setVisible(true);
+        proposal.setIsVisible(true);
 
         assertThrows(RuntimeException.class, () -> proposalService.create(proposal));
     }
@@ -154,7 +154,7 @@ class ProposalServiceTest {
         Proposal proposal = new Proposal();
         proposal.setProposalId(999L);
         proposal.setStatus(Proposal.ProposalStatus.PENDING);
-        proposal.setVisible(true);
+        proposal.setIsVisible(true);
 
         assertThrows(RuntimeException.class, () -> proposalService.update(proposal));
     }
@@ -166,7 +166,7 @@ class ProposalServiceTest {
 
         proposalService.deleteById(proposal.getProposalId());
 
-        assertFalse(proposalService.findById(proposal.getProposalId()).isVisible());
+        assertFalse(proposalService.findById(proposal.getProposalId()).getIsVisible());
     }
 
     @Test
@@ -201,7 +201,7 @@ class ProposalServiceTest {
         proposal.setProject(project);
         proposal.setFreelancer(freelancer);
         proposal.setStatus(Proposal.ProposalStatus.ACCEPTED);
-        proposal.setVisible(true);
+        proposal.setIsVisible(true);
         proposalService.create(proposal);
         Pageable pageable = PageRequest.of(0, 10);
         var params = ListParams.builder()

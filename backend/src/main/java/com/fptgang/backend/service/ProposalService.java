@@ -9,6 +9,5 @@ public interface ProposalService {
     Proposal create(Proposal proposal);
     Proposal update(Proposal proposal);
     Proposal findById(long id);
-    Proposal deleteById(long id);
     Page<Proposal> getAll(ListParams params);
 }

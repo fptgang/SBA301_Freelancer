@@ -61,9 +61,9 @@ public class MessageServiceTest {
         Account account = new Account();
         account.setEmail("MessageTest"+id+"@example.com");
         account.setPassword("password");
-        account.setVisible(true);
+        account.setIsVisible(true);
         account.setBalance(BigDecimal.valueOf(0));
-        account.setVerified(false);
+        account.setIsVerified(false);
         account.setRole(Role.CLIENT);
         account.setFirstName("John");
         account.setLastName("Doe");
@@ -75,7 +75,7 @@ public class MessageServiceTest {
         // First create and save the category
         ProjectCategory testCategory = new ProjectCategory();
         testCategory.setName("Test Category");
-        testCategory.setVisible(true);
+        testCategory.setIsVisible(true);
         testCategory = projectCategoryRepos.save(testCategory);
 
         // Then create the project with the saved category
@@ -85,7 +85,7 @@ public class MessageServiceTest {
         testProject.setCategory(testCategory);
         testProject.setClient(employer);
         testProject.setStatus(Project.ProjectStatus.OPEN);
-        testProject.setVisible(true);
+        testProject.setIsVisible(true);
 
         return projectService.create(testProject);
         // Set other necessary fields
@@ -106,7 +106,7 @@ public class MessageServiceTest {
         testMessage.setProject(project);
         testMessage.setContent("Test Message Content");
         testMessage.setCreatedAt(LocalDateTime.now());
-        testMessage.setVisible(true);
+        testMessage.setIsVisible(true);
     }
 
     @AfterEach
@@ -126,7 +126,7 @@ public class MessageServiceTest {
         assertNotNull(createdMessage);
         assertNotNull(createdMessage.getMessageId());
         assertEquals("Test Message Content", createdMessage.getContent());
-        assertTrue(createdMessage.isVisible());
+        assertTrue(createdMessage.getIsVisible());
     }
 
     @Test
@@ -176,7 +176,7 @@ public class MessageServiceTest {
         Message updatedMessage = messageService.findByMessageId(savedMessage.getMessageId());
 
         // Assert
-        assertFalse(updatedMessage.isVisible());
+        assertFalse(updatedMessage.getIsVisible());
     }
 
     @Test
@@ -219,14 +219,14 @@ public class MessageServiceTest {
         testMessage.setProject(project);
         testMessage.setContent("Test Message Content");
         testMessage.setCreatedAt(LocalDateTime.now());
-        testMessage.setVisible(true);
+        testMessage.setIsVisible(true);
         messageService.create(testMessage);
         var testMessage2 = new Message();
         testMessage2.setSender(sender);
         testMessage2.setProject(project);
         testMessage2.setContent("unfiltered Message Content");
         testMessage2.setCreatedAt(LocalDateTime.now());
-        testMessage2.setVisible(true);
+        testMessage2.setIsVisible(true);
         messageService.create(testMessage2);
         Pageable pageable = PageRequest.of(0, 10);
         Page<Message> messagePage = messageService.getAll(pageable, "content,startswith,Test");
