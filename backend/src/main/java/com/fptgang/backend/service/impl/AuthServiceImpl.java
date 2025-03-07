@@ -131,6 +131,7 @@ public class AuthServiceImpl implements AuthService {
                                 .lastName(dto.getLastName())
                                 .role(Role.CLIENT)  // TODO CHANGE THIS
                                 .password(hashPass)
+                                .isVerified(false)
                                 .build());
                 log.info("User {} registered using Email-Password", dto.getEmail());
                 return true;
