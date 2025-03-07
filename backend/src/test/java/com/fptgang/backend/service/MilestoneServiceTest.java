@@ -96,6 +96,9 @@ class MilestoneServiceTest {
         testProject.setCategory(testCategory);
         testProject.setClient(employer);
         testProject.setStatus(Project.ProjectStatus.OPEN);
+        testProject.setMaxBudget(BigDecimal.valueOf(1000));
+        testProject.setMinBudget(BigDecimal.valueOf(500));
+        testProject.setStartDate(LocalDateTime.now());
         testProject.setIsVisible(true);
 
         return projectService.create(testProject);
