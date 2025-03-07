@@ -16,6 +16,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
@@ -49,6 +52,10 @@ class ProjectServiceTest {
         testProject.setTitle("Test Project");
         testProject.setDescription("Test Description");
         testProject.setCategory(testCategory);
+        testProject.setStartDate(LocalDateTime.now());
+        testProject.setMaxBudget(BigDecimal.valueOf(1000));
+        testProject.setMinBudget(BigDecimal.valueOf(500));
+
         // Set other necessary fields
     }
 
