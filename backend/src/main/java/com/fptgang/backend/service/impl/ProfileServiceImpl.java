@@ -5,6 +5,7 @@ import com.fptgang.backend.model.Profile;
 import com.fptgang.backend.repository.ProfileRepos;
 import com.fptgang.backend.service.ProfileService;
 import com.fptgang.backend.service.params.ListParams;
+import com.fptgang.backend.util.EntityUtil;
 import com.fptgang.backend.util.OpenApiHelper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -20,14 +21,19 @@ public class ProfileServiceImpl implements ProfileService {
 
     @Override
     public Profile create(Profile profile) {
+        profile.setProfileId(null);
         return profileRepos.save(profile);
     }
 
     @Override
     public Profile update(Profile profile) {
-        if(profile.getProfileId() == null || !profileRepos.existsById(profile.getProfileId())){
+        if(profile.getProfileId() == null){
             throw new InvalidInputException("Profile does not exist");
         }
+        var existing = profileRepos.findByProfileId(profile.getProfileId()).orElseThrow(
+                () -> new InvalidInputException("Profile does not exist"));
+        EntityUtil.merge(existing, profile);
+
         return profileRepos.save(profile);
     }
 

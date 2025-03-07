@@ -5,6 +5,7 @@ import com.fptgang.backend.api.model.ContractDto;
 import com.fptgang.backend.api.model.GetContracts200Response;
 import com.fptgang.backend.api.model.Pageable;
 import com.fptgang.backend.mapper.ContractMapper;
+import com.fptgang.backend.mapper.DetailLevel;
 import com.fptgang.backend.model.Role;
 import com.fptgang.backend.service.ContractService;
 import com.fptgang.backend.service.params.ListParams;
@@ -33,12 +34,13 @@ public class ContractController implements ContractsApi {
     @Override
     public ResponseEntity<ContractDto> createContract(ContractDto contractDto) {
         var contract = contractMapper.toEntity(contractDto);
-        return new ResponseEntity<>(contractMapper.toDTO(contractService.create(contract)), HttpStatus.OK);
+        return new ResponseEntity<>(contractMapper.toDTO(contractService.create(contract), DetailLevel.FULL), HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity<ContractDto> getContractById(Long contractId) {
-        return new ResponseEntity<>(contractMapper.toDTO(contractService.findById(contractId)), HttpStatus.OK);
+
+        return new ResponseEntity<>(contractMapper.toDTO(contractService.findById(contractId),DetailLevel.FULL), HttpStatus.OK);
     }
 
     @Override
@@ -52,7 +54,7 @@ public class ContractController implements ContractsApi {
                 .includeInvisible(includeInvisible);
         var res = contractService
                 .getAll(params.build())
-                .map(contractMapper::toDTO);
+                .map(contract -> contractMapper.toDTO(contract, DetailLevel.REFERENCE));
         return OpenApiHelper.respondPage(res, GetContracts200Response.class);
     }
 

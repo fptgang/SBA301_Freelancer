@@ -4,6 +4,7 @@ import com.fptgang.backend.model.Proposal;
 import com.fptgang.backend.repository.ProposalRepos;
 import com.fptgang.backend.service.ProposalService;
 import com.fptgang.backend.service.params.ListParams;
+import com.fptgang.backend.util.EntityUtil;
 import com.fptgang.backend.util.OpenApiHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -19,14 +20,18 @@ public class ProposalServiceImpl implements ProposalService {
 
     @Override
     public Proposal create(Proposal proposal) {
+        proposal.setProposalId(null);
         return proposalRepos.save(proposal);
     }
 
     @Override
     public Proposal update(Proposal proposal) {
-        if (proposal.getProposalId() == null || proposalRepos.findByProposalId(proposal.getProposalId()).isEmpty()) {
+        if (proposal.getProposalId() == null ) {
             throw new IllegalArgumentException("Proposal does not exist");
         }
+        var existing = proposalRepos.findById(proposal.getProposalId()).orElseThrow(
+                () -> new IllegalArgumentException("Proposal does not exist"));
+        EntityUtil.merge(existing, proposal);
         return proposalRepos.save(proposal);
     }
 

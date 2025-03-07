@@ -4,6 +4,7 @@ import com.fptgang.backend.api.controller.ProjectCategoriesApi;
 import com.fptgang.backend.api.model.GetProjectCategories200Response;
 import com.fptgang.backend.api.model.Pageable;
 import com.fptgang.backend.api.model.ProjectCategoryDto;
+import com.fptgang.backend.mapper.DetailLevel;
 import com.fptgang.backend.mapper.ProjectCategoryMapper;
 import com.fptgang.backend.model.Role;
 import com.fptgang.backend.service.ProjectCategoryService;
@@ -39,8 +40,9 @@ public class ProjectCategoryController implements ProjectCategoriesApi {
     @Override
     public ResponseEntity<ProjectCategoryDto> createProjectCategory(ProjectCategoryDto projectCategoryDto) {
         var projectCategory = projectCategoryService.create(projectCategoryMapper.toEntity(projectCategoryDto));
-        messagingTemplate.convertAndSend("resources/projectCategories", projectCategoryMapper.toDTO(projectCategory));
-        return new ResponseEntity<>(projectCategoryMapper.toDTO(projectCategory), HttpStatus.OK);
+        messagingTemplate.convertAndSend("resources/projectCategories", projectCategoryMapper.toDTO(projectCategory, DetailLevel.FULL
+        ));
+        return new ResponseEntity<>(projectCategoryMapper.toDTO(projectCategory,DetailLevel.FULL), HttpStatus.OK);
     }
 
     @Override
@@ -61,19 +63,19 @@ public class ProjectCategoryController implements ProjectCategoriesApi {
                 .includeInvisible(includeInvisible);
         var res = projectCategoryService
                 .getAll(params.build())
-                .map(projectCategoryMapper::toDTO);
+                .map(projectCategory -> projectCategoryMapper.toDTO(projectCategory, DetailLevel.REFERENCE));
         return OpenApiHelper.respondPage(res, GetProjectCategories200Response.class);
     }
 
     @Override
     public ResponseEntity<ProjectCategoryDto> getProjectCategoryById(Long projectCategoryId) {
-        return new ResponseEntity<>(projectCategoryMapper.toDTO(projectCategoryService.findByProjectCategoryId(projectCategoryId)), HttpStatus.OK);
+        return new ResponseEntity<>(projectCategoryMapper.toDTO(projectCategoryService.findByProjectCategoryId(projectCategoryId),DetailLevel.FULL), HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity<ProjectCategoryDto> updateProjectCategory(Long projectCategoryId, ProjectCategoryDto projectCategoryDto) {
         projectCategoryDto.setProjectCategoryId(projectCategoryId); // Override projectCategoryId
         messagingTemplate.convertAndSend("resources/projectCategories", projectCategoryDto);
-        return new ResponseEntity<>(projectCategoryMapper.toDTO(projectCategoryService.update(projectCategoryMapper.toEntity(projectCategoryDto))), HttpStatus.OK);
+        return new ResponseEntity<>(projectCategoryMapper.toDTO(projectCategoryService.update(projectCategoryMapper.toEntity(projectCategoryDto)),DetailLevel.FULL), HttpStatus.OK);
     }
 }

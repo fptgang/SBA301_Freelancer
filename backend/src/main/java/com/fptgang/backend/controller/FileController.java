@@ -3,6 +3,7 @@ package com.fptgang.backend.controller;
 import com.fptgang.backend.api.controller.FilesApi;
 import com.fptgang.backend.api.controller.ProfilesApi;
 import com.fptgang.backend.api.model.*;
+import com.fptgang.backend.mapper.DetailLevel;
 import com.fptgang.backend.mapper.FileMapper;
 import com.fptgang.backend.mapper.ProfileMapper;
 import com.fptgang.backend.model.Account;
@@ -43,7 +44,7 @@ public class FileController implements FilesApi {
 
     @Override
     public ResponseEntity<FileDto> getFileById(Long fileId) {
-        return new ResponseEntity<>(fileMapper.toDTO(fileService.findById(fileId)), HttpStatus.OK);
+        return new ResponseEntity<>(fileMapper.toDTO(fileService.findById(fileId), DetailLevel.FULL), HttpStatus.OK);
     }
 
     @Override
@@ -55,7 +56,7 @@ public class FileController implements FilesApi {
                 .filter(filter)
                 .includeInvisible(includeInvisible)
                 .build();
-        var res = fileService.getAll(params).map(fileMapper::toDTO);
+        var res = fileService.getAll(params).map(file -> fileMapper.toDTO(file, DetailLevel.REFERENCE));
         return OpenApiHelper.respondPage(res, GetFiles200Response.class);
     }
 }

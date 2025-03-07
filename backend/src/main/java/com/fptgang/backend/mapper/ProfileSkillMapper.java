@@ -7,34 +7,20 @@ import com.fptgang.backend.model.ProfileSkill;
 import com.fptgang.backend.model.Skill;
 import com.fptgang.backend.repository.ProfileSkillRepos;
 import com.fptgang.backend.repository.SkillRepos;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import java.util.Optional;
-
+@Slf4j
 @Component
 public class ProfileSkillMapper extends BaseMapper<ProfileSkillDto, ProfileSkill> {
-    @Autowired
-    private SkillMapper skillMapper;
-    @Autowired
-    private SkillRepos skillRepos;
+    private final SkillMapper skillMapper;
+    private final SkillRepos skillRepos;
+    private final ProfileSkillRepos profileSkillRepos;
 
-    @Autowired
-    private ProfileSkillRepos profileSkillRepos;
-
-    @Override
-    public ProfileSkillDto toDTO(ProfileSkill entity) {
-        if (entity == null) {
-            return null;
-        }
-
-        ProfileSkillDto dto = new ProfileSkillDto();
-
-        dto.setProfileSkillId(entity.getProfileSkillId());
-        dto.setSkill(skillMapper.toDTO(entity.getSkill()));
-        dto.setProficiency(ProficiencyEnum.valueOf(entity.getProficiency().name()));
-
-        return dto;
+    public ProfileSkillMapper(SkillMapper skillMapper, SkillRepos skillRepos, ProfileSkillRepos profileSkillRepos) {
+        this.skillMapper = skillMapper;
+        this.skillRepos = skillRepos;
+        this.profileSkillRepos = profileSkillRepos;
     }
 
     @Override
@@ -43,36 +29,42 @@ public class ProfileSkillMapper extends BaseMapper<ProfileSkillDto, ProfileSkill
             return null;
         }
 
-        Optional<ProfileSkill> existingEntityOptional = profileSkillRepos.findById(dto.getProfileSkillId() == null ? 0 : dto.getProfileSkillId());
-        if (existingEntityOptional.isPresent() && dto.getProfileSkillId() != null) {
-            ProfileSkill existEntity = existingEntityOptional.get();
+        ProfileSkill entity = new ProfileSkill();
+        entity.setProfileSkillId(dto.getProfileSkillId());
 
-            if (dto.getSkill() != null) {
-                existEntity.setSkill(findSkill(dto.getSkill().getSkillId()));
-            }
-
-            if (dto.getProficiency() != null) {
-                existEntity.setProficiency(Proficiency.valueOf(dto.getProficiency().name()));
-            }
-
-            return existEntity;
-        } else {
-            ProfileSkill entity = new ProfileSkill();
-
-//            entity.setProfileSkillId(dto.getProfileSkillId());
-            if (dto.getSkill() != null) {
-                entity.setSkill(findSkill(dto.getSkill().getSkillId()));
-            }
-            if (dto.getProficiency() != null) {
-                entity.setProficiency(Proficiency.valueOf(dto.getProficiency().name()));
-            }
-
-            return entity;
+        if (dto.getSkill() != null) {
+            entity.setSkill(skillRepos.findById(dto.getSkill().getSkillId())
+                    .orElseThrow(() -> new IllegalArgumentException("Skill not found")));
         }
+
+        if (dto.getProficiency() != null) {
+            entity.setProficiency(Proficiency.valueOf(dto.getProficiency().name()));
+        }
+
+        return entity;
     }
 
-    public Skill findSkill(Long id) {
-        return skillRepos.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Skill does not exist"));
+    @Override
+    public ProfileSkillDto toDTO(ProfileSkill entity, DetailLevel level) {
+        if (entity == null) {
+            return null;
+        }
+
+        ProfileSkillDto dto = new ProfileSkillDto();
+        dto.setProfileSkillId(entity.getProfileSkillId());
+        dto.setSkill(skillMapper.toDTO(entity.getSkill(), DetailLevel.REFERENCE));
+        dto.setProficiency(ProficiencyEnum.valueOf(entity.getProficiency().name()));
+
+        if (level == DetailLevel.REFERENCE) {
+            return dto; // those fields are enough
+        }
+
+        if (level == DetailLevel.SUMMARY) {
+            return dto; // those fields are enough
+        }
+
+        // Add more fields if needed for other detail levels
+
+        return dto;
     }
 }

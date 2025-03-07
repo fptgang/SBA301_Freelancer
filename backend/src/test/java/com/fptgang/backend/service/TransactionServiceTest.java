@@ -99,7 +99,7 @@ public class TransactionServiceTest {
     @Order(1)
     void createTransactionSuccess() {
         // Act
-        String returnUrl = transactionService.create(testTransaction, ip);
+        String returnUrl = transactionService.create(testTransaction);
         Transaction createdTransaction = transactionRepos.findById(getTransactionId(returnUrl)).get();
         // Assert
         assertNotNull(createdTransaction);
@@ -113,7 +113,7 @@ public class TransactionServiceTest {
     @Order(2)
     void updateTransactionSuccess() {
         // Arrange
-        String returnUrl = transactionService.create(testTransaction,ip);
+        String returnUrl = transactionService.create(testTransaction);
         Long id = getTransactionId(returnUrl);
 
         Transaction savedTransaction = transactionRepos.findById(id).get();
@@ -134,7 +134,7 @@ public class TransactionServiceTest {
     @Order(3)
     void findByIdSuccess() {
         // Arrange
-        String returnUrl = transactionService.create(testTransaction, ip);
+        String returnUrl = transactionService.create(testTransaction);
         Transaction savedTransaction = transactionRepos.findById(getTransactionId(returnUrl)).get();
         // Act
         Transaction foundTransaction = transactionService.findById(savedTransaction.getTransactionId());
@@ -163,7 +163,7 @@ public class TransactionServiceTest {
             transaction.setType(TransactionType.WITHDRAWAL);
             transaction.setStatus(TransactionStatus.SUCCESS);
             transaction.setPaymentMethod(Transaction.PaymentMethod.VNPAY);
-            transactionService.create(transaction, ip);
+            transactionService.create(transaction);
         }
 
         Pageable pageable = PageRequest.of(0, 10);
@@ -192,7 +192,7 @@ public class TransactionServiceTest {
             transaction.setType(TransactionType.DEPOSIT);
             transaction.setStatus(TransactionStatus.SUCCESS);
             transaction.setPaymentMethod(Transaction.PaymentMethod.VNPAY);
-            transactionService.create(transaction, ip);
+            transactionService.create(transaction);
         }
 
         Pageable pageable = PageRequest.of(0, 10);

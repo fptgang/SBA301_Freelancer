@@ -4,38 +4,24 @@ import com.fptgang.backend.api.model.ProficiencyEnum;
 import com.fptgang.backend.api.model.ProjectSkillDto;
 import com.fptgang.backend.model.Proficiency;
 import com.fptgang.backend.model.ProjectSkill;
-import com.fptgang.backend.model.Skill;
 import com.fptgang.backend.repository.ProjectSkillRepos;
 import com.fptgang.backend.repository.SkillRepos;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;
 
+@Slf4j
 @Component
 public class ProjectSkillMapper extends BaseMapper<ProjectSkillDto, ProjectSkill> {
-    @Autowired
-    private SkillMapper skillMapper;
-    @Autowired
-    private SkillRepos skillRepos;
-    @Autowired
-    private ProjectSkillRepos projectSkillRepos;
+    private final SkillMapper skillMapper;
+    private final SkillRepos skillRepos;
+    private final ProjectSkillRepos projectSkillRepos;
 
-    
-
-    @Override
-    public ProjectSkillDto toDTO(ProjectSkill entity) {
-        if (entity == null) {
-            return null;
-        }
-
-        ProjectSkillDto dto = new ProjectSkillDto();
-
-        dto.setProjectSkillId(entity.getProjectSkillId());
-        dto.setSkill(skillMapper.toDTO(entity.getSkill()));
-        dto.setProficiency(ProficiencyEnum.valueOf(entity.getProficiency().name()));
-
-        return dto;
+    public ProjectSkillMapper(SkillMapper skillMapper, SkillRepos skillRepos, ProjectSkillRepos projectSkillRepos) {
+        this.skillMapper = skillMapper;
+        this.skillRepos = skillRepos;
+        this.projectSkillRepos = projectSkillRepos;
     }
 
     @Override
@@ -44,36 +30,42 @@ public class ProjectSkillMapper extends BaseMapper<ProjectSkillDto, ProjectSkill
             return null;
         }
 
-        Optional<ProjectSkill> existingEntityOptional = projectSkillRepos.findById(dto.getProjectSkillId() == null ? 0 : dto.getProjectSkillId());
-        if (existingEntityOptional.isPresent() && dto.getProjectSkillId() != null) {
-            ProjectSkill existEntity = existingEntityOptional.get();
+        ProjectSkill entity = new ProjectSkill();
+        entity.setProjectSkillId(dto.getProjectSkillId());
 
-            if (dto.getSkill() != null) {
-                existEntity.setSkill(findSkill(dto.getSkill().getSkillId()));
-            }
-
-            if (dto.getProficiency() != null) {
-                existEntity.setProficiency(Proficiency.valueOf(dto.getProficiency().name()));
-            }
-
-            return existEntity;
-        } else {
-            ProjectSkill entity = new ProjectSkill();
-
-//            entity.setProjectSkillId(dto.getProjectSkillId());
-            if (dto.getSkill() != null) {
-                entity.setSkill(findSkill(dto.getSkill().getSkillId()));
-            }
-            if (dto.getProficiency() != null) {
-                entity.setProficiency(Proficiency.valueOf(dto.getProficiency().name()));
-            }
-
-            return entity;
+        if (dto.getSkill() != null) {
+            entity.setSkill(skillRepos.findById(dto.getSkill().getSkillId())
+                    .orElseThrow(() -> new IllegalArgumentException("Skill not found")));
         }
+
+        if (dto.getProficiency() != null) {
+            entity.setProficiency(Proficiency.valueOf(dto.getProficiency().name()));
+        }
+
+        return entity;
     }
 
-    public Skill findSkill(Long id) {
-        return skillRepos.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Skill does not exist"));
+    @Override
+    public ProjectSkillDto toDTO(ProjectSkill entity, DetailLevel level) {
+        if (entity == null) {
+            return null;
+        }
+
+        ProjectSkillDto dto = new ProjectSkillDto();
+        dto.setProjectSkillId(entity.getProjectSkillId());
+        dto.setSkill(skillMapper.toDTO(entity.getSkill(), DetailLevel.REFERENCE));
+        dto.setProficiency(ProficiencyEnum.valueOf(entity.getProficiency().name()));
+
+        if (level == DetailLevel.REFERENCE) {
+            return dto; // those fields are enough
+        }
+
+        if (level == DetailLevel.SUMMARY) {
+            return dto; // those fields are enough
+        }
+
+        // Add more fields if needed for other detail levels
+
+        return dto;
     }
 }

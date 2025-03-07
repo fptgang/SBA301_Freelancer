@@ -12,11 +12,15 @@ ProposalDto:
       format: int64
     notes:
       type: string
+    budget:
+      type: number
+      format: double
     status:
       type: string
-      enum: [PENDING, ACCEPTED, REJECTED]
-    isVisible:
-      type: boolean
+      enum: [PENDING,EXPIRED,WITHDRAWN, ACCEPTED, REJECTED]
+    contractId:
+      type: integer
+      format: int64
     createdAt:
       type: string
       format: date-time

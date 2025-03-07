@@ -2,6 +2,7 @@ package com.fptgang.backend.controller;
 
 import com.fptgang.backend.api.controller.ProfilesApi;
 import com.fptgang.backend.api.model.*;
+import com.fptgang.backend.mapper.DetailLevel;
 import com.fptgang.backend.mapper.ProfileMapper;
 import com.fptgang.backend.model.Role;
 import com.fptgang.backend.service.ProfileService;
@@ -32,7 +33,7 @@ public class ProfileController implements ProfilesApi {
     @Override
     public ResponseEntity<ProfileDto> createProfile(ProfileDto profileDto) {
         var profile = profileMapper.toEntity(profileDto);
-        return new ResponseEntity<>(profileMapper.toDTO(profileService.create(profile)), HttpStatus.OK);
+        return new ResponseEntity<>(profileMapper.toDTO(profileService.create(profile), DetailLevel.FULL), HttpStatus.OK);
     }
 
     @Override
@@ -43,7 +44,7 @@ public class ProfileController implements ProfilesApi {
 
     @Override
     public ResponseEntity<ProfileDto> getProfileById(Long profileId) {
-        return new ResponseEntity<>(profileMapper.toDTO(profileService.findByProfileId(profileId)), HttpStatus.OK);
+        return new ResponseEntity<>(profileMapper.toDTO(profileService.findByProfileId(profileId),DetailLevel.FULL), HttpStatus.OK);
     }
 
     @Override
@@ -58,7 +59,7 @@ public class ProfileController implements ProfilesApi {
                 .includeInvisible(includeInvisible);
         var res = profileService
                 .getAll(params.build())
-                .map(profileMapper::toDTO);
+                .map(profile -> profileMapper.toDTO(profile, DetailLevel.REFERENCE));
         return OpenApiHelper.respondPage(res, GetProfiles200Response.class);
     }
 
@@ -66,7 +67,7 @@ public class ProfileController implements ProfilesApi {
     public ResponseEntity<ProfileDto> updateProfile(Long profileId, ProfileDto profileDto) {
         profileDto.setProfileId(profileId); // Override profileId
 
-        return new ResponseEntity<>(profileMapper.toDTO(profileService.update(profileMapper.toEntity(profileDto))), HttpStatus.OK);
+        return new ResponseEntity<>(profileMapper.toDTO(profileService.update(profileMapper.toEntity(profileDto)),DetailLevel.FULL), HttpStatus.OK);
     }
 
 }

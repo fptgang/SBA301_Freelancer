@@ -14,7 +14,7 @@ public interface ProjectRepos extends JpaRepository<Project,Long>, JpaSpecificat
     Optional<Project> findByProjectId(Long projectId);
     @Query("SELECT p FROM Project p LEFT JOIN p.messages m " +
             "WHERE (p.isVisible=true OR NOT p.isVisible  = :includeInvisible) " +
-            "AND (p.activeProposal.freelancer.accountId" +
+            "AND (p.contract.freelancer.accountId" +
             " = :participantId OR p.client.accountId = :participantId) " +
             "GROUP BY p.projectId " +
             "ORDER BY MAX(m.createdAt) DESC")

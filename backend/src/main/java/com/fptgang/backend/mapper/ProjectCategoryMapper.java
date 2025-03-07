@@ -4,19 +4,38 @@ import com.fptgang.backend.api.model.ProjectCategoryDto;
 import com.fptgang.backend.model.ProjectCategory;
 import com.fptgang.backend.repository.ProjectCategoryRepos;
 import com.fptgang.backend.util.DateTimeUtil;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;
 
+@Slf4j
 @Component
 public class ProjectCategoryMapper extends BaseMapper<ProjectCategoryDto, ProjectCategory> {
+    private final ProjectCategoryRepos projectCategoryRepos;
 
-    @Autowired
-    private ProjectCategoryRepos projectCategoryRepos;
+    public ProjectCategoryMapper(ProjectCategoryRepos projectCategoryRepos) {
+        this.projectCategoryRepos = projectCategoryRepos;
+    }
 
     @Override
-    public ProjectCategoryDto toDTO(ProjectCategory entity) {
+    public ProjectCategory toEntity(ProjectCategoryDto dto) {
+        if (dto == null) {
+            return null;
+        }
+
+        ProjectCategory entity = new ProjectCategory();
+        entity.setProjectCategoryId(dto.getProjectCategoryId());
+        entity.setName(dto.getName());
+        entity.setIsVisible(dto.getIsVisible());
+        entity.setCreatedAt(DateTimeUtil.fromOffsetToLocal(dto.getCreatedAt()));
+        entity.setUpdatedAt(DateTimeUtil.fromOffsetToLocal(dto.getUpdatedAt()));
+
+        return entity;
+    }
+
+    @Override
+    public ProjectCategoryDto toDTO(ProjectCategory entity, DetailLevel level) {
         if (entity == null) {
             return null;
         }
@@ -27,27 +46,17 @@ public class ProjectCategoryMapper extends BaseMapper<ProjectCategoryDto, Projec
         dto.setIsVisible(entity.getIsVisible());
         dto.setCreatedAt(DateTimeUtil.fromLocalToOffset(entity.getCreatedAt()));
         dto.setUpdatedAt(DateTimeUtil.fromLocalToOffset(entity.getUpdatedAt()));
+
+        if (level == DetailLevel.REFERENCE) {
+            return dto; // those fields are enough
+        }
+
+        if (level == DetailLevel.SUMMARY) {
+            return dto; // those fields are enough
+        }
+
+        // Add more fields if needed for other detail levels
+
         return dto;
-    }
-
-    @Override
-    public ProjectCategory toEntity(ProjectCategoryDto dto) {
-        if (dto == null) {
-            return null;
-        }
-
-        Optional<ProjectCategory> existingEntityOptional = projectCategoryRepos.findByProjectCategoryId(dto.getProjectCategoryId() == null ? 0 : dto.getProjectCategoryId());
-        if (existingEntityOptional.isPresent() && dto.getProjectCategoryId() != null) {
-            ProjectCategory existEntity = existingEntityOptional.get();
-            existEntity.setName(dto.getName() != null ? dto.getName() : existEntity.getName());
-            existEntity.setIsVisible(dto.getIsVisible() != null ? dto.getIsVisible() : existEntity.getIsVisible());
-            return existEntity;
-        } else {
-            ProjectCategory projectCategory = new ProjectCategory();
-//            projectCategory.setProjectCategoryId(dto.getProjectCategoryId());
-            projectCategory.setName(dto.getName());
-            projectCategory.setIsVisible(dto.getIsVisible() != null ? dto.getIsVisible() : true);
-            return projectCategory;
-        }
     }
 }

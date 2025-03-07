@@ -7,12 +7,15 @@ import com.fptgang.backend.repository.ProjectRepos;
 import com.fptgang.backend.service.ProjectService;
 import com.fptgang.backend.service.ProposalService;
 import com.fptgang.backend.service.params.ListParams;
+import com.fptgang.backend.util.EntityUtil;
 import com.fptgang.backend.util.OpenApiHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
 
 @Service
 public class ProjectServiceImpl implements ProjectService {
@@ -40,9 +43,14 @@ public class ProjectServiceImpl implements ProjectService {
                 && skills != null && !skills.isEmpty()
         ) {
             Project finalProject = project;
-            milestones.forEach(milestone -> {
+            LocalDateTime lastDeadline = LocalDateTime.now();
+            for (var milestone : milestones) {
                 milestone.setProject(finalProject);
-            });
+                if (milestone.getDeadline() != null && milestone.getDeadline().isAfter(lastDeadline)) {
+                    lastDeadline = milestone.getDeadline();
+                } else
+                    throw new InvalidInputException("Milestone deadline must be after the previous milestone");
+            }
             skills.forEach(skill -> {
                 skill.setProject(finalProject);
             });
@@ -50,15 +58,18 @@ public class ProjectServiceImpl implements ProjectService {
             project.setMilestones(milestones);
             project = projectRepos.save(project);
         }
-
         return project;
     }
 
     @Override
     public Project update(Project project) {
-        if (project.getProjectId() == null || projectRepos.existsById(project.getProjectId())) {
-            throw new InvalidInputException("Prject does not exist");
+        if (project.getProjectId() == null ) {
+            throw new InvalidInputException("Project does not exist");
         }
+
+        Project existing = projectRepos.findByProjectId(project.getProjectId()).orElseThrow(
+                () -> new InvalidInputException("Project does not exist"));
+        EntityUtil.merge(existing, project);
         return projectRepos.save(project);
     }
 
@@ -77,16 +88,16 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public Page<Project> getAll(ListParams params) {
-        var spec = OpenApiHelper.groupBy( params.<Project>toSpec(), "projectId");
+        var spec = OpenApiHelper.groupBy(params.<Project>toSpec(), "projectId");
         return projectRepos.findAll(spec, params.getPageable());
     }
 
     @Override
     public Page<Project> getProjectsSortedByLatestMessage(Pageable pageable, Boolean includeInvisible, Long participantId) {
-        if(participantId == null) {
+        if (participantId == null) {
             throw new InvalidInputException("You are not logged in");
         }
-        return projectRepos.findAllSortedByLatestMessage(pageable,includeInvisible,participantId);
+        return projectRepos.findAllSortedByLatestMessage(pageable, includeInvisible, participantId);
     }
 
     @Override
@@ -117,7 +128,7 @@ public class ProjectServiceImpl implements ProjectService {
         Project project = projectRepos.findByProjectId(projectId).orElseThrow(
                 () -> new InvalidInputException("Project with project id " + projectId + "not found"));
         Proposal proposal = proposalService.findById(proposalId);
-        if(proposal.getProject().getProjectId() != projectId) {
+        if (proposal.getProject().getProjectId() != projectId) {
             throw new InvalidInputException("Proposal does not belong to this project");
         }
         proposal.setStatus(Proposal.ProposalStatus.REJECTED);

@@ -1,49 +1,28 @@
 package com.fptgang.backend.mapper;
 
-
 import com.fptgang.backend.api.model.MessageDto;
-import com.fptgang.backend.model.Account;
 import com.fptgang.backend.model.Message;
 import com.fptgang.backend.repository.AccountRepos;
 import com.fptgang.backend.repository.MessageRepos;
 import com.fptgang.backend.repository.ProjectRepos;
 import com.fptgang.backend.util.DateTimeUtil;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import java.util.Optional;
-
+@Slf4j
 @Component
 public class MessageMapper extends BaseMapper<MessageDto, Message> {
+    private final MessageRepos messageRepos;
+    private final AccountRepos accountRepos;
+    private final ProjectRepos projectRepos;
+    private final FileMapper fileMapper;
 
-    @Autowired
-    private MessageRepos messageRepos;
-
-    @Autowired
-    private AccountRepos accountRepos;
-    @Autowired
-    private ProjectRepos projectRepos;
-    @Autowired
-    private FileMapper fileMapper;
-
-    @Override
-    public MessageDto toDTO(Message entity) {
-        if (entity == null) {
-            return null;
-        }
-
-        MessageDto dto = new MessageDto();
-
-        dto.setProjectId(entity.getProject().getProjectId());
-        dto.setSenderId(entity.getSender().getAccountId());
-        dto.setMessageId(entity.getMessageId());
-        dto.setContent(entity.getContent());
-        dto.setCreatedAt(DateTimeUtil.fromLocalToOffset(entity.getCreatedAt()));
-        dto.setIsVisible(entity.getIsVisible());
-        dto.setFiles(entity.getFiles().stream().map(fileMapper::toDTO).toList());
-        return dto;
+    public MessageMapper(MessageRepos messageRepos, AccountRepos accountRepos, ProjectRepos projectRepos, FileMapper fileMapper) {
+        this.messageRepos = messageRepos;
+        this.accountRepos = accountRepos;
+        this.projectRepos = projectRepos;
+        this.fileMapper = fileMapper;
     }
-
 
     @Override
     public Message toEntity(MessageDto dto) {
@@ -51,47 +30,62 @@ public class MessageMapper extends BaseMapper<MessageDto, Message> {
             return null;
         }
 
-        Optional<Message> existingEntityOptional = messageRepos.findByMessageId(dto.getMessageId() == null ? 0 : dto.getMessageId());
-        if (existingEntityOptional.isPresent() && dto.getMessageId() != null) {
-            Message existEntity = existingEntityOptional.get();
+        Message entity = new Message();
+        entity.setMessageId(dto.getMessageId());
 
-            // NOTE: can only change visibility
-            //existEntity.setContent(dto.getContent() != null ? dto.getContent() : existEntity.getContent());
-            //existEntity.setReceiver(dto.getReceiverId() != null ? findAccount(dto.getReceiverId()) : existEntity.getReceiver());
-            //existEntity.setSender(dto.getSenderId() != null ? findAccount(dto.getSenderId()) : existEntity.getSender());
-            existEntity.setIsVisible(dto.getIsVisible() != null ? dto.getIsVisible() : existEntity.getIsVisible());
-            if(dto.getFiles() != null) {
-                existEntity.setFiles(dto.getFiles().stream().map(fileMapper::toEntity).toList());
-            }
-            return existEntity;
-        } else {
-            Message entity = new Message();
-//            entity.setMessageId(dto.getMessageId());
-
-            if (dto.getContent() != null) {
-                entity.setContent(dto.getContent());
-            }
-
-            if (dto.getProjectId() != null) {
-                entity.setProject(projectRepos.findByProjectId(dto.getProjectId())
-                        .orElseThrow(() -> new IllegalArgumentException("Project does not exist")));
-            }
-            if (dto.getSenderId() != null) {
-                entity.setSender(findAccount(dto.getSenderId()));
-            }
-            if (dto.getIsVisible() != null) {
-                entity.setIsVisible(dto.getIsVisible());
-            }
-            if(dto.getFiles() != null) {
-                entity.setFiles(dto.getFiles().stream().map(fileMapper::toEntity).toList());
-            }
-
-            return entity;
+        if (dto.getContent() != null) {
+            entity.setContent(dto.getContent());
         }
+
+        if (dto.getProjectId() != null) {
+            entity.setProject(projectRepos.findByProjectId(dto.getProjectId())
+                    .orElseThrow(() -> new IllegalArgumentException("Project not found")));
+        }
+
+        if (dto.getSenderId() != null) {
+            entity.setSender(accountRepos.findByAccountId(dto.getSenderId())
+                    .orElseThrow(() -> new IllegalArgumentException("Sender not found")));
+        }
+
+        if (dto.getIsVisible() != null) {
+            entity.setIsVisible(dto.getIsVisible());
+        }
+
+        if (dto.getFiles() != null) {
+            entity.setFiles(dto.getFiles().stream().map(fileMapper::toEntity).toList());
+        }
+
+        entity.setCreatedAt(DateTimeUtil.fromOffsetToLocal(dto.getCreatedAt()));
+
+        return entity;
     }
 
-    public Account findAccount(Long id) {
-        return accountRepos.findByAccountId(id)
-                .orElseThrow(() -> new IllegalArgumentException("Account does not exist"));
+    @Override
+    public MessageDto toDTO(Message entity, DetailLevel level) {
+        if (entity == null) {
+            return null;
+        }
+
+        MessageDto dto = new MessageDto();
+        dto.setMessageId(entity.getMessageId());
+        dto.setProjectId(entity.getProject().getProjectId());
+        dto.setSenderId(entity.getSender().getAccountId());
+        dto.setContent(entity.getContent());
+        dto.setCreatedAt(DateTimeUtil.fromLocalToOffset(entity.getCreatedAt()));
+        dto.setIsVisible(entity.getIsVisible());
+
+        if (level == DetailLevel.REFERENCE) {
+            return dto; // those fields are enough
+        }
+
+        if (level == DetailLevel.SUMMARY) {
+            return dto; // those fields are enough
+        }
+
+        dto.setFiles(entity.getFiles().stream().map(f -> fileMapper.toDTO(f, DetailLevel.REFERENCE)).toList());
+
+        // Add more fields if needed for other detail levels
+
+        return dto;
     }
 }

@@ -3,6 +3,7 @@ package com.fptgang.backend.controller;
 import com.fptgang.backend.api.controller.AuthApi;
 import com.fptgang.backend.api.model.*;
 import com.fptgang.backend.mapper.AccountMapper;
+import com.fptgang.backend.mapper.DetailLevel;
 import com.fptgang.backend.service.JwtService;
 import com.fptgang.backend.service.AccountService;
 import com.fptgang.backend.service.AuthService;
@@ -66,7 +67,7 @@ public class AuthController implements AuthApi {
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<AccountDto> getCurrentUser() {
         String email = SecurityUtil.requireCurrentUserEmail();
-        return ResponseEntity.ok(accountMapper.toDTO(accountService.findByEmail(email)));
+        return ResponseEntity.ok(accountMapper.toDTO(accountService.findByEmail(email), DetailLevel.FULL));
     }
 
     @Override

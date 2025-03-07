@@ -11,9 +11,11 @@ MilestoneDto:
       type: string
     title:
       type: string
-    budget:
+    budgetRatio:
       type: number
       format: double
+      minimum: 0
+      maximum: 1
     deadline:
       type: string
       format: date-time
@@ -26,6 +28,10 @@ MilestoneDto:
       type: array
       items:
         $ref: 'file.yml#/FileDto'
+    transactions:
+      type: array
+      items:
+        $ref: 'transaction.yml#/TransactionDto'
     createdAt:
       type: string
       format: date-time

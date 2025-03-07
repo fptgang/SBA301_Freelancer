@@ -5,6 +5,7 @@ import com.fptgang.backend.model.ProjectCategory;
 import com.fptgang.backend.repository.ProjectCategoryRepos;
 import com.fptgang.backend.service.ProjectCategoryService;
 import com.fptgang.backend.service.params.ListParams;
+import com.fptgang.backend.util.EntityUtil;
 import com.fptgang.backend.util.OpenApiHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,15 +26,19 @@ public class ProjectCategoryServiceImpl implements ProjectCategoryService {
 
     @Override
     public ProjectCategory create(ProjectCategory projectCategory) {
+        projectCategory.setProjectCategoryId(null);
         return projectCategoryRepos.save(projectCategory);
     }
 
     @Override
     public ProjectCategory update(ProjectCategory projectCategory) {
         log.info("update prjCate");
-        if (projectCategory.getProjectCategoryId() == null || !projectCategoryRepos.existsById(projectCategory.getProjectCategoryId())) {
+        if (projectCategory.getProjectCategoryId() == null ) {
             throw new InvalidInputException("Project Category does not exist");
         }
+        var existing = projectCategoryRepos.findByProjectCategoryId(projectCategory.getProjectCategoryId()).orElseThrow(
+                () -> new InvalidInputException("Project Category does not exist"));
+        EntityUtil.merge(existing, projectCategory);
         return projectCategoryRepos.save(projectCategory);
     }
 

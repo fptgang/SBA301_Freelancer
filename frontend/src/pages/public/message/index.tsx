@@ -31,27 +31,27 @@ export const Message: React.FC = () => {
     // sorters: [{ field: "messages.createdAt", order: "desc" }],
     meta: {
       param: [
-        { field: "participantId", value: userId },
+        // { field: "participantId", value: userId },
         { field: "type", value: "chat" },
       ],
     },
   });
 
-  if (email)
-    useSubscription({
-      channel: "message/" + email,
-      onLiveEvent: (event) => {
-        console.log(event);
-        setNewMessage(event.payload as MessageDto);
-        if (
-          // (event.payload as MessageDto).senderId !== user?.id ||
-          (event.payload as MessageDto).senderId !== userId
-        ) {
-          const audio = new Audio("./src/assets/notification.mp3");
-          audio.play();
-        }
-      },
-    });
+  useSubscription({
+    channel: "message/" + email,
+    onLiveEvent: (event) => {
+      console.log(event);
+      setNewMessage(event.payload as MessageDto);
+      if (
+        // (event.payload as MessageDto).senderId !== user?.id ||
+        (event.payload as MessageDto).senderId !== userId
+      ) {
+        const audio = new Audio("./src/assets/notification.mp3");
+        audio.play();
+      }
+    },
+    enabled: !!email,
+  });
 
   useEffect(() => {
     if (projects?.data?.length && !selectedProject) {

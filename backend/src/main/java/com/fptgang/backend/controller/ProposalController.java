@@ -3,6 +3,7 @@ package com.fptgang.backend.controller;
 import com.fptgang.backend.api.controller.ProposalsApi;
 import com.fptgang.backend.api.model.*;
 import com.fptgang.backend.api.model.ProposalDto;
+import com.fptgang.backend.mapper.DetailLevel;
 import com.fptgang.backend.mapper.ProposalMapper;
 import com.fptgang.backend.model.Role;
 import com.fptgang.backend.service.ProposalService;
@@ -32,12 +33,12 @@ public class ProposalController implements ProposalsApi {
     @Override
     public ResponseEntity<ProposalDto> createProposal(ProposalDto proposalDto) {
         var proposal = proposalMapper.toEntity(proposalDto);
-        return new ResponseEntity<>(proposalMapper.toDTO(proposalService.create(proposal)), HttpStatus.OK);
+        return new ResponseEntity<>(proposalMapper.toDTO(proposalService.create(proposal), DetailLevel.FULL), HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity<ProposalDto> getProposalById(Long proposalId) {
-        return new ResponseEntity<>(proposalMapper.toDTO(proposalService.findById(proposalId)), HttpStatus.OK);
+        return new ResponseEntity<>(proposalMapper.toDTO(proposalService.findById(proposalId),DetailLevel.FULL), HttpStatus.OK);
     }
 
     @Override
@@ -51,7 +52,7 @@ public class ProposalController implements ProposalsApi {
                 .includeInvisible(includeInvisible);
         var res = proposalService
                 .getAll(params.build())
-                .map(proposalMapper::toDTO);
+                .map(proposal -> proposalMapper.toDTO(proposal, DetailLevel.REFERENCE));
         return OpenApiHelper.respondPage(res, GetProposals200Response.class);
     }
 
@@ -59,7 +60,7 @@ public class ProposalController implements ProposalsApi {
     public ResponseEntity<ProposalDto> updateProposal(Long proposalId, ProposalDto proposalDto) {
         proposalDto.setProposalId(proposalId); // Override proposalId
 
-        return new ResponseEntity<>(proposalMapper.toDTO(proposalService.update(proposalMapper.toEntity(proposalDto))), HttpStatus.OK);
+        return new ResponseEntity<>(proposalMapper.toDTO(proposalService.update(proposalMapper.toEntity(proposalDto)),DetailLevel.FULL), HttpStatus.OK);
     }
 
 }

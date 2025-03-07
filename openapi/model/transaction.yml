@@ -18,10 +18,13 @@ TransactionDto:
       enum: [DEPOSIT, WITHDRAWAL, ESCROW_DEPOSIT, ESCROW_RELEASE, FEE]
     status:
       type: string
-      enum: [SUCCESS, FAILED]
+      enum: [PENDING, SUCCESS, FAILED]
+    milestoneId:
+      type: integer
+      format: int64
     paymentMethod:
       type: string
-      enum: [ VNPAY, MANUAL ]
+      enum: [ VNPAY ]
     createdAt:
       type: string
       format: date-time
