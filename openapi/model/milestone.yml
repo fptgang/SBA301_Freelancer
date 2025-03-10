@@ -21,7 +21,7 @@ MilestoneDto:
       format: date-time
     status:
       type: string
-      enum: [PENDING, TERMINATED, IN_PROGRESS, FINISHED]
+      enum: [PENDING, TERMINATED, IN_PROGRESS, REVIEWING, FINISHED]
     isVisible:
       type: boolean
     deliverables:

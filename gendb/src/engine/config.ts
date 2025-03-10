@@ -1,10 +1,19 @@
 // Private store for configuration values
+
 const store = {
   installDate: new Date('2024-12-01T00:00:00'),
   hashPass: '$2a$10$a.andI/9BHw4zF3dm5wX1erg1BuJ2jwDksUGAYSxPGGIp6JM/AIZ.', // 1
   depositAmount: {
     min: 10,
     max: 1000
+  },
+  projectBudget: {
+    min: 10,
+    max: 1000
+  },
+  projectStartDayDelay: {
+    min: 3,
+    max: 30
   },
   projectRequiredSkillAmount: {
     min: 1,
@@ -28,10 +37,10 @@ const store = {
   },
   milestoneAmount: {
     min: 1,
-    max: 5
+    max: 10
   },
   milestoneDeliverableFileAmount: {
-    min: 1,
+    min: 0,
     max: 5
   },
   milestoneDescriptionLineAmount: {
@@ -39,38 +48,30 @@ const store = {
     max: 4
   },
   milestoneDeadlineIncreaseDays: {
-    min: 7,
+    min: 3,
     max: 14
   },
-  milestoneBudget: [
-    // casual
-    {min: 5, max: 500},
-    // standard
-    {min: 500, max: 2000},
-    // professional  
-    {min: 2000, max: 5000},
-    // enterprise
-    {min: 5000, max: 15000},
-    // corporate
-    {min: 15000, max: 50000}
-  ],
   proposalFileAmount: {
     min: 0,
     max: 3
   },
-  depositEscrowOnDemand: {
-    probability: 0.5
-  },
   simulationActionWeights: {
-    skip: 1000,
-    createAccount: 50,
-    createProject: 20,
-    createProposal: 60,
-    makeDeposit: 30,
-    requestWithdrawal: 20,
-    chooseProposal: 30,
-    startMilestone: 50,
-    completeMilestone: 50
+    skip: 500,
+    createAccount: 40,
+    makeDeposit: 10,
+    requestWithdrawal: 10,
+    createProject: 30,
+    terminateProjectBeforeContract: 5,
+    unpauseProject: 10,
+    createProposal: 80,
+    withdrawProposal: 5,
+    chooseProposal: 60,
+    signContract: 30,
+    submitWork: 50,
+    confirmWork: 60,
+    extendDeadline: 30,
+    fundMilestoneBudget: 40,
+    clientRequestProjectTermination: 5
   } as const,
   targetMinFinishedProject: 5
 };
@@ -89,10 +90,10 @@ export let projectDescriptionLineAmount = () => store.projectDescriptionLineAmou
 export let milestoneAmount = () => store.milestoneAmount;
 export let milestoneDescriptionLineAmount = () => store.milestoneDescriptionLineAmount;
 export let milestoneDeadlineIncreaseDays = () => store.milestoneDeadlineIncreaseDays;
-export let milestoneBudget = () => store.milestoneBudget;
-export let depositEscrowOnDemand = () => store.depositEscrowOnDemand;
 export let simulationActionWeights = () => store.simulationActionWeights;
 export let targetMinFinishedProject = () => store.targetMinFinishedProject;
+export let projectBudget = () => store.projectBudget;
+export let projectStartDayDelay = () => store.projectStartDayDelay;
 
 // Setters
 export const setInstallDate = (value: typeof store.installDate) => {
@@ -103,6 +104,12 @@ export const setHashPass = (value: typeof store.hashPass) => {
 };
 export const setDepositAmount = (value: typeof store.depositAmount) => {
   Object.assign(store.depositAmount, value);
+};
+export const setProjectBudget = (value: typeof store.projectBudget) => {
+  Object.assign(store.projectBudget, value);
+};
+export const setProjectStartDayDelay = (value: typeof store.projectStartDayDelay) => {
+  Object.assign(store.projectStartDayDelay, value);
 };
 export const setProjectRequiredSkillAmount = (value: typeof store.projectRequiredSkillAmount) => {
   Object.assign(store.projectRequiredSkillAmount, value);
@@ -133,12 +140,6 @@ export const setMilestoneDescriptionLineAmount = (value: typeof store.milestoneD
 }
 export const setMilestoneDeadlineIncreaseDays = (value: typeof store.milestoneDeadlineIncreaseDays) => {
   Object.assign(store.milestoneDeadlineIncreaseDays, value);
-};
-export const setMilestoneBudget = (value: typeof store.milestoneBudget) => {
-  store.milestoneBudget = value;
-};
-export const setDepositEscrowOnDemand = (value: typeof store.depositEscrowOnDemand) => {
-  Object.assign(store.depositEscrowOnDemand, value);
 };
 export const setSimulationActionWeights = (value: typeof store.simulationActionWeights) => {
   Object.assign(store.simulationActionWeights, value);

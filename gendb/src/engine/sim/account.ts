@@ -45,30 +45,34 @@ export class accountPool {
   dump(): string {
     return '\n' + Account.dump(this.accounts);
   }
+
+  count(): number {
+    return this.accounts.length;
+  }
 }
 
 export let AccountPool = new accountPool();
 export const DumpAccounts = () => SqlFileAppender.append(AccountPool.dump());
-export const EscrowAccount = () => new Account({
-  account_id: AccountPool.getNextId(),
-  avatar_url: null,
-  balance: 0,
-  created_at: installDate(),
-  email: 'escrow@hirable.com',
-  first_name: 'Escrow',
-  is_verified: true,
-  is_visible: false,
-  last_name: null,
-  password: hashPass(),
-  role: AccountRole.ADMIN,
-  updated_at: installDate(),
-  verified_at: installDate()
-});
+export let EscrowAccount = {} as Account;
 
 export const ResetAccountPool = () => {
   AccountPool = new accountPool();
 
-  AccountPool.add(EscrowAccount());
+  AccountPool.add(EscrowAccount = new Account({
+    account_id: AccountPool.getNextId(),
+    avatar_url: null,
+    balance: 0,
+    created_at: installDate(),
+    email: 'escrow@hirable.com',
+    first_name: 'Escrow',
+    is_verified: true,
+    is_visible: false,
+    last_name: null,
+    password: hashPass(),
+    role: AccountRole.ADMIN,
+    updated_at: installDate(),
+    verified_at: installDate()
+  }));
 
   AccountPool.add(new Account({
     account_id: AccountPool.getNextId(),
@@ -141,15 +145,15 @@ export const createAccount = (date: Date) => {
 
   const firstName = faker.person.firstName();
   const lastName = faker.person.lastName();
-  const email = faker.internet.email({firstName, lastName}).toLowerCase();
   const verified = faker.datatype.boolean();
+  const accId = AccountPool.getNextId();
 
   const account = new Account({
-    account_id: AccountPool.getNextId(),
+    account_id: accId,
     avatar_url: null,
     balance: 0,
     created_at: date,
-    email: email,
+    email: `acc${accId}@hirable.com`,
     first_name: firstName,
     is_verified: verified,
     is_visible: true,
@@ -198,5 +202,5 @@ export const createAccount = (date: Date) => {
 
   AccountPool.add(account);
 
-  return account;
+  return true;
 }

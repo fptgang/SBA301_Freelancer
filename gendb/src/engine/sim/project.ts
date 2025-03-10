@@ -1,5 +1,5 @@
 import {faker} from "@faker-js/faker";
-import {Project} from "../model/Project.js";
+import {Project, TerminationReason} from "../model/Project.js";
 import {ProjectStatus} from "../model/ProjectStatus.js";
 import {ProjectRequiredSkill} from "../model/ProjectRequiredSkill.js";
 import {ProficiencyLevel} from "../model/ProficiencyLevel.js";
@@ -12,17 +12,23 @@ import {PickSkill} from "../seed/SkillDump.js";
 import {PickCategory} from "../seed/CategoryDump.js";
 import {
   milestoneAmount,
-  milestoneBudget,
   milestoneDeadlineIncreaseDays,
-  milestoneDeliverableFileAmount,
   milestoneDescriptionLineAmount,
+  projectBudget,
   projectDescriptionLineAmount,
   projectFileAmount,
-  projectRequiredSkillAmount
+  projectRequiredSkillAmount,
+  projectStartDayDelay
 } from "../config.js";
 import {SqlFileAppender} from "../appender.js";
 import {TransactionPool} from "./transaction.js";
-import { FilePool } from "./file.js";
+import {FilePool} from "./file.js";
+import {ProposalPool} from "./proposal";
+import {ProposalStatus} from "../model/ProposalStatus";
+import {generateSegmentedArray} from "../utils";
+import {ContractStatus} from "../model/Contract";
+import {TransactionType} from "../model/TransactionType";
+import {TransactionStatus} from "../model/TransactionStatus";
 
 export class projectPool {
   private projects: Project[] = [];
@@ -60,10 +66,6 @@ export class projectPool {
       .join('\n\n');
   }
 
-  dumpActiveProposalId(): string {
-    return '\n' + Project.dumpActiveProposalId(this.projects);
-  }
-
   pickProject(date: Date, status?: ProjectStatus): Project | null {
     const eligibleProjects = this.projects.filter(project => {
       const matchesDate = project.created_at && project.created_at <= date;
@@ -78,20 +80,124 @@ export class projectPool {
     return eligibleProjects[randomIndex];
   }
 
+  pickProjectWithActiveMilestone(date: Date, status?: ProjectStatus): Project | null {
+    const eligibleProjects = this.projects.filter(project => {
+      const matchesDate = project.created_at && project.created_at <= date;
+      const matchesStatus = status ? project.status === status : true;
+      const isVisible = project.is_visible;
+      return matchesDate && matchesStatus && isVisible && project.activeMilestone;
+    });
+
+    if (eligibleProjects.length === 0) return null;
+
+    const randomIndex = Math.floor(Math.random() * eligibleProjects.length);
+    return eligibleProjects[randomIndex];
+  }
+
+  pickProjectInProposalSubmission(date: Date): Project | null {
+    const eligibleProjects = this.projects.filter(project => {
+      const matchesDate = project.created_at && project.created_at <= date;
+      const matchesStatus = project.status === ProjectStatus.OPEN;
+      const isVisible = project.is_visible;
+      const acceptProposal = date.getTime() < project.start_date.getTime() - 24 * 60 * 60 * 1000;
+      return matchesDate && matchesStatus && isVisible && acceptProposal;
+    });
+
+    if (eligibleProjects.length === 0) return null;
+
+    const randomIndex = Math.floor(Math.random() * eligibleProjects.length);
+    return eligibleProjects[randomIndex];
+  }
+
+  findExpiredProjectWithoutContract(date: Date): Project | null {
+    const eligibleProjects = this.projects.filter(project => {
+      const matchesDate = project.created_at && project.created_at <= date;
+      const matchesStatus = project.status === ProjectStatus.OPEN;
+      const isVisible = project.is_visible;
+      const hasContract = !!project.contract;
+      const hasActiveMilestone = !!project.activeMilestone;
+      // If 1 day before startDate reaches with no acceptance, all proposals are automatically EXPIRED
+      const after1dayBeforeStartDate = date.getTime() >= project.start_date.getTime() - 24 * 60 * 60 * 1000;
+      return matchesDate && matchesStatus && isVisible && !hasContract && !hasActiveMilestone && after1dayBeforeStartDate;
+    });
+
+    if (eligibleProjects.length === 0) return null;
+
+    const randomIndex = Math.floor(Math.random() * eligibleProjects.length);
+    return eligibleProjects[randomIndex];
+  }
+
+  // terminable projects subject to OTHER termination reason
+  pickTerminableProjectDueToOtherReason(date: Date): Project | null {
+    const eligibleProjects = this.projects.filter(project => {
+      const matchesDate = project.created_at && project.created_at <= date;
+      const matchesStatus = project.status === ProjectStatus.OPEN;
+      const isVisible = project.is_visible;
+      const hasContract = !!project.contract;
+      const hasActiveMilestone = !!project.activeMilestone;
+      const afterStartDate = date >= project.start_date;
+      return matchesDate && matchesStatus && isVisible && !hasContract && !hasActiveMilestone && !afterStartDate;
+    });
+
+    if (eligibleProjects.length === 0) return null;
+
+    const randomIndex = Math.floor(Math.random() * eligibleProjects.length);
+    return eligibleProjects[randomIndex];
+  }
+
+  // terminable projects subject to CONTRACT_UNSIGNED termination reason
+  pickTerminableProjectDueToUnsignedExpiredContract(date: Date): Project | null {
+    const eligibleProjects = this.projects.filter(project => {
+      const matchesDate = project.created_at && project.created_at <= date;
+      const matchesStatus = project.status === ProjectStatus.IN_PROGRESS;
+      const isVisible = project.is_visible;
+      const hasUnsignedContract = !!project.contract && project.contract.status === ContractStatus.UNSIGNED;
+      const afterStartDate = date >= project.start_date;
+      return matchesDate && matchesStatus && isVisible && hasUnsignedContract && afterStartDate;
+    });
+
+    if (eligibleProjects.length === 0) return null;
+
+    const randomIndex = Math.floor(Math.random() * eligibleProjects.length);
+    return eligibleProjects[randomIndex];
+  }
+
+  pickTerminableProjectDueToClientRequest(date: Date): Project | null {
+    const eligibleProjects = this.projects.filter(project => {
+      const matchesDate = project.created_at && project.created_at <= date;
+      const matchesStatus = project.status === ProjectStatus.IN_PROGRESS;
+      const isVisible = project.is_visible;
+      const hasContract = !!project.contract;
+      const hasActiveMilestone = !!project.activeMilestone;
+      const toTerminate = project.to_terminate;
+      return matchesDate && matchesStatus && isVisible && hasContract && hasActiveMilestone && toTerminate;
+    });
+    if (eligibleProjects.length === 0) return null;
+
+    const randomIndex = Math.floor(Math.random() * eligibleProjects.length);
+    return eligibleProjects[randomIndex];
+  }
+
   countFinished(): number {
     return this.projects.filter(p => p.status === ProjectStatus.FINISHED).length;
+  }
+
+  count(): number {
+    return this.projects.length;
   }
 }
 
 export let ProjectPool = new projectPool();
 export const ResetProjectPool = () => ProjectPool = new projectPool();
 export const DumpProjects = () => SqlFileAppender.append(ProjectPool.dump());
-export const DumpActiveProposalId = () => SqlFileAppender.append(ProjectPool.dumpActiveProposalId());
 
 export const createProject = (date: Date) => {
   // Pick a client from account pool
-  const client = AccountPool.pickAccount(date, AccountRole.CLIENT, true);
-  if (!client) return
+  const client = AccountPool.pickAccount(date, AccountRole.CLIENT, false);
+  if (!client)
+    return false;
+
+  const minBudget = faker.number.int(projectBudget());
 
   // Create project
   const project = new Project({
@@ -104,9 +210,15 @@ export const createProject = (date: Date) => {
     is_visible: true,
     client_id: client.account_id,
     project_category_id: PickCategory().project_category_id,
-    active_proposal_id: null,
-    client: client
+    client: client,
+    min_budget: minBudget,
+    max_budget: faker.number.int({
+      min: minBudget,
+      max: projectBudget().max
+    }),
+    start_date: new Date(date.getTime() + faker.number.int(projectStartDayDelay()) * 24 * 60 * 60 * 1000)
   });
+  project.client = client;
 
   const numSkills = faker.number.int(projectRequiredSkillAmount());
   const addedSkillIds = new Set<number>();
@@ -128,16 +240,15 @@ export const createProject = (date: Date) => {
 
   const numMilestones = faker.number.int(milestoneAmount());
   let currentDeadline = date;
+  const budgetRatios = generateSegmentedArray(numMilestones);
 
   for (let i = 0; i < numMilestones; i++) {
     currentDeadline = new Date(currentDeadline.getTime() +
       faker.number.int(milestoneDeadlineIncreaseDays()) * 24 * 60 * 60 * 1000);
 
-    const budgetRange = milestoneBudget()[Math.floor(Math.random() * milestoneBudget().length)];
-
     project.milestones.push(new Milestone(
       ProjectPool.getNextMilestoneId(),
-      faker.number.int(budgetRange),
+      budgetRatios[i],
       currentDeadline,
       MilestoneStatus.PENDING,
       faker.commerce.productAdjective() + " " + faker.commerce.productName(),
@@ -170,79 +281,134 @@ export const createProject = (date: Date) => {
     }));
   }
 
-  return project;
+  return true;
 };
 
-export const startMilestone = (date: Date) => {
-  let milestone = null;
+// Client can terminate project before contract
+export const terminateProjectBeforeContract = (date: Date) => {
   let project = ProjectPool.pickProject(date, ProjectStatus.OPEN);
-
-  // if the project is open but a proposal has been picked, start the first milestone
-  if (project) {
-    if (!project.activeProposal) return;
-    milestone = project.milestones[0];
-    project.status = ProjectStatus.IN_PROGRESS;
-    project.updated_at = date;
-  }
-  // if the project is in progress, start the next milestone
-  else {
-    project = ProjectPool.pickProject(date, ProjectStatus.IN_PROGRESS);
-    if (!project) return;
-
-    if (project.activeMilestone && project.activeMilestone.status === MilestoneStatus.IN_PROGRESS) return;
-
-    milestone = project.nextMilestone();
-  }
-
-  if (!milestone || !project.client) return;
-
-  // might have fund or not
-  if (TransactionPool.depositEscrow(date, project.client, milestone.budget)) {
-    milestone.status = MilestoneStatus.IN_PROGRESS;
+  if (!project)
+    return false;
+  project.status = ProjectStatus.TERMINATED;
+  project.termination_reason = TerminationReason.OTHER;
+  project.updated_at = date;
+  for (let milestone of project.milestones) {
+    milestone.status = MilestoneStatus.TERMINATED;
     milestone.updatedAt = date;
-    project.activeMilestone = milestone;
   }
-};
+  ProposalPool.pickAllProposals(date, ProposalStatus.PENDING, project.project_id)
+    .forEach(p => {
+      p.status = ProposalStatus.REJECTED;
+      p.updated_at = date;
+    })
+  //console.log("Project ", project.project_id, " terminated as client requested before contract");
+  return true;
+}
 
-export const completeMilestone = (date: Date) => {
-  const project = ProjectPool.pickProject(date, ProjectStatus.IN_PROGRESS);
-  if (!project || !project.activeMilestone || !project.activeProposal || !project.activeProposal.freelancer) return;
+// If 1 day before startDate reaches with no acceptance:
+export const taskAutoPauseUncontractedProject = (date: Date) => {
+  let project = ProjectPool.findExpiredProjectWithoutContract(date);
+  if (!project)
+    return false;
+  project.status = ProjectStatus.PAUSED;
+  project.updated_at = date;
+  ProposalPool.pickAllProposals(date, ProposalStatus.PENDING, project.project_id)
+    .forEach(p => {
+      p.status = ProposalStatus.EXPIRED;
+      p.updated_at = date;
+    });
+  //console.log("Project ", project.project_id, " paused due to no contract made by 1 day before StartDate");
+  // before contract so no refund here
+  return true;
+}
 
-  let milestone = project.activeMilestone;
-  if (milestone.status !== MilestoneStatus.IN_PROGRESS) return;
+// If a contract is made but not signed at startDate
+export const taskAutoTerminateProjectDueToUnsignedContract = (date: Date) => {
+  let project = ProjectPool.pickTerminableProjectDueToUnsignedExpiredContract(date);
+  if (!project || !project.contract) {
+    return false;
+  }
+  project.contract.status = ContractStatus.TERMINATED;
+  project.contract.terminated_at = date;
+  project.contract.updated_at = date;
+  project.status = ProjectStatus.TERMINATED;
+  project.termination_reason = TerminationReason.CONTRACT_UNSIGNED;
+  project.updated_at = date;
+  for (let milestone of project.milestones) {
+    milestone.status = MilestoneStatus.TERMINATED;
+    milestone.updatedAt = date;
+  }
+  TransactionPool.refundEscrow(date, project.client,
+    project.milestones[0].budgetRatio * project.contract.budget,
+    project.milestones[0].milestoneId);
+  //console.log("Project ", project.project_id, " terminated due to unsigned contract");
+  return true;
+}
 
-  milestone.status = MilestoneStatus.FINISHED;
-  milestone.updatedAt = date;
-  TransactionPool.releaseEscrow(date, project.activeProposal.freelancer, milestone.budget);
+export const unpauseProject = (date: Date) => {
+  let project = ProjectPool.pickProject(date, ProjectStatus.PAUSED);
+  if (!project)
+    return false;
 
-  project.activeMilestone = null;
+  project.start_date = new Date(date.getTime() + faker.number.int(projectStartDayDelay()) * 24 * 60 * 60 * 1000);
+  project.status = ProjectStatus.OPEN;
+  project.updated_at = date;
 
-  // continue next milestone or finish project
-  if (!project.nextMilestone()) {
-    project.status = ProjectStatus.FINISHED;
-    project.updated_at = date;
+  let currentDeadline = project.start_date;
+  for (let i = 0; i < project.milestones.length; i++) {
+    currentDeadline = new Date(currentDeadline.getTime() +
+      faker.number.int(milestoneDeadlineIncreaseDays()) * 24 * 60 * 60 * 1000);
+    project.milestones[i].deadline = currentDeadline;
+    project.milestones[i].updatedAt = date;
+  }
+  console.log("Project ", project.project_id, " unpaused");
+  return true;
+}
 
-    // create deliverable files
-    const numFiles = faker.number.int(milestoneDeliverableFileAmount());
-    console.log(`Creating ${numFiles} deliverable files for milestone ${milestone.milestoneId}`);
-    for (let i = 0; i < numFiles; i++) {
-      FilePool.add(new File({
-        file_id: FilePool.getNextId(),
-        created_at: date,
-        file_name: faker.system.fileName(),
-        file_type: faker.system.fileExt(),
-        file_url: faker.image.url(),
-        is_visible: true,
-        size: faker.number.int(1000000),
-        message_id: null,
-        project_id: null,
-        proposal_id: null,
-        uploader_id: project.client_id,
-        milestone_id: milestone.milestoneId
-      }));
+export const clientRequestProjectTermination = (date: Date) => {
+  const project = ProjectPool.pickProjectWithActiveMilestone(date, ProjectStatus.IN_PROGRESS);
+  if (!project || !project.activeMilestone)
+    return false;
+
+  if (project.activeMilestone.deadline.getTime() - 2 * 24 * 60 * 60 * 1000 <= date.getTime()) {
+    return false;
+  }
+
+  project.to_terminate = true;
+  project.updated_at = date;
+  console.log("Project ", project.project_id, " is going to be terminated due to client request");
+  return true;
+}
+
+export const taskAutoTerminateProjectDueToClientRequest = (date: Date) => {
+  let project = ProjectPool.pickTerminableProjectDueToClientRequest(date);
+  if (!project || !project.contract || !project.activeMilestone)
+    return false;
+  project.status = ProjectStatus.TERMINATED;
+  project.termination_reason = TerminationReason.CLIENT_REQUEST_TERMINATION;
+  project.updated_at = date;
+
+  project.contract.status = ContractStatus.TERMINATED;
+  project.contract.terminated_at = date;
+  project.contract.updated_at = date;
+
+  let activeMilestone = project.activeMilestone;
+  activeMilestone.status = MilestoneStatus.TERMINATED;
+  activeMilestone.updatedAt = date;
+  TransactionPool.releaseEscrow(date, project.contract.freelancer, project.contract.budget * activeMilestone.budgetRatio, activeMilestone.milestoneId);
+
+  for (let milestone of project.milestones) {
+    if (milestone.status === MilestoneStatus.PENDING) {
+      milestone.status = MilestoneStatus.TERMINATED;
+      milestone.updatedAt = date;
+
+      const hasMilestoneEscrowDeposit = TransactionPool.pickTransaction(
+        TransactionType.ESCROW_DEPOSIT, TransactionStatus.SUCCESS, milestone.milestoneId).length > 0;
+
+      if (hasMilestoneEscrowDeposit)
+        TransactionPool.refundEscrow(date, project.client, project.contract.budget * milestone.budgetRatio, milestone.milestoneId);
     }
-
-    return;
   }
-  startMilestone(date);
-};  
+  //console.log("Project ", project.project_id, " terminated due to client request in previous milestone");
+  return true;
+}

@@ -23,11 +23,13 @@ public class Transaction {
     private Long transactionId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "from_account_id", nullable = false)
+    @JoinColumn(name = "from_account_id")
+    @Nullable
     private Account fromAccount;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "to_account_id", nullable = false)
+    @JoinColumn(name = "to_account_id")
+    @Nullable
     private Account toAccount;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -46,15 +48,18 @@ public class Transaction {
     private TransactionStatus status;
 
     @Enumerated(EnumType.STRING)
-    @Column
-    @Nullable
+    @Column(nullable = false)
     private PaymentMethod paymentMethod;
 
     @CreationTimestamp
     private LocalDateTime createdAt;
 
+    @CreationTimestamp
+    private LocalDateTime updatedAt;
+
     public enum PaymentMethod {
-        VNPAY
+        VNPAY,
+        INTERNAL_WALLET
     }
 
     public enum TransactionType {
@@ -62,7 +67,7 @@ public class Transaction {
         WITHDRAWAL,
         ESCROW_DEPOSIT,
         ESCROW_RELEASE,
-        FEE
+        ESCROW_REFUND
     }
 
     public enum TransactionStatus {

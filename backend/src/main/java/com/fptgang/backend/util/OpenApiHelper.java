@@ -2,11 +2,15 @@ package com.fptgang.backend.util;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.Expression;
 import jakarta.persistence.criteria.Path;
 import jakarta.persistence.criteria.Predicate;
 import org.joor.Reflect;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -22,7 +26,10 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 public class OpenApiHelper {
+    private static final Logger LOGGER = LoggerFactory.getLogger(OpenApiHelper.class);
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+    private static final Map<Class<?>, Set<String>> SEARCHABLE_FIELDS = new HashMap<>();
+    private static final Map<Class<?>, Set<String>> FILTERABLE_FIELDS = new HashMap<>();
 
     public static Pageable toPageable(Object pageableObj) {
         if (pageableObj == null) {
@@ -92,15 +99,12 @@ public class OpenApiHelper {
 
         return (root, query, criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>();
-            Field[] fields = root.getJavaType().getDeclaredFields();
 
-            for (Field field : fields) {
-                if (field.isAnnotationPresent(Searchable.class)) {
-                    predicates.add(criteriaBuilder.like(
-                            criteriaBuilder.lower(root.get(field.getName()).as(String.class)),
-                            "%" + normalizedSearch + "%"
-                    ));
-                }
+            for (String field : getSearchableFields(root.getJavaType())) {
+                predicates.add(criteriaBuilder.like(
+                        criteriaBuilder.lower(root.get(field).as(String.class)),
+                        "%" + normalizedSearch + "%"
+                ));
             }
 
             return criteriaBuilder.or(predicates.toArray(new Predicate[0]));
@@ -116,9 +120,7 @@ public class OpenApiHelper {
             return Collections.emptyMap();
         }
 
-        Map<String, String[]> filterMap = new LinkedHashMap<>();
-
-        String[] filters = new String[]{filter};
+        String[] filters;
 
         if (filter.startsWith("[") && filter.endsWith("]")) {
             try {
@@ -126,9 +128,11 @@ public class OpenApiHelper {
             } catch (JsonProcessingException ignored) {
                 throw new IllegalArgumentException("Invalid multi-filter format");
             }
+        } else {
+            filters = new String[]{filter};
         }
 
-        Map<String, String[]> map = new LinkedHashMap<>();
+        Map<String, String[]> filterMap = new LinkedHashMap<>();
 
         for (String str : filters) {
             String[] filterParts = str.split(",", 3);
@@ -143,7 +147,7 @@ public class OpenApiHelper {
         return filterMap;
     }
 
-    public static <T> Specification<T> filtersToSpec(Map<String, String[]> filters) {
+    public static <T> Specification<T>  filtersToSpec(Map<String, String[]> filters) {
         //noinspection unchecked
         Specification<T>[] specs = new Specification[filters.size()];
         int i = 0;
@@ -160,6 +164,10 @@ public class OpenApiHelper {
 
         return (root, query, criteriaBuilder) -> {
             String[] fieldPaths = path.split("\\.");
+            if (!getFilterableFields(root.getJavaType()).contains(fieldPaths[0])) {
+                LOGGER.warn("Field {} in {} is not filterable", fieldPaths[0], root.getJavaType().getName());
+                return criteriaBuilder.or();
+            }
             Path<?> fieldPath = root.get(fieldPaths[0]);
 
             if (fieldPath == null) {
@@ -167,6 +175,10 @@ public class OpenApiHelper {
             }
 
             for (int i = 1; i < Math.min(5, fieldPaths.length); i++) {
+                if (!getFilterableFields(fieldPath.getJavaType()).contains(fieldPaths[i])) {
+                    LOGGER.warn("Field {} in {} is not filterable", fieldPaths[i], fieldPath.getJavaType().getName());
+                    return criteriaBuilder.or();
+                }
                 fieldPath = fieldPath.get(fieldPaths[i]);
 
                 if (fieldPath == null) {
@@ -391,5 +403,34 @@ public class OpenApiHelper {
 
             return predicate;
         };
+    }
+
+    private static Set<String> getSearchableFields(Class<?> clazz) {
+        Set<String> fields = SEARCHABLE_FIELDS.get(clazz);
+        if (fields == null) {
+            fields = new HashSet<>();
+            for (Field field : clazz.getDeclaredFields()) {
+                if (field.isAnnotationPresent(Searchable.class)) {
+                    fields.add(field.getName());
+                }
+            }
+            SEARCHABLE_FIELDS.put(clazz, fields);
+        }
+        return fields;
+    }
+
+    private static Set<String> getFilterableFields(Class<?> clazz) {
+        Set<String> fields = FILTERABLE_FIELDS.get(clazz);
+        if (fields == null) {
+            fields = new HashSet<>();
+            for (Field field : clazz.getDeclaredFields()) {
+                if (field.isAnnotationPresent(OneToMany.class) || field.isAnnotationPresent(ManyToMany.class)) {
+                    continue;
+                }
+                fields.add(field.getName());
+            }
+            FILTERABLE_FIELDS.put(clazz, fields);
+        }
+        return fields;
     }
 }

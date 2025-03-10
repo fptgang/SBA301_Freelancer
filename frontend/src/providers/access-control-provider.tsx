@@ -1,6 +1,7 @@
 import { AccessControlProvider } from "@refinedev/core";
 import { newEnforcer } from "casbin";
 import { model, adapter } from "../utils/access-controls";
+import {store} from "../store";
 
 /**
  * Check out the Access Control Provider documentation for detailed information
@@ -8,7 +9,7 @@ import { model, adapter } from "../utils/access-controls";
  **/
 export const accessControlProvider: AccessControlProvider = {
   can: async ({ resource, action, params }) => {
-    const role = localStorage.getItem("role") ?? "ADMIN";
+    const role = store.getState().auth.account?.role;
     const enforcer = await newEnforcer(model, adapter);
     if (action === "delete" || action === "edit" || action === "show") {
       return Promise.resolve({

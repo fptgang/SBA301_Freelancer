@@ -73,7 +73,7 @@ class sqlFileAppender {
   }
 
   public getBuffer(): string[] {
-    return [...this.buffer, '\nset @@foreign_key_checks = 1;  \ncommit;'] ;
+    return [...this.buffer, '\nset @@foreign_key_checks = 1;  \ncommit;'];
   }
 }
 

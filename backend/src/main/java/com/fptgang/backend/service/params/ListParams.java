@@ -13,7 +13,7 @@ public class ListParams {
     private Pageable pageable;
     private Map<String, String[]> filter;
     private String search;
-    private Boolean includeInvisible;
+    private boolean includeInvisible;
 
     private ListParams() {}
 
@@ -32,7 +32,7 @@ public class ListParams {
         private Pageable pageable;
         private final Map<String, String[]> filter = new LinkedHashMap<>();
         private String search;
-        private Boolean includeInvisible;
+        private boolean includeInvisible;
 
         public Builder pageable(Pageable pageable) {
             this.pageable = pageable;
@@ -59,7 +59,7 @@ public class ListParams {
             return this;
         }
 
-        public Builder includeInvisible(Boolean includeInvisible) {
+        public Builder includeInvisible(boolean includeInvisible) {
             this.includeInvisible = includeInvisible;
             return this;
         }
@@ -70,12 +70,12 @@ public class ListParams {
     }
 
     public <T> Specification<T> toSpec() {
+        if (!includeInvisible) {
+            filter.put("isVisible", new String[]{"eq", "true"});
+        }
         var spec = OpenApiHelper.<T>filtersToSpec(filter);
         if (search != null && !search.isEmpty()) {
             spec = spec.and(OpenApiHelper.searchToSpec(search));
-        }
-        if (includeInvisible!=null && !includeInvisible) {
-            spec = spec.and((a, _, cb) -> cb.isTrue(a.get("isVisible")));
         }
         return spec;
     }

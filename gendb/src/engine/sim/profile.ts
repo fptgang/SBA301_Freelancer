@@ -29,6 +29,10 @@ export class profilePool {
       .filter(dump => dump.length > 0)
       .join('\n\n');
   }
+
+  count(): number {
+    return this.profiles.length;
+  }
 }
 
 export let ProfilePool = new profilePool();

@@ -1,51 +1,37 @@
 package com.fptgang.backend.service.impl;
 
-import com.fptgang.backend.config.VnPayConfig;
-import com.fptgang.backend.model.Account;
+import com.fptgang.backend.exception.InvalidInputException;
 import com.fptgang.backend.model.Transaction;
 import com.fptgang.backend.repository.TransactionRepos;
 import com.fptgang.backend.service.TransactionService;
-import com.fptgang.backend.service.VNPAYService;
 import com.fptgang.backend.service.params.ListParams;
-import com.fptgang.backend.util.OpenApiHelper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.fptgang.backend.util.EntityUtil;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.time.LocalDateTime;
 
+@Slf4j
 @Service
 public class TransactionServiceImpl implements TransactionService {
-    private static final Logger LOGGER = LoggerFactory.getLogger(TransactionServiceImpl.class);
-    private final TransactionRepos transactionRepos;
-    private final VNPAYService VNPAYService;
 
-    public TransactionServiceImpl(TransactionRepos transactionRepos, VNPAYService VNPAYService) {
+    private final TransactionRepos transactionRepos;
+
+    @Autowired
+    public TransactionServiceImpl(TransactionRepos transactionRepos) {
         this.transactionRepos = transactionRepos;
-        this.VNPAYService = VNPAYService;
     }
 
     @Override
-    public String create(Transaction transaction) {
-        try {
-            transaction.setStatus(Transaction.TransactionStatus.FAILED);
-            transaction = transactionRepos.save(transaction);
-            if (transaction.getPaymentMethod() == Transaction.PaymentMethod.VNPAY) {
-                return VNPAYService.createVNPay(transaction);
-            }
-            return "Transaction created successfully";
-        } catch (Exception e) {
-            LOGGER.info("Transaction creation failed {}", e.getMessage());
-            throw new IllegalArgumentException("Transaction creation failed");
+    public Transaction create(Transaction transaction) {
+        if (transaction.getAmount().compareTo(BigDecimal.ZERO) <= 0) {
+            throw new InvalidInputException("Amount must be greater than 0");
         }
+        transaction.setCreatedAt(LocalDateTime.now());
+        return transactionRepos.save(transaction);
     }
 
     @Override
@@ -55,20 +41,15 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     public Transaction update(Transaction transaction) {
-        if (transaction.getTransactionId() == null || !transactionRepos.existsById(transaction.getTransactionId())) {
-            throw new IllegalArgumentException("Transaction does not exist");
-        }
-        return transactionRepos.save(transaction);
+        Transaction existing = transactionRepos.findById(transaction.getTransactionId())
+                .orElseThrow(() -> new InvalidInputException("Transaction does not exist"));
+        EntityUtil.merge(existing, transaction);
+        return transactionRepos.save(existing);
     }
 
     @Override
     public Page<Transaction> getAll(ListParams params) {
-        var spec = OpenApiHelper.groupBy( params.<Transaction>toSpec(), "transactionId");
+        var spec = params.<Transaction>toSpec();
         return transactionRepos.findAll(spec, params.getPageable());
-    }
-
-    @Override
-    public Page<Transaction> getAll(Pageable pageable, BigDecimal minAmount, BigDecimal maxAmount) {
-        return transactionRepos.findByAmountBetween(minAmount, maxAmount, pageable);
     }
 }

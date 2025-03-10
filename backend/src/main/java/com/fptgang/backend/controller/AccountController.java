@@ -57,7 +57,7 @@ public class AccountController implements AccountsApi {
     @Override
     public ResponseEntity<AccountDto> getAccountById(Long accountId) {
         log.info("Getting account by id ");
-        if(SecurityUtil.isRole(Role.CLIENT, Role.FREELANCER) && SecurityUtil.requireCurrentUserId() != accountId) {
+        if(SecurityUtil.hasRole(Role.CLIENT, Role.FREELANCER) && SecurityUtil.requireCurrentUserId() != accountId) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
@@ -75,7 +75,7 @@ public class AccountController implements AccountsApi {
                 .includeInvisible(includeInvisible);
 
         // Staff cannot view Admin
-        if (SecurityUtil.isRole(Role.STAFF)) {
+        if (SecurityUtil.hasRole(Role.STAFF)) {
             params.setFilter("role", "in", "STAFF,CUSTOMER");
         }
         var res = accountService
@@ -101,7 +101,7 @@ public class AccountController implements AccountsApi {
             accountDto.setVerifiedAt(null);
         }
 
-        if (SecurityUtil.isRole(Role.CLIENT, Role.FREELANCER)) {
+        if (SecurityUtil.hasRole(Role.CLIENT, Role.FREELANCER)) {
             if (SecurityUtil.requireCurrentUserId() != accountId) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
             }

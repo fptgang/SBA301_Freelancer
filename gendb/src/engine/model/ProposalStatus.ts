@@ -1,5 +1,7 @@
 export enum ProposalStatus {
   ACCEPTED = 'ACCEPTED',
   PENDING = 'PENDING',
+  EXPIRED = "EXPIRED",
+  WITHDRAWN = "WITHDRAWN",
   REJECTED = 'REJECTED'
 }

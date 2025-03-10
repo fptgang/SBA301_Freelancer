@@ -27,9 +27,20 @@ dump order
     skills [x]
     transactions
 
-write a typescript class to present the table using the appropriate typescript data types
-then, write a static dump() function that accept an array of model objects and print out SQL command that bulk insert. Remember, format the value as appropriate to let it work with the data type declared in table fields
-For ID (primary key and foreign key), in the typescript model, should be number
-do not write the examples
-export all
+Write a Typescript class to present the table using the appropriate typescript data types
+Import: import {escapeSingleQuotes} from "../utils.js";
+
+The constructor accepts Partial<T>
+The constructor need to explicitly set each field individually with proper default values
+
+Then, write a static dump() function that accept an array of model objects and print out MySQL-compatible SQL command that bulk insert. 
+
+Remember:
+- format the value as appropriate to let it work with the data type declared in table fields. For string, use escapeSingleQuotes()
+- For ID (primary key and foreign key), in the typescript model, should be [number]
+
+Do not write the examples
+Export all 
+
+
 ```

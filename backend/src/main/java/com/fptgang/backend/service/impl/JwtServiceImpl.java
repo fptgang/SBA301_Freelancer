@@ -9,6 +9,7 @@ import com.fptgang.backend.service.RefreshTokenService;
 import jakarta.validation.constraints.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.oauth2.jwt.*;
 import org.springframework.stereotype.Service;
 
@@ -19,11 +20,14 @@ import java.util.Objects;
 
 @Service
 public class JwtServiceImpl implements JwtService {
-    private static final Duration JWT_EXPIRY_DURATION = Duration.ofHours(1);
+    private static final Duration JWT_EXPIRY_DURATION = Duration.ofMinutes(15);
     private static final Logger LOGGER = LoggerFactory.getLogger(JwtServiceImpl.class);
     private final JwtEncoder encoder;
     private final JwtDecoder decoder;
     private final RefreshTokenService refreshTokenService;
+
+    @Value("${exception.log:false}")
+    private boolean exceptionLog;
 
     public JwtServiceImpl(JwtEncoder encoder, JwtDecoder decoder, RefreshTokenService refreshTokenService) {
         this.encoder = encoder;
@@ -69,6 +73,9 @@ public class JwtServiceImpl implements JwtService {
             Instant expiryAt = Objects.requireNonNull(jwt.getExpiresAt());
             return expiryAt.isBefore(Instant.now()) ? null : jwt;
         } catch (JwtException e) {
+            if (exceptionLog) {
+                e.printStackTrace();
+            }
             return null;
         }
     }
