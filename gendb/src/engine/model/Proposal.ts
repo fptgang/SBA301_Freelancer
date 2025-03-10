@@ -5,7 +5,7 @@ import {ProposalStatus} from "./ProposalStatus.js";
 export class Proposal {
   proposal_id: number;
   created_at: Date | null;
-  is_visible: boolean;
+  budget: number;
   notes: string | null;
   status: ProposalStatus;
   updated_at: Date | null;
@@ -19,7 +19,7 @@ export class Proposal {
   constructor(
     proposal_id: number,
     created_at: Date | null,
-    is_visible: boolean,
+    budget: number,
     notes: string | null,
     status: ProposalStatus,
     updated_at: Date | null,
@@ -29,7 +29,7 @@ export class Proposal {
   ) {
     this.proposal_id = proposal_id;
     this.created_at = created_at;
-    this.is_visible = is_visible;
+    this.budget = budget;
     this.notes = notes;
     this.status = status;
     this.updated_at = updated_at;
@@ -51,7 +51,7 @@ export class Proposal {
 
       return `(${proposal.proposal_id},` +
         `${created_at},` +
-        `${proposal.is_visible ? 1 : 0},` +
+        `${proposal.budget.toFixed(2)},` +
         `${notes},` +
         `'${proposal.status}',` +
         `${updated_at},` +
@@ -60,7 +60,7 @@ export class Proposal {
     }).join(',\n');
 
     return `INSERT INTO proposals ` +
-      `(proposal_id, created_at, is_visible, notes, status, updated_at, freelancer_id, project_id) ` +
+      `(proposal_id, created_at, budget, notes, status, updated_at, freelancer_id, project_id) ` +
       `VALUES\n${values};`;
   }
 }

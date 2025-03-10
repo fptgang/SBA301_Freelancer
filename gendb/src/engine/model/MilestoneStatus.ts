@@ -2,5 +2,6 @@ export enum MilestoneStatus {
   FINISHED = 'FINISHED',
   IN_PROGRESS = 'IN_PROGRESS',
   PENDING = 'PENDING',
+  REVIEWING = 'REVIEWING',
   TERMINATED = 'TERMINATED'
 }

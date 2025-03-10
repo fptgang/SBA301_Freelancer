@@ -44,8 +44,8 @@ public class TransactionMapper extends BaseMapper<TransactionDto, Transaction> {
         }
 
         entity.setAmount(dto.getAmount());
-        entity.setType(mapTransactionTypeReverse(dto.getType()));
-        entity.setStatus(mapTransactionStatusReverse(dto.getStatus()));
+        entity.setType(Transaction.TransactionType.valueOf(dto.getType().name()));
+        entity.setStatus(Transaction.TransactionStatus.valueOf(dto.getStatus().name()));
         entity.setPaymentMethod(Transaction.PaymentMethod.valueOf(dto.getPaymentMethod().name()));
         entity.setCreatedAt(DateTimeUtil.fromOffsetToLocal(dto.getCreatedAt()));
         entity.setMilestone(milestoneRepos.findById(dto.getMilestoneId()).orElse(null));
@@ -63,8 +63,8 @@ public class TransactionMapper extends BaseMapper<TransactionDto, Transaction> {
         dto.setFromAccountId(entity.getFromAccount().getAccountId());
         dto.setToAccountId(entity.getToAccount().getAccountId());
         dto.setAmount(entity.getAmount());
-        dto.setType(mapTransactionType(entity.getType()));
-        dto.setStatus(mapTransactionStatus(entity.getStatus()));
+        dto.setType(TransactionDto.TypeEnum.valueOf(entity.getType().name()));
+        dto.setStatus(TransactionDto.StatusEnum.valueOf(entity.getStatus().name()));
         dto.setPaymentMethod(entity.getPaymentMethod()!=null?TransactionDto.PaymentMethodEnum.valueOf(entity.getPaymentMethod().name()):null);
         dto.setMilestoneId(entity.getMilestone() != null ? entity.getMilestone().getMilestoneId() : null);
         dto.setCreatedAt(DateTimeUtil.fromLocalToOffset(entity.getCreatedAt()));
@@ -82,71 +82,4 @@ public class TransactionMapper extends BaseMapper<TransactionDto, Transaction> {
         return dto;
     }
 
-    private TransactionDto.TypeEnum mapTransactionType(Transaction.TransactionType type) {
-        if (type == null) {
-            return null;
-        }
-        switch (type) {
-            case DEPOSIT:
-                return TransactionDto.TypeEnum.DEPOSIT;
-            case WITHDRAWAL:
-                return TransactionDto.TypeEnum.WITHDRAWAL;
-            case FEE:
-                return TransactionDto.TypeEnum.FEE;
-            case ESCROW_DEPOSIT:
-                return TransactionDto.TypeEnum.ESCROW_DEPOSIT;
-            case ESCROW_RELEASE:
-                return TransactionDto.TypeEnum.ESCROW_RELEASE;
-            default:
-                throw new IllegalArgumentException("Unexpected type value: " + type);
-        }
-    }
-
-    private Transaction.TransactionType mapTransactionTypeReverse(TransactionDto.TypeEnum type) {
-        if (type == null) {
-            return null;
-        }
-        switch (type) {
-            case DEPOSIT:
-                return Transaction.TransactionType.DEPOSIT;
-            case WITHDRAWAL:
-                return Transaction.TransactionType.WITHDRAWAL;
-            case FEE:
-                return Transaction.TransactionType.FEE;
-            case ESCROW_DEPOSIT:
-                return Transaction.TransactionType.ESCROW_DEPOSIT;
-            case ESCROW_RELEASE:
-                return Transaction.TransactionType.ESCROW_RELEASE;
-            default:
-                throw new IllegalArgumentException("Unexpected type value: " + type);
-        }
-    }
-
-    private TransactionDto.StatusEnum mapTransactionStatus(Transaction.TransactionStatus status) {
-        if (status == null) {
-            return null;
-        }
-        switch (status) {
-            case SUCCESS:
-                return TransactionDto.StatusEnum.SUCCESS;
-            case FAILED:
-                return TransactionDto.StatusEnum.FAILED;
-            default:
-                throw new IllegalArgumentException("Unexpected status value: " + status);
-        }
-    }
-
-    private Transaction.TransactionStatus mapTransactionStatusReverse(TransactionDto.StatusEnum status) {
-        if (status == null) {
-            return null;
-        }
-        switch (status) {
-            case SUCCESS:
-                return Transaction.TransactionStatus.SUCCESS;
-            case FAILED:
-                return Transaction.TransactionStatus.FAILED;
-            default:
-                throw new IllegalArgumentException("Unexpected status value: " + status);
-        }
-    }
 }

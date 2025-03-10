@@ -11,7 +11,6 @@
     "gen": "node --loader ts-node/esm src/main.ts"
   },
   "dependencies": {
-    "@types/prismjs": "^1.26.5",
     "bcryptjs": "^3.0.0",
     "bootstrap": "^5.3.2",
     "prismjs": "^1.29.0",

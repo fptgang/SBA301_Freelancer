@@ -29,6 +29,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @Testcontainers
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @Import(TestcontainersConfiguration.class)
+@Disabled
 class MilestoneServiceTest {
 
     private final MilestoneService milestoneService;

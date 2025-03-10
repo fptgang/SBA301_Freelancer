@@ -75,13 +75,15 @@ public class SecurityUtil {
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     @NotNull
     public static boolean hasPermission(Role role) {
-        return requireCurrentUserRole().hasPermission(role);
+        var currentUserRole = getCurrentUserRole();
+        return currentUserRole != null && currentUserRole.hasPermission(role);
     }
 
     @NotNull
-    public static boolean isRole(Role... roles) {
+    public static boolean hasRole(Role... roles) {
+        Role currentUserRole = getCurrentUserRole();
         for (Role role : roles) {
-            if (requireCurrentUserRole().equals(role)) {
+            if (role == currentUserRole) {
                 return true;
             }
         }

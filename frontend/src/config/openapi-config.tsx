@@ -1,65 +1,74 @@
 import { API_URL } from "../utils/constants";
-import { REFRESH_TOKEN_KEY, TOKEN_KEY } from "../authProvider";
 import {
   Configuration,
   DefaultApi,
   Middleware,
   ResponseContext,
-  RequestContext,
+  RequestContext, JwtResponseDto,
 } from "../../generated";
+import {store} from "../store";
+import {clearAuth, setAccessToken} from "../store/auth";
+import {REFRESH_TOKEN_KEY} from "../authProvider";
 
-// Authentication middleware
-const authMiddleware: Middleware = {
-  pre: async (context: RequestContext) => {
-    // Add token to request headers
-    const token = localStorage.getItem(TOKEN_KEY);
-    if (token) {
-      context.init.headers = {
-        ...context.init.headers,
-        Authorization: `Bearer ${token}`,
-      };
-    }
-    return context;
-  },
-  post: async (context: ResponseContext) => {
-    // Handle 401 errors and token refresh
-    if (context.response.status === 401) {
-      const refresh = localStorage.getItem(REFRESH_TOKEN_KEY);
-      if (refresh) {
-        try {
-          // Get new tokens
-          const tokens = await api.refreshToken({
-            body: refresh,
-          });
+class TokenRefreshMiddleware implements Middleware {
+  private refreshInProgress: Promise<string | undefined> | null = null;
 
-          // Update localStorage
-          localStorage.setItem(TOKEN_KEY, tokens.accessToken ?? "");
-          localStorage.setItem(REFRESH_TOKEN_KEY, tokens.refreshToken ?? "");
+  async post(context: ResponseContext): Promise<Response | void> {
+    if (context.response && context.response.status === 401) {
+      if (!this.refreshInProgress) {
+        this.refreshInProgress = this.refreshAccessToken();
+        console.log("[OpenAPI client] Refreshing access token...");
+      }
 
-          // Retry the original request with new token
-          const originalRequest = context.init;
-          originalRequest.headers = {
-            ...originalRequest.headers,
-            Authorization: `Bearer ${tokens.accessToken}`,
-          };
+      try {
+        const newAccessToken = await this.refreshInProgress;
+        const newHeaders = new Headers(context.init.headers);
+        newHeaders.set('Authorization', `Bearer ${newAccessToken}`);
 
-          // Create new request with updated token
-          const response = await fetch(context.url, originalRequest);
-          return response;
-        } catch (error) {
-          // If refresh fails, clear tokens and redirect to login
-          localStorage.removeItem(TOKEN_KEY);
-          localStorage.removeItem(REFRESH_TOKEN_KEY);
-          window.location.href = "/login";
-          throw error;
-        }
+        const retriedInit = {
+          ...context.init,
+          headers: newHeaders
+        };
+
+        return fetch(context.url, retriedInit);
+      } catch (refreshError) {
+        localStorage.removeItem(REFRESH_TOKEN_KEY);
+        store.dispatch(clearAuth());
+        window.location.href = '/login';
+        throw refreshError;
+      } finally {
+        this.refreshInProgress = null;
       }
     }
-    return context.response;
-  },
-};
 
-// Logging middleware
+    return context.response;
+  }
+
+  private async refreshAccessToken(): Promise<string | undefined> {
+    const refreshToken = localStorage.getItem(REFRESH_TOKEN_KEY);
+
+    if (!refreshToken) {
+      throw new Error('No refresh token available');
+    }
+
+    const response = await fetch(`${API_URL}/auth/refresh-token`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: refreshToken
+    });
+
+    if (!response.ok) {
+      throw new Error('Token refresh failed');
+    }
+
+    const { accessToken } = await response.json() as JwtResponseDto;
+    store.dispatch(setAccessToken(accessToken));
+    return accessToken;
+  }
+}
+
 const loggingMiddleware: Middleware = {
   pre: async (context: RequestContext) => {
     console.log("Request:", {
@@ -78,14 +87,17 @@ const loggingMiddleware: Middleware = {
   },
 };
 
-// Create API client configuration
 const apiConfig = new Configuration({
   basePath: API_URL,
-  accessToken: localStorage.getItem(TOKEN_KEY) ?? undefined,
-  middleware: [authMiddleware, loggingMiddleware],
+  accessToken: async () => {
+    return store.getState().auth.accessToken || "";
+  },
+  middleware: [
+    new TokenRefreshMiddleware(),
+    // loggingMiddleware,
+  ],
 });
 
-// Create API instance
 export const api = new DefaultApi(apiConfig);
 
 export default api;

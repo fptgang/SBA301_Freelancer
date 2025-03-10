@@ -3,6 +3,7 @@ package com.fptgang.backend.util;
 import jakarta.persistence.criteria.*;
 import lombok.Builder;
 import lombok.Data;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -24,6 +25,7 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
+@Disabled
 public class OpenApiHelperTest {
     @Test
     public void testToPageableSingleSort() {

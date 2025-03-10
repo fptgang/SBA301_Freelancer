@@ -1,60 +1,46 @@
 import type { AuthProvider } from "@refinedev/core";
-import { API_URL } from "./utils/constants";
 
 import {
+  AccountDto,
   AccountDtoRoleEnum,
   AuthResponseDto,
-  Configuration,
-  DefaultApi,
   ResetPasswordRequestDto,
 } from "../generated";
-export const TOKEN_KEY = "refine-auth";
-const config: Configuration = new Configuration({
-  basePath: API_URL,
-});
+import api from "./config/openapi-config";
+import {store} from "./store";
+import {clearAuth, setAccessToken, setAuthenticatedAccount} from "./store/auth";
+
 export const REFRESH_TOKEN_KEY = "refine-refresh-token";
-const api = new DefaultApi(config);
+
 export const authProvider: AuthProvider = {
   login: async ({ username, email, password, googleToken }) => {
     if (googleToken) {
-      const response = await api.loginWithGoogle({ body: googleToken });
-      localStorage.setItem(TOKEN_KEY, response.token ?? "");
-      localStorage.setItem(REFRESH_TOKEN_KEY, response.refreshToken ?? "");
+      const response = await api.loginWithGoogle({body: googleToken});
       console.log(response);
-      localStorage.setItem("role", response?.accountResponseDTO?.role ?? "");
-      if (response?.accountResponseDTO?.role === AccountDtoRoleEnum.Admin) {
-        return {
-          success: true,
-          redirectTo: "/admin",
-        };
-      } else if(response?.accountResponseDTO?.role === AccountDtoRoleEnum.Client) {
-        return {
-          success: true,
-          redirectTo: "/find-work",
-        };
-      }
+
+      localStorage.setItem(REFRESH_TOKEN_KEY, response.refreshToken ?? "");
+      store.dispatch(setAccessToken(response.token));
+      store.dispatch(setAuthenticatedAccount(response.accountResponseDTO));
+
+      return {
+        success: true,
+        redirectTo: response?.accountResponseDTO?.role === AccountDtoRoleEnum.Admin ? "/admin" : "/",
+      };
     }
 
     if ((username || email) && password) {
       const response: AuthResponseDto = await api.login({
         loginRequestDto: { email: email, password: password },
       });
-      localStorage.setItem(TOKEN_KEY, response.token ?? "");
-      localStorage.setItem(REFRESH_TOKEN_KEY, response.refreshToken ?? "");
       console.log(response);
-      localStorage.setItem("role", response.accountResponseDTO?.role ?? "");
+      localStorage.setItem(REFRESH_TOKEN_KEY, response.refreshToken ?? "");
+      store.dispatch(setAccessToken(response.token));
+      store.dispatch(setAuthenticatedAccount(response.accountResponseDTO));
 
-      if (response.accountResponseDTO?.role === AccountDtoRoleEnum.Admin) {
-        return {
-          success: true,
-          redirectTo: "/admin",
-        };
-      } else {
-        return {
-          success: true,
-          redirectTo: "/",
-        };
-      }
+      return {
+        success: true,
+        redirectTo: response?.accountResponseDTO?.role === AccountDtoRoleEnum.Admin ? "/admin" : "/",
+      };
     }
 
     return {
@@ -66,78 +52,45 @@ export const authProvider: AuthProvider = {
     };
   },
   logout: async () => {
-    localStorage.removeItem(TOKEN_KEY);
+    localStorage.removeItem(REFRESH_TOKEN_KEY);
+    store.dispatch(clearAuth());
     return {
       success: true,
       redirectTo: "/login",
     };
   },
   check: async () => {
-    const token: string | null = localStorage.getItem(TOKEN_KEY);
-    console.log("check auth " + token);
-    if (token) {
-      const checkStatus = await api
-        .getCurrentUser({
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        })
-        .then((response) => {
-          console.log(response);
-          if (response.role) {
-            localStorage.setItem("role", response.role);
-          }
-          console.log(response);
-          return {
-            role: response.role,
-            authenticated: true,
-          };
-        })
-        .catch((error) => {
-          console.log(error);
-          return {
-            authenticated: false,
-            redirectTo: "/login",
-          };
-        });
-      return checkStatus;
+    if (authProvider.getIdentity && await authProvider.getIdentity()) {
+      return { authenticated: true }
+    } else {
+      return {
+        authenticated: false,
+        redirectTo: "/login",
+        error: {
+          message: "Check failed",
+          name: "Not authenticated"
+        }
+      }
     }
-    return {
-      authenticated: false,
-      redirectTo: "/login",
-    };
   },
   getPermissions: async () => {
-    return localStorage.getItem("role");
+    return store.getState().auth.account?.role;
   },
-  getIdentity: async () => {
-    const token = localStorage.getItem(TOKEN_KEY);
-    if (token) {
-      const result = await api
-        .getCurrentUser({
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        })
-        .then((response) => {
+  getIdentity: async (refetch = false) : Promise<AccountDto | undefined>=> {
+    // Force fetching if on first load, there is refresh token
+    if (refetch || (!store.getState().auth.account && localStorage.getItem(REFRESH_TOKEN_KEY))) {
+      console.log("[authProvider.getIdentity] fetching user profile...");
+      await api.getCurrentUser()
+        .then((response: AccountDto) => {
           console.log(response);
-          if (response.role) {
-            localStorage.setItem("role", response.role);
-          }
-          return {
-            id: response.accountId,
-            name: response.firstName + " " + response.lastName,
-            avatar: response.avatarUrl ?? "https://i.pravatar.cc/300",
-            role: response.role,
-          };
+          store.dispatch(setAuthenticatedAccount(response));
         })
         .catch((error) => {
           console.log(error);
-          return null;
         });
-      return result;
     }
-    return null;
+
+    return store.getState().auth.account;
   },
   onError: async (error) => {
     console.error(error);
@@ -173,7 +126,6 @@ export const authProvider: AuthProvider = {
   },
   updatePassword: async (params: ResetPasswordRequestDto) => {
     if (params.token) {
-      console.log("reset password");
       api
         .resetPassword({
           resetPasswordRequestDto: {
@@ -188,18 +140,14 @@ export const authProvider: AuthProvider = {
             redirectTo: "/login",
           };
         });
-    } else {
-      console.log("update password");
     }
 
-    console.log(params);
     return {
       success: true,
       redirectTo: "/login",
     };
   },
   forgotPassword: async (params) => {
-    console.log(params);
     const response = api.forgotPassword({
       forgotPasswordRequestDto: { email: params.email },
     });

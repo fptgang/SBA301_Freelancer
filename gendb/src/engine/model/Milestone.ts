@@ -3,7 +3,7 @@ import {MilestoneStatus} from "./MilestoneStatus.js";
 
 export class Milestone {
   milestoneId: number;
-  budget: number;
+  budgetRatio: number;
   createdAt: Date | null;
   deadline: Date;
   isVisible: boolean;
@@ -15,7 +15,7 @@ export class Milestone {
 
   constructor(
     milestoneId: number,
-    budget: number,
+    budgetRatio: number,
     deadline: Date,
     status: MilestoneStatus,
     title: string,
@@ -26,7 +26,7 @@ export class Milestone {
     updatedAt: Date | null = null
   ) {
     this.milestoneId = milestoneId;
-    this.budget = budget;
+    this.budgetRatio = budgetRatio;
     this.deadline = deadline;
     this.isVisible = isVisible;
     this.status = status;
@@ -42,7 +42,7 @@ export class Milestone {
 
     const columns = [
       'milestone_id',
-      'budget',
+      'budget_ratio',
       'created_at',
       'deadline',
       'is_visible',
@@ -58,7 +58,7 @@ export class Milestone {
         date ? `'${date.toISOString().slice(0, 19).replace('T', ' ')}.000000'` : 'NULL';
 
       return `(${milestone.milestoneId},` +
-        `${milestone.budget.toFixed(2)},` +
+        `${milestone.budgetRatio.toFixed(2)},` +
         `${formatDate(milestone.createdAt)},` +
         `${formatDate(milestone.deadline)},` +
         `${milestone.isVisible ? 1 : 0},` +

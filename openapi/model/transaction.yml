@@ -15,7 +15,7 @@ TransactionDto:
       format: double
     type:
       type: string
-      enum: [DEPOSIT, WITHDRAWAL, ESCROW_DEPOSIT, ESCROW_RELEASE, FEE]
+      enum: [DEPOSIT, WITHDRAWAL, ESCROW_DEPOSIT, ESCROW_RELEASE, ESCROW_REFUND]
     status:
       type: string
       enum: [PENDING, SUCCESS, FAILED]
@@ -24,7 +24,7 @@ TransactionDto:
       format: int64
     paymentMethod:
       type: string
-      enum: [ VNPAY ]
+      enum: [ VNPAY, INTERNAL_WALLET ]
     createdAt:
       type: string
       format: date-time

@@ -93,6 +93,38 @@ public class Project {
     private List<Message> messages = new ArrayList<>();
 
     public enum ProjectStatus {
-        OPEN, IN_PROGRESS, TERMINATED, FINISHED
+        OPEN,
+        PAUSED,
+        IN_PROGRESS,
+        TERMINATED,
+        FINISHED
+    }
+
+    @Enumerated(EnumType.STRING)
+    @Nullable
+    private TerminationReason terminationReason;
+
+    @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
+    @Builder.Default
+    @Nullable
+    private Boolean toTerminate = false;
+
+    public enum TerminationReason {
+        /**
+            Other reasons before the contract is made
+            e.g. Client didn’t accept any proposal by startDate
+                 No proposals were submitted by startDate
+         */
+        OTHER,
+
+        /** Contract remained unsigned by the start date */
+        CONTRACT_UNSIGNED,
+
+        /** Client can request termination before 2 days past the current milestone deadline
+            Become effective starting from the next milestone  */
+        CLIENT_REQUEST_TERMINATION,
+
+        /** Project terminated by staff after conflict resolution */
+        STAFF_DECISION
     }
 }

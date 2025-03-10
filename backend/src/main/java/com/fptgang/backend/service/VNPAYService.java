@@ -1,7 +1,7 @@
 package com.fptgang.backend.service;
 
-import com.fptgang.backend.model.Transaction;
+import java.math.BigDecimal;
 
 public interface VNPAYService {
-    String createVNPay(Transaction transaction);
+    String createVNPay(String orderInfo, BigDecimal amount, String txnRef, String vnp_IpAddr);
 }

@@ -1,4 +1,4 @@
-import { escapeSingleQuotes } from "../utils.js";
+import {escapeSingleQuotes} from "../utils.js";
 
 export class File {
   file_id: number;

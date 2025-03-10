@@ -74,6 +74,7 @@ public class Milestone {
         PENDING,
         TERMINATED,
         IN_PROGRESS,
+        REVIEWING,
         FINISHED
     }
 }

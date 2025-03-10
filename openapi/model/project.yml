@@ -39,7 +39,12 @@ ProjectDto:
         $ref: 'project-skill.yml#/ProjectSkillDto'
     status:
       type: string
-      enum: [OPEN, IN_PROGRESS, TERMINATED, FINISHED]
+      enum: [OPEN, PAUSED, IN_PROGRESS, TERMINATED, FINISHED]
+    termination_reasons:
+      type: string
+      enum: [CONTRACT_UNSIGNED, CLIENT_REQUEST_TERMINATION, STAFF_DECISION, OTHER]
+    to_terminate:
+      type: boolean
     contract:
       $ref: 'contract.yml#/ContractDto'
     latestMessage:
