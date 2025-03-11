@@ -1,5 +1,6 @@
 import {escapeSingleQuotes} from "../utils.js";
 import {MilestoneStatus} from "./MilestoneStatus.js";
+import {FundStatus} from "./FundStatus.js";
 
 export class Milestone {
   milestoneId: number;
@@ -8,6 +9,7 @@ export class Milestone {
   deadline: Date;
   isVisible: boolean;
   status: MilestoneStatus;
+  fundStatus: FundStatus;
   title: string;
   description: string | null;
   updatedAt: Date | null;
@@ -18,6 +20,7 @@ export class Milestone {
     budgetRatio: number,
     deadline: Date,
     status: MilestoneStatus,
+    fundStatus: FundStatus,
     title: string,
     description: string | null,
     projectId: number,
@@ -30,6 +33,7 @@ export class Milestone {
     this.deadline = deadline;
     this.isVisible = isVisible;
     this.status = status;
+    this.fundStatus = fundStatus;
     this.title = title;
     this.description = description;
     this.projectId = projectId;
@@ -47,6 +51,7 @@ export class Milestone {
       'deadline',
       'is_visible',
       'status',
+      'fund_status',
       'title',
       'description',
       'updated_at',
@@ -63,6 +68,7 @@ export class Milestone {
         `${formatDate(milestone.deadline)},` +
         `${milestone.isVisible ? 1 : 0},` +
         `'${milestone.status}',` +
+        `'${milestone.fundStatus}',` +
         `'${escapeSingleQuotes(milestone.title)}',` +
         (milestone.description ? `'${escapeSingleQuotes(milestone.description)}'` : `NULL`) + `,` +
         `${formatDate(milestone.updatedAt)},` +

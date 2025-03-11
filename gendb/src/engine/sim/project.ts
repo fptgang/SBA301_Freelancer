@@ -29,6 +29,7 @@ import {generateSegmentedArray} from "../utils";
 import {ContractStatus} from "../model/Contract";
 import {TransactionType} from "../model/TransactionType";
 import {TransactionStatus} from "../model/TransactionStatus";
+import {FundStatus} from "../model/FundStatus";
 
 export class projectPool {
   private projects: Project[] = [];
@@ -251,6 +252,7 @@ export const createProject = (date: Date) => {
       budgetRatios[i],
       currentDeadline,
       MilestoneStatus.PENDING,
+      FundStatus.NONE,
       faker.commerce.productAdjective() + " " + faker.commerce.productName(),
       faker.datatype.boolean() ? faker.lorem.paragraph(milestoneDescriptionLineAmount()) : null,
       project.project_id,
@@ -341,6 +343,8 @@ export const taskAutoTerminateProjectDueToUnsignedContract = (date: Date) => {
   TransactionPool.refundEscrow(date, project.client,
     project.milestones[0].budgetRatio * project.contract.budget,
     project.milestones[0].milestoneId);
+  project.milestones[0].fundStatus = FundStatus.REFUNDED;
+  project.milestones[0].updatedAt = date;
   //console.log("Project ", project.project_id, " terminated due to unsigned contract");
   return true;
 }
@@ -394,6 +398,7 @@ export const taskAutoTerminateProjectDueToClientRequest = (date: Date) => {
 
   let activeMilestone = project.activeMilestone;
   activeMilestone.status = MilestoneStatus.TERMINATED;
+  activeMilestone.fundStatus = FundStatus.RELEASED;
   activeMilestone.updatedAt = date;
   TransactionPool.releaseEscrow(date, project.contract.freelancer, project.contract.budget * activeMilestone.budgetRatio, activeMilestone.milestoneId);
 
@@ -405,8 +410,11 @@ export const taskAutoTerminateProjectDueToClientRequest = (date: Date) => {
       const hasMilestoneEscrowDeposit = TransactionPool.pickTransaction(
         TransactionType.ESCROW_DEPOSIT, TransactionStatus.SUCCESS, milestone.milestoneId).length > 0;
 
-      if (hasMilestoneEscrowDeposit)
+      if (hasMilestoneEscrowDeposit) {
         TransactionPool.refundEscrow(date, project.client, project.contract.budget * milestone.budgetRatio, milestone.milestoneId);
+        milestone.fundStatus = FundStatus.REFUNDED;
+        milestone.updatedAt = date;
+      }
     }
   }
   //console.log("Project ", project.project_id, " terminated due to client request in previous milestone");

@@ -14,4 +14,7 @@ import java.util.Optional;
 public interface TransactionRepos extends JpaRepository<Transaction, Long>, JpaSpecificationExecutor<Transaction> {
     Optional<Transaction> findByTransactionId(Long transactionId);
     Page<Transaction> findByAmountBetween(BigDecimal min, BigDecimal max, Pageable pageable);
+
+    Optional<Transaction> findByTypeAndStatusAndMilestone_MilestoneId(Transaction.TransactionType type, Transaction.TransactionStatus status, Long milestoneId);
+    boolean existsByTypeAndStatusAndMilestone_MilestoneId(Transaction.TransactionType type, Transaction.TransactionStatus status, Long milestoneId);
 }

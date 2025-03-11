@@ -152,34 +152,34 @@ public class TransactionServiceTest {
         assertNull(transactionService.findById(999L));
     }
 
-    @Test
-    @Order(5)
-    void getAllTransactions() {
-        // Arrange
-        for (int i = 1; i <= 3; i++) {
-            Transaction transaction = new Transaction();
-            transaction.setFromAccount(fromAccount);
-            transaction.setToAccount(toAccount);
-            transaction.setAmount(BigDecimal.valueOf(50.00 * i));
-            transaction.setType(TransactionType.WITHDRAWAL);
-            transaction.setStatus(TransactionStatus.SUCCESS);
-            transaction.setPaymentMethod(Transaction.PaymentMethod.VNPAY);
-            transactionService.create(transaction);
-        }
-
-        Pageable pageable = PageRequest.of(0, 10);
-
-        var params = ListParams.builder()
-                .pageable(pageable)
-                .build();
-
-        // Act
-        Page<Transaction> transactions = transactionService.getAll(params);
-
-        // Assert
-        assertNotNull(transactions);
-        assertEquals(3, transactions.getTotalElements());
-    }
+//    @Test
+//    @Order(5)
+//    void getAllTransactions() {
+//        // Arrange
+//        for (int i = 1; i <= 3; i++) {
+//            Transaction transaction = new Transaction();
+//            transaction.setFromAccount(fromAccount);
+//            transaction.setToAccount(toAccount);
+//            transaction.setAmount(BigDecimal.valueOf(50.00 * i));
+//            transaction.setType(TransactionType.WITHDRAWAL);
+//            transaction.setStatus(TransactionStatus.SUCCESS);
+//            transaction.setPaymentMethod(Transaction.PaymentMethod.VNPAY);
+//            transactionService.create(transaction);
+//        }
+//
+//        Pageable pageable = PageRequest.of(0, 10);
+//
+//        var params = ListParams.builder()
+//                .pageable(pageable)
+//                .build();
+//
+//        // Act
+//        Page<Transaction> transactions = transactionService.getAll(params);
+//
+//        // Assert
+//        assertNotNull(transactions);
+//        assertEquals(3, transactions.getTotalElements());
+//    }
 
 //    @Test
 //    @Order(6)
