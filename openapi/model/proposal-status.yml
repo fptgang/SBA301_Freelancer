@@ -1,0 +1,3 @@
+ProposalStatusDto:
+  type: string
+  enum: [PENDING,EXPIRED,WITHDRAWN, ACCEPTED, REJECTED]

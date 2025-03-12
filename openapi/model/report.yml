@@ -4,12 +4,10 @@ ReportDto:
     reportId:
       type: integer
       format: int64
-    reporterId:
-      type: integer
-      format: int64
-    projectId:
-      type: integer
-      format: int64
+    reporter:
+      $ref: 'account.yml#/AccountDto'
+    project:
+      $ref: 'project.yml#/ProjectDto'
     reason:
       type: string
     status:

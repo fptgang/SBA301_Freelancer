@@ -1,0 +1,32 @@
+put:
+  summary: Extend a project deadlines
+  operationId: extendProjectDeadline
+  security:
+    - bearerAuth: []
+  parameters:
+    - name: projectId
+      in: path
+      required: true
+      schema:
+        type: integer
+        format: int64
+  requestBody:
+    description: Project deadlines to be extended
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../../../model/request/project-deadline-extend.yml#/ProjectDeadlineExtendDto'
+  responses:
+    '200':
+      description: The operation was success
+      content:
+        application/json:
+          schema:
+            $ref: '../../../model/project.yml#/ProjectDto'
+    '400':
+      description: The operation was failed
+      content:
+        application/json:
+          schema:
+            $ref: '../../../component/error.yml#/ErrorResponse'

@@ -1,10 +1,10 @@
 package com.fptgang.backend.controller;
 
 import com.fptgang.backend.api.controller.ProjectsApi;
-import com.fptgang.backend.api.model.GetProjects200Response;
-import com.fptgang.backend.api.model.Pageable;
-import com.fptgang.backend.api.model.ProjectDto;
+import com.fptgang.backend.api.model.*;
 import com.fptgang.backend.mapper.DetailLevel;
+import com.fptgang.backend.mapper.ProjectCreateMapper;
+import com.fptgang.backend.mapper.ProjectDeadlineExtendMapper;
 import com.fptgang.backend.mapper.ProjectMapper;
 import com.fptgang.backend.model.Project;
 import com.fptgang.backend.model.Role;
@@ -26,17 +26,23 @@ import java.util.Objects;
 public class ProjectController implements ProjectsApi {
     private final ProjectService projectService;
     private final ProjectMapper projectMapper;
+    private final ProjectCreateMapper projectCreateMapper;
+    private final ProjectDeadlineExtendMapper projectDeadlineExtendMapper;
 
     @Autowired
-    public ProjectController(ProjectService projectService, ProjectMapper projectMapper) {
+    public ProjectController(ProjectService projectService,
+                             ProjectMapper projectMapper,
+                             ProjectCreateMapper projectCreateMapper,
+                             ProjectDeadlineExtendMapper projectDeadlineExtendMapper) {
         this.projectService = projectService;
         this.projectMapper = projectMapper;
+        this.projectCreateMapper = projectCreateMapper;
+        this.projectDeadlineExtendMapper = projectDeadlineExtendMapper;
     }
 
-
     @Override
-    public ResponseEntity<ProjectDto> createProject(ProjectDto projectDto) {
-        return ResponseEntity.ok(projectMapper.toDTO(projectService.create(projectMapper.toEntity(projectDto)), DetailLevel.FULL));
+    public ResponseEntity<ProjectDto> createProject(ProjectCreateDto projectCreateDto) {
+        return ProjectsApi.super.createProject(projectCreateDto);
     }
 
     @Override
@@ -48,13 +54,7 @@ public class ProjectController implements ProjectsApi {
     @Override
     public ResponseEntity<ProjectDto> getProjectById(Long projectId) {
         Project project = projectService.findByProjectId(projectId);
-        DetailLevel level = DetailLevel.SUMMARY;
-        if(Objects.equals(SecurityUtil.getCurrentUserId(), project.getClient().getAccountId()) ||
-        SecurityUtil.hasPermission(Role.STAFF)||
-        project.getContract().getFreelancer().getAccountId().equals(SecurityUtil.getCurrentUserId())){
-            level = DetailLevel.FULL;
-        }
-        return ResponseEntity.ok(projectMapper.toDTO(project, level));
+        return ResponseEntity.ok(projectMapper.toDTO(project, DetailLevel.FULL));
     }
 
     @Override
@@ -65,7 +65,7 @@ public class ProjectController implements ProjectsApi {
         Long participantId = SecurityUtil.getCurrentUserId();
         if(type!=null && type.equalsIgnoreCase("chat")){
             var res = projectService.getProjectsSortedByLatestMessage(page,includeInvisible,participantId).map(
-                    project -> projectMapper.toDTO(project, DetailLevel.REFERENCE)
+                    project -> projectMapper.toDTO(project, DetailLevel.SUMMARY)
             );
             return OpenApiHelper.respondPage(res, GetProjects200Response.class);
         }
@@ -76,7 +76,7 @@ public class ProjectController implements ProjectsApi {
                 .includeInvisible(includeInvisible);
         var res = projectService
                 .getAll(params.build())
-                .map(project -> projectMapper.toDTO(project, DetailLevel.REFERENCE));
+                .map(project -> projectMapper.toDTO(project, DetailLevel.SUMMARY));
         return OpenApiHelper.respondPage(res, GetProjects200Response.class);
     }
 
@@ -85,40 +85,38 @@ public class ProjectController implements ProjectsApi {
         projectDto.setProjectId(projectId); // Override projectId
 
         return ResponseEntity.ok(projectMapper.toDTO(projectService.update(projectMapper.toEntity(projectDto)), DetailLevel.FULL));
-
     }
 
     @Override
-    public ResponseEntity<Void> acceptProjectProposal(Long projectId, Long proposalId) {
-        if(SecurityUtil.getCurrentUserId()!=projectService.findByProjectId(projectId).getClient().getAccountId())
-            throw new RuntimeException("You are not the client of this project");
-        projectService.acceptProjectProposal(projectId, proposalId);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<ProjectDto> extendProjectDeadline(Long projectId, ProjectDeadlineExtendDto projectDeadlineExtendDto) {
+        return ProjectsApi.super.extendProjectDeadline(projectId, projectDeadlineExtendDto);
     }
 
     @Override
-    public ResponseEntity<Void> rejectProjectProposal(Long projectId, Long proposalId) {
-        if(SecurityUtil.getCurrentUserId()!=projectService.findByProjectId(projectId).getClient().getAccountId())
-            throw new RuntimeException("You are not the client of this project");
-        projectService.rejectProjectProposal(projectId, proposalId);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<ProjectDto> terminateProject(Long projectId) {
+        return ProjectsApi.super.terminateProject(projectId);
     }
 
     @Override
-    public ResponseEntity<Void> joinProject(Long projectId) {
+    public ResponseEntity<ProjectDto> unpauseProject(Long projectId) {
+        return ProjectsApi.super.unpauseProject(projectId);
+    }
+
+    @Override
+    public ResponseEntity<ProjectDto> joinProject(Long projectId) {
         if(!SecurityUtil.hasPermission(Role.STAFF)){
             throw new RuntimeException("You are not a staff");
         }
-        projectService.joinProject(projectId, SecurityUtil.getCurrentUserId());
-        return ResponseEntity.ok().build();
+        Project project = projectService.joinProject(projectId, SecurityUtil.getCurrentUserId());
+        return ResponseEntity.ok(projectMapper.toDTO(project, DetailLevel.FULL));
     }
 
     @Override
-    public ResponseEntity<Void> leaveProject(Long projectId) {
+    public ResponseEntity<ProjectDto> leaveProject(Long projectId) {
         if(!SecurityUtil.hasPermission(Role.STAFF)){
             throw new RuntimeException("You are not a staff");
         }
-        projectService.leaveProject(projectId, SecurityUtil.getCurrentUserId());
-        return ResponseEntity.ok().build();
+        Project project = projectService.leaveProject(projectId, SecurityUtil.getCurrentUserId());
+        return ResponseEntity.ok(projectMapper.toDTO(project, DetailLevel.FULL));
     }
 }

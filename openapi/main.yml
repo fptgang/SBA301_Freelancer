@@ -21,28 +21,43 @@ components:
       $ref: 'param/search.yml#/Search'
 
   schemas:
+    AccountDto:
+      $ref: "model/account.yml#/AccountDto"
+    ContractDto:
+      $ref: 'model/contract.yml#/ContractDto'
     FileDto:
       $ref: 'model/file.yml#/FileDto'
+    FileBlobDto:
+      $ref: 'model/file-blob.yml#/FileBlobDto'
     MessageDto:
       $ref: 'model/message.yml#/MessageDto'
     MilestoneDto:
       $ref: 'model/milestone.yml#/MilestoneDto'
+    ProficiencyEnum:
+      $ref: 'model/proficiency.yml#/ProficiencyEnum'
     ProfileDto:
       $ref: 'model/profile.yml#/ProfileDto'
+    ProjectDto:
+      $ref: 'model/project.yml#/ProjectDto'
+    ProjectCategoryDto:
+      $ref: 'model/project-category.yml#/ProjectCategoryDto'
     ProposalDto:
       $ref: 'model/proposal.yml#/ProposalDto'
     RefreshTokenDto:
       $ref: 'model/refresh-token.yml#/RefreshTokenDto'
-    SkillDto:
-      $ref: 'model/skill.yml#/SkillDto'
     TransactionDto:
       $ref: 'model/transaction.yml#/TransactionDto'
-    ProficiencyEnum:
-      $ref: 'model/proficiency.yml#/ProficiencyEnum'
-    AccountResponseDto:
-      $ref: 'model/account-response.yml#/AccountResponseDto'
-    ReportDto:
-      $ref: 'model/report.yml#/ReportDto'
+    #    SkillDto:
+    #      $ref: 'model/skill.yml#/SkillDto'
+    ProfileSkillDto:
+      $ref: 'model/profile-skill.yml#/ProfileSkillDto'
+    ProjectSkillDto:
+      $ref: 'model/project-skill.yml#/ProjectSkillDto'
+
+    ProjectCreateDto:
+      $ref: 'model/request/project-create.yml#/ProjectCreateDto'
+    MilestoneCreateDto:
+      $ref: 'model/request/milestone-create.yml#/MilestoneCreateDto'
 paths:
   /auth/me:
     $ref: 'path/auth/me.yml'
@@ -60,61 +75,77 @@ paths:
     $ref: 'path/auth/forgot-password.yml'
   /auth/reset-password:
     $ref: 'path/auth/reset-password.yml'
+
   /accounts:
-    $ref: 'path/account.yml'
+    $ref: 'path/accounts/index.yml'
   /accounts/{accountId}:
-    $ref: 'path/account-accountId.yml'
-  /projects:
-    $ref: 'path/project.yml'
-  /projects/{projectId}:
-    $ref: 'path/project-projectId.yml'
-  /projects/{projectId}/{proposalId}:
-    $ref: 'path/project-projectId-proposalId.yml'
-  /projects/staff/{projectId}:
-    $ref: 'path/project-projectId-staff.yml'
-  /projectCategories:
-    $ref: 'path/projectCategory.yml'
-  /projectCategories/{projectCategoryId}:
-    $ref: 'path/projectCategory-projectCategoryId.yml'
+    $ref: 'path/accounts/@id/index.yml'
+
   /profiles:
-    $ref: 'path/profile.yml'
+    $ref: 'path/profiles/index.yml'
   /profiles/{profileId}:
-    $ref: 'path/profile-profileId.yml'
-  /transactions:
-     $ref: 'path/transaction.yml'
-  /transactions/{transactionId}:
-    $ref: 'path/transaction-transactionId.yml'
-  /proposals:
-     $ref: 'path/proposal.yml'
-  /proposals/{proposalId}:
-    $ref: 'path/proposal-proposalId.yml'
+    $ref: 'path/profiles/@id/index.yml'
+
+  /project-categories:
+    $ref: 'path/project-categories/index.yml'
+  /project-categories/{projectCategoryId}:
+    $ref: 'path/project-categories/@id/index.yml'
+
+  /projects:
+    $ref: 'path/projects/index.yml'
+  /projects/{projectId}:
+    $ref: 'path/projects/@id/index.yml'
+  /projects/{projectId}/staff:
+    $ref: 'path/projects/@id/staff.yml'
+  /projects/{projectId}/terminate:
+    $ref: 'path/projects/@id/terminate.yml'
+  /projects/{projectId}/unpause:
+    $ref: 'path/projects/@id/unpause.yml'
+  /projects/{projectId}/extend-deadline:
+    $ref: 'path/projects/@id/extend-deadline.yml'
+
   /milestones:
-     $ref: 'path/milestone.yml'
-  /milestones/{milestoneId}:
-    $ref: 'path/milestone-milestoneId.yml'
-  /messages:
-     $ref: 'path/message.yml'
-  /messages/{messagesId}:
-    $ref: 'path/message-messageId.yml'
-  /files:
-     $ref: 'path/file.yml'
-  /files/{fileId}:
-    $ref: 'path/file-fileId.yml'
+    $ref: 'path/milestones/index.yml'
+  /milestones/{milestoneId}/deposit-fund:
+    $ref: 'path/milestones/@id/deposit-fund.yml'
+  /milestones/{milestoneId}/submit-work:
+    $ref: 'path/milestones/@id/submit-work.yml'
+  /milestones/{milestoneId}/confirm-work:
+    $ref: 'path/milestones/@id/confirm-work.yml'
+
   /skills:
-    $ref: 'path/skill.yml'
+    $ref: 'path/skills/index.yml'
   /skills/{skillId}:
-    $ref: 'path/skill-skillId.yml'
-  /entityFiles/{entityType}/{entityId}:
-    $ref: 'path/entityFile-entityType-entityId.yml'
-  /entityFiles/{entityType}/{entityId}/batch:
-    $ref: 'path/entityFile-batch.yml'
-  /contracts:
-    $ref: 'path/contract.yml'
-  /contracts/{contractId}:
-    $ref: 'path/contract-contractId.yml'
+    $ref: 'path/skills/@id/index.yml'
+
+  /proposals:
+    $ref: 'path/proposals/index.yml'
+  /proposals/{proposalId}/accept:
+    $ref: 'path/proposals/@id/accept.yml'
+  /proposals/{proposalId}/reject:
+    $ref: 'path/proposals/@id/reject.yml'
+  /proposals/{proposalId}/withdraw:
+    $ref: 'path/proposals/@id/withdraw.yml'
+
+  /contracts/{contractId}/sign:
+    $ref: 'path/contracts/@id/sign.yml'
+
+  /transactions:
+    $ref: 'path/transactions/index.yml'
+  /transactions/deposit:
+    $ref: 'path/transactions/deposit.yml'
+
+  /messages:
+    $ref: 'path/messages/index.yml'
+  /messages/{messageId}:
+    $ref: 'path/messages/@id/index.yml'
+
+  /files:
+    $ref: 'path/files/index.yml'
+  /files/{fileId}:
+    $ref: 'path/files/@id/index.yml'
+
   /reports:
-    $ref: 'path/report.yml'
+    $ref: 'path/reports/index.yml'
   /reports/{reportId}:
-    $ref: 'path/report-reportId.yml'
-
-
+    $ref: 'path/reports/@id/index.yml'

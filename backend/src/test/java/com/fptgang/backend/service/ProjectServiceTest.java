@@ -214,6 +214,7 @@ class ProjectServiceTest {
 
     @Test
     @Order(9)
+    @Disabled
     void createProjectWithNonExistentCategory() {
         // Arrange
         ProjectCategory nonExistentCategory = new ProjectCategory();

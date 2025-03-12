@@ -34,7 +34,17 @@ public class FileController implements FilesApi {
         this.fileMapper = fileMapper;
     }
 
+    @Override
+    public ResponseEntity<FileDto> uploadFile(Long uploaderId, MultipartFile blob,
+                                              Boolean isVisible, Long messageId, Long proposalId, Long projectId, Long milestoneId) {
+        return FilesApi.super.uploadFile(uploaderId, blob, isVisible, messageId, proposalId, projectId, milestoneId);
+    }
 
+    @Override
+    public ResponseEntity<FileDto> updateFile(Long fileId, Long uploaderId, MultipartFile blob,
+                                              Boolean isVisible, Long messageId, Long proposalId, Long projectId, Long milestoneId) {
+        return FilesApi.super.updateFile(fileId, uploaderId, blob, isVisible, messageId, proposalId, projectId, milestoneId);
+    }
 
     @Override
     public ResponseEntity<Void> deleteFile(Long fileId) {
@@ -42,21 +52,4 @@ public class FileController implements FilesApi {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @Override
-    public ResponseEntity<FileDto> getFileById(Long fileId) {
-        return new ResponseEntity<>(fileMapper.toDTO(fileService.findById(fileId), DetailLevel.FULL), HttpStatus.OK);
-    }
-
-    @Override
-    public ResponseEntity<GetFiles200Response> getFiles(Pageable pageable, String filter, String search) {
-        var includeInvisible = SecurityUtil.hasPermission(Role.ADMIN);
-        var params = ListParams.builder()
-                .pageable(OpenApiHelper.toPageable(pageable))
-                .search(search)
-                .filter(filter)
-                .includeInvisible(includeInvisible)
-                .build();
-        var res = fileService.getAll(params).map(file -> fileMapper.toDTO(file, DetailLevel.REFERENCE));
-        return OpenApiHelper.respondPage(res, GetFiles200Response.class);
-    }
 }

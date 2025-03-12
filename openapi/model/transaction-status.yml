@@ -1,0 +1,3 @@
+TransactionStatusDto:
+  type: string
+  enum: [PENDING, SUCCESS, FAILED]

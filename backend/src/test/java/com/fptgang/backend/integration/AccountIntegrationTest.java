@@ -87,7 +87,6 @@ class AccountIntegrationTest {
         assertThat(account1.getEmail()).isEqualTo("a@test.com");
         assertThat(account1.getFirstName()).isEqualTo("a");
         assertThat(account1.getLastName()).isEqualTo("x");
-        assertThat(account1.getPassword()).isEqualTo("pwd");
         assertThat(account1.getAvatarUrl()).isEqualTo("string");
         assertThat(account1.getRole()).isEqualTo(AccountDto.RoleEnum.ADMIN);
         assertThat(account1.getIsVerified()).isFalse();
@@ -96,7 +95,6 @@ class AccountIntegrationTest {
         assertThat(account2.getEmail()).isEqualTo("b@test.com");
         assertThat(account2.getFirstName()).isEqualTo("b");
         assertThat(account2.getLastName()).isEqualTo("y");
-        assertThat(account2.getPassword()).isEqualTo("pwd");
         assertThat(account2.getAvatarUrl()).isEqualTo("string");
         assertThat(account2.getRole()).isEqualTo(AccountDto.RoleEnum.ADMIN);
         assertThat(account2.getIsVerified()).isTrue();

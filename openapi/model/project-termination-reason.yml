@@ -1,0 +1,3 @@
+ProjectTerminationReasonDto:
+  type: string
+  enum: [CONTRACT_UNSIGNED, CLIENT_REQUEST_TERMINATION, STAFF_DECISION, OTHER]

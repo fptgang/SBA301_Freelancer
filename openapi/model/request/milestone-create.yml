@@ -1,0 +1,18 @@
+MilestoneCreateDto:
+  type: object
+  properties:
+    projectId:
+      type: integer
+      format: int64
+    description:
+      type: string
+    title:
+      type: string
+    budgetRatio:
+      type: number
+      format: double
+      minimum: 0
+      maximum: 1
+    deadline:
+      type: string
+      format: date-time

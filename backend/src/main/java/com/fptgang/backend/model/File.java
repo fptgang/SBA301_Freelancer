@@ -38,7 +38,7 @@ public class File {
     private String fileType;
 
     @Column(nullable = false)
-    private long size;
+    private Long size;
 
     @CreationTimestamp
     private LocalDateTime createdAt;

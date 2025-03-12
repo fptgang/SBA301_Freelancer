@@ -5,7 +5,7 @@ ProfileDto:
       type: integer
       format: int64
     account:
-      $ref: 'account-response.yml#/AccountResponseDto'
+      $ref: 'account.yml#/AccountDto'
     overview:
       type: string
     education:
@@ -18,6 +18,8 @@ ProfileDto:
       type: array
       items:
         $ref: 'profile-skill.yml#/ProfileSkillDto'
+    isVisible:
+      type: boolean
     createdAt:
       type: string
       format: date-time

@@ -31,17 +31,6 @@ public class ProposalController implements ProposalsApi {
     }
 
     @Override
-    public ResponseEntity<ProposalDto> createProposal(ProposalDto proposalDto) {
-        var proposal = proposalMapper.toEntity(proposalDto);
-        return new ResponseEntity<>(proposalMapper.toDTO(proposalService.create(proposal), DetailLevel.FULL), HttpStatus.OK);
-    }
-
-    @Override
-    public ResponseEntity<ProposalDto> getProposalById(Long proposalId) {
-        return new ResponseEntity<>(proposalMapper.toDTO(proposalService.findById(proposalId),DetailLevel.FULL), HttpStatus.OK);
-    }
-
-    @Override
     public ResponseEntity<GetProposals200Response> getProposals(Pageable pageable, String filter, String search) {
         var page = OpenApiHelper.toPageable(pageable);
         var includeInvisible = SecurityUtil.hasPermission(Role.ADMIN);
@@ -52,15 +41,24 @@ public class ProposalController implements ProposalsApi {
                 .includeInvisible(includeInvisible);
         var res = proposalService
                 .getAll(params.build())
-                .map(proposal -> proposalMapper.toDTO(proposal, DetailLevel.REFERENCE));
+                .map(proposal -> proposalMapper.toDTO(proposal, DetailLevel.SUMMARY));
         return OpenApiHelper.respondPage(res, GetProposals200Response.class);
     }
 
     @Override
-    public ResponseEntity<ProposalDto> updateProposal(Long proposalId, ProposalDto proposalDto) {
-        proposalDto.setProposalId(proposalId); // Override proposalId
-
-        return new ResponseEntity<>(proposalMapper.toDTO(proposalService.update(proposalMapper.toEntity(proposalDto)),DetailLevel.FULL), HttpStatus.OK);
+    public ResponseEntity<ProposalDto> acceptProposal(Long proposalId) {
+        //projectService.acceptProjectProposal(projectId, proposalId);
+        return ProposalsApi.super.acceptProposal(proposalId);
     }
 
+    @Override
+    public ResponseEntity<ProposalDto> rejectProposal(Long proposalId) {
+        //projectService.rejectProjectProposal(projectId, proposalId);
+        return ProposalsApi.super.rejectProposal(proposalId);
+    }
+
+    @Override
+    public ResponseEntity<ProposalDto> withdrawProposal(Long proposalId) {
+        return ProposalsApi.super.withdrawProposal(proposalId);
+    }
 }

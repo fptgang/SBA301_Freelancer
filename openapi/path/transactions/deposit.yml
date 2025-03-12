@@ -1,0 +1,25 @@
+post:
+  summary: Create a deposit
+  operationId: createDeposit
+  security:
+    - bearerAuth: []
+  requestBody:
+    description: Deposit details
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../../model/request/deposit.yml#/DepositDto'
+  responses:
+    '200':
+      description: The operation was successful
+      content:
+        application/json:
+          schema:
+            type: string
+    '400':
+      description: The operation failed
+      content:
+        application/json:
+          schema:
+            $ref: '../../component/error.yml#/ErrorResponse'

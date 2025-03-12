@@ -19,4 +19,5 @@ public interface TransactionService {
     boolean existByMilestone(Transaction.TransactionType type, Transaction.TransactionStatus status, Long milestoneId);
     Transaction update(Transaction transaction);
     Page<Transaction> getAll(ListParams params);
+    Page<Transaction> getAllInvolvingAccount(ListParams params, Long accountId);
 }

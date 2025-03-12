@@ -3,9 +3,7 @@ package com.fptgang.backend.mapper;
 import com.fptgang.backend.api.model.ReportDto;
 import com.fptgang.backend.model.Report;
 import com.fptgang.backend.repository.AccountRepos;
-import com.fptgang.backend.repository.ReportRepos;
 import com.fptgang.backend.repository.ProjectRepos;
-import com.fptgang.backend.repository.ProposalRepos;
 import com.fptgang.backend.util.DateTimeUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -13,16 +11,19 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 public class ReportMapper extends BaseMapper<ReportDto, Report> {
-    private final ReportRepos reportRepos;
-    private final ProjectRepos projectRepos;
     private final AccountRepos accountRepos;
-    private final ProposalRepos proposalRepos;
+    private final AccountMapper accountMapper;
+    private final ProjectRepos projectRepos;
+    private final ProjectMapper projectMapper;
 
-    public ReportMapper(ReportRepos reportRepos, ProjectRepos projectRepos, AccountRepos accountRepos, ProposalRepos proposalRepos) {
-        this.reportRepos = reportRepos;
-        this.projectRepos = projectRepos;
+    public ReportMapper(AccountRepos accountRepos,
+                        AccountMapper accountMapper,
+                        ProjectRepos projectRepos,
+                        ProjectMapper projectMapper) {
         this.accountRepos = accountRepos;
-        this.proposalRepos = proposalRepos;
+        this.accountMapper = accountMapper;
+        this.projectRepos = projectRepos;
+        this.projectMapper = projectMapper;
     }
 
     @Override
@@ -34,21 +35,17 @@ public class ReportMapper extends BaseMapper<ReportDto, Report> {
         Report entity = new Report();
         entity.setReportId(dto.getReportId());
 
-        if (dto.getProjectId() != null) {
-            entity.setProject(projectRepos.findByProjectId(dto.getProjectId())
-                    .orElseThrow(() -> new IllegalArgumentException("Project not found")));
+        if (dto.getReporter() != null && dto.getReporter().getAccountId() != null) {
+            entity.setReporter(accountRepos.getReferenceById(dto.getReporter().getAccountId()));
         }
-
-        if (dto.getReporterId() != null) {
-            entity.setReporter(accountRepos.findByAccountId(dto.getReporterId())
-                    .orElseThrow(() -> new IllegalArgumentException("Reporter not found")));
+        if (dto.getProject() != null && dto.getProject().getProjectId() != null) {
+            entity.setProject(projectRepos.getReferenceById(dto.getProject().getProjectId()));
         }
+        entity.setReason(dto.getReason());
 
-        if(dto.getStatus() != null){
+        if (dto.getStatus() != null) {
             entity.setStatus(Report.ReportStatus.valueOf(dto.getStatus().name()));
         }
-
-        entity.setReason(dto.getReason());
 
         entity.setCreatedAt(DateTimeUtil.fromOffsetToLocal(dto.getCreatedAt()));
         entity.setUpdatedAt(DateTimeUtil.fromOffsetToLocal(dto.getUpdatedAt()));
@@ -64,24 +61,17 @@ public class ReportMapper extends BaseMapper<ReportDto, Report> {
 
         ReportDto dto = new ReportDto();
         dto.setReportId(entity.getReportId());
-        dto.setProjectId(entity.getProject().getProjectId());
-        dto.setCreatedAt(DateTimeUtil.fromLocalToOffset(entity.getCreatedAt()));
-        dto.setUpdatedAt(DateTimeUtil.fromLocalToOffset(entity.getUpdatedAt()));
 
         if (level == DetailLevel.REFERENCE) {
             return dto; // those fields are enough
         }
 
-        dto.setReporterId(entity.getReporter().getAccountId());
-
-        if (level == DetailLevel.SUMMARY) {
-            return dto; // those fields are enough
-        }
-
+        dto.setReporter(accountMapper.toDTO(entity.getReporter(), DetailLevel.REFERENCE));
+        dto.setProject(projectMapper.toDTO(entity.getProject(), DetailLevel.REFERENCE));
         dto.setReason(entity.getReason());
         dto.setStatus(ReportDto.StatusEnum.valueOf(entity.getStatus().name()));
-
-        // Add more fields if needed for other detail levels
+        dto.setCreatedAt(DateTimeUtil.fromLocalToOffset(entity.getCreatedAt()));
+        dto.setUpdatedAt(DateTimeUtil.fromLocalToOffset(entity.getUpdatedAt()));
 
         return dto;
     }

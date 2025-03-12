@@ -1,0 +1,28 @@
+ProjectCreateDto:
+  type: object
+  properties:
+    projectCategoryId:
+      type: integer
+      format: int64
+    title:
+      type: string
+    description:
+      type: string
+    startDate:
+      type: string
+      format: date-time
+    minBudget:
+      type: number
+      format: double
+    maxBudget:
+      type: number
+      format: double
+    requiredSkillIds:
+      type: array
+      items:
+        type: integer
+        format: int64
+    milestones:
+      type: array
+      items:
+        $ref: 'milestone-create.yml#/MilestoneCreateDto'

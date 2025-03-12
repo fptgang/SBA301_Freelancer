@@ -7,6 +7,8 @@ use hirable;
 
 set @@foreign_key_checks = 0;
 
+truncate table contract;
+
 truncate table files;
 
 truncate table messages;

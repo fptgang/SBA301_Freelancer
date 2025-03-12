@@ -1,5 +1,6 @@
 package com.fptgang.backend.model;
 
+import com.fptgang.backend.util.Searchable;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -32,6 +33,7 @@ public class Report {
     private Project project;
 
     @Column(columnDefinition = "TEXT", length = 10000000, nullable = false)
+    @Searchable
     private String reason;
 
     @Enumerated(EnumType.STRING)

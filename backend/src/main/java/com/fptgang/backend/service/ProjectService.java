@@ -16,7 +16,7 @@ public interface ProjectService {
     Page<Project> getProjectsSortedByLatestMessage(Pageable pageable,Boolean includeInvisible,Long participantId);
     Page<Project> getAll(ListParams params);
 
-    void joinProject(Long projectId, Long currentUserId);
+    Project joinProject(Long projectId, Long currentUserId);
 
-    void leaveProject(Long projectId, Long currentUserId);
+    Project leaveProject(Long projectId, Long currentUserId);
 }

@@ -147,7 +147,7 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public void joinProject(Long projectId, Long currentUserId) {
+    public Project joinProject(Long projectId, Long currentUserId) {
         Project project = projectRepos.findByProjectId(projectId).orElseThrow(
                 () -> new InvalidInputException("Project with project id " + projectId + "not found"));
         if(project.getStaff()!=null&& !Objects.equals(project.getStaff().getAccountId(), currentUserId)){
@@ -160,11 +160,11 @@ public class ProjectServiceImpl implements ProjectService {
             if(report.getStatus() == Report.ReportStatus.UNSOLVED){
             report.setStatus(Report.ReportStatus.SOLVING);}
         });
-        projectRepos.save(project);
+        return projectRepos.save(project);
     }
 
     @Override
-    public void leaveProject(Long projectId, Long currentUserId) {
+    public Project leaveProject(Long projectId, Long currentUserId) {
         Project project = projectRepos.findByProjectId(projectId).orElseThrow(
                 () -> new InvalidInputException("Project with project id " + projectId + "not found"));
         if (project.getStaff() == null) {
@@ -177,6 +177,6 @@ public class ProjectServiceImpl implements ProjectService {
                 report.setStatus(Report.ReportStatus.SOLVING);}
         });
         project.setStaff(null);
-        projectRepos.save(project);
+        return projectRepos.save(project);
     }
 }

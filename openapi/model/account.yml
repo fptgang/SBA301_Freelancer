@@ -33,3 +33,5 @@ AccountDto:
     updatedAt:
       type: string
       format: date-time
+    profile:
+      $ref: 'profile.yml#/ProfileDto'

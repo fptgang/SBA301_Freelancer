@@ -63,7 +63,7 @@ public class ProjectCategoryController implements ProjectCategoriesApi {
                 .includeInvisible(includeInvisible);
         var res = projectCategoryService
                 .getAll(params.build())
-                .map(projectCategory -> projectCategoryMapper.toDTO(projectCategory, DetailLevel.REFERENCE));
+                .map(projectCategory -> projectCategoryMapper.toDTO(projectCategory, DetailLevel.SUMMARY));
         return OpenApiHelper.respondPage(res, GetProjectCategories200Response.class);
     }
 

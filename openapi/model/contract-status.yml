@@ -1,0 +1,3 @@
+ContractStatusDto:
+  type: string
+  enum: [UNSIGNED,SIGNED,TERMINATED]

@@ -1,27 +1,29 @@
 package com.fptgang.backend.mapper;
 
+import com.fptgang.backend.api.model.PaymentMethodDto;
 import com.fptgang.backend.api.model.TransactionDto;
+import com.fptgang.backend.api.model.TransactionStatusDto;
+import com.fptgang.backend.api.model.TransactionTypeDto;
 import com.fptgang.backend.model.Transaction;
 import com.fptgang.backend.repository.AccountRepos;
 import com.fptgang.backend.repository.MilestoneRepos;
-import com.fptgang.backend.repository.TransactionRepos;
 import com.fptgang.backend.util.DateTimeUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import java.util.Optional;
-
 @Slf4j
 @Component
 public class TransactionMapper extends BaseMapper<TransactionDto, Transaction> {
-    private final TransactionRepos transactionRepos;
     private final AccountRepos accountRepos;
+    private final AccountMapper accountMapper;
     private final MilestoneRepos milestoneRepos;
+    private final MilestoneMapper milestoneMapper;
 
-    public TransactionMapper(TransactionRepos transactionRepos, AccountRepos accountRepos, MilestoneRepos milestoneRepos) {
-        this.transactionRepos = transactionRepos;
+    public TransactionMapper(AccountRepos accountRepos, AccountMapper accountMapper, MilestoneRepos milestoneRepos, MilestoneMapper milestoneMapper) {
         this.accountRepos = accountRepos;
+        this.accountMapper = accountMapper;
         this.milestoneRepos = milestoneRepos;
+        this.milestoneMapper = milestoneMapper;
     }
 
     @Override
@@ -33,22 +35,30 @@ public class TransactionMapper extends BaseMapper<TransactionDto, Transaction> {
         Transaction entity = new Transaction();
         entity.setTransactionId(dto.getTransactionId());
 
-        if (dto.getFromAccountId() != null) {
-            entity.setFromAccount(accountRepos.findByAccountId(dto.getFromAccountId())
-                    .orElseThrow(() -> new IllegalArgumentException("From account not found")));
+        if (dto.getFromAccount() != null && dto.getFromAccount().getAccountId() != null) {
+            entity.setFromAccount(accountRepos
+                    .getReferenceById(dto.getFromAccount().getAccountId()));
         }
 
-        if (dto.getToAccountId() != null) {
-            entity.setToAccount(accountRepos.findByAccountId(dto.getToAccountId())
-                    .orElseThrow(() -> new IllegalArgumentException("To account not found")));
+        if (dto.getToAccount() != null && dto.getToAccount().getAccountId() != null) {
+            entity.setToAccount(accountRepos
+                    .getReferenceById(dto.getToAccount().getAccountId()));
+        }
+
+        if (dto.getMilestone() != null && dto.getMilestone().getMilestoneId() != null) {
+            entity.setMilestone(milestoneRepos
+                    .getReferenceById(dto.getMilestone().getMilestoneId()));
         }
 
         entity.setAmount(dto.getAmount());
-        entity.setType(Transaction.TransactionType.valueOf(dto.getType().name()));
-        entity.setStatus(Transaction.TransactionStatus.valueOf(dto.getStatus().name()));
-        entity.setPaymentMethod(Transaction.PaymentMethod.valueOf(dto.getPaymentMethod().name()));
+        entity.setType(dto.getType() == null ? null :
+                Transaction.TransactionType.valueOf(dto.getType().name()));
+        entity.setStatus(dto.getStatus() == null ? null :
+                Transaction.TransactionStatus.valueOf(dto.getStatus().name()));
+        entity.setPaymentMethod(dto.getPaymentMethod() == null ? null :
+                Transaction.PaymentMethod.valueOf(dto.getPaymentMethod().name()));
         entity.setCreatedAt(DateTimeUtil.fromOffsetToLocal(dto.getCreatedAt()));
-        entity.setMilestone(milestoneRepos.findById(dto.getMilestoneId()).orElse(null));
+        entity.setUpdatedAt(DateTimeUtil.fromOffsetToLocal(dto.getUpdatedAt()));
         return entity;
     }
 
@@ -60,24 +70,18 @@ public class TransactionMapper extends BaseMapper<TransactionDto, Transaction> {
 
         TransactionDto dto = new TransactionDto();
         dto.setTransactionId(entity.getTransactionId());
-        dto.setFromAccountId(entity.getFromAccount().getAccountId());
-        dto.setToAccountId(entity.getToAccount().getAccountId());
+        dto.setFromAccount(accountMapper.toDTO(entity.getFromAccount(), DetailLevel.REFERENCE));
+        dto.setToAccount(accountMapper.toDTO(entity.getToAccount(), DetailLevel.REFERENCE));
+        dto.setMilestone(milestoneMapper.toDTO(entity.getMilestone(), DetailLevel.REFERENCE));
         dto.setAmount(entity.getAmount());
-        dto.setType(TransactionDto.TypeEnum.valueOf(entity.getType().name()));
-        dto.setStatus(TransactionDto.StatusEnum.valueOf(entity.getStatus().name()));
-        dto.setPaymentMethod(entity.getPaymentMethod()!=null?TransactionDto.PaymentMethodEnum.valueOf(entity.getPaymentMethod().name()):null);
-        dto.setMilestoneId(entity.getMilestone() != null ? entity.getMilestone().getMilestoneId() : null);
+        dto.setType(entity.getType() == null ? null :
+                TransactionTypeDto.valueOf(entity.getType().name()));
+        dto.setStatus(entity.getStatus() == null ? null :
+                TransactionStatusDto.valueOf(entity.getStatus().name()));
+        dto.setPaymentMethod(entity.getPaymentMethod() == null ? null :
+                PaymentMethodDto.valueOf(entity.getPaymentMethod().name()));
         dto.setCreatedAt(DateTimeUtil.fromLocalToOffset(entity.getCreatedAt()));
-
-        if (level == DetailLevel.REFERENCE) {
-            return dto; // those fields are enough
-        }
-
-        if (level == DetailLevel.SUMMARY) {
-            return dto; // those fields are enough
-        }
-
-        // Add more fields if needed for other detail levels
+        dto.setUpdatedAt(DateTimeUtil.fromLocalToOffset(entity.getUpdatedAt()));
 
         return dto;
     }

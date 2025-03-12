@@ -60,9 +60,6 @@ public class ContractServiceImpl implements ContractService {
         if(contract.getStatus() == Contract.ContractStatus.SIGNED){
             throw new IllegalArgumentException("Contract is already signed");
         }
-        if(SecurityUtil.requireCurrentUserId() != contract.getProposal().getFreelancer().getAccountId()){
-            throw new IllegalArgumentException("You are not allowed to sign this contract");
-        }
         contract.setStatus(Contract.ContractStatus.SIGNED);
         return contractRepos.save(contract);
     }

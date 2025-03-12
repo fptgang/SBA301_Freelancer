@@ -1,0 +1,3 @@
+TransactionTypeDto:
+  type: string
+  enum: [DEPOSIT, WITHDRAWAL, ESCROW_DEPOSIT, ESCROW_RELEASE, ESCROW_REFUND]

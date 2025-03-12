@@ -4,18 +4,24 @@ ContractDto:
     contractId:
       type: integer
       format: int64
-    proposalId:
-      type: integer
-      format: int64
-    freelancerId:
-      type: integer
-      format: int64
+    proposal:
+      $ref: 'proposal.yml#/ProposalDto'
+    freelancer:
+      $ref: 'account.yml#/AccountDto'
     projectId:
       type: integer
       format: int64
-    status:
+    budget:
+      type: number
+      format: double
+    signedAt:
       type: string
-      enum: [UNSIGNED,SIGNED,TERMINATED]
+      format: date-time
+    terminatedAt:
+      type: string
+      format: date-time
+    status:
+      $ref: 'contract-status.yml#/ContractStatusDto'
     contractFile:
       $ref: 'file.yml#/FileDto'
     createdAt:
