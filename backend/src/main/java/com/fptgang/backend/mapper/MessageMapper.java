@@ -16,12 +16,14 @@ public class MessageMapper extends BaseMapper<MessageDto, Message> {
     private final AccountRepos accountRepos;
     private final ProjectRepos projectRepos;
     private final FileMapper fileMapper;
+    private final AccountMapper accountMapper;
 
-    public MessageMapper(MessageRepos messageRepos, AccountRepos accountRepos, ProjectRepos projectRepos, FileMapper fileMapper) {
+    public MessageMapper(MessageRepos messageRepos, AccountRepos accountRepos, ProjectRepos projectRepos, FileMapper fileMapper, AccountMapper accountMapper) {
         this.messageRepos = messageRepos;
         this.accountRepos = accountRepos;
         this.projectRepos = projectRepos;
         this.fileMapper = fileMapper;
+        this.accountMapper = accountMapper;
     }
 
     @Override
@@ -42,8 +44,8 @@ public class MessageMapper extends BaseMapper<MessageDto, Message> {
                     .orElseThrow(() -> new IllegalArgumentException("Project not found")));
         }
 
-        if (dto.getSenderId() != null) {
-            entity.setSender(accountRepos.findByAccountId(dto.getSenderId())
+        if (dto.getSender() != null) {
+            entity.setSender(accountRepos.findByAccountId(dto.getSender().getAccountId())
                     .orElseThrow(() -> new IllegalArgumentException("Sender not found")));
         }
 
@@ -69,7 +71,7 @@ public class MessageMapper extends BaseMapper<MessageDto, Message> {
         MessageDto dto = new MessageDto();
         dto.setMessageId(entity.getMessageId());
         dto.setProjectId(entity.getProject().getProjectId());
-        dto.setSenderId(entity.getSender().getAccountId());
+        dto.setSender(accountMapper.toResponseDto(accountMapper.toDTO(entity.getSender(), DetailLevel.REFERENCE)));
         dto.setContent(entity.getContent());
         dto.setCreatedAt(DateTimeUtil.fromLocalToOffset(entity.getCreatedAt()));
         dto.setIsVisible(entity.getIsVisible());

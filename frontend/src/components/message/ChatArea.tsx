@@ -26,16 +26,15 @@ import { MessageItem } from "./MessageItem";
 import { useEffect, useRef, useState } from "react";
 import { formatDistanceToNow, set } from "date-fns";
 import EmojiPicker from "emoji-picker-react";
+import { store } from "../../store";
 
 interface ChatAreaProps {
   selectedProject?: ProjectDto;
-  user?: AccountDto;
   newMessage?: MessageDto;
 }
 
 export const ChatArea: React.FC<ChatAreaProps> = ({
   selectedProject,
-  user,
   newMessage,
 }) => {
   const [content, setContent] = useState("");
@@ -45,6 +44,7 @@ export const ChatArea: React.FC<ChatAreaProps> = ({
   const [showEmoji, setShowEmoji] = useState(false);
   const [files, setFiles] = useState<FileDto[]>([]);
   const [inputFiles, setInputFiles] = useState<FileList | null>(null);
+  const user = store.getState().auth.account;
 
   const {
     data: messages,
@@ -74,7 +74,7 @@ export const ChatArea: React.FC<ChatAreaProps> = ({
     const data: MessageDto = {
       content: content,
       projectId: selectedProject?.projectId,
-      senderId: user?.id,
+      sender: user,
       files,
     };
 
@@ -158,6 +158,13 @@ export const ChatArea: React.FC<ChatAreaProps> = ({
         >
           <Typography.Title level={4} style={{ marginBottom: 16 }}>
             {selectedProject.title}
+            {selectedProject.status !== "IN_PROGRESS" ? (
+              <Typography.Text type="danger" style={{ marginLeft: 8 }}>
+                {selectedProject.status}
+              </Typography.Text>
+            ) : (
+              ""
+            )}
           </Typography.Title>
 
           <List
@@ -188,20 +195,25 @@ export const ChatArea: React.FC<ChatAreaProps> = ({
               <>
                 <MessageItem
                   msg={msg}
-                  isCurrentUser={msg.senderId === user?.id}
+                  isCurrentUser={msg.sender?.accountId === user?.accountId}
                 />
                 {i == (messages?.data?.length || 0) - 1 && (
                   <div
                     style={{
                       display: "flex",
                       justifyContent:
-                        msg.senderId === user?.id ? "end" : "start",
+                        msg.sender?.accountId === user?.accountId
+                          ? "end"
+                          : "start",
                       color: "gray",
                     }}
                   >
                     <Typography.Text
                       style={{
-                        textAlign: msg.senderId === user?.id ? "right" : "left",
+                        textAlign:
+                          msg.sender?.accountId === user?.accountId
+                            ? "right"
+                            : "left",
                         color: "gray",
                       }}
                     >
@@ -216,22 +228,22 @@ export const ChatArea: React.FC<ChatAreaProps> = ({
             )}
             loading={loading}
           />
-
-          <Space.Compact style={{ width: "100%", position: "relative" }}>
-            {showEmoji && (
-              <EmojiPicker
-                onEmojiClick={(e) => {
-                  console.log(e);
-                  setContent(content + e.emoji);
-                }}
-                style={{
-                  position: "absolute",
-                  bottom: 50,
-                  left: 0,
-                }}
-              />
-            )}
-            {/* <Button
+          {selectedProject?.status === "IN_PROGRESS" ? (
+            <Space.Compact style={{ width: "100%", position: "relative" }}>
+              {showEmoji && (
+                <EmojiPicker
+                  onEmojiClick={(e) => {
+                    console.log(e);
+                    setContent(content + e.emoji);
+                  }}
+                  style={{
+                    position: "absolute",
+                    bottom: 50,
+                    left: 0,
+                  }}
+                />
+              )}
+              {/* <Button
               icon={<PaperClipOutlined />}
               onClick={() => {
                 const input = document.createElement("input");
@@ -249,24 +261,27 @@ export const ChatArea: React.FC<ChatAreaProps> = ({
                 input.click();
               }}
             /> */}
-            <Button
-              icon={<SmileOutlined />}
-              onClick={() => {
-                setShowEmoji((prev) => !prev);
-              }}
-            />
-            <Input
-              placeholder="Type a message"
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              onPressEnter={handleSendMessage}
-            />
-            <Button
-              type="primary"
-              icon={<SendOutlined />}
-              onClick={handleSendMessage}
-            />
-          </Space.Compact>
+              <Button
+                icon={<SmileOutlined />}
+                onClick={() => {
+                  setShowEmoji((prev) => !prev);
+                }}
+              />
+              <Input
+                placeholder="Type a message"
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
+                onPressEnter={handleSendMessage}
+              />
+              <Button
+                type="primary"
+                icon={<SendOutlined />}
+                onClick={handleSendMessage}
+              />
+            </Space.Compact>
+          ) : (
+            ""
+          )}
         </div>
       ) : (
         <Typography.Text

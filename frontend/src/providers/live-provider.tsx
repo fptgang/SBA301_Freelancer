@@ -1,5 +1,6 @@
 import { LiveEvent, LiveProvider } from "@refinedev/core";
 import { Client } from "@stomp/stompjs";
+import { store } from "../store";
 
 /**
  * Check out the Live Provider documentation for detailed information
@@ -8,6 +9,7 @@ import { Client } from "@stomp/stompjs";
 export const liveProvider = (client: Client): LiveProvider => ({
   subscribe: ({ callback, channel, types, params }) => {
     var id = channel;
+    const token = store?.getState().auth.accessToken;
     client?.subscribe(
       channel,
       (message) => {
@@ -21,7 +23,7 @@ export const liveProvider = (client: Client): LiveProvider => ({
         callback(liveEvent);
       },
       {
-        Authorization: `Bearer ${localStorage.getItem("refine-auth")}`,
+        Authorization: `Bearer ${token}`,
         id,
       }
     );
@@ -41,11 +43,12 @@ export const liveProvider = (client: Client): LiveProvider => ({
     });
   },
   publish: ({ channel, type, date, payload }) => {
+    const token = store?.getState().auth.accessToken;
     client.publish({
       destination: channel,
       body: JSON.stringify(payload),
       headers: {
-        Authorization: `Bearer ${localStorage.getItem("refine-auth")}`,
+        Authorization: `Bearer ${token}`,
       },
     });
     console.log("publish", {

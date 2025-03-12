@@ -41,6 +41,8 @@ components:
       $ref: 'model/proficiency.yml#/ProficiencyEnum'
     AccountResponseDto:
       $ref: 'model/account-response.yml#/AccountResponseDto'
+    ReportDto:
+      $ref: 'model/report.yml#/ReportDto'
 paths:
   /auth/me:
     $ref: 'path/auth/me.yml'
@@ -68,6 +70,8 @@ paths:
     $ref: 'path/project-projectId.yml'
   /projects/{projectId}/{proposalId}:
     $ref: 'path/project-projectId-proposalId.yml'
+  /projects/staff/{projectId}:
+    $ref: 'path/project-projectId-staff.yml'
   /projectCategories:
     $ref: 'path/projectCategory.yml'
   /projectCategories/{projectCategoryId}:
@@ -108,5 +112,9 @@ paths:
     $ref: 'path/contract.yml'
   /contracts/{contractId}:
     $ref: 'path/contract-contractId.yml'
+  /reports:
+    $ref: 'path/report.yml'
+  /reports/{reportId}:
+    $ref: 'path/report-reportId.yml'
 
 

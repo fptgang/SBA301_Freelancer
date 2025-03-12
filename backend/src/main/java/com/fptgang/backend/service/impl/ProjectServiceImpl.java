@@ -3,7 +3,9 @@ package com.fptgang.backend.service.impl;
 import com.fptgang.backend.exception.InvalidInputException;
 import com.fptgang.backend.model.Project;
 import com.fptgang.backend.model.Proposal;
+import com.fptgang.backend.model.Report;
 import com.fptgang.backend.repository.ProjectRepos;
+import com.fptgang.backend.service.AccountService;
 import com.fptgang.backend.service.ProjectService;
 import com.fptgang.backend.service.ProposalService;
 import com.fptgang.backend.service.params.ListParams;
@@ -17,17 +19,20 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 @Service
 public class ProjectServiceImpl implements ProjectService {
 
     private final ProjectRepos projectRepos;
     private final ProposalService proposalService;
+    private final AccountService accountService;
 
     @Autowired
-    public ProjectServiceImpl(ProjectRepos projectRepos, ProposalService proposalService) {
+    public ProjectServiceImpl(ProjectRepos projectRepos, ProposalService proposalService, AccountService accountService) {
         this.projectRepos = projectRepos;
         this.proposalService = proposalService;
+        this.accountService = accountService;
     }
 
 
@@ -54,7 +59,7 @@ public class ProjectServiceImpl implements ProjectService {
                 } else
                     throw new InvalidInputException("Milestone deadline must be after the previous milestone");
             }
-            if(totalBudgetRatio.compareTo(BigDecimal.ONE) != 0) {
+            if (totalBudgetRatio.compareTo(BigDecimal.ONE) != 0) {
                 throw new InvalidInputException("Total budget ratio must be 1");
             }
             skills.forEach(skill -> {
@@ -69,7 +74,7 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public Project update(Project project) {
-        if (project.getProjectId() == null ) {
+        if (project.getProjectId() == null) {
             throw new InvalidInputException("Project does not exist");
         }
 
@@ -139,5 +144,39 @@ public class ProjectServiceImpl implements ProjectService {
         }
         proposal.setStatus(Proposal.ProposalStatus.REJECTED);
         proposalService.update(proposal);
+    }
+
+    @Override
+    public void joinProject(Long projectId, Long currentUserId) {
+        Project project = projectRepos.findByProjectId(projectId).orElseThrow(
+                () -> new InvalidInputException("Project with project id " + projectId + "not found"));
+        if(project.getStaff()!=null&& !Objects.equals(project.getStaff().getAccountId(), currentUserId)){
+            throw new InvalidInputException("Project already has a staff");
+        }
+        project.setStaff(
+                accountService.findById(currentUserId)
+        );
+        project.getReports().forEach(report -> {
+            if(report.getStatus() == Report.ReportStatus.UNSOLVED){
+            report.setStatus(Report.ReportStatus.SOLVING);}
+        });
+        projectRepos.save(project);
+    }
+
+    @Override
+    public void leaveProject(Long projectId, Long currentUserId) {
+        Project project = projectRepos.findByProjectId(projectId).orElseThrow(
+                () -> new InvalidInputException("Project with project id " + projectId + "not found"));
+        if (project.getStaff() == null) {
+            throw new InvalidInputException("Project does not have a staff");
+        } else if (!Objects.equals(project.getStaff().getAccountId(), currentUserId)) {
+            throw new InvalidInputException("You are not a staff of this project");
+        }
+        project.getReports().forEach(report -> {
+            if(report.getStatus() == Report.ReportStatus.UNSOLVED){
+                report.setStatus(Report.ReportStatus.SOLVING);}
+        });
+        project.setStaff(null);
+        projectRepos.save(project);
     }
 }

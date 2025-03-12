@@ -16,6 +16,7 @@ public interface ProjectRepos extends JpaRepository<Project,Long>, JpaSpecificat
             "WHERE (p.isVisible=true OR NOT p.isVisible  = :includeInvisible) " +
             "AND (p.contract.freelancer.accountId" +
             " = :participantId OR p.client.accountId = :participantId) " +
+            "OR p.staff.accountId=:participantId " +
             "GROUP BY p.projectId " +
             "ORDER BY MAX(m.createdAt) DESC")
     Page<Project> findAllSortedByLatestMessage (Pageable pageable,boolean includeInvisible,Long participantId);

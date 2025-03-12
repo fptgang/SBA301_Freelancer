@@ -25,6 +25,10 @@ ProjectDto:
       type: array
       items:
         $ref: 'milestone.yml#/MilestoneDto'
+    reports:
+      type: array
+      items:
+        $ref: 'report.yml#/ReportDto'
     files:
       type: array
       items:

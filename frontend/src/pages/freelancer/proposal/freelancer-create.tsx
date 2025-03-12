@@ -28,9 +28,10 @@ import {
   CheckCircleOutlined,
   UploadOutlined,
   PaperClipOutlined,
-} from "@ant-design/icons";     
+} from "@ant-design/icons";
 import TextArea from "antd/lib/input/TextArea";
 import { AccountDto, ProjectDto, ProposalDto } from "../../../../generated";
+import { store } from "../../../store";
 
 const { Step } = Steps;
 const { Title, Text } = Typography;
@@ -40,18 +41,22 @@ interface FreelancerCreateProposalButtonProps {
   freelancerId?: number;
 }
 
-const FreelancerCreateProposalButton: React.FC<FreelancerCreateProposalButtonProps> = ({ project, freelancerId }) => {
+const FreelancerCreateProposalButton: React.FC<
+  FreelancerCreateProposalButtonProps
+> = ({ project, freelancerId }) => {
   const [visible, setVisible] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
-  const [selectedProject, setSelectedProject] = useState<ProjectDto | null>(null);
+  const [selectedProject, setSelectedProject] = useState<ProjectDto | null>(
+    null
+  );
   const [fileList, setFileList] = useState<any[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const apiUrl = useApiUrl();
   const { open } = useNotification();
   const { data: identity } = useGetIdentity<AccountDto>();
   const freelancerIdUsed = freelancerId ?? identity?.accountId;
+  const token = store?.getState().auth.accessToken;
 
-  
   // Fetch projects for selection if not provided
   const { data: projectsData, isLoading: projectsLoading } =
     useList<ProjectDto>({
@@ -75,7 +80,12 @@ const FreelancerCreateProposalButton: React.FC<FreelancerCreateProposalButtonPro
   useEffect(() => {
     if (project) {
       setSelectedProject(project);
-    } else if (visible && projectsData?.data && projectsData.data.length > 0 && !selectedProject) {
+    } else if (
+      visible &&
+      projectsData?.data &&
+      projectsData.data.length > 0 &&
+      !selectedProject
+    ) {
       setSelectedProject(projectsData.data[0]);
     }
   }, [project, visible, projectsData]);
@@ -122,14 +132,14 @@ const FreelancerCreateProposalButton: React.FC<FreelancerCreateProposalButtonPro
     try {
       // Use entityFiles endpoint for batch upload
       const formData = new FormData();
-      
+
       // Add files
       fileList.forEach((file) => {
         if (file.originFileObj) {
           formData.append("files", file.originFileObj);
         }
       });
-      
+
       // Set visibility
       formData.append("isVisible", "true");
 
@@ -139,7 +149,7 @@ const FreelancerCreateProposalButton: React.FC<FreelancerCreateProposalButtonPro
         {
           method: "POST",
           headers: {
-            Authorization: `Bearer ${localStorage.getItem("refine-auth")}`,
+            Authorization: `Bearer ${token}`,
           },
           body: formData,
         }
@@ -184,23 +194,17 @@ const FreelancerCreateProposalButton: React.FC<FreelancerCreateProposalButtonPro
           <Title level={4} className="mb-4 flex items-center">
             <FileTextOutlined className="mr-2" /> Proposal Details
           </Title>
-          
+
           {/* Project ID hidden field */}
-          <Form.Item
-            name="projectId"
-            hidden
-          >
+          <Form.Item name="projectId" hidden>
             <Input />
           </Form.Item>
-          
+
           {/* Freelancer ID hidden field */}
-          <Form.Item
-            name="freelancerId"
-            hidden
-          >
+          <Form.Item name="freelancerId" hidden>
             <Input />
           </Form.Item>
-          
+
           <Form.Item
             name="notes"
             label="Proposal Message"
@@ -317,7 +321,7 @@ const FreelancerCreateProposalButton: React.FC<FreelancerCreateProposalButtonPro
         projectId: selectedProject.projectId,
         freelancerId: freelancerIdUsed,
         status: "PENDING",
-        isVisible: true
+        isVisible: true,
       });
     }
   }, [visible, selectedProject, freelancerIdUsed, formProps.form]);
@@ -329,20 +333,20 @@ const FreelancerCreateProposalButton: React.FC<FreelancerCreateProposalButtonPro
         // On final step, validate and submit
         await formProps.form?.validateFields();
         setSubmitting(true);
-        
+
         const values = await formProps.form?.getFieldsValue();
-        
+
         // Ensure required fields are set
         const completeValues = {
           ...values,
           projectId: selectedProject?.projectId,
           freelancerId: freelancerIdUsed,
           status: "PENDING",
-          isVisible: true
+          isVisible: true,
         };
-        
+
         console.log("Submitting proposal with values:", completeValues);
-        
+
         // Submit the form
         onFinish(completeValues);
       } else {
@@ -422,11 +426,7 @@ const FreelancerCreateProposalButton: React.FC<FreelancerCreateProposalButtonPro
           </div>
         }
       >
-        <Form 
-          {...formProps} 
-          layout="vertical" 
-          className="mt-4"
-        >
+        <Form {...formProps} layout="vertical" className="mt-4">
           <Steps current={currentStep} className="mb-8">
             {steps.map((step) => (
               <Step key={step.title} title={step.title} />
@@ -434,7 +434,10 @@ const FreelancerCreateProposalButton: React.FC<FreelancerCreateProposalButtonPro
           </Steps>
 
           {steps.map((step, index) => (
-            <div key={index} className={currentStep === index ? "block" : "hidden"}>
+            <div
+              key={index}
+              className={currentStep === index ? "block" : "hidden"}
+            >
               {step.content}
             </div>
           ))}

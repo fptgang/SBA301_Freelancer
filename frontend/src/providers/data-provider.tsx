@@ -1,17 +1,17 @@
 import { DataProvider, LogicalFilter } from "@refinedev/core";
 import { Axios } from "axios";
 import { generateSortQuery, generateFilterQuery } from "../utils/query-utils";
-import {store} from "../store";
+import { store } from "../store";
 
 function buildHeaders(headers: any) {
   headers = headers || {};
 
   const token = store.getState().auth.accessToken;
   if (token) {
-    headers["Authorization"] = `Bearer ${token}`
+    headers["Authorization"] = `Bearer ${token}`;
   }
 
-  return headers
+  return headers;
 }
 
 export const dataProvider = (
@@ -39,10 +39,16 @@ export const dataProvider = (
     if (currentPage > 0) {
       currentPage--;
     }
+    let parameter = "";
+    if (meta?.param) {
+      meta.param?.forEach((param: any) => {
+        parameter += `&${param.field}=${param.value}`;
+      });
+    }
 
     const url = `${apiUrl}/${resource}?page=${currentPage}&pageSize=${
       pagination?.pageSize ?? 20
-    }&size=${pagination?.pageSize ?? 20}${sortQuery}${filterQuery}`;
+    }&size=${pagination?.pageSize ?? 20}${sortQuery}${filterQuery}${parameter}`;
 
     console.log("getList", {
       resource,
@@ -53,7 +59,9 @@ export const dataProvider = (
       url,
     });
 
-    const result = await _httpClient.get(url, { headers: buildHeaders(meta?.headers) });
+    const result = await _httpClient.get(url, {
+      headers: buildHeaders(meta?.headers),
+    });
 
     return {
       data: result.data.content,
@@ -70,18 +78,17 @@ export const dataProvider = (
 
     try {
       // Create an array of promises for each ID
-      const promises = ids.map(id =>
-        _httpClient.get(
-          `${apiUrl}/${resource}/${id}`,
-          { headers: buildHeaders(meta?.headers) }
-        )
+      const promises = ids.map((id) =>
+        _httpClient.get(`${apiUrl}/${resource}/${id}`, {
+          headers: buildHeaders(meta?.headers),
+        })
       );
 
       // Execute all promises in parallel
       const responses = await Promise.all(promises);
 
       // Extract data from each response
-      const data = responses.map(response => response.data);
+      const data = responses.map((response) => response.data);
 
       return {
         data,
@@ -98,7 +105,11 @@ export const dataProvider = (
       variables,
       meta,
     });
-    const response = await _httpClient.post(`${apiUrl}/${resource}`, variables, { headers: buildHeaders(meta?.headers) });
+    const response = await _httpClient.post(
+      `${apiUrl}/${resource}`,
+      variables,
+      { headers: buildHeaders(meta?.headers) }
+    );
 
     return {
       data: response.data,
@@ -135,7 +146,9 @@ export const dataProvider = (
 
     // TODO: send request to the API
     // const response = await httpClient.get(url, {});
-    const response = await _httpClient.get(`${apiUrl}/${resource}/${id}`, { headers: buildHeaders(meta?.headers) });
+    const response = await _httpClient.get(`${apiUrl}/${resource}/${id}`, {
+      headers: buildHeaders(meta?.headers),
+    });
     return {
       data: response.data,
     };
@@ -151,7 +164,9 @@ export const dataProvider = (
 
     // TODO: send request to the API
     // const response = await httpClient.post(url, {});
-    const response = await _httpClient.delete(`${apiUrl}/${resource}/${id}`, { headers: buildHeaders(meta?.headers) });
+    const response = await _httpClient.delete(`${apiUrl}/${resource}/${id}`, {
+      headers: buildHeaders(meta?.headers),
+    });
     console.log(response);
     return {
       data: {} as any,
@@ -163,15 +178,15 @@ export const dataProvider = (
   },
 
   custom: async ({
-                   url,
-                   method,
-                   filters,
-                   sorters,
-                   payload,
-                   query,
-                   headers,
-                   meta,
-                 }) => {
+    url,
+    method,
+    filters,
+    sorters,
+    payload,
+    query,
+    headers,
+    meta,
+  }) => {
     console.log("custom", {
       url,
       method,

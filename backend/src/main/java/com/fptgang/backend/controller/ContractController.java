@@ -6,6 +6,7 @@ import com.fptgang.backend.api.model.GetContracts200Response;
 import com.fptgang.backend.api.model.Pageable;
 import com.fptgang.backend.mapper.ContractMapper;
 import com.fptgang.backend.mapper.DetailLevel;
+import com.fptgang.backend.model.Contract;
 import com.fptgang.backend.model.Role;
 import com.fptgang.backend.service.ContractService;
 import com.fptgang.backend.service.params.ListParams;
@@ -17,6 +18,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Objects;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -39,8 +42,16 @@ public class ContractController implements ContractsApi {
 
     @Override
     public ResponseEntity<ContractDto> getContractById(Long contractId) {
+        Contract contract = contractService.findById(contractId);
+        DetailLevel detailLevel = DetailLevel.REFERENCE;
+        if (SecurityUtil.hasPermission(Role.ADMIN) ||
+                SecurityUtil.hasPermission(Role.STAFF) ||
+                Objects.equals(SecurityUtil.getCurrentUserId(), contract.getProject().getClient().getAccountId()) ||
+                Objects.equals(SecurityUtil.getCurrentUserId(), contract.getFreelancer().getAccountId())) {
 
-        return new ResponseEntity<>(contractMapper.toDTO(contractService.findById(contractId),DetailLevel.FULL), HttpStatus.OK);
+            detailLevel = DetailLevel.FULL;
+        }
+        return new ResponseEntity<>(contractMapper.toDTO(contract, detailLevel), HttpStatus.OK);
     }
 
     @Override
@@ -58,4 +69,14 @@ public class ContractController implements ContractsApi {
         return OpenApiHelper.respondPage(res, GetContracts200Response.class);
     }
 
+    @Override
+    public ResponseEntity<ContractDto> signInContract(Long contractId) {
+        return new ResponseEntity<>(contractMapper.toDTO(contractService.signContract(contractId), DetailLevel.FULL), HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<Void> terminateContract(Long contractId) {
+        contractService.terminateContract(contractId);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
 }

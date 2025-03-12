@@ -1,6 +1,16 @@
 import React, { useState } from "react";
-import { Layout, Tabs, List, Typography, Space, Grid } from "antd";
+import {
+  Layout,
+  Tabs,
+  List,
+  Typography,
+  Space,
+  Grid,
+  Button,
+  Modal,
+} from "antd";
 import { ProjectDto } from "../../../generated";
+import { ReportModal } from "./ReportModal";
 
 interface ProjectDetailsSidebarProps {
   project?: ProjectDto;
@@ -10,6 +20,7 @@ export const ProjectDetailsSidebar: React.FC<ProjectDetailsSidebarProps> = ({
   project,
 }) => {
   const [collapsed, setCollapsed] = useState(true);
+  const [showReportModal, setShowReportModal] = useState(false);
   const screens = Grid.useBreakpoint();
 
   return (
@@ -23,8 +34,33 @@ export const ProjectDetailsSidebar: React.FC<ProjectDetailsSidebarProps> = ({
     >
       {!collapsed && project && (
         <div style={{ padding: 24 }}>
-          <Typography.Title level={5} style={{ marginBottom: 16 }}>
-            Project Details
+          <Typography.Title
+            level={5}
+            style={{
+              marginBottom: 16,
+              display: "flex",
+              justifyContent: "space-between",
+            }}
+          >
+            <>Project Details</>
+            {project?.status === "IN_PROGRESS" && (
+              <>
+                <Button
+                  type="primary"
+                  danger
+                  style={{ marginLeft: 8 }}
+                  onClick={() => setShowReportModal(true)}
+                >
+                  Report
+                </Button>
+
+                <ReportModal
+                  showReportModal={showReportModal}
+                  setShowReportModal={setShowReportModal}
+                  project={project}
+                />
+              </>
+            )}
           </Typography.Title>
 
           <Tabs
@@ -33,11 +69,20 @@ export const ProjectDetailsSidebar: React.FC<ProjectDetailsSidebarProps> = ({
                 key: "overview",
                 label: "Overview",
                 children: (
-                  <Space direction="vertical">
-                    <Typography.Text>{project.description}</Typography.Text>
+                  <Space
+                    direction="vertical"
+                    style={{ maxHeight: "65vh", overflow: "auto" }}
+                  >
+                    <Typography.Text
+                      style={{
+                        overflow: "auto",
+                      }}
+                    >
+                      {project.description}
+                    </Typography.Text>
                     <Typography.Text>Status: {project.status}</Typography.Text>
                     <Typography.Text>
-                      Budget: ${project.estimateBudget}
+                      Budget: ${project.minBudget} - ${project.maxBudget}
                     </Typography.Text>
                   </Space>
                 ),
@@ -51,7 +96,9 @@ export const ProjectDetailsSidebar: React.FC<ProjectDetailsSidebarProps> = ({
                     renderItem={(milestone) => (
                       <List.Item>
                         <Typography.Text>{milestone.title}</Typography.Text>
-                        <Typography.Text>${milestone.budget}</Typography.Text>
+                        <Typography.Text>
+                          ${milestone.budgetRatio}
+                        </Typography.Text>
                       </List.Item>
                     )}
                   />

@@ -23,3 +23,49 @@ get:
         application/json:
           schema:
             $ref: '../component/error.yml#/ErrorResponse'
+put:
+  summary: Sign in a contract
+  operationId: signInContract
+  security:
+      - bearerAuth: []
+  parameters:
+    - name: contractId
+      in: path
+      required: true
+      schema:
+        type: integer
+        format: int64
+  responses:
+    '200':
+      description: The operation was successful
+      content:
+        application/json:
+          schema:
+            $ref: '../model/contract.yml#/ContractDto'
+    '400':
+      description: The operation failed
+      content:
+        application/json:
+          schema:
+            $ref: '../component/error.yml#/ErrorResponse'
+delete:
+  summary: Terminate an unsigned contract
+  operationId: terminateContract
+  security:
+    - bearerAuth: []
+  parameters:
+    - name: contractId
+      in: path
+      required: true
+      schema:
+        type: integer
+        format: int64
+  responses:
+    '200':
+        description: The operation was successful
+    '400':
+        description: The operation failed
+        content:
+          application/json:
+            schema:
+              $ref: '../component/error.yml#/ErrorResponse'

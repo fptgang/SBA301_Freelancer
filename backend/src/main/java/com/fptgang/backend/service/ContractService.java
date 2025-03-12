@@ -10,4 +10,6 @@ public interface ContractService {
     Contract update(Contract contract);
     Contract findById(long id);
     Page<Contract> getAll(ListParams params);
+    Contract signContract(long id);
+    Contract terminateContract(long id);
 }

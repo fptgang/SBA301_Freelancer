@@ -51,6 +51,7 @@ import {
 import { formatCurrency } from "../../../utils/formatter";
 import { ProjectDto } from "../../../../generated/models/ProjectDto";
 import { ProposalDto } from "../../../../generated/models/ProposalDto";
+import { store } from "../../../store";
 
 const { Title, Text, Paragraph } = Typography;
 const { Step } = Steps;
@@ -63,6 +64,7 @@ const ClientProjectShow: React.FC = () => {
   const { open } = useNotification();
   const { mutate: acceptProposal } = useCustomMutation();
   const { mutate: rejectProposal } = useCustomMutation();
+  const token = store?.getState().auth.accessToken;
 
   // Fetch project data
   const { queryResult: projectQueryResult } = useShow<ProjectDto>({
@@ -134,7 +136,7 @@ const ClientProjectShow: React.FC = () => {
         config: {
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("refine-auth")}`,
+            Authorization: `Bearer ${token}`,
           },
         },
         values: {},

@@ -52,11 +52,6 @@ export const ProjectsList: React.FC = () => {
           operator: "eq",
           value: undefined,
         },
-        {
-          field: "isVisible",
-          operator: "eq",
-          value: undefined,
-        },
       ],
     },
     liveMode: "manual",
