@@ -6,6 +6,7 @@ import com.fptgang.backend.api.model.Pageable;
 import com.fptgang.backend.api.model.ProjectDto;
 import com.fptgang.backend.mapper.DetailLevel;
 import com.fptgang.backend.mapper.ProjectMapper;
+import com.fptgang.backend.model.Project;
 import com.fptgang.backend.model.Role;
 import com.fptgang.backend.service.ProjectService;
 import com.fptgang.backend.service.params.ListParams;
@@ -16,6 +17,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Objects;
 
 @RestController
 @RequestMapping("api/v1")
@@ -44,7 +47,14 @@ public class ProjectController implements ProjectsApi {
 
     @Override
     public ResponseEntity<ProjectDto> getProjectById(Long projectId) {
-        return ResponseEntity.ok(projectMapper.toDTO(projectService.findByProjectId(projectId), DetailLevel.FULL));
+        Project project = projectService.findByProjectId(projectId);
+        DetailLevel level = DetailLevel.SUMMARY;
+        if(Objects.equals(SecurityUtil.getCurrentUserId(), project.getClient().getAccountId()) ||
+        SecurityUtil.hasPermission(Role.STAFF)||
+        project.getContract().getFreelancer().getAccountId().equals(SecurityUtil.getCurrentUserId())){
+            level = DetailLevel.FULL;
+        }
+        return ResponseEntity.ok(projectMapper.toDTO(project, level));
     }
 
     @Override
@@ -91,6 +101,24 @@ public class ProjectController implements ProjectsApi {
         if(SecurityUtil.getCurrentUserId()!=projectService.findByProjectId(projectId).getClient().getAccountId())
             throw new RuntimeException("You are not the client of this project");
         projectService.rejectProjectProposal(projectId, proposalId);
+        return ResponseEntity.ok().build();
+    }
+
+    @Override
+    public ResponseEntity<Void> joinProject(Long projectId) {
+        if(!SecurityUtil.hasPermission(Role.STAFF)){
+            throw new RuntimeException("You are not a staff");
+        }
+        projectService.joinProject(projectId, SecurityUtil.getCurrentUserId());
+        return ResponseEntity.ok().build();
+    }
+
+    @Override
+    public ResponseEntity<Void> leaveProject(Long projectId) {
+        if(!SecurityUtil.hasPermission(Role.STAFF)){
+            throw new RuntimeException("You are not a staff");
+        }
+        projectService.leaveProject(projectId, SecurityUtil.getCurrentUserId());
         return ResponseEntity.ok().build();
     }
 }

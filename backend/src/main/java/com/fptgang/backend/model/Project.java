@@ -92,6 +92,10 @@ public class Project {
     @Builder.Default
     private List<Message> messages = new ArrayList<>();
 
+    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @Builder.Default        
+    private List<Report> reports = new ArrayList<>();
+
     public enum ProjectStatus {
         OPEN,
         PAUSED,

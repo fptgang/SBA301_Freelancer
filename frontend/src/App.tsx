@@ -118,6 +118,7 @@ import WithdrawPage from "./pages/shared/wallet/withdraw";
 import ProjectDetailsScreen from "./pages/public/project";
 import { Message } from "./pages/public/message";
 import MessageLayout from "./components/layout/message-layout";
+import { ReportsEdit, ReportsList, ReportsShow } from "./pages/reports";
 
 const resources = [
   {
@@ -182,6 +183,17 @@ const resources = [
       icon: <DollarCircleFilled />,
     },
   },
+  {
+    name: "reports",
+    list: "/admin/reports",
+    edit: "/admin/reports/edit/:id",
+    show: "/admin/reports/show/:id",
+    meta: {
+      label: "Reports",
+      canDelete: true,
+      icon: <FileTextOutlined />,
+    },
+  },
 ];
 
 function App() {
@@ -195,7 +207,7 @@ function App() {
                 dataProvider={dataProvider(API_URL, axiosConfig)}
                 notificationProvider={notificationProvider}
                 authProvider={authProvider}
-                accessControlProvider={accessControlProvider}
+                // accessControlProvider={accessControlProvider}
                 routerProvider={routerBindings}
                 resources={resources}
                 liveProvider={liveProvider(stompClient)}
@@ -294,6 +306,12 @@ function App() {
                       <Route path="create" element={<TransactionsCreate />} />
                       <Route path="edit/:id" element={<TransactionsEdit />} />
                       <Route path="show/:id" element={<TransactionsShow />} />
+                    </Route>
+
+                    <Route path="reports">
+                      <Route index element={<ReportsList />} />
+                      <Route path="edit/:id" element={<ReportsEdit />} />
+                      <Route path="show/:id" element={<ReportsShow />} />
                     </Route>
                   </Route>
 

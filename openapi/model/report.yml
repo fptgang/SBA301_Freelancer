@@ -1,0 +1,23 @@
+ReportDto:
+  type: object
+  properties:
+    reportId:
+      type: integer
+      format: int64
+    reporterId:
+      type: integer
+      format: int64
+    projectId:
+      type: integer
+      format: int64
+    reason:
+      type: string
+    status:
+      type: string
+      enum: [UNSOLVED,SOLVED,SOLVING]
+    createdAt:
+      type: string
+      format: date-time
+    updatedAt:
+      type: string
+      format: date-time

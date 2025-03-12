@@ -62,8 +62,9 @@ public class MessageServiceImpl implements MessageService {
         }
         spec = spec.and((root, query, criteriaBuilder) -> criteriaBuilder.or(
                 criteriaBuilder.equal(root.get("project").get("client").get("accountId"), participantId),
-                criteriaBuilder.equal(root.get("project").get("activeProposal").get("freelancer").get("accountId"), participantId)
-        ));
+                criteriaBuilder.equal(root.get("project").get("contract").get("freelancer").get("accountId"), participantId),
+                criteriaBuilder.equal(root.get("project").get("staff").get("accountId"), participantId)
+                ));
         return messageRepos.findAll(spec, pageable);
     }
 }

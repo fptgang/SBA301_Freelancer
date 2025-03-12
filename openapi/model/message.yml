@@ -4,9 +4,8 @@ MessageDto:
     messageId:
       type: integer
       format: int64
-    senderId:
-      type: integer
-      format: int64
+    sender:
+      $ref: 'account-response.yml#/AccountResponseDto'
     projectId:
       type: integer
       format: int64

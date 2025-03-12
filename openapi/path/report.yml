@@ -1,0 +1,55 @@
+get:
+  summary: Get a list of reports
+  operationId: getReports
+  security:
+    - bearerAuth: []
+  parameters:
+    - $ref: '../param/pageable.yml#/Pageable'
+    - $ref: '../param/filter.yml#/Filter'
+    - $ref: '../param/search.yml#/Search'
+  responses:
+    '200':
+      description: The operation was successful
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '../component/page.yml#/Page'
+              - type: object
+                properties:
+                  content:
+                    type: array
+                    items:
+                      $ref: '../model/report.yml#/ReportDto'
+    '400':
+      description: The operation failed
+      content:
+        application/json:
+          schema:
+            $ref: '../component/error.yml#/ErrorResponse'
+
+post:
+  summary: Create a report
+  operationId: createReport
+  security:
+    - bearerAuth: []
+  requestBody:
+    description: Report to create
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../model/report.yml#/ReportDto'
+  responses:
+    '200':
+      description: The operation was successful
+      content:
+        application/json:
+          schema:
+            $ref: '../model/report.yml#/ReportDto'
+    '400':
+      description: The operation failed
+      content:
+        application/json:
+          schema:
+            $ref: '../component/error.yml#/ErrorResponse'

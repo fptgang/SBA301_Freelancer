@@ -7,22 +7,23 @@ import {
   useSubscription,
 } from "@refinedev/core";
 import { Layout, Grid, Tabs, Typography } from "antd";
-import { useParams } from "react-router";
+import { useLocation, useParams } from "react-router";
 import { useEffect, useState } from "react";
 import { AccountDto, MessageDto, ProjectDto } from "../../../../generated";
 import { ProjectSidebar } from "../../../components/message/ProjectSidebar";
 import { ChatArea } from "../../../components/message/ChatArea";
 import { ProjectDetailsSidebar } from "../../../components/message/ProjectDetailsSideBar";
 import { parseJwt } from "../../../utils/parse-jwt";
+import { store } from "../../../store";
 
 export const Message: React.FC = () => {
-  const { data: user } = useGetIdentity<AccountDto>();
+  const location = useLocation();
   const [selectedProject, setSelectedProject] = useState<ProjectDto>();
   const [files, setFiles] = useState<File[]>([]);
   const [newMessage, setNewMessage] = useState<MessageDto>();
   const [pageSize, setPageSize] = useState(20);
-  const email = parseJwt(localStorage.getItem("refine-auth") ?? "")?.sub;
-  const userId = parseJwt(localStorage.getItem("refine-auth") ?? "")?.accountId;
+  const email = store?.getState().auth.account?.email;
+  const userId = store?.getState().auth.account?.accountId;
 
   // Fetch projects where current user is participant
   const { data: projects, refetch } = useList<ProjectDto>({
@@ -55,7 +56,15 @@ export const Message: React.FC = () => {
 
   useEffect(() => {
     if (projects?.data?.length && !selectedProject) {
-      setSelectedProject(projects.data[0]);
+      if (location?.state?.projectId) {
+        setSelectedProject(
+          projects.data.find(
+            (project) => project.projectId === location.state.projectId
+          )
+        );
+      } else {
+        setSelectedProject(projects.data[0]);
+      }
     }
   }, [projects]);
 
@@ -100,13 +109,7 @@ export const Message: React.FC = () => {
         // collapsed={!screens.md}
       />
 
-      <ChatArea
-        selectedProject={selectedProject}
-        user={user}
-        files={files}
-        setFiles={setFiles}
-        newMessage={newMessage}
-      />
+      <ChatArea selectedProject={selectedProject} newMessage={newMessage} />
 
       <ProjectDetailsSidebar project={selectedProject} />
     </Layout>

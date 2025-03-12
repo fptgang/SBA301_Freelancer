@@ -1,6 +1,7 @@
 package com.fptgang.backend.controller;
 
 import com.fptgang.backend.api.controller.MessagesApi;
+import com.fptgang.backend.api.model.AccountResponseDto;
 import com.fptgang.backend.api.model.GetMessages200Response;
 import com.fptgang.backend.api.model.MessageDto;
 import com.fptgang.backend.api.model.Pageable;
@@ -52,10 +53,8 @@ public class MessageController implements MessagesApi {
     public ResponseEntity<GetMessages200Response> getMessages(Pageable pageable, String filter, String search) {
         log.info("Getting messages");
         var page = OpenApiHelper.toPageable(pageable);
-        var userEmail = SecurityUtil.requireCurrentUserEmail();
-        var account = accountService.findByEmail(userEmail);
-        var userId = account.getAccountId();
-        var includeInvisible = SecurityUtil.hasPermission(Role.ADMIN);
+        var userId = SecurityUtil.requireCurrentUserId();
+        var includeInvisible = SecurityUtil.hasPermission(Role.ADMIN)||SecurityUtil.hasPermission(Role.STAFF);
         Page<MessageDto> res = messageService
                 .getAllInvolving(userId, page, filter, search, includeInvisible)
                 .map(message -> messageMapper.toDTO(message, DetailLevel.FULL));
@@ -86,12 +85,18 @@ public class MessageController implements MessagesApi {
 //    @PreAuthorize("isAuthenticated()")
     public void sendMessage(@Payload MessageDto messageDto) {
         try {
+            messageDto.setSender(new AccountResponseDto().accountId(SecurityUtil.requireCurrentUserId()));
             Message message = messageMapper.toEntity(messageDto);
             messageDto = messageMapper.toDTO(messageService.create(message), DetailLevel.FULL);
             messagingTemplate.convertAndSend("message/" + message.getProject().getClient().getEmail(), messageDto);
+            log.info("Sending message: {} to {} ", message.getContent(), "message/" + message.getSender().getEmail());
             if (message.getProject().getContract().getFreelancer() != null) {
                 messagingTemplate.convertAndSend("message/" + message.getProject().getContract().getFreelancer().getEmail(), messageDto);
-                log.info("Sending message: {} to {} and {}", message.getContent(), "message/" + message.getSender().getAccountId(), message.getProject().getContract().getFreelancer().getAccountId());
+                log.info("Sending message: {} to {} ", message.getContent(), "message/" + message.getProject().getContract().getFreelancer().getEmail());
+            }
+            if(message.getProject().getStaff() != null) {
+                messagingTemplate.convertAndSend("message/" + message.getProject().getStaff().getEmail(), messageDto);
+                log.info("Sending message: {} to {} ", message.getContent(), "message/" + message.getProject().getStaff().getEmail());
             }
         } catch (Exception e) {
             throw new RuntimeException(e);

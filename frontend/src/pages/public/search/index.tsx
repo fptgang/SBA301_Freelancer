@@ -102,7 +102,7 @@ const SearchPage = () => {
             : {
                 field: "skills.skill",
                 operator: "ne",
-                value: "0",
+                value: undefined,
               },
           selectedLevel.length > 0
             ? {
@@ -113,7 +113,7 @@ const SearchPage = () => {
             : {
                 field: "skills.proficiency",
                 operator: "ne",
-                value: "0",
+                value: undefined,
               },
         ],
         pagination: { current, pageSize },
@@ -129,7 +129,7 @@ const SearchPage = () => {
           {
             field: "title",
             operator: "contains",
-            value: searchText,
+            value: searchText.length > 0 ? searchText : undefined,
           },
           selectedSkills.length > 0
             ? {
@@ -140,7 +140,7 @@ const SearchPage = () => {
             : {
                 field: "requiredSkills.skill",
                 operator: "ne",
-                value: "0",
+                value: undefined,
               },
           selectedLevel.length > 0
             ? {
@@ -151,7 +151,7 @@ const SearchPage = () => {
             : {
                 field: "requiredSkills.proficiency",
                 operator: "ne",
-                value: "",
+                value: undefined,
               },
           selectedCategories.length > 0
             ? {
@@ -164,7 +164,7 @@ const SearchPage = () => {
             : {
                 field: "category",
                 operator: "ne",
-                value: "0",
+                value: undefined,
               },
         ],
         pagination: { current, pageSize },

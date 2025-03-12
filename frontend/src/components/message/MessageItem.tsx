@@ -30,9 +30,9 @@ export const MessageItem: React.FC<MessageItemProps> = ({
           marginBottom: 16,
         }}
       >
-        <Tooltip title={`Sender: User #${msg.senderId}`}>
+        <Tooltip title={`${msg.sender?.firstName} ${msg.sender?.lastName}`}>
           <Avatar
-            src={msg.senderId}
+            src={msg.sender?.avatarUrl}
             icon={<UserOutlined />}
             style={{ flexShrink: 0 }}
           />

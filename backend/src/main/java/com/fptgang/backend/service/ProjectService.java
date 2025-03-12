@@ -15,4 +15,8 @@ public interface ProjectService {
     void rejectProjectProposal(long projectId, long proposalId);
     Page<Project> getProjectsSortedByLatestMessage(Pageable pageable,Boolean includeInvisible,Long participantId);
     Page<Project> getAll(ListParams params);
+
+    void joinProject(Long projectId, Long currentUserId);
+
+    void leaveProject(Long projectId, Long currentUserId);
 }

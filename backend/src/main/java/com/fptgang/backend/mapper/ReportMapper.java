@@ -1,53 +1,54 @@
 package com.fptgang.backend.mapper;
 
-import com.fptgang.backend.api.model.ContractDto;
-import com.fptgang.backend.model.Contract;
+import com.fptgang.backend.api.model.ReportDto;
+import com.fptgang.backend.model.Report;
 import com.fptgang.backend.repository.AccountRepos;
+import com.fptgang.backend.repository.ReportRepos;
 import com.fptgang.backend.repository.ProjectRepos;
-import com.fptgang.backend.repository.ContractRepos;
 import com.fptgang.backend.repository.ProposalRepos;
 import com.fptgang.backend.util.DateTimeUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import java.util.Optional;
-
 @Slf4j
 @Component
-public class ContractMapper extends BaseMapper<ContractDto, Contract> {
-    private final ContractRepos contractRepos;
+public class ReportMapper extends BaseMapper<ReportDto, Report> {
+    private final ReportRepos reportRepos;
     private final ProjectRepos projectRepos;
     private final AccountRepos accountRepos;
     private final ProposalRepos proposalRepos;
 
-    public ContractMapper(ContractRepos contractRepos, ProjectRepos projectRepos, AccountRepos accountRepos, ProposalRepos proposalRepos) {
-        this.contractRepos = contractRepos;
+    public ReportMapper(ReportRepos reportRepos, ProjectRepos projectRepos, AccountRepos accountRepos, ProposalRepos proposalRepos) {
+        this.reportRepos = reportRepos;
         this.projectRepos = projectRepos;
         this.accountRepos = accountRepos;
         this.proposalRepos = proposalRepos;
     }
 
     @Override
-    public Contract toEntity(ContractDto dto) {
+    public Report toEntity(ReportDto dto) {
         if (dto == null) {
             return null;
         }
 
-        Contract entity = new Contract();
-        entity.setContractId(dto.getContractId());
+        Report entity = new Report();
+        entity.setReportId(dto.getReportId());
 
         if (dto.getProjectId() != null) {
             entity.setProject(projectRepos.findByProjectId(dto.getProjectId())
                     .orElseThrow(() -> new IllegalArgumentException("Project not found")));
         }
 
-        if (dto.getProposalId() != null) {
-            entity.setProposal(proposalRepos.findByProposalId(dto.getProposalId())
-                    .orElseThrow(() -> new IllegalArgumentException("Proposal not found")));
+        if (dto.getReporterId() != null) {
+            entity.setReporter(accountRepos.findByAccountId(dto.getReporterId())
+                    .orElseThrow(() -> new IllegalArgumentException("Reporter not found")));
         }
+
         if(dto.getStatus() != null){
-            entity.setStatus(Contract.ContractStatus.valueOf(dto.getStatus().name()));
+            entity.setStatus(Report.ReportStatus.valueOf(dto.getStatus().name()));
         }
+
+        entity.setReason(dto.getReason());
 
         entity.setCreatedAt(DateTimeUtil.fromOffsetToLocal(dto.getCreatedAt()));
         entity.setUpdatedAt(DateTimeUtil.fromOffsetToLocal(dto.getUpdatedAt()));
@@ -56,13 +57,13 @@ public class ContractMapper extends BaseMapper<ContractDto, Contract> {
     }
 
     @Override
-    public ContractDto toDTO(Contract entity, DetailLevel level) {
+    public ReportDto toDTO(Report entity, DetailLevel level) {
         if (entity == null) {
             return null;
         }
 
-        ContractDto dto = new ContractDto();
-        dto.setContractId(entity.getContractId());
+        ReportDto dto = new ReportDto();
+        dto.setReportId(entity.getReportId());
         dto.setProjectId(entity.getProject().getProjectId());
         dto.setCreatedAt(DateTimeUtil.fromLocalToOffset(entity.getCreatedAt()));
         dto.setUpdatedAt(DateTimeUtil.fromLocalToOffset(entity.getUpdatedAt()));
@@ -70,13 +71,15 @@ public class ContractMapper extends BaseMapper<ContractDto, Contract> {
         if (level == DetailLevel.REFERENCE) {
             return dto; // those fields are enough
         }
-        dto.setProposalId(entity.getProposal().getProposalId());
+
+        dto.setReporterId(entity.getReporter().getAccountId());
 
         if (level == DetailLevel.SUMMARY) {
             return dto; // those fields are enough
         }
 
-        dto.setStatus(ContractDto.StatusEnum.valueOf(entity.getStatus().name()));
+        dto.setReason(entity.getReason());
+        dto.setStatus(ReportDto.StatusEnum.valueOf(entity.getStatus().name()));
 
         // Add more fields if needed for other detail levels
 

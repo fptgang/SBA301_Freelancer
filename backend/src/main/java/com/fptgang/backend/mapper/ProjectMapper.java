@@ -23,10 +23,11 @@ public class ProjectMapper extends BaseMapper<ProjectDto, Project> {
     private final MessageMapper messageMapper;
     private final FileMapper fileMapper;
     private final AccountMapper accountMapper;
+    private final ReportMapper reportMapper;
 
     public ProjectMapper(ProjectRepos projectRepos, ProjectCategoryRepos projectCategoryRepos, AccountRepos accountRepos,
                          ProjectSkillMapper projectSkillMapper, MilestoneMapper milestoneMapper, MessageMapper messageMapper,
-                         FileMapper fileMapper, AccountMapper accountMapper) {
+                         FileMapper fileMapper, AccountMapper accountMapper, ReportMapper reportMapper) {
         this.projectRepos = projectRepos;
         this.projectCategoryRepos = projectCategoryRepos;
         this.accountRepos = accountRepos;
@@ -35,6 +36,7 @@ public class ProjectMapper extends BaseMapper<ProjectDto, Project> {
         this.messageMapper = messageMapper;
         this.fileMapper = fileMapper;
         this.accountMapper = accountMapper;
+        this.reportMapper = reportMapper;
     }
 
     @Override
@@ -51,6 +53,8 @@ public class ProjectMapper extends BaseMapper<ProjectDto, Project> {
         entity.setIsVisible(dto.getIsVisible());
         entity.setCreatedAt(DateTimeUtil.fromOffsetToLocal(dto.getCreatedAt()));
         entity.setUpdatedAt(DateTimeUtil.fromOffsetToLocal(dto.getUpdatedAt()));
+        entity.setMaxBudget(dto.getMaxBudget());
+        entity.setMinBudget(dto.getMinBudget());
 
         if (dto.getProjectCategoryId() != null) {
             entity.setCategory(projectCategoryRepos.findByProjectCategoryId(dto.getProjectCategoryId())
@@ -95,6 +99,8 @@ public class ProjectMapper extends BaseMapper<ProjectDto, Project> {
         dto.setDescription(entity.getDescription());
         dto.setStatus(ProjectDto.StatusEnum.fromValue(entity.getStatus().name()));
         dto.setIsVisible(entity.getIsVisible());
+        dto.setMaxBudget(entity.getMaxBudget());
+        dto.setMinBudget(entity.getMinBudget());
         dto.setCreatedAt(DateTimeUtil.fromLocalToOffset(entity.getCreatedAt()));
         dto.setUpdatedAt(DateTimeUtil.fromLocalToOffset(entity.getUpdatedAt()));
 
@@ -132,8 +138,13 @@ public class ProjectMapper extends BaseMapper<ProjectDto, Project> {
         if (level == DetailLevel.SUMMARY) {
             return dto; // those fields are enough
         }
-        if(level==DetailLevel.FULL &&  entity.getMessages() != null) {
+        if(entity.getMessages() != null) {
             dto.setLatestMessage(messageMapper.toDTO(entity.getMessages().getLast(), DetailLevel.REFERENCE));
+        }
+        if(entity.getReports() != null) {
+            dto.setReports(entity.getReports().stream()
+                    .map(report -> reportMapper.toDTO(report, DetailLevel.REFERENCE))
+                    .collect(Collectors.toList()));
         }
 
         return dto;
