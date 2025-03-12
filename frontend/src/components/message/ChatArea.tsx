@@ -74,6 +74,7 @@ export const ChatArea: React.FC<ChatAreaProps> = ({
     const data: MessageDto = {
       content: content,
       projectId: selectedProject?.projectId,
+      sender: user,
       files,
     };
 

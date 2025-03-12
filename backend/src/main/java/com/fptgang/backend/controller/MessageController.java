@@ -85,7 +85,6 @@ public class MessageController implements MessagesApi {
 //    @PreAuthorize("isAuthenticated()")
     public void sendMessage(@Payload MessageDto messageDto) {
         try {
-            messageDto.setSender(new AccountResponseDto().accountId(SecurityUtil.requireCurrentUserId()));
             Message message = messageMapper.toEntity(messageDto);
             messageDto = messageMapper.toDTO(messageService.create(message), DetailLevel.FULL);
             messagingTemplate.convertAndSend("message/" + message.getProject().getClient().getEmail(), messageDto);
