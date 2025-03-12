@@ -12,6 +12,7 @@ import {FilePool} from "./file.js";
 import Contract, {ContractStatus} from "../model/Contract";
 import {ContractPool} from "./contract";
 import {TransactionPool} from "./transaction";
+import {FundStatus} from "../model/FundStatus";
 
 export class proposalPool {
   private proposals: Proposal[] = [];
@@ -154,6 +155,8 @@ export const chooseProposal = (date: Date) => {
     project.milestones[0].budgetRatio * pickedProposal.budget,
     project.milestones[0].milestoneId
   );
+  project.milestones[0].fundStatus = FundStatus.DEPOSITED;
+  project.milestones[0].updatedAt = date;
 
   pickedProposal.status = ProposalStatus.ACCEPTED;
   pickedProposal.updated_at = date;

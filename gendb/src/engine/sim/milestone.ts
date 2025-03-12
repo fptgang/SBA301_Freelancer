@@ -11,6 +11,7 @@ import {File} from "../model/File";
 import {ProjectPool} from "./project";
 import {TransactionType} from "../model/TransactionType";
 import {TransactionStatus} from "../model/TransactionStatus";
+import {FundStatus} from "../model/FundStatus";
 
 export const submitWork = (date: Date) => {
   const project = ProjectPool.pickProjectWithActiveMilestone(date, ProjectStatus.IN_PROGRESS);
@@ -67,8 +68,12 @@ export const confirmWork = (date: Date) => {
 
   const hasMilestoneEscrowReleased = TransactionPool.pickTransaction(
     TransactionType.ESCROW_RELEASE, TransactionStatus.SUCCESS, milestone.milestoneId).length > 0;
-  if (!hasMilestoneEscrowReleased)
+  if (!hasMilestoneEscrowReleased) {
     TransactionPool.releaseEscrow(date, project.contract.freelancer, project.contract.budget * milestone.budgetRatio, milestone.milestoneId);
+
+    milestone.fundStatus = FundStatus.RELEASED;
+    milestone.updatedAt = date;
+  }
 
   project.activeMilestone = null;
   project.updated_at = date;
@@ -82,6 +87,7 @@ export const confirmWork = (date: Date) => {
 
   milestone = nextMilestone;
   milestone.status = MilestoneStatus.IN_PROGRESS;
+  milestone.fundStatus = FundStatus.DEPOSITED;
   milestone.updatedAt = date;
   project.activeMilestone = milestone;
   project.updated_at = date;
@@ -135,6 +141,8 @@ export const fundMilestoneBudget = (date: Date) => {
       date, project.client,
       project.contract.budget * milestone.budgetRatio,
       milestone.milestoneId);
+    milestone.fundStatus = FundStatus.DEPOSITED;
+    milestone.updatedAt = date;
   }
 
   return true;

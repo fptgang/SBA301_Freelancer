@@ -1,0 +1,6 @@
+export enum FundStatus {
+  NONE = "NONE",
+  DEPOSITED = "DEPOSITED",
+  RELEASED = "RELEASED",
+  REFUNDED = "REFUNDED"
+}

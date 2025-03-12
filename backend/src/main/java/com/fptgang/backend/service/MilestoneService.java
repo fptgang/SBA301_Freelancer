@@ -10,5 +10,8 @@ public interface MilestoneService {
     Milestone update(Milestone milestone);
     Milestone findById(long id);
     Milestone deleteById(long id);
+    Milestone depositFund(long id);
+    Milestone releaseFund(long id);
+    Milestone returnFund(long id);
     Page<Milestone> getAll(ListParams params);
 }

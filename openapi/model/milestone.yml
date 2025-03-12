@@ -22,6 +22,9 @@ MilestoneDto:
     status:
       type: string
       enum: [PENDING, TERMINATED, IN_PROGRESS, REVIEWING, FINISHED]
+    fundStatus:
+      type: string
+      enum: [NONE, DEPOSITED, RELEASED, REFUNDED]
     isVisible:
       type: boolean
     deliverables:

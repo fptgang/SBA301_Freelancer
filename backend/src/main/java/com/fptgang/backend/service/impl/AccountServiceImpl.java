@@ -23,12 +23,20 @@ import java.time.LocalDateTime;
 @Service
 @Slf4j
 public class AccountServiceImpl implements AccountService {
-    private final String DEFAULT_ESCROW_EMAIL = "escrow@hirable.com";
     private final AccountRepos accountRepos;
     private final PasswordEncoderConfig passwordEncoderConfig;
 
-    @Value("${hirable.account.escrow:0}")
+    @Value("${hirable.account.escrow.id:0}")
     private Long escrowAccountId;
+
+    @Value("${hirable.account.escrow.email:escrow@hirable.com}")
+    private String escrowAccountEmail;
+
+    @Value("${hirable.account.escrow.name:Escrow}")
+    private String escrowAccountName;
+
+    @Value("${hirable.account.escrow.password:1}")
+    private String escrowAccountPassword;
 
     @Autowired
     public AccountServiceImpl(AccountRepos accountRepos, PasswordEncoderConfig passwordEncoderConfig) {
@@ -53,7 +61,7 @@ public class AccountServiceImpl implements AccountService {
             }
         }
 
-        var acc = accountRepos.findByEmail(DEFAULT_ESCROW_EMAIL).orElse(null);
+        var acc = accountRepos.findByEmail(escrowAccountEmail).orElse(null);
         if (acc != null) {
             escrowAccountId = acc.getAccountId();
             log.info("Picked account id {} as escrow", escrowAccountId);
@@ -61,13 +69,13 @@ public class AccountServiceImpl implements AccountService {
         }
 
         acc = Account.builder()
-                .email(DEFAULT_ESCROW_EMAIL)
+                .email(escrowAccountEmail)
                 .isVerified(true)
                 .verifiedAt(LocalDateTime.now())
-                .firstName("Escrow")
+                .firstName(escrowAccountName)
                 .role(Role.ADMIN)
                 .balance(BigDecimal.ZERO)
-                .password(passwordEncoderConfig.bcryptEncoder().encode("1"))
+                .password(passwordEncoderConfig.bcryptEncoder().encode(escrowAccountPassword))
                 .build();
         acc = accountRepos.save(acc);
         escrowAccountId = acc.getAccountId();
@@ -77,6 +85,11 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public long getEscrowAccountId() {
         return escrowAccountId;
+    }
+
+    @Override
+    public Account getEscrowAccountReference() {
+        return accountRepos.getReferenceById(escrowAccountId);
     }
 
     @Override

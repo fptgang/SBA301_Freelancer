@@ -51,6 +51,10 @@ public class Milestone {
     @Column(nullable = false)
     private MilestoneStatus status;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private FundStatus fundStatus;
+
     @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT TRUE")
     @Builder.Default
     private Boolean isVisible = true;
@@ -76,5 +80,12 @@ public class Milestone {
         IN_PROGRESS,
         REVIEWING,
         FINISHED
+    }
+
+    public enum FundStatus {
+        NONE,
+        DEPOSITED,
+        RELEASED,
+        REFUNDED
     }
 }

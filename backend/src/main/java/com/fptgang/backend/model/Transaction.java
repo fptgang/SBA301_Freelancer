@@ -34,6 +34,7 @@ public class Transaction {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "milestone_id")
+    @Nullable
     private Milestone milestone;
 
     @Column(nullable = false, precision = 10, scale = 2)
