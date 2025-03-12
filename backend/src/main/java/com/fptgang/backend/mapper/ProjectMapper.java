@@ -1,42 +1,53 @@
 package com.fptgang.backend.mapper;
 
 import com.fptgang.backend.api.model.ProjectDto;
+import com.fptgang.backend.api.model.ProjectStatusDto;
+import com.fptgang.backend.api.model.ProjectTerminationReasonDto;
 import com.fptgang.backend.model.Project;
-import com.fptgang.backend.repository.AccountRepos;
-import com.fptgang.backend.repository.ProjectCategoryRepos;
-import com.fptgang.backend.repository.ProjectRepos;
+import com.fptgang.backend.repository.*;
 import com.fptgang.backend.util.DateTimeUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
 @Component
 public class ProjectMapper extends BaseMapper<ProjectDto, Project> {
-    private final ProjectRepos projectRepos;
     private final ProjectCategoryRepos projectCategoryRepos;
+    private final ProjectCategoryMapper projectCategoryMapper;
     private final AccountRepos accountRepos;
-    private final ProjectSkillMapper projectSkillMapper;
-    private final MilestoneMapper milestoneMapper;
-    private final MessageMapper messageMapper;
-    private final FileMapper fileMapper;
     private final AccountMapper accountMapper;
-    private final ReportMapper reportMapper;
+    private final FileRepos fileRepos;
+    private final FileMapper fileMapper;
+    private final ContractRepos contractRepos;
+    private final ContractMapper contractMapper;
+    private final MilestoneRepos milestoneRepos;
+    private final MilestoneMapper milestoneMapper;
+    private final ProjectSkillMapper projectSkillMapper;
 
-    public ProjectMapper(ProjectRepos projectRepos, ProjectCategoryRepos projectCategoryRepos, AccountRepos accountRepos,
-                         ProjectSkillMapper projectSkillMapper, MilestoneMapper milestoneMapper, MessageMapper messageMapper,
-                         FileMapper fileMapper, AccountMapper accountMapper, ReportMapper reportMapper) {
-        this.projectRepos = projectRepos;
+    public ProjectMapper(ProjectCategoryRepos projectCategoryRepos,
+                         ProjectCategoryMapper projectCategoryMapper,
+                         AccountRepos accountRepos,
+                         AccountMapper accountMapper,
+                         FileRepos fileRepos,
+                         FileMapper fileMapper,
+                         ContractRepos contractRepos,
+                         ContractMapper contractMapper,
+                         MilestoneRepos milestoneRepos,
+                         MilestoneMapper milestoneMapper,
+                         ProjectSkillMapper projectSkillMapper) {
         this.projectCategoryRepos = projectCategoryRepos;
+        this.projectCategoryMapper = projectCategoryMapper;
         this.accountRepos = accountRepos;
-        this.projectSkillMapper = projectSkillMapper;
-        this.milestoneMapper = milestoneMapper;
-        this.messageMapper = messageMapper;
-        this.fileMapper = fileMapper;
         this.accountMapper = accountMapper;
-        this.reportMapper = reportMapper;
+        this.fileRepos = fileRepos;
+        this.fileMapper = fileMapper;
+        this.contractRepos = contractRepos;
+        this.contractMapper = contractMapper;
+        this.milestoneRepos = milestoneRepos;
+        this.milestoneMapper = milestoneMapper;
+        this.projectSkillMapper = projectSkillMapper;
     }
 
     @Override
@@ -47,43 +58,46 @@ public class ProjectMapper extends BaseMapper<ProjectDto, Project> {
 
         Project entity = new Project();
         entity.setProjectId(dto.getProjectId());
+        if (dto.getProjectCategory() != null && dto.getProjectCategory().getProjectCategoryId() != null) {
+            entity.setCategory(projectCategoryRepos.getReferenceById(dto.getProjectCategory().getProjectCategoryId()));
+        }
+        if (dto.getClient() != null && dto.getClient().getAccountId() != null) {
+            entity.setClient(accountRepos.getReferenceById(dto.getClient().getAccountId()));
+        }
+        if (dto.getStaff() != null && dto.getStaff().getAccountId() != null) {
+            entity.setStaff(accountRepos.getReferenceById(dto.getStaff().getAccountId()));
+        }
         entity.setTitle(dto.getTitle());
         entity.setDescription(dto.getDescription());
-        entity.setStatus(Project.ProjectStatus.valueOf(dto.getStatus().getValue()));
-        entity.setIsVisible(dto.getIsVisible());
-        entity.setCreatedAt(DateTimeUtil.fromOffsetToLocal(dto.getCreatedAt()));
-        entity.setUpdatedAt(DateTimeUtil.fromOffsetToLocal(dto.getUpdatedAt()));
+        entity.setStatus(dto.getStatus() == null ? null :
+                Project.ProjectStatus.valueOf(dto.getStatus().getValue()));
+        entity.setStartDate(DateTimeUtil.fromOffsetToLocal(dto.getStartDate()));
         entity.setMaxBudget(dto.getMaxBudget());
         entity.setMinBudget(dto.getMinBudget());
-
-        if (dto.getProjectCategoryId() != null) {
-            entity.setCategory(projectCategoryRepos.findByProjectCategoryId(dto.getProjectCategoryId())
-                    .orElseThrow(() -> new IllegalArgumentException("Project category not found")));
+        entity.setCreatedAt(DateTimeUtil.fromOffsetToLocal(dto.getCreatedAt()));
+        entity.setUpdatedAt(DateTimeUtil.fromOffsetToLocal(dto.getUpdatedAt()));
+        entity.setIsVisible(dto.getIsVisible());
+        entity.setFiles(dto.getFiles() == null ? null : dto.getFiles().stream()
+                .filter(e -> e.getFileId() != null)
+                .map(e -> fileRepos.getReferenceById(e.getFileId()))
+                .toList());
+        if (dto.getContract() != null && dto.getContract().getContractId() != null) {
+            entity.setContract(contractRepos.getReferenceById(dto.getContract().getContractId()));
         }
-
-        if (dto.getClient() != null) {
-            entity.setClient(accountRepos.findByAccountId(dto.getClient().getAccountId())
-                    .orElseThrow(() -> new IllegalArgumentException("Client not found")));
+        if (dto.getMilestones() != null) {
+            entity.setMilestones(dto.getMilestones().stream()
+                    .filter(e -> e.getMilestoneId() != null)
+                    .map(e -> milestoneRepos.getReferenceById(e.getMilestoneId()))
+                    .collect(Collectors.toList()));
         }
-
         if (dto.getRequiredSkills() != null) {
             entity.setRequiredSkills(dto.getRequiredSkills().stream()
                     .map(projectSkillMapper::toEntity)
                     .collect(Collectors.toList()));
         }
-
-        if (dto.getMilestones() != null) {
-            entity.setMilestones(dto.getMilestones().stream()
-                    .map(milestoneMapper::toEntity)
-                    .collect(Collectors.toList()));
-        }
-
-        if (dto.getFiles() != null) {
-            entity.setFiles(dto.getFiles().stream()
-                    .map(fileMapper::toEntity)
-                    .collect(Collectors.toList()));
-        }
-
+        entity.setTerminationReason(dto.getTerminationReason() == null ? null :
+                Project.TerminationReason.valueOf(dto.getTerminationReason().name()));
+        entity.setToTerminate(dto.getToTerminate());
         return entity;
     }
 
@@ -96,56 +110,44 @@ public class ProjectMapper extends BaseMapper<ProjectDto, Project> {
         ProjectDto dto = new ProjectDto();
         dto.setProjectId(entity.getProjectId());
         dto.setTitle(entity.getTitle());
-        dto.setDescription(entity.getDescription());
-        dto.setStatus(ProjectDto.StatusEnum.fromValue(entity.getStatus().name()));
         dto.setIsVisible(entity.getIsVisible());
+
+        if (level == DetailLevel.REFERENCE) {
+            dto.setProjectCategory(projectCategoryMapper.toDTO(entity.getCategory(), DetailLevel.REFERENCE));
+            return dto; // Those fields are enough
+        }
+
+        dto.setProjectCategory(projectCategoryMapper.toDTO(entity.getCategory(), DetailLevel.FULL));
+        dto.setClient(accountMapper.toDTO(entity.getClient(), DetailLevel.REFERENCE));
+        dto.setStaff(accountMapper.toDTO(entity.getStaff(), DetailLevel.REFERENCE));
+        dto.setStatus(ProjectStatusDto.valueOf(entity.getStatus().name()));
+        dto.setStartDate(DateTimeUtil.fromLocalToOffset(entity.getStartDate()));
         dto.setMaxBudget(entity.getMaxBudget());
         dto.setMinBudget(entity.getMinBudget());
         dto.setCreatedAt(DateTimeUtil.fromLocalToOffset(entity.getCreatedAt()));
         dto.setUpdatedAt(DateTimeUtil.fromLocalToOffset(entity.getUpdatedAt()));
+        dto.setTerminationReason(entity.getTerminationReason() == null ? null :
+                ProjectTerminationReasonDto.valueOf(entity.getTerminationReason().name()));
+        dto.setToTerminate(entity.getToTerminate());
 
-        if (entity.getCategory() != null) {
-            dto.setProjectCategoryId(entity.getCategory().getProjectCategoryId());
-        }
-
-        if (entity.getClient() != null) {
-            dto.setClient(accountMapper.toResponseDto(
-                    accountMapper.toDTO(entity.getClient(), DetailLevel.REFERENCE)));
-        }
-
-        if (level == DetailLevel.REFERENCE) {
-            return dto; // those fields are enough
-        }
-
-
-        if (entity.getRequiredSkills() != null) {
-            dto.setRequiredSkills(entity.getRequiredSkills().stream()
-                    .map(skill -> projectSkillMapper.toDTO(skill, DetailLevel.REFERENCE))
-                    .collect(Collectors.toList()));
-        }
-
-        if (entity.getMilestones() != null) {
-            dto.setMilestones(entity.getMilestones().stream()
-                    .map(milestone -> milestoneMapper.toDTO(milestone, DetailLevel.REFERENCE))
-                    .collect(Collectors.toList()));
-        }
-
-        if (entity.getFiles() != null) {
-            dto.setFiles(entity.getFiles().stream()
-                    .map(file -> fileMapper.toDTO(file, DetailLevel.REFERENCE))
-                    .collect(Collectors.toList()));
-        }
         if (level == DetailLevel.SUMMARY) {
-            return dto; // those fields are enough
+            return dto; // Those fields are enough
         }
-        if(entity.getMessages() != null) {
-            dto.setLatestMessage(messageMapper.toDTO(entity.getMessages().getLast(), DetailLevel.REFERENCE));
-        }
-        if(entity.getReports() != null) {
-            dto.setReports(entity.getReports().stream()
-                    .map(report -> reportMapper.toDTO(report, DetailLevel.REFERENCE))
-                    .collect(Collectors.toList()));
-        }
+
+        dto.setDescription(entity.getDescription());
+        dto.setFiles(entity.getFiles().stream()
+                .map(f -> fileMapper.toDTO(f, DetailLevel.FULL))
+                .toList());
+        dto.setContract(contractMapper.toDTO(entity.getContract(), DetailLevel.FULL));
+        dto.setMilestones(entity.getMilestones().stream()
+                .map(milestone -> milestoneMapper.toDTO(milestone, DetailLevel.FULL))
+                .collect(Collectors.toList()));
+        dto.setRequiredSkills(entity.getRequiredSkills().stream()
+                .map(skill -> projectSkillMapper.toDTO(skill, DetailLevel.FULL))
+                .collect(Collectors.toList()));
+        dto.setRequiredSkills(entity.getRequiredSkills().stream()
+                .map((s) -> projectSkillMapper.toDTO(s, DetailLevel.FULL))
+                .collect(Collectors.toList()));
 
         return dto;
     }

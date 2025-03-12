@@ -1,0 +1,3 @@
+PaymentMethodDto:
+  type: string
+  enum: [ VNPAY, INTERNAL_WALLET ]

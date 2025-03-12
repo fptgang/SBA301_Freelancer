@@ -1,0 +1,3 @@
+MilestoneFundStatusDto:
+  type: string
+  enum: [NONE, DEPOSITED, RELEASED, REFUNDED]

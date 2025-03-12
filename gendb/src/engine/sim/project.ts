@@ -169,9 +169,9 @@ export class projectPool {
       const matchesStatus = project.status === ProjectStatus.IN_PROGRESS;
       const isVisible = project.is_visible;
       const hasContract = !!project.contract;
-      const hasActiveMilestone = !!project.activeMilestone;
       const toTerminate = project.to_terminate;
-      return matchesDate && matchesStatus && isVisible && hasContract && hasActiveMilestone && toTerminate;
+      const afterMilestoneDeadline = !!project.activeMilestone && date >= project.activeMilestone?.deadline;
+      return matchesDate && matchesStatus && isVisible && hasContract && toTerminate && afterMilestoneDeadline;
     });
     if (eligibleProjects.length === 0) return null;
 
@@ -210,6 +210,7 @@ export const createProject = (date: Date) => {
     status: ProjectStatus.OPEN,
     is_visible: true,
     client_id: client.account_id,
+    staff_id: null,
     project_category_id: PickCategory().project_category_id,
     client: client,
     min_budget: minBudget,

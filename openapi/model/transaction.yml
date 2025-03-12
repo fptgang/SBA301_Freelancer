@@ -4,27 +4,24 @@ TransactionDto:
     transactionId:
       type: integer
       format: int64
-    fromAccountId:
-      type: integer
-      format: int64
-    toAccountId:
-      type: integer
-      format: int64
+    fromAccount:
+      $ref: 'account.yml#/AccountDto'
+    toAccount:
+      $ref: 'account.yml#/AccountDto'
+    milestone:
+      $ref: 'milestone.yml#/MilestoneDto'
     amount:
       type: number
       format: double
     type:
-      type: string
-      enum: [DEPOSIT, WITHDRAWAL, ESCROW_DEPOSIT, ESCROW_RELEASE, ESCROW_REFUND]
+      $ref: 'transaction-type.yml#/TransactionTypeDto'
     status:
-      type: string
-      enum: [PENDING, SUCCESS, FAILED]
-    milestoneId:
-      type: integer
-      format: int64
+      $ref: 'transaction-status.yml#/TransactionStatusDto'
     paymentMethod:
-      type: string
-      enum: [ VNPAY, INTERNAL_WALLET ]
+      $ref: 'payment-method.yml#/PaymentMethodDto'
     createdAt:
+      type: string
+      format: date-time
+    updatedAt:
       type: string
       format: date-time

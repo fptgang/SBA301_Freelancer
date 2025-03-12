@@ -1,0 +1,25 @@
+put:
+  summary: Terminate a project
+  operationId: terminateProject
+  security:
+    - bearerAuth: []
+  parameters:
+    - name: projectId
+      in: path
+      required: true
+      schema:
+        type: integer
+        format: int64
+  responses:
+    '200':
+      description: The operation was success
+      content:
+        application/json:
+          schema:
+            $ref: '../../../model/project.yml#/ProjectDto'
+    '400':
+      description: The operation was failed
+      content:
+        application/json:
+          schema:
+            $ref: '../../../component/error.yml#/ErrorResponse'

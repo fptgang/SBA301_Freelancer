@@ -1,0 +1,3 @@
+MilestoneStatusDto:
+  type: string
+  enum: [PENDING, TERMINATED, IN_PROGRESS, REVIEWING, FINISHED]

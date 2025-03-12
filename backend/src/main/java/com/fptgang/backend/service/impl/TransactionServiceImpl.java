@@ -9,6 +9,7 @@ import com.fptgang.backend.service.TransactionService;
 import com.fptgang.backend.service.params.ListParams;
 import com.fptgang.backend.util.EntityUtil;
 import com.google.common.base.Preconditions;
+import jakarta.persistence.criteria.Predicate;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -166,6 +167,17 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     public Page<Transaction> getAll(ListParams params) {
         var spec = params.<Transaction>toSpec();
+        return transactionRepos.findAll(spec, params.getPageable());
+    }
+
+    @Override
+    public Page<Transaction> getAllInvolvingAccount(ListParams params, Long accountId) {
+        var spec = params.<Transaction>toSpec();
+        spec = spec.and((root, query, criteriaBuilder) -> {
+            Predicate fromPredicate = criteriaBuilder.equal(root.get("fromAccount").get("accountId"), accountId);
+            Predicate toPredicate = criteriaBuilder.equal(root.get("toAccount").get("accountId"), accountId);
+            return criteriaBuilder.or(fromPredicate, toPredicate);
+        });
         return transactionRepos.findAll(spec, params.getPageable());
     }
 }

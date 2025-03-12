@@ -80,7 +80,7 @@ public class AccountController implements AccountsApi {
         }
         var res = accountService
                 .getAll(params.build())
-                .map((account) -> accountMapper.toDTO(account, DetailLevel.FULL));
+                .map((account) -> accountMapper.toDTO(account, DetailLevel.SUMMARY));
         return OpenApiHelper.respondPage(res, GetAccounts200Response.class);
     }
 

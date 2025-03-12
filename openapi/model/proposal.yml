@@ -7,20 +7,17 @@ ProposalDto:
     projectId:
       type: integer
       format: int64
-    freelancerId:
-      type: integer
-      format: int64
+    freelancer:
+      $ref: 'account.yml#/AccountDto'
     notes:
       type: string
     budget:
       type: number
       format: double
     status:
-      type: string
-      enum: [PENDING,EXPIRED,WITHDRAWN, ACCEPTED, REJECTED]
-    contractId:
-      type: integer
-      format: int64
+      $ref: 'proposal-status.yml#/ProposalStatusDto'
+    contract:
+      $ref: 'contract.yml#/ContractDto'
     createdAt:
       type: string
       format: date-time

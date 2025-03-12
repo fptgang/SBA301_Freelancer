@@ -5,7 +5,7 @@ MessageDto:
       type: integer
       format: int64
     sender:
-      $ref: 'account-response.yml#/AccountResponseDto'
+      $ref: 'account.yml#/AccountDto'
     projectId:
       type: integer
       format: int64

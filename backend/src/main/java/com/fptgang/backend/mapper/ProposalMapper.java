@@ -1,28 +1,37 @@
 package com.fptgang.backend.mapper;
 
 import com.fptgang.backend.api.model.ProposalDto;
+import com.fptgang.backend.api.model.ProposalStatusDto;
 import com.fptgang.backend.model.Proposal;
+import com.fptgang.backend.model.Proposal.ProposalStatus;
 import com.fptgang.backend.repository.AccountRepos;
+import com.fptgang.backend.repository.FileRepos;
 import com.fptgang.backend.repository.ProjectRepos;
-import com.fptgang.backend.repository.ProposalRepos;
 import com.fptgang.backend.util.DateTimeUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import java.util.Optional;
-
 @Slf4j
 @Component
 public class ProposalMapper extends BaseMapper<ProposalDto, Proposal> {
-    private final ProposalRepos proposalRepos;
     private final ProjectRepos projectRepos;
     private final AccountRepos accountRepos;
+    private final AccountMapper accountMapper;
+    private final ContractMapper.Converter contractConverter;
+    private final FileRepos fileRepos;
     private final FileMapper fileMapper;
 
-    public ProposalMapper(ProposalRepos proposalRepos, ProjectRepos projectRepos, AccountRepos accountRepos, FileMapper fileMapper) {
-        this.proposalRepos = proposalRepos;
+    public ProposalMapper(ProjectRepos projectRepos,
+                          AccountRepos accountRepos,
+                          AccountMapper accountMapper,
+                          ContractMapper.Converter contractConverter,
+                          FileRepos fileRepos,
+                          FileMapper fileMapper) {
         this.projectRepos = projectRepos;
         this.accountRepos = accountRepos;
+        this.accountMapper = accountMapper;
+        this.contractConverter = contractConverter;
+        this.fileRepos = fileRepos;
         this.fileMapper = fileMapper;
     }
 
@@ -34,22 +43,22 @@ public class ProposalMapper extends BaseMapper<ProposalDto, Proposal> {
 
         Proposal entity = new Proposal();
         entity.setProposalId(dto.getProposalId());
-
         if (dto.getProjectId() != null) {
-            entity.setProject(projectRepos.findByProjectId(dto.getProjectId())
-                    .orElseThrow(() -> new IllegalArgumentException("Project not found")));
+            entity.setProject(projectRepos.getReferenceById(dto.getProjectId()));
         }
-
-        if (dto.getFreelancerId() != null) {
-            entity.setFreelancer(accountRepos.findByAccountId(dto.getFreelancerId())
-                    .orElseThrow(() -> new IllegalArgumentException("Freelancer not found")));
+        if (dto.getFreelancer() != null && dto.getFreelancer().getAccountId() != null) {
+            entity.setFreelancer(accountRepos.getReferenceById(dto.getFreelancer().getAccountId()));
         }
-
-        entity.setStatus(mapRoleEntity(dto.getStatus()));
         entity.setNotes(dto.getNotes());
-        entity.setFiles(fileMapper.toEntities(dto.getFiles()));
+        entity.setBudget(dto.getBudget());
+        entity.setStatus(dto.getStatus() == null ? null : ProposalStatus.valueOf(dto.getStatus().name()));
+        entity.setContract(contractConverter.toEntity(dto.getContract()));
         entity.setCreatedAt(DateTimeUtil.fromOffsetToLocal(dto.getCreatedAt()));
         entity.setUpdatedAt(DateTimeUtil.fromOffsetToLocal(dto.getUpdatedAt()));
+        entity.setFiles(dto.getFiles() == null ? null : dto.getFiles().stream()
+                .filter(e -> e.getFileId() != null)
+                .map(e -> fileRepos.getReferenceById(e.getFileId()))
+                .toList());
 
         return entity;
     }
@@ -63,52 +72,14 @@ public class ProposalMapper extends BaseMapper<ProposalDto, Proposal> {
         ProposalDto dto = new ProposalDto();
         dto.setProposalId(entity.getProposalId());
         dto.setProjectId(entity.getProject().getProjectId());
-        dto.setFreelancerId(entity.getFreelancer().getAccountId());
-        dto.setStatus(mapRoleDto(entity.getStatus()));
+        dto.setFreelancer(accountMapper.toDTO(entity.getFreelancer(), DetailLevel.REFERENCE));
         dto.setNotes(entity.getNotes());
-        dto.setFiles(entity.getFiles().stream().map((file -> {
-            return fileMapper.toDTO(file, DetailLevel.REFERENCE);
-        }
-        )).toList());
+        dto.setBudget(entity.getBudget());
+        dto.setStatus(ProposalStatusDto.valueOf(entity.getStatus().name()));
+        dto.setContract(contractConverter.toDTO(entity.getContract(), DetailLevel.FULL));
         dto.setCreatedAt(DateTimeUtil.fromLocalToOffset(entity.getCreatedAt()));
         dto.setUpdatedAt(DateTimeUtil.fromLocalToOffset(entity.getUpdatedAt()));
-
-        if (level == DetailLevel.REFERENCE) {
-            return dto; // those fields are enough
-        }
-
-        if (level == DetailLevel.SUMMARY) {
-            return dto; // those fields are enough
-        }
-
-        // Add more fields if needed for other detail levels
-
+        dto.setFiles(entity.getFiles().stream().map((file -> fileMapper.toDTO(file, DetailLevel.FULL))).toList());
         return dto;
-    }
-
-    public ProposalDto.StatusEnum mapRoleDto(Proposal.ProposalStatus roleEnum) {
-        if (roleEnum == null) {
-            return null;
-        }
-
-        return switch (roleEnum) {
-            case PENDING -> ProposalDto.StatusEnum.PENDING;
-            case ACCEPTED -> ProposalDto.StatusEnum.ACCEPTED;
-            case REJECTED -> ProposalDto.StatusEnum.REJECTED;
-            default -> throw new IllegalArgumentException("Unknown RoleEnum: " + roleEnum);
-        };
-    }
-
-    public Proposal.ProposalStatus mapRoleEntity(ProposalDto.StatusEnum roleEnum) {
-        if (roleEnum == null) {
-            return null;
-        }
-
-        return switch (roleEnum) {
-            case PENDING -> Proposal.ProposalStatus.PENDING;
-            case ACCEPTED -> Proposal.ProposalStatus.ACCEPTED;
-            case REJECTED -> Proposal.ProposalStatus.REJECTED;
-            default -> throw new IllegalArgumentException("Unknown RoleEnum: " + roleEnum);
-        };
     }
 }

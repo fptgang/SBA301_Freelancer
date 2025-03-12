@@ -1,21 +1,21 @@
 package com.fptgang.backend.mapper;
 
 import com.fptgang.backend.api.model.AccountDto;
-import com.fptgang.backend.api.model.AccountResponseDto;
 import com.fptgang.backend.model.Account;
 import com.fptgang.backend.model.Role;
-import com.fptgang.backend.repository.AccountRepos;
+import com.fptgang.backend.repository.ProfileRepos;
 import com.fptgang.backend.util.DateTimeUtil;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import java.util.Optional;
 
 @Component
 public class AccountMapper extends BaseMapper<AccountDto, Account> {
+    private final ProfileRepos profileRepos;
+    private final ProfileMapper.Converter profileConverter;
 
-    @Autowired
-    private AccountRepos accountRepos;
+    public AccountMapper(ProfileRepos profileRepos, ProfileMapper.Converter profileConverter) {
+        this.profileRepos = profileRepos;
+        this.profileConverter = profileConverter;
+    }
 
     @Override
     public Account toEntity(AccountDto dto) {
@@ -23,133 +23,54 @@ public class AccountMapper extends BaseMapper<AccountDto, Account> {
             return null;
         }
 
-        Optional<Account> existingAccountOptional = accountRepos.findByAccountId(dto.getAccountId() == null ? 0 : dto.getAccountId());
-
-        if (existingAccountOptional.isPresent() && dto.getAccountId() != null) {
-            Account existingAccount = existingAccountOptional.get();
-            existingAccount.setEmail(dto.getEmail() != null ? dto.getEmail() : existingAccount.getEmail());
-            existingAccount.setFirstName(dto.getFirstName() != null ? dto.getFirstName() : existingAccount.getFirstName());
-            existingAccount.setLastName(dto.getLastName() != null ? dto.getLastName() : existingAccount.getLastName());
-            existingAccount.setAvatarUrl(dto.getAvatarUrl() != null ? dto.getAvatarUrl() : existingAccount.getAvatarUrl());
-            existingAccount.setBalance(dto.getBalance() != null ? dto.getBalance() : existingAccount.getBalance());
-            existingAccount.setRole(dto.getRole() != null ? mapRoleAccount(dto.getRole()) : existingAccount.getRole());
-            existingAccount.setIsVerified(dto.getIsVerified() != null ? dto.getIsVerified() : existingAccount.getIsVerified());
-            existingAccount.setVerifiedAt(dto.getVerifiedAt() != null ? DateTimeUtil.fromOffsetToLocal(dto.getVerifiedAt()) : existingAccount.getVerifiedAt());
-            existingAccount.setIsVisible(dto.getIsVisible() != null ? dto.getIsVisible() : existingAccount.getIsVisible());
-
-            return existingAccount;
-        } else {
-
-            Account entity = new Account();
-//            entity.setAccountId(dto.getAccountId());  // This is not necessary
-            if (dto.getEmail() != null) {
-                entity.setEmail(dto.getEmail());
-            }
-            if (dto.getFirstName() != null) {
-                entity.setFirstName(dto.getFirstName());
-            }
-            if (dto.getLastName() != null) {
-                entity.setLastName(dto.getLastName());
-            }
-            if (dto.getAvatarUrl() != null) {
-                entity.setAvatarUrl(dto.getAvatarUrl());
-            }
-            if (dto.getBalance() != null) {
-                entity.setBalance(dto.getBalance());
-            }
-            if (dto.getRole() != null) {
-                entity.setRole(mapRoleAccount(dto.getRole())); // Enum conversion
-            }
-            if (dto.getVerifiedAt() != null) {
-                entity.setVerifiedAt(DateTimeUtil.fromOffsetToLocal(dto.getVerifiedAt()));
-            }
-            if (dto.getIsVerified() != null) {
-                entity.setIsVerified(dto.getIsVerified());
-            }
-            if (dto.getIsVisible() != null) {
-                entity.setIsVisible(dto.getIsVisible());
-            }
-
-
-            return entity;
+        Account account = new Account();
+        account.setAccountId(dto.getAccountId());
+        account.setEmail(dto.getEmail());
+        account.setFirstName(dto.getFirstName());
+        account.setLastName(dto.getLastName());
+        account.setPassword(dto.getPassword());
+        account.setAvatarUrl(dto.getAvatarUrl());
+        account.setBalance(dto.getBalance());
+        account.setRole(dto.getRole() == null ? null : Role.valueOf(dto.getRole().name()));
+        account.setIsVerified(dto.getIsVerified());
+        account.setIsVisible(dto.getIsVisible());
+        account.setVerifiedAt(dto.getVerifiedAt() != null ? DateTimeUtil.fromOffsetToLocal(dto.getVerifiedAt()) : null);
+        account.setCreatedAt(dto.getCreatedAt() != null ? DateTimeUtil.fromOffsetToLocal(dto.getCreatedAt()) : null);
+        account.setUpdatedAt(dto.getUpdatedAt() != null ? DateTimeUtil.fromOffsetToLocal(dto.getUpdatedAt()) : null);
+        if (dto.getProfile() != null && dto.getProfile().getProfileId() != null) {
+            account.setProfile(profileRepos.getReferenceById(dto.getProfile().getProfileId()));
         }
 
+        return account;
     }
 
     @Override
-    public AccountDto toDTO(Account entity,DetailLevel detailLevel) {
+    public AccountDto toDTO(Account entity, DetailLevel level) {
         if (entity == null) {
             return null;
         }
 
         AccountDto dto = new AccountDto();
-        // Set nullable and non-nullable fields
         dto.setAccountId(entity.getAccountId());
-        dto.setEmail(entity.getEmail());
         dto.setFirstName(entity.getFirstName());
         dto.setLastName(entity.getLastName());
-        dto.setPassword(entity.getPassword());
-        dto.setRole(mapRoleAccountDto(entity.getRole()));
+        dto.setAvatarUrl(entity.getAvatarUrl());
         dto.setIsVerified(entity.getIsVerified());
         dto.setIsVisible(entity.getIsVisible());
-        // Nullable fields
-        dto.setAvatarUrl(entity.getAvatarUrl());
+
+        if (level == DetailLevel.REFERENCE) {
+            return dto; // those fields are enough
+        }
+
+        dto.setEmail(entity.getEmail());
+        //dto.setPassword(entity.getPassword());
         dto.setBalance(entity.getBalance());
+        dto.setRole(entity.getRole() == null ? null : AccountDto.RoleEnum.valueOf(entity.getRole().name()));
         dto.setVerifiedAt(DateTimeUtil.fromLocalToOffset(entity.getVerifiedAt()));
         dto.setCreatedAt(DateTimeUtil.fromLocalToOffset(entity.getCreatedAt()));
         dto.setUpdatedAt(DateTimeUtil.fromLocalToOffset(entity.getUpdatedAt()));
+        dto.setProfile(profileConverter.toDTO(entity.getProfile(), DetailLevel.FULL));
 
         return dto;
-    }
-
-    public Role mapRoleAccount(AccountDto.RoleEnum roleEnum) {
-        if (roleEnum == null) {
-            return null; // Or a default Role, e.g., Role.CLIENT
-        }
-
-        switch (roleEnum) {
-            case ADMIN:
-                return Role.ADMIN;
-            case STAFF:
-                return Role.STAFF;
-            case CLIENT:
-                return Role.CLIENT;
-            case FREELANCER:
-                return Role.FREELANCER;
-            default:
-                throw new IllegalArgumentException("Unknown RoleEnum: " + roleEnum);
-        }
-    }
-
-    public AccountDto.RoleEnum mapRoleAccountDto(Role roleEnum) {
-        if (roleEnum == null) {
-            return null; // Or a default Role, e.g., Role.CLIENT
-        }
-        switch (roleEnum) {
-            case ADMIN:
-                return AccountDto.RoleEnum.ADMIN;
-            case STAFF:
-                return AccountDto.RoleEnum.STAFF;
-            case CLIENT:
-                return AccountDto.RoleEnum.CLIENT;
-            case FREELANCER:
-                return AccountDto.RoleEnum.FREELANCER;
-            default:
-                throw new IllegalArgumentException("Unknown RoleEnum: " + roleEnum);
-        }
-    }
-
-    public AccountResponseDto toResponseDto(AccountDto accountDto)
-    {
-        AccountResponseDto responseDto = new AccountResponseDto();
-        responseDto.setAvatarUrl(accountDto.getAvatarUrl());
-        responseDto.setAccountId(accountDto.getAccountId());
-        responseDto.setEmail(accountDto.getEmail());
-        responseDto.setFirstName(accountDto.getFirstName());
-        responseDto.setLastName(accountDto.getLastName());
-        responseDto.setIsVerified(accountDto.getIsVerified());
-        responseDto.setCreatedAt(accountDto.getCreatedAt());
-        return responseDto;
-
     }
 }

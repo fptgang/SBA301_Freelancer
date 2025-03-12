@@ -1,0 +1,17 @@
+ProjectDeadlineExtendDto:
+  type: object
+  properties:
+    projectId:
+      type: integer
+      format: int64
+    milestones:
+      type: array
+      items:
+        type: object
+        properties:
+          milestoneId:
+            type: integer
+            format: int64
+          newDeadline:
+            type: string
+            format: date-time

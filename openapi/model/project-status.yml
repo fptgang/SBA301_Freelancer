@@ -1,0 +1,3 @@
+ProjectStatusDto:
+  type: string
+  enum: [OPEN, PAUSED, IN_PROGRESS, TERMINATED, FINISHED]

@@ -1,7 +1,6 @@
 package com.fptgang.backend.controller;
 
 import com.fptgang.backend.api.controller.MessagesApi;
-import com.fptgang.backend.api.model.AccountResponseDto;
 import com.fptgang.backend.api.model.GetMessages200Response;
 import com.fptgang.backend.api.model.MessageDto;
 import com.fptgang.backend.api.model.Pageable;
@@ -67,10 +66,6 @@ public class MessageController implements MessagesApi {
         return ResponseEntity.ok().build();
     }
 
-    @Override
-    public ResponseEntity<MessageDto> getMessageById(Long messageId) {
-        return ResponseEntity.ok(messageMapper.toDTO(messageService.findByMessageId(messageId), DetailLevel.FULL));
-    }
 
     @Override
     public ResponseEntity<MessageDto> updateMessage(Long messageId, MessageDto messageDto) {

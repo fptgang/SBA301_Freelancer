@@ -46,7 +46,7 @@ export class Project {
   updated_at: Date | null;
   project_category_id: number;
   client_id: number;
-  staff_id: number;
+  staff_id: number | null;
 
   // not dumpable
   client: Account;
@@ -70,7 +70,7 @@ export class Project {
     this.updated_at = data.updated_at ? new Date(data.updated_at) : null;
     this.project_category_id = data.project_category_id || 0;
     this.client_id = data.client_id || 0;
-    this.staff_id = data.staff_id || 0;
+    this.staff_id = data.staff_id || null;
 
     this.client = data.client || {} as Account;
     this.project_skills = data.project_skills || [];
@@ -97,7 +97,7 @@ export class Project {
         project.updated_at ? `'${project.updated_at.toISOString().slice(0, 19)}.000000'` : 'NULL',
         project.project_category_id,
         project.client_id,
-        project.staff_id
+        project.staff_id ? project.staff_id : 'NULL'
       ].join(', ')})`;
     }).join(',\n');
 

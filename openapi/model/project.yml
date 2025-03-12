@@ -4,27 +4,35 @@ ProjectDto:
     projectId:
       type: integer
       format: int64
-    projectCategoryId:
-      type: integer
-      format: int64
+    projectCategory:
+      $ref: 'project-category.yml#/ProjectCategoryDto'
     client:
-      $ref: 'account-response.yml#/AccountResponseDto'
-    staffId:
-      type: integer
-      format: int64
-    proposalCount:
-      type: integer
-      format: int32
+      $ref: 'account.yml#/AccountDto'
+    staff:
+      $ref: 'account.yml#/AccountDto'
+    title:
+      type: string
+    description:
+      type: string
+    status:
+      $ref: 'project-status.yml#/ProjectStatusDto'
+    startDate:
+      type: string
+      format: date-time
     minBudget:
       type: number
       format: double
     maxBudget:
       type: number
       format: double
-    milestones:
-      type: array
-      items:
-        $ref: 'milestone.yml#/MilestoneDto'
+    createdAt:
+      type: string
+      format: date-time
+    updatedAt:
+      type: string
+      format: date-time
+    isVisible:
+      type: boolean
     reports:
       type: array
       items:
@@ -33,34 +41,17 @@ ProjectDto:
       type: array
       items:
         $ref: 'file.yml#/FileDto'
-    title:
-      type: string
-    description:
-      type: string
+    contract:
+      $ref: 'contract.yml#/ContractDto'
+    milestones:
+      type: array
+      items:
+        $ref: 'milestone.yml#/MilestoneDto'
     requiredSkills:
       type: array
       items:
         $ref: 'project-skill.yml#/ProjectSkillDto'
-    status:
-      type: string
-      enum: [OPEN, PAUSED, IN_PROGRESS, TERMINATED, FINISHED]
-    termination_reasons:
-      type: string
-      enum: [CONTRACT_UNSIGNED, CLIENT_REQUEST_TERMINATION, STAFF_DECISION, OTHER]
-    to_terminate:
+    terminationReason:
+      $ref: 'project-termination-reason.yml#/ProjectTerminationReasonDto'
+    toTerminate:
       type: boolean
-    contract:
-      $ref: 'contract.yml#/ContractDto'
-    latestMessage:
-      $ref: 'message.yml#/MessageDto'
-    isVisible:
-      type: boolean
-    startDate:
-      type: string
-      format: date-time
-    createdAt:
-      type: string
-      format: date-time
-    updatedAt:
-      type: string
-      format: date-time

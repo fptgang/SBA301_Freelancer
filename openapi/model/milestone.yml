@@ -20,21 +20,15 @@ MilestoneDto:
       type: string
       format: date-time
     status:
-      type: string
-      enum: [PENDING, TERMINATED, IN_PROGRESS, REVIEWING, FINISHED]
+      $ref: 'milestone-status.yml#/MilestoneStatusDto'
     fundStatus:
-      type: string
-      enum: [NONE, DEPOSITED, RELEASED, REFUNDED]
+      $ref: 'milestone-fund-status.yml#/MilestoneFundStatusDto'
     isVisible:
       type: boolean
     deliverables:
       type: array
       items:
         $ref: 'file.yml#/FileDto'
-    transactions:
-      type: array
-      items:
-        $ref: 'transaction.yml#/TransactionDto'
     createdAt:
       type: string
       format: date-time

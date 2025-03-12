@@ -1,12 +1,11 @@
 FileDto:
   type: object
   properties:
-    uploaderId:
-      type: integer
-      format: int64
     fileId:
       type: integer
       format: int64
+    uploader:
+      $ref: 'account.yml#/AccountDto'
     fileName:
       type: string
     fileUrl:
@@ -33,5 +32,3 @@ FileDto:
     milestoneId:
       type: integer
       format: int64
-    description:
-      type: string

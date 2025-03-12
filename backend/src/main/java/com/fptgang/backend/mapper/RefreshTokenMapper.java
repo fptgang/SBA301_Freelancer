@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 public class RefreshTokenMapper extends BaseMapper<RefreshTokenDto, RefreshToken> {
+
     private final AccountRepos accountRepos;
 
     public RefreshTokenMapper(AccountRepos accountRepos) {
@@ -22,42 +23,32 @@ public class RefreshTokenMapper extends BaseMapper<RefreshTokenDto, RefreshToken
             return null;
         }
 
-        RefreshToken entity = new RefreshToken();
-        entity.setRefreshTokenId(dto.getRefreshTokenId());
-
+        RefreshToken refreshToken = new RefreshToken();
+        refreshToken.setRefreshTokenId(dto.getRefreshTokenId());
         if (dto.getAccountId() != null) {
-            entity.setAccount(accountRepos.findByAccountId(dto.getAccountId())
-                    .orElseThrow(() -> new IllegalArgumentException("Account not found")));
+            refreshToken.setAccount(accountRepos.getReferenceById(dto.getAccountId()));
+        }
+        refreshToken.setToken(dto.getToken());
+        refreshToken.setIpAddress(dto.getIpAddress());
+        refreshToken.setSessionId(dto.getSessionId());
+        refreshToken.setClientInfo(dto.getClientInfo());
+        if (dto.getExpiryDate() != null) {
+            refreshToken.setExpiryDate(dto.getExpiryDate().toInstant());
         }
 
-        entity.setToken(dto.getToken());
-        entity.setExpiryDate(dto.getExpiryDate().toInstant());
-
-        return entity;
+        return refreshToken;
     }
 
     @Override
     public RefreshTokenDto toDTO(RefreshToken entity, DetailLevel level) {
-        if (entity == null) {
-            return null;
-        }
-
         RefreshTokenDto dto = new RefreshTokenDto();
         dto.setRefreshTokenId(entity.getRefreshTokenId());
         dto.setAccountId(entity.getAccount().getAccountId());
         dto.setToken(entity.getToken());
+        dto.setIpAddress(entity.getIpAddress());
+        dto.setSessionId(entity.getSessionId());
+        dto.setClientInfo(entity.getClientInfo());
         dto.setExpiryDate(DateTimeUtil.fromInstantToOffset(entity.getExpiryDate()));
-
-        if (level == DetailLevel.REFERENCE) {
-            return dto; // those fields are enough
-        }
-
-        if (level == DetailLevel.SUMMARY) {
-            return dto; // those fields are enough
-        }
-
-        // Add more fields if needed for other detail levels
-
         return dto;
     }
 }

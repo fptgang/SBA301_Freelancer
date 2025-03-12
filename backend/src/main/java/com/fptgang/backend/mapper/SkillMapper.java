@@ -45,16 +45,6 @@ public class SkillMapper extends BaseMapper<SkillDto, Skill> {
         dto.setCreatedAt(DateTimeUtil.fromLocalToOffset(entity.getCreatedAt()));
         dto.setUpdatedAt(DateTimeUtil.fromLocalToOffset(entity.getUpdatedAt()));
 
-        if (level == DetailLevel.REFERENCE) {
-            return dto; // those fields are enough
-        }
-
-        if (level == DetailLevel.SUMMARY) {
-            return dto; // those fields are enough
-        }
-
-        // Add more fields if needed for other detail levels
-
         return dto;
     }
 }

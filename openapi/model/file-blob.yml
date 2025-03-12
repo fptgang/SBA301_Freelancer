@@ -21,5 +21,3 @@ FileBlobDto:
     milestoneId:
       type: integer
       format: int64
-    description:
-      type: string

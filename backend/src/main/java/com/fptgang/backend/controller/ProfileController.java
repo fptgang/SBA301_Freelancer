@@ -29,22 +29,10 @@ public class ProfileController implements ProfilesApi {
         this.profileMapper = profileMapper;
     }
 
-
     @Override
     public ResponseEntity<ProfileDto> createProfile(ProfileDto profileDto) {
         var profile = profileMapper.toEntity(profileDto);
         return new ResponseEntity<>(profileMapper.toDTO(profileService.create(profile), DetailLevel.FULL), HttpStatus.OK);
-    }
-
-    @Override
-    public ResponseEntity<Void> deleteProfile(Long profileId) {
-        profileService.deleteById(profileId);
-        return new ResponseEntity<>(HttpStatus.OK);
-    }
-
-    @Override
-    public ResponseEntity<ProfileDto> getProfileById(Long profileId) {
-        return new ResponseEntity<>(profileMapper.toDTO(profileService.findByProfileId(profileId),DetailLevel.FULL), HttpStatus.OK);
     }
 
     @Override
@@ -59,7 +47,7 @@ public class ProfileController implements ProfilesApi {
                 .includeInvisible(includeInvisible);
         var res = profileService
                 .getAll(params.build())
-                .map(profile -> profileMapper.toDTO(profile, DetailLevel.REFERENCE));
+                .map(profile -> profileMapper.toDTO(profile, DetailLevel.SUMMARY));
         return OpenApiHelper.respondPage(res, GetProfiles200Response.class);
     }
 

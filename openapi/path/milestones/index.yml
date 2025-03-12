@@ -1,0 +1,25 @@
+post:
+  summary: Create a milestone
+  operationId: createMilestone
+  security:
+    - bearerAuth: []
+  requestBody:
+    description: Milestone to create
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../../model/request/milestone-create.yml#/MilestoneCreateDto'
+  responses:
+    '200':
+      description: The operation was successful
+      content:
+        application/json:
+          schema:
+            $ref: '../../model/milestone.yml#/MilestoneDto'
+    '400':
+      description: The operation failed
+      content:
+        application/json:
+          schema:
+            $ref: '../../component/error.yml#/ErrorResponse'

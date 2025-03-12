@@ -3,6 +3,7 @@ package com.fptgang.backend.controller;
 import com.fptgang.backend.api.controller.MilestonesApi;
 import com.fptgang.backend.api.model.*;
 import com.fptgang.backend.mapper.DetailLevel;
+import com.fptgang.backend.mapper.MilestoneCreateMapper;
 import com.fptgang.backend.mapper.MilestoneMapper;
 import com.fptgang.backend.model.Role;
 import com.fptgang.backend.service.MilestoneService;
@@ -22,48 +23,33 @@ public class MilestoneController implements MilestonesApi {
 
     private final MilestoneMapper milestoneMapper;
     private final MilestoneService milestoneService;
+    private final MilestoneCreateMapper milestoneCreateMapper;
 
-    public MilestoneController(MilestoneMapper milestoneMapper, MilestoneService milestoneService) {
+    public MilestoneController(MilestoneMapper milestoneMapper,
+                               MilestoneService milestoneService,
+                               MilestoneCreateMapper milestoneCreateMapper) {
         this.milestoneMapper = milestoneMapper;
         this.milestoneService = milestoneService;
+        this.milestoneCreateMapper = milestoneCreateMapper;
     }
 
     @Override
-    public ResponseEntity<MilestoneDto> createMilestone(MilestoneDto milestoneDto) {
-        var milestone = milestoneMapper.toEntity(milestoneDto);
-        return new ResponseEntity<>(milestoneMapper.toDTO(milestoneService.create(milestone), DetailLevel.FULL), HttpStatus.OK);
+    public ResponseEntity<MilestoneDto> createMilestone(MilestoneCreateDto milestoneCreateDto) {
+        return MilestonesApi.super.createMilestone(milestoneCreateDto);
     }
 
     @Override
-    public ResponseEntity<Void> deleteMilestone(Long milestoneId) {
-        milestoneService.deleteById(milestoneId);
-        return new ResponseEntity<>(HttpStatus.OK);
+    public ResponseEntity<MilestoneDto> submitMilestoneWork(Long milestoneId) {
+        return MilestonesApi.super.submitMilestoneWork(milestoneId);
     }
 
     @Override
-    public ResponseEntity<MilestoneDto> getMilestoneById(Long milestoneId) {
-        return new ResponseEntity<>(milestoneMapper.toDTO(milestoneService.findById(milestoneId),DetailLevel.FULL), HttpStatus.OK);
+    public ResponseEntity<MilestoneDto> confirmMilestoneWork(Long milestoneId) {
+        return MilestonesApi.super.confirmMilestoneWork(milestoneId);
     }
 
     @Override
-    public ResponseEntity<GetMilestones200Response> getMilestones(Pageable pageable, String filter, String search) {
-        log.info("Getting milestone");
-        var includeInvisible = SecurityUtil.hasPermission(Role.ADMIN);
-        var params = ListParams.builder()
-                .pageable(OpenApiHelper.toPageable(pageable))
-                .search(search)
-                .filter(filter)
-                .includeInvisible(includeInvisible);
-        var res = milestoneService
-                .getAll(params.build())
-                .map((milestone) -> milestoneMapper.toDTO(milestone, DetailLevel.REFERENCE));
-        return OpenApiHelper.respondPage(res, GetMilestones200Response.class);
-    }
-
-    @Override
-    public ResponseEntity<MilestoneDto> updateMilestone(Long milestoneId, MilestoneDto milestoneDto) {
-        milestoneDto.setMilestoneId(milestoneId); // Override milestoneId
-
-        return new ResponseEntity<>(milestoneMapper.toDTO(milestoneService.update(milestoneMapper.toEntity(milestoneDto)),DetailLevel.FULL), HttpStatus.OK);
+    public ResponseEntity<MilestoneDto> depositMilestoneFund(Long milestoneId) {
+        return MilestonesApi.super.depositMilestoneFund(milestoneId);
     }
 }
