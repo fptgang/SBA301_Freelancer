@@ -24,18 +24,21 @@ import {
   DollarOutlined,
   CalendarOutlined,
   TagOutlined,
+  EyeInvisibleOutlined,
+  EyeOutlined,
 } from "@ant-design/icons";
 import { formatCurrency } from "../../../utils/formatter";
 import ClientCreateButton from "./client-create";
 import { useGetIdentity } from "@refinedev/core";
 import { AccountDto } from "../../../../generated";
+import { store } from "../../../store";
 
 const { Text, Title } = Typography;
 const { Option } = Select;
 
 const ClientList = () => {
   const [searchText, setSearchText] = useState("");
-  const me = useGetIdentity<AccountDto>();
+  const me = store?.getState()?.auth?.account;
 
   const { tableProps, filters, setFilters } = useTable({
     resource: "projects",
@@ -44,7 +47,7 @@ const ClientList = () => {
         {
           field: "client.accountId",
           operator: "eq",
-          value: me.data?.accountId,
+          value: me?.accountId,
         },
         {
           field: "status",
@@ -227,14 +230,12 @@ const ClientList = () => {
             dataIndex="actions"
             render={(_, record) => (
               <Space>
-                <ShowButton
-                  size="small"
-                  recordItemId={record.projectId}
-                  hideText
-                  resource="projects"
-                  meta={{
-                    route: "/client/projects/:id",
-                  }}
+                <Button
+                  type="link"
+                  icon={<EyeOutlined />}
+                  color="default"
+                  style={{ border: "1px solid #f0f0f0" }}
+                  href={`/client/projects/${record.projectId}`}
                 />
               </Space>
             )}

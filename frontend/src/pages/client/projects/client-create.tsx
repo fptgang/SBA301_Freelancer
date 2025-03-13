@@ -31,7 +31,7 @@ const ClientCreateButton = () => {
 
   // Fetch categories for select
   const { selectProps: categorySelectProps } = useSelect({
-    resource: "projectCategories",
+    resource: "project-categories",
     optionLabel: "name",
     optionValue: "projectCategoryId",
   });

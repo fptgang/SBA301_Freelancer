@@ -4,12 +4,17 @@ import com.fptgang.backend.api.controller.TransactionsApi;
 import com.fptgang.backend.api.model.*;
 import com.fptgang.backend.mapper.DetailLevel;
 import com.fptgang.backend.mapper.TransactionMapper;
+import com.fptgang.backend.model.Account;
 import com.fptgang.backend.model.Role;
+import com.fptgang.backend.model.Transaction;
+import com.fptgang.backend.service.PaymentService;
 import com.fptgang.backend.service.TransactionService;
+import com.fptgang.backend.service.impl.PaymentServiceImpl;
 import com.fptgang.backend.service.params.ListParams;
 import com.fptgang.backend.util.OpenApiHelper;
 import com.fptgang.backend.util.SecurityUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -20,15 +25,29 @@ import org.springframework.web.bind.annotation.RestController;
 public class TransactionController implements TransactionsApi {
     private final TransactionService transactionService;
     private final TransactionMapper transactionMapper;
+    private final PaymentService paymentService;
 
-    public TransactionController(TransactionService transactionService, TransactionMapper transactionMapper) {
+    public TransactionController(TransactionService transactionService, TransactionMapper transactionMapper, PaymentService paymentService) {
         this.transactionService = transactionService;
         this.transactionMapper = transactionMapper;
+        this.paymentService = paymentService;
     }
 
+
+
     @Override
-    public ResponseEntity<String> createDeposit(DepositDto depositDto) {
-        return TransactionsApi.super.createDeposit(depositDto);
+    public ResponseEntity<CreateDeposit200Response> createDeposit(DepositDto depositDto) {
+        depositDto.setAccountId(SecurityUtil.getCurrentUserId());
+        Transaction transaction = transactionService.create(
+                transactionMapper.toEntity(depositDto)
+        );
+        String paymentLink = paymentService.generatePaymentLinkForDeposit(
+                Transaction.PaymentMethod.VNPAY,
+                depositDto.getAmount(),
+                transaction.getTransactionId()
+        );  
+
+        return new ResponseEntity<>( new CreateDeposit200Response().paymentRedirectUrl(paymentLink), HttpStatus.OK);
     }
 
     @Override

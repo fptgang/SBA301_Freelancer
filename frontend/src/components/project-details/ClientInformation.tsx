@@ -42,7 +42,11 @@ export const ClientInformation: React.FC<ClientInformationProps> = ({
           </Typography.Text>
           <Typography.Title level={4} style={{ margin: 0 }}>
             $
-            {project?.estimateBudget
+            {project?.minBudget
+              ?.toFixed(0)
+              .replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
+            - $
+            {project?.maxBudget
               ?.toFixed(0)
               .replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
           </Typography.Title>

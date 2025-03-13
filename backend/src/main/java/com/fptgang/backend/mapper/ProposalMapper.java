@@ -1,10 +1,12 @@
 package com.fptgang.backend.mapper;
 
+import com.fptgang.backend.api.model.ProposalCreateDto;
 import com.fptgang.backend.api.model.ProposalDto;
 import com.fptgang.backend.api.model.ProposalStatusDto;
 import com.fptgang.backend.model.Proposal;
 import com.fptgang.backend.model.Proposal.ProposalStatus;
 import com.fptgang.backend.repository.AccountRepos;
+import com.fptgang.backend.repository.ContractRepos;
 import com.fptgang.backend.repository.FileRepos;
 import com.fptgang.backend.repository.ProjectRepos;
 import com.fptgang.backend.util.DateTimeUtil;
@@ -20,19 +22,21 @@ public class ProposalMapper extends BaseMapper<ProposalDto, Proposal> {
     private final ContractMapper.Converter contractConverter;
     private final FileRepos fileRepos;
     private final FileMapper fileMapper;
+    private final ContractRepos contractRepos;
 
     public ProposalMapper(ProjectRepos projectRepos,
                           AccountRepos accountRepos,
                           AccountMapper accountMapper,
                           ContractMapper.Converter contractConverter,
                           FileRepos fileRepos,
-                          FileMapper fileMapper) {
+                          FileMapper fileMapper, ContractRepos contractRepos) {
         this.projectRepos = projectRepos;
         this.accountRepos = accountRepos;
         this.accountMapper = accountMapper;
         this.contractConverter = contractConverter;
         this.fileRepos = fileRepos;
         this.fileMapper = fileMapper;
+        this.contractRepos = contractRepos;
     }
 
     @Override
@@ -52,13 +56,31 @@ public class ProposalMapper extends BaseMapper<ProposalDto, Proposal> {
         entity.setNotes(dto.getNotes());
         entity.setBudget(dto.getBudget());
         entity.setStatus(dto.getStatus() == null ? null : ProposalStatus.valueOf(dto.getStatus().name()));
-        entity.setContract(contractConverter.toEntity(dto.getContract()));
+        entity.setContract(dto.getContractId() == null ? null : contractRepos.getReferenceById(dto.getContractId()));
         entity.setCreatedAt(DateTimeUtil.fromOffsetToLocal(dto.getCreatedAt()));
         entity.setUpdatedAt(DateTimeUtil.fromOffsetToLocal(dto.getUpdatedAt()));
         entity.setFiles(dto.getFiles() == null ? null : dto.getFiles().stream()
                 .filter(e -> e.getFileId() != null)
                 .map(e -> fileRepos.getReferenceById(e.getFileId()))
                 .toList());
+
+        return entity;
+    }
+
+    public Proposal toEntity(ProposalCreateDto dto) {
+        if (dto == null) {
+            return null;
+        }
+
+        Proposal entity = new Proposal();
+        if (dto.getProjectId() != null) {
+            entity.setProject(projectRepos.getReferenceById(dto.getProjectId()));
+        }
+        if (dto.getFreelancerId() != null) {
+            entity.setFreelancer(accountRepos.getReferenceById(dto.getFreelancerId()));
+        }
+        entity.setNotes(dto.getNotes());
+        entity.setBudget(dto.getBudget());
 
         return entity;
     }
@@ -76,7 +98,7 @@ public class ProposalMapper extends BaseMapper<ProposalDto, Proposal> {
         dto.setNotes(entity.getNotes());
         dto.setBudget(entity.getBudget());
         dto.setStatus(ProposalStatusDto.valueOf(entity.getStatus().name()));
-        dto.setContract(contractConverter.toDTO(entity.getContract(), DetailLevel.FULL));
+        dto.setContractId(entity.getContract()!=null?entity.getContract().getContractId():null);
         dto.setCreatedAt(DateTimeUtil.fromLocalToOffset(entity.getCreatedAt()));
         dto.setUpdatedAt(DateTimeUtil.fromLocalToOffset(entity.getUpdatedAt()));
         dto.setFiles(entity.getFiles().stream().map((file -> fileMapper.toDTO(file, DetailLevel.FULL))).toList());

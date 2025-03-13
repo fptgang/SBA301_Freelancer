@@ -11,8 +11,7 @@ public interface ProjectService {
     Project update(Project account);
     Project findByProjectId(long projectId);
     void deleteById(long projectId);
-    void acceptProjectProposal(long projectId, long proposalId);
-    void rejectProjectProposal(long projectId, long proposalId);
+
     Page<Project> getProjectsSortedByLatestMessage(Pageable pageable,Boolean includeInvisible,Long participantId);
     Page<Project> getAll(ListParams params);
 

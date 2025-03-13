@@ -20,14 +20,14 @@ import {
   TagOutlined,
   InfoCircleOutlined,
 } from "@ant-design/icons";
-import { ProjectDtoStatusEnum } from "../../../../generated";
+import { ProjectStatusDto } from "../../../../generated";
 
 export const ProjectsEdit: React.FC = () => {
   const { formProps, saveButtonProps, queryResult } = useForm();
   const projectsData = queryResult?.data?.data;
 
   const { selectProps: projectCategorySelectProps } = useSelect({
-    resource: "projectCategories",
+    resource: "project-categories",
     optionLabel: "name",
     optionValue: "projectCategoryId",
   });
@@ -130,7 +130,7 @@ export const ProjectsEdit: React.FC = () => {
                   className="w-full"
                   showSearch
                 >
-                  {Object.values(ProjectDtoStatusEnum).map((status) => (
+                  {Object.values(ProjectStatusDto).map((status) => (
                     <Select.Option key={status} value={status}>
                       {status
                         .toLowerCase()

@@ -3,33 +3,25 @@ import React, { useState } from "react";
 import {
   ProjectCategoryDto,
   ProjectDto,
-  ProjectDtoStatusEnum,
+  ProjectStatusDto,
 } from "../../../../generated";
 import { HttpError, useList, useOne } from "@refinedev/core";
 import { renderSkillTags } from "./renderSkillTags";
 import { Link, useNavigate } from "react-router";
 import { ArrowsAltOutlined, WindowsFilled } from "@ant-design/icons";
+import { store } from "../../../store";
 
 const ProjectDrawer: React.FC<{
   project: ProjectDto;
   isDrawerVisible: any;
   onClose: any;
 }> = ({ project, isDrawerVisible, onClose }) => {
-  const [activeTab, setActiveTab] = useState("completed jobs");
-  const {
-    data: categoryData,
-    isLoading: categoryLoading,
-    isError: categoryError,
-  } = useOne<ProjectCategoryDto, HttpError>({
-    resource: "projectCategories",
-    id: project?.projectCategoryId,
-  });
   const navigate = useNavigate();
 
-  const role = localStorage.getItem("role");
+  const role = store.getState().auth.account?.role;
 
   const onApplyJobClick = () => {
-    if (project.status === ProjectDtoStatusEnum.Open) {
+    if (project.status === ProjectStatusDto.Open) {
       navigate(`/projects/${project.projectId}`);
     } else {
       // Could add a message here that the project is no longer open
@@ -97,7 +89,7 @@ const ProjectDrawer: React.FC<{
         Project Category
       </Typography.Title>
       <Typography.Text>
-        {categoryLoading ? "Loading..." : categoryData?.data?.name}
+        {project.projectCategory?.name || "Unknown"}
       </Typography.Text>
       {/* <Typography.Text>{categoryData?.data?.name}</Typography.Text> */}
 

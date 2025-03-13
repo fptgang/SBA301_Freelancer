@@ -6,7 +6,7 @@ import {
   UserOutlined,
 } from "@ant-design/icons";
 import { useNavigate } from "react-router";
-import { AccountDto, ProjectDto, ProjectDtoStatusEnum } from "../../../generated";
+import { AccountDto, ProjectDto, ProjectStatusDto } from "../../../generated";
 import FreelancerCreateProposalButton from "../../pages/freelancer/proposal/freelancer-create";
 import { useGetIdentity } from "@refinedev/core";
 
@@ -16,7 +16,11 @@ interface ActionCardProps {
   role: string | null;
 }
 
-export const ActionCard: React.FC<ActionCardProps> = ({ project, role, freelancerId }) => {
+export const ActionCard: React.FC<ActionCardProps> = ({
+  project,
+  role,
+  freelancerId,
+}) => {
   const navigate = useNavigate();
 
   return (
@@ -33,13 +37,14 @@ export const ActionCard: React.FC<ActionCardProps> = ({ project, role, freelance
           >
             Post Similar Project
           </Button>
-        ) : project.status !== ProjectDtoStatusEnum.Open ? (
+        ) : project.status !== ProjectStatusDto.Open ? (
           <></>
         ) : role === "FREELANCER" ? (
           <>
-            <FreelancerCreateProposalButton project={project} freelancerId={
-                freelancerId
-            } />
+            <FreelancerCreateProposalButton
+              project={project}
+              freelancerId={freelancerId}
+            />
             <Typography.Text
               type="secondary"
               style={{ textAlign: "center", display: "block" }}
@@ -59,14 +64,18 @@ export const ActionCard: React.FC<ActionCardProps> = ({ project, role, freelance
         )}
 
         {role === "CLIENT" ||
-          (project.status === ProjectDtoStatusEnum.Open && (
+          (project.status === ProjectStatusDto.Open && (
             <Divider style={{ margin: "16px 0" }} />
           ))}
         <Space direction="vertical" size="small">
           <Typography.Text strong>Project Details</Typography.Text>
           <Typography.Text>
             <DollarOutlined /> <strong>Budget:</strong> $
-            {project?.estimateBudget
+            {project?.minBudget
+              ?.toFixed(0)
+              .replace(/\B(?=(\d{3})+(?!\d))/g, ",")}{" "}
+            - $
+            {project?.maxBudget
               ?.toFixed(0)
               .replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
           </Typography.Text>

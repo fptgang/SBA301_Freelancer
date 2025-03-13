@@ -38,8 +38,8 @@ public class ReportMapper extends BaseMapper<ReportDto, Report> {
         if (dto.getReporter() != null && dto.getReporter().getAccountId() != null) {
             entity.setReporter(accountRepos.getReferenceById(dto.getReporter().getAccountId()));
         }
-        if (dto.getProject() != null && dto.getProject().getProjectId() != null) {
-            entity.setProject(projectRepos.getReferenceById(dto.getProject().getProjectId()));
+        if (dto.getProjectId() != null) {
+            entity.setProject(projectRepos.getReferenceById(dto.getProjectId()));
         }
         entity.setReason(dto.getReason());
 
@@ -67,7 +67,7 @@ public class ReportMapper extends BaseMapper<ReportDto, Report> {
         }
 
         dto.setReporter(accountMapper.toDTO(entity.getReporter(), DetailLevel.REFERENCE));
-        dto.setProject(projectMapper.toDTO(entity.getProject(), DetailLevel.REFERENCE));
+        dto.setProjectId(entity.getProject().getProjectId());
         dto.setReason(entity.getReason());
         dto.setStatus(ReportDto.StatusEnum.valueOf(entity.getStatus().name()));
         dto.setCreatedAt(DateTimeUtil.fromLocalToOffset(entity.getCreatedAt()));
