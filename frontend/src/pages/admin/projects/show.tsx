@@ -64,7 +64,7 @@ export const ProjectsShow: React.FC = () => {
   const record = data?.data;
 
   const { data: categoryData, isLoading: categoryIsLoading } = useOne({
-    resource: "projectCategories",
+    resource: "project-categories",
     id: record?.projectCategoryId || "",
     queryOptions: {
       enabled: !!record,

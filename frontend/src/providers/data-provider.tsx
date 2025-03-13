@@ -201,7 +201,16 @@ export const dataProvider = (
     // TODO: send request to the API
     // const requestMethod = meta.method
     // const response = await httpClient[requestMethod](url, {});
+    url = `${apiUrl}/${url}`;
+    const response = await _httpClient.request({
+      url,
+      method,
+      data: payload,
+      headers: buildHeaders(meta?.headers),
+    });
 
-    return {} as any;
+    return {
+      data: response.data,
+    };
   },
 });

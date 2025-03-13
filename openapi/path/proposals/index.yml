@@ -27,3 +27,28 @@ get:
         application/json:
           schema:
             $ref: '../../component/error.yml#/ErrorResponse'
+post:
+  summary: Create a proposal
+  operationId: createProposal
+  security:
+    - bearerAuth: []
+  requestBody:
+    description: Proposal details
+    required: true
+    content:
+      application/json:
+          schema:
+            $ref: '../../model/request/proposal-create.yml#/ProposalCreateDto'
+  responses:
+    '200':
+      description: The operation was successful
+      content:
+          application/json:
+            schema:
+              $ref: '../../model/proposal.yml#/ProposalDto'
+    '400':
+      description: The operation failed
+      content:
+          application/json:
+            schema:
+              $ref: '../../component/error.yml#/ErrorResponse'

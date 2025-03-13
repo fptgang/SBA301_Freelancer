@@ -47,7 +47,7 @@ export const ProjectCategoriesList: React.FC = () => {
 
   // const { data: projectCategoryData, isLoading: projectCategoryIsLoading } =
   //   useMany({
-  //     resource: "projectCategories",
+  //     resource: "project-categories",
   //     ids: tableProps?.dataSource?.map((item) => item?.projectCategoryId) ?? [],
   //     queryOptions: {
   //       enabled: !!tableProps?.dataSource,
@@ -56,7 +56,7 @@ export const ProjectCategoriesList: React.FC = () => {
 
   useEffect(() => {
     return () => {
-      stompClient?.unsubscribe("resources/projectCategories");
+      stompClient?.unsubscribe("resources/project-categories");
     };
   }, []);
 
@@ -74,7 +74,7 @@ export const ProjectCategoriesList: React.FC = () => {
     <List
       headerButtons={[
         <RefreshButton key="refresh" className="mr-2" />,
-        <CreateButton resource="projectCategories" />,
+        <CreateButton resource="project-categories" />,
       ]}
     >
       <div className="mb-6">

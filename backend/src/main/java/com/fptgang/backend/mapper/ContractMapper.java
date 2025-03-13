@@ -3,6 +3,7 @@ package com.fptgang.backend.mapper;
 import com.fptgang.backend.api.model.ContractDto;
 import com.fptgang.backend.api.model.ContractStatusDto;
 import com.fptgang.backend.model.Contract;
+import com.fptgang.backend.model.Proposal;
 import com.fptgang.backend.repository.AccountRepos;
 import com.fptgang.backend.repository.FileRepos;
 import com.fptgang.backend.repository.ProjectRepos;
@@ -31,9 +32,12 @@ public class ContractMapper extends BaseMapper<ContractDto, Contract> {
         Contract entity = delegate.toEntity(dto);
 
         if (dto.getProposal() != null && dto.getProposal().getProposalId() != null) {
-            entity.setProposal(proposalRepos.getReferenceById(dto.getProposal().getProposalId()));
+            Proposal proposal = proposalRepos.getReferenceById(dto.getProposal().getProposalId());
+            entity.setProposal(proposal);
+            entity.setFreelancer(proposal.getFreelancer());
+            entity.setProject(proposal.getProject());
+            entity.setBudget(proposal.getBudget());
         }
-
         return entity;
     }
 

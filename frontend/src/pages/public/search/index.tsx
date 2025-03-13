@@ -74,7 +74,7 @@ const SearchPage = () => {
     isLoading: isCategoriesLoading,
     isError: isCategoriesError,
   } = useList<ProjectCategoryDto, HttpError>({
-    resource: "projectCategories",
+    resource: "project-categories",
     pagination: { pageSize: 100 },
   });
 

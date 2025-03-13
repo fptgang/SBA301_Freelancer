@@ -16,8 +16,9 @@ ProposalDto:
       format: double
     status:
       $ref: 'proposal-status.yml#/ProposalStatusDto'
-    contract:
-      $ref: 'contract.yml#/ContractDto'
+    contractId:
+      type: integer
+      format: int64
     createdAt:
       type: string
       format: date-time

@@ -10,4 +10,5 @@ import java.util.Optional;
 @Repository
 public interface ContractRepos extends JpaRepository<Contract, Long>, JpaSpecificationExecutor<Contract> {
     Optional<Contract> findByContractId(Long contractId);
+    Optional<Contract> findByProject_ProjectIdAndStatus(Long contractId, Contract.ContractStatus status);
 }

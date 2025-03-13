@@ -1,6 +1,10 @@
 import { Table, Tag } from "antd";
 import type { ColumnsType } from "antd/es/table";
-import { TransactionDto, TransactionDtoStatusEnum, TransactionDtoTypeEnum } from "../../../../../generated/models/TransactionDto";
+import { TransactionDto } from "../../../../../generated/models/TransactionDto";
+import {
+  TransactionStatusDto,
+  TransactionTypeDto,
+} from "../../../../../generated";
 
 const CURRENT_USER_ID = 0;
 
@@ -8,29 +12,53 @@ const CURRENT_USER_ID = 0;
 const transactions: TransactionDto[] = [
   {
     transactionId: 1,
-    fromAccountId: 0,
-    toAccountId: 2,
-    amount: 100.00,
-    type: TransactionDtoTypeEnum.Withdrawal,
-    status: TransactionDtoStatusEnum.Success,
+    fromAccount: {
+      accountId: 1,
+      firstName: "John",
+      lastName: "Doe",
+    },
+    toAccount: {
+      accountId: 2,
+      firstName: "Jane",
+      lastName: "Doe",
+    },
+    amount: 100.0,
+    type: TransactionTypeDto.Withdrawal,
+    status: TransactionStatusDto.Success,
     createdAt: new Date("2024-03-20T10:00:00Z"),
   },
   {
     transactionId: 2,
-    fromAccountId: 3,
-    toAccountId: 0,
-    amount: 250.00,
-    type: TransactionDtoTypeEnum.Deposit,
-    status: TransactionDtoStatusEnum.Success,
+    fromAccount: {
+      accountId: 1,
+      firstName: "John",
+      lastName: "Doe",
+    },
+    toAccount: {
+      accountId: 2,
+      firstName: "Jane",
+      lastName: "Doe",
+    },
+    amount: 250.0,
+    type: TransactionTypeDto.Deposit,
+    status: TransactionStatusDto.Success,
     createdAt: new Date("2024-03-19T15:30:00Z"),
   },
   {
     transactionId: 3,
-    fromAccountId: 0,
-    toAccountId: 4,
-    amount: 500.00,
-    type: TransactionDtoTypeEnum.EscrowDeposit,
-    status: TransactionDtoStatusEnum.Success,
+    fromAccount: {
+      accountId: 1,
+      firstName: "John",
+      lastName: "Doe",
+    },
+    toAccount: {
+      accountId: 2,
+      firstName: "Jane",
+      lastName: "Doe",
+    },
+    amount: 500.0,
+    type: TransactionTypeDto.EscrowDeposit,
+    status: TransactionStatusDto.Success,
     createdAt: new Date("2024-03-18T09:15:00Z"),
   },
 ];
@@ -47,7 +75,7 @@ const TransactionHistoryTable: React.FC = () => {
       title: "Type",
       key: "direction",
       render: (_, record) => {
-        const isOutgoing = record.fromAccountId === CURRENT_USER_ID;
+        const isOutgoing = record.fromAccount?.accountId === CURRENT_USER_ID;
         return (
           <Tag color={isOutgoing ? "volcano" : "green"}>
             {isOutgoing ? "Outgoing" : "Incoming"}
@@ -59,13 +87,13 @@ const TransactionHistoryTable: React.FC = () => {
       title: "Transaction Type",
       dataIndex: "type",
       key: "type",
-      render: (type: TransactionDtoTypeEnum) => {
+      render: (type: TransactionTypeDto) => {
         const typeColors = {
-          [TransactionDtoTypeEnum.Deposit]: "blue",
-          [TransactionDtoTypeEnum.Withdrawal]: "orange",
-          [TransactionDtoTypeEnum.EscrowDeposit]: "purple",
-          [TransactionDtoTypeEnum.EscrowRelease]: "cyan",
-          [TransactionDtoTypeEnum.Fee]: "red",
+          [TransactionTypeDto.Deposit]: "blue",
+          [TransactionTypeDto.Withdrawal]: "orange",
+          [TransactionTypeDto.EscrowDeposit]: "purple",
+          [TransactionTypeDto.EscrowRelease]: "cyan",
+          [TransactionTypeDto.EscrowRefund]: "red",
         };
         return <Tag color={typeColors[type]}>{type.replace(/_/g, " ")}</Tag>;
       },
@@ -75,7 +103,7 @@ const TransactionHistoryTable: React.FC = () => {
       dataIndex: "amount",
       key: "amount",
       render: (amount: number, record) => {
-        const isOutgoing = record.fromAccountId === CURRENT_USER_ID;
+        const isOutgoing = record.fromAccount?.accountId === CURRENT_USER_ID;
         return (
           <span style={{ color: isOutgoing ? "#ff4d4f" : "#52c41a" }}>
             {isOutgoing ? "-" : "+"}${amount.toFixed(2)}
@@ -87,8 +115,10 @@ const TransactionHistoryTable: React.FC = () => {
       title: "Status",
       dataIndex: "status",
       key: "status",
-      render: (status: TransactionDtoStatusEnum) => (
-        <Tag color={status === TransactionDtoStatusEnum.Success ? "success" : "error"}>
+      render: (status: TransactionStatusDto) => (
+        <Tag
+          color={status === TransactionStatusDto.Success ? "success" : "error"}
+        >
           {status}
         </Tag>
       ),

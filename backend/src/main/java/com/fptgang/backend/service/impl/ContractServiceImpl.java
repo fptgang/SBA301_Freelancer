@@ -1,12 +1,16 @@
 package com.fptgang.backend.service.impl;
 
+import com.fptgang.backend.model.Account;
 import com.fptgang.backend.model.Contract;
 import com.fptgang.backend.model.Milestone;
 import com.fptgang.backend.model.Project;
 import com.fptgang.backend.model.Role;
 import com.fptgang.backend.repository.ContractRepos;
 import com.fptgang.backend.repository.MilestoneRepos;
+
 import com.fptgang.backend.service.ContractService;
+import com.fptgang.backend.service.ProposalService;
+import com.fptgang.backend.service.TransactionService;
 import com.fptgang.backend.service.params.ListParams;
 import com.fptgang.backend.util.OpenApiHelper;
 import com.fptgang.backend.util.SecurityUtil;
@@ -21,6 +25,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+
 @Service
 public class ContractServiceImpl implements ContractService {
 
@@ -30,10 +35,26 @@ public class ContractServiceImpl implements ContractService {
     private MilestoneRepos milestoneRepos;
 
 
+
     @Override
     public Contract create(Contract contract) {
         contract.setContractId(null);
+        if (contractRepos.findByProject_ProjectIdAndStatus(contract.getProject().getProjectId(), Contract.ContractStatus.SIGNED).isPresent()) {
+            throw new IllegalArgumentException("Project already has a signed contract");
+        }
+        if (contractRepos.findByProject_ProjectIdAndStatus(contract.getProject().getProjectId(), Contract.ContractStatus.UNSIGNED).isPresent()) {
+            throw new IllegalArgumentException("Project already has an unsigned contract");
+        }
+        Account client = accountService.findById(contract.getProject().getClient().getAccountId());
+        Milestone firstMilestone = contract.getProject().getMilestones().getFirst();
+        BigDecimal firstMilestoneBudget = firstMilestone.getBudgetRatio().multiply(contract.getBudget());
+        if (client.getBalance().compareTo(firstMilestoneBudget) < 0) {
+            throw new IllegalArgumentException("Client does not have enough balance");
+        }
+        proposalService.acceptProposal(contract.getProposal().getProposalId(), SecurityUtil.requireCurrentUserId());
         contract.setStatus(Contract.ContractStatus.UNSIGNED);
+        firstMilestone.getProject().setContract(contract);
+        transactionService.createEscrowDeposit(firstMilestone);
         return contractRepos.save(contract);
     }
 
@@ -63,6 +84,7 @@ public class ContractServiceImpl implements ContractService {
                 "contractId");
         return contractRepos.findAll(spec,
                 params.getPageable());
+
     }
 
     @Override
@@ -92,6 +114,7 @@ public class ContractServiceImpl implements ContractService {
         }
 
         // Sign the contract
+
         contract.setStatus(Contract.ContractStatus.SIGNED);
         contract.setSignedAt(LocalDateTime.now());
 
@@ -126,6 +149,7 @@ public class ContractServiceImpl implements ContractService {
         if (SecurityUtil.requireCurrentUserId() != contract.getProject()
                                                            .getClient()
                                                            .getAccountId() ||
+
                 SecurityUtil.hasPermission(Role.STAFF) || SecurityUtil.hasPermission(Role.ADMIN)) {
             throw new IllegalArgumentException("You are not allowed to terminate this contract");
         }

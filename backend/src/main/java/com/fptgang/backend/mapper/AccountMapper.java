@@ -37,8 +37,8 @@ public class AccountMapper extends BaseMapper<AccountDto, Account> {
         account.setVerifiedAt(dto.getVerifiedAt() != null ? DateTimeUtil.fromOffsetToLocal(dto.getVerifiedAt()) : null);
         account.setCreatedAt(dto.getCreatedAt() != null ? DateTimeUtil.fromOffsetToLocal(dto.getCreatedAt()) : null);
         account.setUpdatedAt(dto.getUpdatedAt() != null ? DateTimeUtil.fromOffsetToLocal(dto.getUpdatedAt()) : null);
-        if (dto.getProfile() != null && dto.getProfile().getProfileId() != null) {
-            account.setProfile(profileRepos.getReferenceById(dto.getProfile().getProfileId()));
+        if (dto.getProfileId() != null) {
+            account.setProfile(profileRepos.getReferenceById(dto.getProfileId()));
         }
 
         return account;
@@ -57,19 +57,19 @@ public class AccountMapper extends BaseMapper<AccountDto, Account> {
         dto.setAvatarUrl(entity.getAvatarUrl());
         dto.setIsVerified(entity.getIsVerified());
         dto.setIsVisible(entity.getIsVisible());
+        dto.setEmail(entity.getEmail());
 
         if (level == DetailLevel.REFERENCE) {
             return dto; // those fields are enough
         }
 
-        dto.setEmail(entity.getEmail());
         //dto.setPassword(entity.getPassword());
         dto.setBalance(entity.getBalance());
         dto.setRole(entity.getRole() == null ? null : AccountDto.RoleEnum.valueOf(entity.getRole().name()));
         dto.setVerifiedAt(DateTimeUtil.fromLocalToOffset(entity.getVerifiedAt()));
         dto.setCreatedAt(DateTimeUtil.fromLocalToOffset(entity.getCreatedAt()));
         dto.setUpdatedAt(DateTimeUtil.fromLocalToOffset(entity.getUpdatedAt()));
-        dto.setProfile(profileConverter.toDTO(entity.getProfile(), DetailLevel.FULL));
+        dto.setProfileId(entity.getProfile() == null ? null : entity.getProfile().getProfileId());
 
         return dto;
     }

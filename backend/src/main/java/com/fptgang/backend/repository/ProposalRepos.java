@@ -9,8 +9,12 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 @Repository
 public interface ProposalRepos extends JpaRepository<Proposal, Long>, JpaSpecificationExecutor<Proposal> {
     Optional<Proposal> findByProposalId(Long proposalId);
+
+    List<Proposal> findByProject_ProjectId(Long projectId);
+    Optional<Proposal> findByProject_ProjectIdAndFreelancer_AccountIdAndStatus(Long projectId, Long freelancerId, Proposal.ProposalStatus status);
 }
