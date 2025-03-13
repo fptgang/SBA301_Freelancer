@@ -51,6 +51,11 @@ ProjectDto:
       type: array
       items:
         $ref: 'project-skill.yml#/ProjectSkillDto'
+    proposalCount:
+      type: integer
+      format: int64
+    latestMessage:
+      $ref: 'message.yml#/MessageDto'
     terminationReason:
       $ref: 'project-termination-reason.yml#/ProjectTerminationReasonDto'
     toTerminate:

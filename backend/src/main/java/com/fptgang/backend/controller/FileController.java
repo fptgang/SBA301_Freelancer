@@ -36,14 +36,14 @@ public class FileController implements FilesApi {
 
     @Override
     public ResponseEntity<FileDto> uploadFile(Long uploaderId, MultipartFile blob,
-                                              Boolean isVisible, Long messageId, Long proposalId, Long projectId, Long milestoneId) {
-        return FilesApi.super.uploadFile(uploaderId, blob, isVisible, messageId, proposalId, projectId, milestoneId);
+                                              Boolean isVisible, Long messageId, Long proposalId, Long projectId, Long milestoneId, Long contractId) {
+        return FilesApi.super.uploadFile(uploaderId, blob, isVisible, messageId, proposalId, projectId, milestoneId, contractId);
     }
 
     @Override
     public ResponseEntity<FileDto> updateFile(Long fileId, Long uploaderId, MultipartFile blob,
-                                              Boolean isVisible, Long messageId, Long proposalId, Long projectId, Long milestoneId) {
-        return FilesApi.super.updateFile(fileId, uploaderId, blob, isVisible, messageId, proposalId, projectId, milestoneId);
+                                              Boolean isVisible, Long messageId, Long proposalId, Long projectId, Long milestoneId, Long contractId) {
+        return FilesApi.super.updateFile(fileId, uploaderId, blob, isVisible, messageId, proposalId, projectId, milestoneId, contractId);
     }
 
     @Override

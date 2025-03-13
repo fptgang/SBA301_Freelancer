@@ -100,19 +100,15 @@ const RenderFilter: React.FC<{
               loading={isCategoriesLoading}
               onChange={(value) => {
                 setSelectedCategories(
-                  categoriesData?.data?.filter((c) =>
-                    value.includes(c.projectCategoryId)
-                  ) || []
+                  categoriesData?.data?.filter((c) => value.includes(c.name)) ||
+                    []
                 );
                 console.log(value);
               }}
-              value={selectedCategories.map((c) => c.projectCategoryId)}
+              value={selectedCategories.map((c) => c.name)}
             >
               {categoriesData?.data?.map((c) => (
-                <Select.Option
-                  key={c.projectCategoryId}
-                  value={c.projectCategoryId}
-                >
+                <Select.Option key={c.projectCategoryId} value={c.name}>
                   {c.name}
                 </Select.Option>
               ))}

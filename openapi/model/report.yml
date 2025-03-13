@@ -6,8 +6,9 @@ ReportDto:
       format: int64
     reporter:
       $ref: 'account.yml#/AccountDto'
-    project:
-      $ref: 'project.yml#/ProjectDto'
+    projectId:
+      type: integer
+      format: int64
     reason:
       type: string
     status:

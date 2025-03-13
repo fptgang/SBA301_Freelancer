@@ -53,11 +53,18 @@ components:
       $ref: 'model/profile-skill.yml#/ProfileSkillDto'
     ProjectSkillDto:
       $ref: 'model/project-skill.yml#/ProjectSkillDto'
-
+    ProjectStatusDto:
+      $ref: 'model/project-status.yml#/ProjectStatusDto'
     ProjectCreateDto:
       $ref: 'model/request/project-create.yml#/ProjectCreateDto'
     MilestoneCreateDto:
       $ref: 'model/request/milestone-create.yml#/MilestoneCreateDto'
+    TransactionStatusDto:
+      $ref: 'model/transaction-status.yml#/TransactionStatusDto'
+    TransactionTypeDto:
+      $ref: 'model/transaction-type.yml#/TransactionTypeDto'
+    ProposalStatusDto:
+      $ref: 'model/proposal-status.yml#/ProposalStatusDto'
 paths:
   /auth/me:
     $ref: 'path/auth/me.yml'
@@ -120,8 +127,6 @@ paths:
 
   /proposals:
     $ref: 'path/proposals/index.yml'
-  /proposals/{proposalId}/accept:
-    $ref: 'path/proposals/@id/accept.yml'
   /proposals/{proposalId}/reject:
     $ref: 'path/proposals/@id/reject.yml'
   /proposals/{proposalId}/withdraw:
@@ -129,6 +134,8 @@ paths:
 
   /contracts/{contractId}/sign:
     $ref: 'path/contracts/@id/sign.yml'
+  /contracts:
+    $ref: 'path/contracts/index.yml'
 
   /transactions:
     $ref: 'path/transactions/index.yml'

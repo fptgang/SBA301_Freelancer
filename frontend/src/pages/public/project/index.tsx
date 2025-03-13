@@ -3,7 +3,12 @@ import { useShow, useOne, useGetIdentity } from "@refinedev/core";
 import { HttpError } from "@refinedev/core";
 import { Col, Row, Spin, Typography } from "antd";
 import { useNavigate, useParams } from "react-router";
-import { ProjectDto, ProjectCategoryDto, AccountDto } from "../../../../generated";
+import {
+  ProjectDto,
+  ProjectCategoryDto,
+  AccountDto,
+  AccountDtoRoleEnum,
+} from "../../../../generated";
 
 import { ProjectDescription } from "../../../components/project-details/ProjectDescription";
 import { ProjectActivity } from "../../../components/project-details/ProjectActivity";
@@ -11,14 +16,15 @@ import { ProjectMilestones } from "../../../components/project-details/ProjectMi
 import { ClientInformation } from "../../../components/project-details/ClientInformation";
 import { ActionCard } from "../../../components/project-details/ActionCard";
 import { ProjectHeader } from "../../../components/project-details/ProjectHeader";
+import { store } from "../../../store";
 
 const ProjectDetailsScreen: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const { data: identity } = useGetIdentity<any>();
   const { query } = useShow<ProjectDto, HttpError>({
     resource: "projects",
     id,
   });
+  const user = store.getState().auth.account;
 
   const {
     data: projectData,
@@ -31,11 +37,10 @@ const ProjectDetailsScreen: React.FC = () => {
     isLoading: categoryLoading,
     isError: categoryError,
   } = useOne<ProjectCategoryDto, HttpError>({
-    resource: "projectCategories",
-    id: projectData?.data?.projectCategoryId,
+    resource: "project-categories",
+    id: projectData?.data?.projectCategory?.projectCategoryId,
   });
 
-  const role = localStorage.getItem("role");
   const project = projectData?.data;
 
   if (projectLoading || categoryLoading) {
@@ -82,7 +87,13 @@ const ProjectDetailsScreen: React.FC = () => {
         {/* Right Column */}
         <Col xs={24} md={8}>
           {project && <ClientInformation project={project} />}
-          {project && <ActionCard project={project} role={role} freelancerId={identity?.id} />}
+          {project && (
+            <ActionCard
+              project={project}
+              role={user?.role?.toString() || null}
+              freelancerId={user?.accountId}
+            />
+          )}
         </Col>
       </Row>
     </div>

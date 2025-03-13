@@ -3,13 +3,12 @@ import React, { useState } from "react";
 import {
   ProfileDto,
   ProjectDto,
-  ProjectDtoStatusEnum,
+  ProjectStatusDto,
 } from "../../../../generated";
 import { HttpError, useList } from "@refinedev/core";
 import { renderSkillTags } from "./renderSkillTags";
 import { Navigate, useNavigate } from "react-router";
-import { ad } from "react-router/dist/development/route-data-aSUFWnQ6";
-import { r } from "react-router/dist/development/fog-of-war-DLtn2OLr";
+import { store } from "../../../store";
 
 const ProfileDrawer: React.FC<{
   profile: ProfileDto;
@@ -34,14 +33,14 @@ const ProfileDrawer: React.FC<{
       {
         field: "status",
         operator: "in",
-        value: [ProjectDtoStatusEnum.Finished, ProjectDtoStatusEnum.InProgress],
+        value: [ProjectStatusDto.Finished, ProjectStatusDto.InProgress],
       },
     ],
   });
 
   const navigate = useNavigate();
 
-  const role = localStorage.getItem("role");
+  const role = store.getState().auth.account?.role;
   return (
     <Drawer
       title={`Profile Details: ${profile.account?.firstName} ${profile.account?.lastName}`}
@@ -104,7 +103,7 @@ const ProfileDrawer: React.FC<{
           tab={
             "Completed Jobs ( " +
             (projectsData?.data?.filter((p) => {
-              return p.status === ProjectDtoStatusEnum.Finished;
+              return p.status === ProjectStatusDto.Finished;
             }).length || 0) +
             " )"
           }
@@ -115,7 +114,7 @@ const ProfileDrawer: React.FC<{
               ? "Loading..."
               : projectsData?.data
                   ?.filter((p) => {
-                    return p.status === ProjectDtoStatusEnum.Finished;
+                    return p.status === ProjectStatusDto.Finished;
                   })
                   .map((p) => {
                     return (
@@ -130,7 +129,7 @@ const ProfileDrawer: React.FC<{
           tab={
             "In Progress ( " +
             (projectsData?.data?.filter((p) => {
-              return p.status === ProjectDtoStatusEnum.InProgress;
+              return p.status === ProjectStatusDto.InProgress;
             })?.length || 0) +
             " )"
           }
@@ -141,7 +140,7 @@ const ProfileDrawer: React.FC<{
               ? "Loading..."
               : projectsData?.data
                   ?.filter((p) => {
-                    return p.status === ProjectDtoStatusEnum.InProgress;
+                    return p.status === ProjectStatusDto.InProgress;
                   })
                   .map((p) => {
                     return (

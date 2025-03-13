@@ -23,7 +23,7 @@ import {
 import {
   AccountDto,
   ProjectCategoryDto,
-  ProjectDtoStatusEnum,
+  ProjectStatusDto,
 } from "../../../../generated";
 import { useGetIdentity } from "@refinedev/core";
 
@@ -32,7 +32,7 @@ export const ProjectsCreate: React.FC = () => {
   const me = useGetIdentity<AccountDto>();
   const { selectProps: projectCategorySelectProps } =
     useSelect<ProjectCategoryDto>({
-      resource: "projectCategories",
+      resource: "project-categories",
       optionLabel: "name",
       optionValue: "projectCategoryId",
 
@@ -68,7 +68,7 @@ export const ProjectsCreate: React.FC = () => {
           requiredMark="optional"
           initialValues={{
             isVisible: true,
-            status: ProjectDtoStatusEnum.Open,
+            status: ProjectStatusDto.Open,
           }}
         >
           <Divider orientation="left">Basic Information</Divider>
@@ -141,7 +141,7 @@ export const ProjectsCreate: React.FC = () => {
                   className="w-full"
                   showSearch
                 >
-                  {Object.values(ProjectDtoStatusEnum).map((status) => (
+                  {Object.values(ProjectStatusDto).map((status) => (
                     <Select.Option key={status} value={status}>
                       {status
                         .toLowerCase()

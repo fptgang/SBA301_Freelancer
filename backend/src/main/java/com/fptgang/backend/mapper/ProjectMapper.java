@@ -25,6 +25,7 @@ public class ProjectMapper extends BaseMapper<ProjectDto, Project> {
     private final MilestoneRepos milestoneRepos;
     private final MilestoneMapper milestoneMapper;
     private final ProjectSkillMapper projectSkillMapper;
+    private final MessageMapper messageMapper;
 
     public ProjectMapper(ProjectCategoryRepos projectCategoryRepos,
                          ProjectCategoryMapper projectCategoryMapper,
@@ -36,7 +37,7 @@ public class ProjectMapper extends BaseMapper<ProjectDto, Project> {
                          ContractMapper contractMapper,
                          MilestoneRepos milestoneRepos,
                          MilestoneMapper milestoneMapper,
-                         ProjectSkillMapper projectSkillMapper) {
+                         ProjectSkillMapper projectSkillMapper, MessageMapper messageMapper) {
         this.projectCategoryRepos = projectCategoryRepos;
         this.projectCategoryMapper = projectCategoryMapper;
         this.accountRepos = accountRepos;
@@ -48,6 +49,7 @@ public class ProjectMapper extends BaseMapper<ProjectDto, Project> {
         this.milestoneRepos = milestoneRepos;
         this.milestoneMapper = milestoneMapper;
         this.projectSkillMapper = projectSkillMapper;
+        this.messageMapper = messageMapper;
     }
 
     @Override
@@ -111,15 +113,15 @@ public class ProjectMapper extends BaseMapper<ProjectDto, Project> {
         dto.setProjectId(entity.getProjectId());
         dto.setTitle(entity.getTitle());
         dto.setIsVisible(entity.getIsVisible());
+        dto.setDescription(entity.getDescription());
 
         if (level == DetailLevel.REFERENCE) {
             dto.setProjectCategory(projectCategoryMapper.toDTO(entity.getCategory(), DetailLevel.REFERENCE));
             return dto; // Those fields are enough
         }
-
+        dto.setProposalCount((long) entity.getProposals().size());
         dto.setProjectCategory(projectCategoryMapper.toDTO(entity.getCategory(), DetailLevel.FULL));
         dto.setClient(accountMapper.toDTO(entity.getClient(), DetailLevel.REFERENCE));
-        dto.setStaff(accountMapper.toDTO(entity.getStaff(), DetailLevel.REFERENCE));
         dto.setStatus(ProjectStatusDto.valueOf(entity.getStatus().name()));
         dto.setStartDate(DateTimeUtil.fromLocalToOffset(entity.getStartDate()));
         dto.setMaxBudget(entity.getMaxBudget());
@@ -129,16 +131,6 @@ public class ProjectMapper extends BaseMapper<ProjectDto, Project> {
         dto.setTerminationReason(entity.getTerminationReason() == null ? null :
                 ProjectTerminationReasonDto.valueOf(entity.getTerminationReason().name()));
         dto.setToTerminate(entity.getToTerminate());
-
-        if (level == DetailLevel.SUMMARY) {
-            return dto; // Those fields are enough
-        }
-
-        dto.setDescription(entity.getDescription());
-        dto.setFiles(entity.getFiles().stream()
-                .map(f -> fileMapper.toDTO(f, DetailLevel.FULL))
-                .toList());
-        dto.setContract(contractMapper.toDTO(entity.getContract(), DetailLevel.FULL));
         dto.setMilestones(entity.getMilestones().stream()
                 .map(milestone -> milestoneMapper.toDTO(milestone, DetailLevel.FULL))
                 .collect(Collectors.toList()));
@@ -148,7 +140,16 @@ public class ProjectMapper extends BaseMapper<ProjectDto, Project> {
         dto.setRequiredSkills(entity.getRequiredSkills().stream()
                 .map((s) -> projectSkillMapper.toDTO(s, DetailLevel.FULL))
                 .collect(Collectors.toList()));
+        if (level == DetailLevel.SUMMARY) {
+            return dto; // Those fields are enough
+        }
+        dto.setStaff(entity.getStaff()!=null && entity.getStaff().getAccountId()!=0?accountMapper.toDTO(entity.getStaff(), DetailLevel.REFERENCE):null);
+        dto.setFiles(entity.getFiles().stream()
+                .map(f -> fileMapper.toDTO(f, DetailLevel.FULL))
+                .toList());
+        dto.setContract(entity.getContract()!=null?contractMapper.toDTO(entity.getContract(), DetailLevel.FULL):null);
 
+        dto.setLatestMessage(entity.getMessages().isEmpty() ? null : messageMapper.toDTO(entity.getMessages().getLast(), DetailLevel.REFERENCE));
         return dto;
     }
 }
