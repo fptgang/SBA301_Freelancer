@@ -29,7 +29,6 @@ public class MessageServiceImpl implements MessageService {
         message.setMessageId(null);
         message.setIsVisible(true);
         message = messageRepos.save(message);
-        messageRepos.updateLastMessageByProjectId(message.getMessageId(), message.getProjectId());
         return message;
     }
 
@@ -51,15 +50,16 @@ public class MessageServiceImpl implements MessageService {
     }
 
     @Override
+    public Message findLatestVisibleMessageByProject(long projectId) {
+        return messageRepos.findLatestVisibleMessageByProject(projectId).orElse(null);
+    }
+
+    @Override
     public void deleteById(long messageId) {
         Message message = messageRepos.findByMessageId(messageId).orElseThrow(
                 () -> new InvalidInputException("Message with id " + messageId + "not found"));
         message.setIsVisible(false);
         messageRepos.save(message);
-
-        messageRepos.findLatestVisibleMessage(message.getProjectId()).ifPresent(m -> {
-            messageRepos.updateLastMessageByProjectId(m.getMessageId(), message.getProjectId());
-        });
     }
 
     @Override
