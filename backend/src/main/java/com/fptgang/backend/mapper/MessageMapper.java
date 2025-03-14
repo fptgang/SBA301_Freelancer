@@ -67,15 +67,20 @@ public class MessageMapper extends BaseMapper<MessageDto, Message> {
         if (level == DetailLevel.REFERENCE) {
             return dto; // those fields are enough
         }
-
-        dto.setSender(accountMapper.toDTO(entity.getSender(), DetailLevel.REFERENCE));
-        dto.setProjectId(entity.getProject().getProjectId());
         dto.setContent(entity.getContent());
-        dto.setIsVisible(entity.getIsVisible());
         dto.setFiles(entity.getFiles().stream()
                 .map(f -> fileMapper.toDTO(f, DetailLevel.FULL))
                 .toList());
         dto.setCreatedAt(DateTimeUtil.fromLocalToOffset(entity.getCreatedAt()));
+
+        if(level == DetailLevel.SUMMARY) {
+            return dto;
+        }
+
+        dto.setSender(accountMapper.toDTO(entity.getSender(), DetailLevel.REFERENCE));
+        dto.setProjectId(entity.getProject().getProjectId());
+        dto.setIsVisible(entity.getIsVisible());
+
 
         return dto;
     }

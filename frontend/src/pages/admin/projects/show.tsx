@@ -26,37 +26,9 @@ import {
   TagsOutlined,
   EyeOutlined,
 } from "@ant-design/icons";
-import { AccountDto } from "../../../../generated";
+import { AccountDto, ProjectDto } from "../../../../generated";
 
 const { Title } = Typography;
-
-interface Skill {
-  skillId: number;
-  name: string;
-  isVisible: boolean;
-  createdAt: string;
-  updatedAt: string;
-}
-
-interface ProjectSkill {
-  projectSkillId: number;
-  skill: Skill;
-  proficiency: "BEGINNER" | "INTERMEDIATE" | "EXPERT";
-}
-
-interface ProjectDto {
-  projectId: number;
-  projectCategoryId: number;
-  clientId: number;
-  title: string;
-  description: string;
-  requiredSkills: ProjectSkill[];
-  status: "PENDING" | "IN_PROGRESS" | "FINISHED" | "CANCELLED";
-  activeProposalId: number | null;
-  isVisible: boolean;
-  createdAt: string;
-  updatedAt: string;
-}
 
 export const ProjectsShow: React.FC = () => {
   const { queryResult } = useShow<ProjectDto>();
@@ -65,7 +37,7 @@ export const ProjectsShow: React.FC = () => {
 
   const { data: categoryData, isLoading: categoryIsLoading } = useOne({
     resource: "project-categories",
-    id: record?.projectCategoryId || "",
+    id: record?.projectCategory?.projectCategoryId || "",
     queryOptions: {
       enabled: !!record,
     },
@@ -73,7 +45,7 @@ export const ProjectsShow: React.FC = () => {
 
   const { data: clientData, isLoading: clientIsLoading } = useOne<AccountDto>({
     resource: "accounts",
-    id: record?.clientId || "",
+    id: record?.client?.accountId || "",
     queryOptions: {
       enabled: !!record,
     },

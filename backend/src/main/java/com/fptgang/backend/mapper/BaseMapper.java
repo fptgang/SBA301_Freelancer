@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
  * @param <D> DTO type
  * @param <E> Entity type
  */
-abstract class BaseMapper<D, E> {
+public abstract class BaseMapper<D, E> {
     public abstract E toEntity(D dto);
 
     public List<E> toEntities(List<D> dtos) {
