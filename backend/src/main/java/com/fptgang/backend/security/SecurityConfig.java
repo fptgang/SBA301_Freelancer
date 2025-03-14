@@ -72,7 +72,7 @@ public class SecurityConfig {
                                         "/swagger-ui.html",
                                         "/api/v1/mail/**"
                                 ).permitAll()
-                                .anyRequest().authenticated();
+                                .anyRequest().permitAll();
                     }
                 })
                 .csrf(AbstractHttpConfigurer::disable)

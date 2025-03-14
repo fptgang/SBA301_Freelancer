@@ -9,6 +9,10 @@ public interface ProjectService {
 
     Project create(Project project);
     Project update(Project account);
+    Project terminateByClient(Project account);
+    Project terminateByStaff(Project account);
+    Project unpause(Project account);
+    Project extendDeadline(Project account);
     Project findByProjectId(long projectId);
     void deleteById(long projectId);
 

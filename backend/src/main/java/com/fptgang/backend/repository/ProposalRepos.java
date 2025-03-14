@@ -1,5 +1,6 @@
 package com.fptgang.backend.repository;
 
+import com.fptgang.backend.model.Project;
 import com.fptgang.backend.model.Proposal;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -14,7 +15,13 @@ import java.util.Optional;
 @Repository
 public interface ProposalRepos extends JpaRepository<Proposal, Long>, JpaSpecificationExecutor<Proposal> {
     Optional<Proposal> findByProposalId(Long proposalId);
+    List<Proposal> findByProjectAndStatus(
+            Project project,
+            Proposal.ProposalStatus status
+            );
+
 
     List<Proposal> findByProject_ProjectId(Long projectId);
     Optional<Proposal> findByProject_ProjectIdAndFreelancer_AccountIdAndStatus(Long projectId, Long freelancerId, Proposal.ProposalStatus status);
+
 }

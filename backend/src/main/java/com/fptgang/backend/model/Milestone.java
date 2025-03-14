@@ -79,7 +79,8 @@ public class Milestone {
         TERMINATED,
         IN_PROGRESS,
         REVIEWING,
-        FINISHED
+        FINISHED,
+        SUCCESS
     }
 
     public enum FundStatus {
