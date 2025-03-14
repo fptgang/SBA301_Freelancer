@@ -8,6 +8,7 @@ public interface MessageService {
     Message create(Message message);
     Message update(Message message);
     Message findByMessageId(long messageId);
+    Message findLatestVisibleMessageByProject(long projectId);
     void deleteById(long messageId);
     Page<Message> getAll(Pageable pageable, String filter);
     Page<Message> getAllInvolving(long participantId, Pageable pageable, String filter, String search, boolean includeInvisible);

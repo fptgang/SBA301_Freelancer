@@ -31,9 +31,6 @@ public class Message {
     @JoinColumn(name = "project_id", nullable = false)
     private Project project;
 
-    @Column(name = "project_id", insertable = false, updatable = false)
-    private Long projectId;
-
     @Column(columnDefinition = "TEXT", length = 100000, nullable = false)
     @Searchable
     private String content;

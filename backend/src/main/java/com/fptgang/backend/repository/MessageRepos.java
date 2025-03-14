@@ -15,15 +15,8 @@ import java.util.Optional;
 public interface MessageRepos extends JpaRepository<Message, Long>, JpaSpecificationExecutor<Message> {
     Optional<Message> findByMessageId(Long messageId);
 
-    @Modifying
-    @Transactional
-    @Query("UPDATE Project p SET p.lastMessage = :messageId WHERE p.projectId = :projectId")
-    void updateLastMessageByProjectId(@Param("messageId") Long messageId,
-                                     @Param("projectId") Long projectId);
-
     @Query("""
-            SELECT m FROM Message m WHERE m.project.projectId = :projectId 
-                        AND m.isVisible = true ORDER BY m.messageId 
-                                    DESC LIMIT 1""")
-    Optional<Message> findLatestVisibleMessage(@Param("projectId") Long projectId);
+            SELECT m FROM Message m WHERE m.project.projectId = :projectId
+            AND m.isVisible = true ORDER BY m.messageId DESC LIMIT 1""")
+    Optional<Message> findLatestVisibleMessageByProject(@Param("projectId") Long projectId);
 }

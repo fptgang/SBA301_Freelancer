@@ -77,9 +77,6 @@ public class Project {
     @Builder.Default
     private List<Proposal> proposals = new ArrayList<>();
 
-    @Nullable
-    private Integer proposalCount;
-
     @OneToOne(mappedBy = "project", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     private Contract contract;
 
@@ -94,11 +91,6 @@ public class Project {
     @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @Builder.Default
     private List<Message> messages = new ArrayList<>();
-
-    @OneToOne
-    @JoinColumn(name = "last_message_id", referencedColumnName = "messageId")
-    @Nullable
-    private Message lastMessage;
 
     @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @Builder.Default        

@@ -127,4 +127,9 @@ public class ProposalServiceImpl implements ProposalService {
         proposal=update(proposal);
         return proposal;
     }
+
+    @Override
+    public long countByProjectIdAndStatus(long projectId, Proposal.ProposalStatus status) {
+        return proposalRepos.countByProjectIdAndStatus(projectId, status);
+    }
 }

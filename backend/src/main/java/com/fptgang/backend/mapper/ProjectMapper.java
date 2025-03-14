@@ -5,6 +5,8 @@ import com.fptgang.backend.api.model.ProjectStatusDto;
 import com.fptgang.backend.api.model.ProjectTerminationReasonDto;
 import com.fptgang.backend.model.Project;
 import com.fptgang.backend.repository.*;
+import com.fptgang.backend.service.MessageService;
+import com.fptgang.backend.service.ProposalService;
 import com.fptgang.backend.util.DateTimeUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -26,7 +28,8 @@ public class ProjectMapper extends BaseMapper<ProjectDto, Project> {
     private final MilestoneMapper milestoneMapper;
     private final ProjectSkillMapper projectSkillMapper;
     private final MessageMapper messageMapper;
-    private final MessageRepos messageRepos;
+    private final MessageService messageService;
+    private final ProposalService proposalService;
 
     public ProjectMapper(ProjectCategoryRepos projectCategoryRepos,
                          ProjectCategoryMapper projectCategoryMapper,
@@ -38,7 +41,10 @@ public class ProjectMapper extends BaseMapper<ProjectDto, Project> {
                          ContractMapper contractMapper,
                          MilestoneRepos milestoneRepos,
                          MilestoneMapper milestoneMapper,
-                         ProjectSkillMapper projectSkillMapper, MessageMapper messageMapper, MessageRepos messageRepos) {
+                         ProjectSkillMapper projectSkillMapper,
+                         MessageMapper messageMapper,
+                         MessageService messageService,
+                         ProposalService proposalService) {
         this.projectCategoryRepos = projectCategoryRepos;
         this.projectCategoryMapper = projectCategoryMapper;
         this.accountRepos = accountRepos;
@@ -51,7 +57,8 @@ public class ProjectMapper extends BaseMapper<ProjectDto, Project> {
         this.milestoneMapper = milestoneMapper;
         this.projectSkillMapper = projectSkillMapper;
         this.messageMapper = messageMapper;
-        this.messageRepos = messageRepos;
+        this.messageService = messageService;
+        this.proposalService = proposalService;
     }
 
     @Override
@@ -94,9 +101,6 @@ public class ProjectMapper extends BaseMapper<ProjectDto, Project> {
                     .map(e -> milestoneRepos.getReferenceById(e.getMilestoneId()))
                     .collect(Collectors.toList()));
         }
-        if (dto.getLatestMessage() != null && dto.getLatestMessage().getMessageId() != null) {
-            entity.setLastMessage(messageRepos.getReferenceById(dto.getLatestMessage().getMessageId()));
-        }
         if (dto.getRequiredSkills() != null) {
             entity.setRequiredSkills(dto.getRequiredSkills().stream()
                     .map(projectSkillMapper::toEntity)
@@ -124,7 +128,7 @@ public class ProjectMapper extends BaseMapper<ProjectDto, Project> {
             dto.setProjectCategory(projectCategoryMapper.toDTO(entity.getCategory(), DetailLevel.REFERENCE));
             return dto; // Those fields are enough
         }
-        dto.setProposalCount((long) entity.getProposals().size());
+        dto.setProposalCount(proposalService.countByProjectIdAndStatus(entity.getProjectId(), null));
         dto.setProjectCategory(projectCategoryMapper.toDTO(entity.getCategory(), DetailLevel.FULL));
         dto.setClient(accountMapper.toDTO(entity.getClient(), DetailLevel.REFERENCE));
         dto.setStatus(ProjectStatusDto.valueOf(entity.getStatus().name()));
@@ -154,7 +158,10 @@ public class ProjectMapper extends BaseMapper<ProjectDto, Project> {
                 .toList());
         dto.setContract(entity.getContract()!=null?contractMapper.toDTO(entity.getContract(), DetailLevel.FULL):null);
 
-        dto.setLatestMessage(messageMapper.toDTO(entity.getLastMessage(), DetailLevel.REFERENCE));
+        dto.setLatestMessage(messageMapper.toDTO(
+                messageService.findLatestVisibleMessageByProject(entity.getProjectId()),
+                DetailLevel.REFERENCE
+        ));
         return dto;
     }
 }
