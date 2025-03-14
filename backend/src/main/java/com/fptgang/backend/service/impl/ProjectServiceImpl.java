@@ -599,7 +599,7 @@ public class ProjectServiceImpl implements ProjectService {
 
                     // Process PENDING and SUCCESS milestones for refund
                     if (milestone.getStatus() == Milestone.MilestoneStatus.PENDING ||
-                            milestone.getStatus() == Milestone.MilestoneStatus.SUCCESS) {
+                            milestone.getStatus() == Milestone.MilestoneStatus.FINISHED) {
 
                         milestone.setStatus(Milestone.MilestoneStatus.TERMINATED);
 

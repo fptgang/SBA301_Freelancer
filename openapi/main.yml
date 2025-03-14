@@ -65,6 +65,10 @@ components:
       $ref: 'model/transaction-type.yml#/TransactionTypeDto'
     ProposalStatusDto:
       $ref: 'model/proposal-status.yml#/ProposalStatusDto'
+    StringBigDecimalDatapointDto:
+      $ref: 'model/stats/string-bigdecimal-datapoint.yml#/StringBigDecimalDatapointDto'
+    StringIntegerDatapointDto:
+      $ref: 'model/stats/string-integer-datapoint.yml#/StringIntegerDatapointDto'
 paths:
   /auth/me:
     $ref: 'path/auth/me.yml'
@@ -156,3 +160,6 @@ paths:
     $ref: 'path/reports/index.yml'
   /reports/{reportId}:
     $ref: 'path/reports/@id/index.yml'
+
+  /stats/monthly-new-customers:
+    $ref: "path/stats/monthly-new-customer.yml"

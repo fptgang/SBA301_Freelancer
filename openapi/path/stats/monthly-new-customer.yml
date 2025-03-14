@@ -1,0 +1,20 @@
+get:
+  summary: Get the number of new customers who registered monthly
+  operationId: getMonthlyNewCustomers
+  security:
+    - bearerAuth: []
+  responses:
+    '200':
+      description: The operation was successful
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '../../model/stats/string-integer-datapoint.yml#/StringIntegerDatapointDto'
+    '400':
+      description: The operation failed
+      content:
+        application/json:
+          schema:
+            $ref: '../../component/error.yml#/ErrorResponse'

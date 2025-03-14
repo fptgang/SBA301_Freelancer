@@ -1,0 +1,8 @@
+StringIntegerDatapointDto:
+  type: object
+  properties:
+    key:
+      type: string
+    value:
+      type: integer
+      format: int32
