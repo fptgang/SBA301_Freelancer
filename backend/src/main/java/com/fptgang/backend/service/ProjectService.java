@@ -1,6 +1,7 @@
 package com.fptgang.backend.service;
 
 import com.fptgang.backend.model.Project;
+import com.fptgang.backend.model.Role;
 import com.fptgang.backend.service.params.ListParams;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -8,11 +9,11 @@ import org.springframework.data.domain.Pageable;
 public interface ProjectService {
 
     Project create(Project project);
-    Project update(Project account);
-    Project terminateByClient(Project account);
-    Project terminateByStaff(Project account);
-    Project unpause(Project account);
-    Project extendDeadline(Project account);
+    Project update(Project project);
+    Project terminateByClient(Project project);
+    Project terminateByStaff(Long projectId, Role TranferToRole);
+    Project unpause(Project project);
+    Project extendDeadline(Project project);
     Project findByProjectId(long projectId);
     void deleteById(long projectId);
 

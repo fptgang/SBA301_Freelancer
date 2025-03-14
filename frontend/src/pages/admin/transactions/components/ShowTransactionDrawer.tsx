@@ -1,29 +1,21 @@
 import React from "react";
-import { useShow, useOne } from "@refinedev/core";
-import { Show, NumberField, TextField, DateField } from "@refinedev/antd";
-import {
-  Typography,
-  Card,
-  Descriptions,
-  Space,
-  Tag,
-  Skeleton,
-  Alert,
-} from "antd";
+import { useShow } from "@refinedev/core";
+import { Drawer, Skeleton, Space, Tag, Alert, Descriptions, Card } from "antd";
 import {
   DollarOutlined,
   SwapOutlined,
   ClockCircleOutlined,
   UserOutlined,
   CheckCircleOutlined,
+  ArrowsAltOutlined,
 } from "@ant-design/icons";
 import {
   TransactionDto,
   TransactionStatusDto,
   TransactionTypeDto,
-} from "../../../../generated";
-
-const { Title } = Typography;
+} from "../../../../../generated";
+import { DateField, NumberField } from "@refinedev/antd";
+import { Link } from "react-router";
 
 const STATUS_COLOR_MAP: Record<TransactionStatusDto, string> = {
   SUCCESS: "green",
@@ -39,15 +31,17 @@ const TYPE_COLOR_MAP: Record<TransactionTypeDto, string> = {
   ESCROW_REFUND: "red",
 };
 
-export const TransactionsShow: React.FC = () => {
-  const { queryResult } = useShow<TransactionDto>();
-  const { data, isLoading } = queryResult;
-  const record = data?.data;
+interface ShowTransactionDrawerProps {
+  transaction?: TransactionDto;
+  open: boolean;
+  onClose: () => void;
+}
 
-  if (isLoading) {
-    return <Skeleton active paragraph={{ rows: 6 }} />;
-  }
-
+export const ShowTransactionDrawer: React.FC<ShowTransactionDrawerProps> = ({
+  transaction,
+  open,
+  onClose,
+}) => {
   const getStatusTag = (status: TransactionStatusDto) => (
     <Tag color={STATUS_COLOR_MAP[status]} className="text-sm">
       {status}
@@ -56,14 +50,27 @@ export const TransactionsShow: React.FC = () => {
 
   const getTypeTag = (type: TransactionTypeDto) => (
     <Tag color={TYPE_COLOR_MAP[type]} className="text-sm">
-      {type.replace("_", " ")}
+      {type?.replace("_", " ")}
     </Tag>
   );
 
   return (
-    <Show isLoading={isLoading} canEdit={false} canDelete={false}>
+    <Drawer
+      title="Transaction Details"
+      open={open}
+      onClose={onClose}
+      width={800}
+      destroyOnClose
+    >
       <Space direction="vertical" size="large" className="w-full">
-        {record?.status === "SUCCESS" && (
+        <Link
+          to={`/admin/transactions/show/${transaction?.transactionId}`}
+          style={{ textAlign: "right", display: "block", color: "#1890ff" }}
+        >
+          {" "}
+          View transaction details in full screen <ArrowsAltOutlined />
+        </Link>
+        {transaction?.status === "SUCCESS" && (
           <Alert
             message="Successful Transaction"
             description="This transaction has been completed successfully."
@@ -94,7 +101,7 @@ export const TransactionsShow: React.FC = () => {
               }
             >
               <NumberField
-                value={record?.amount || 0}
+                value={transaction?.amount || 0}
                 options={{
                   style: "currency",
                   currency: "USD",
@@ -110,7 +117,7 @@ export const TransactionsShow: React.FC = () => {
                 </Space>
               }
             >
-              {getTypeTag(record?.type)}
+              {getTypeTag(transaction?.type)}
             </Descriptions.Item>
 
             <Descriptions.Item
@@ -121,7 +128,7 @@ export const TransactionsShow: React.FC = () => {
                 </Space>
               }
             >
-              {getStatusTag(record?.status)}
+              {getStatusTag(transaction?.status)}
             </Descriptions.Item>
 
             <Descriptions.Item
@@ -133,7 +140,7 @@ export const TransactionsShow: React.FC = () => {
               }
             >
               <DateField
-                value={record?.createdAt}
+                value={transaction?.createdAt}
                 format="MMMM D, YYYY HH:mm:ss"
               />
             </Descriptions.Item>
@@ -163,11 +170,11 @@ export const TransactionsShow: React.FC = () => {
             >
               <Space direction="vertical">
                 <span className="font-medium">
-                  {record?.fromAccount?.firstName}{" "}
-                  {record?.fromAccount?.lastName}
+                  {transaction?.fromAccount?.firstName}{" "}
+                  {transaction?.fromAccount?.lastName}
                 </span>
                 <Tag className="font-mono">
-                  {record?.fromAccount?.accountId}
+                  {transaction?.fromAccount?.accountId}
                 </Tag>
               </Space>
             </Descriptions.Item>
@@ -182,9 +189,12 @@ export const TransactionsShow: React.FC = () => {
             >
               <Space direction="vertical">
                 <span className="font-medium">
-                  {record?.toAccount?.firstName} {record?.toAccount?.lastName}
+                  {transaction?.toAccount?.firstName}{" "}
+                  {transaction?.toAccount?.lastName}
                 </span>
-                <Tag className="font-mono">{record?.toAccount?.accountId}</Tag>
+                <Tag className="font-mono">
+                  {transaction?.toAccount?.accountId}
+                </Tag>
               </Space>
             </Descriptions.Item>
           </Descriptions>
@@ -204,11 +214,11 @@ export const TransactionsShow: React.FC = () => {
             column={{ xxl: 2, xl: 2, lg: 2, md: 1, sm: 1, xs: 1 }}
           >
             <Descriptions.Item label="Transaction ID" span={2}>
-              <Tag className="font-mono">{record?.transactionId}</Tag>
+              <Tag className="font-mono">{transaction?.transactionId}</Tag>
             </Descriptions.Item>
           </Descriptions>
         </Card>
       </Space>
-    </Show>
+    </Drawer>
   );
 };

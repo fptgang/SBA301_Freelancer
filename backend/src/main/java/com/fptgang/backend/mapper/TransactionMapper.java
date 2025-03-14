@@ -80,7 +80,7 @@ public class TransactionMapper extends BaseMapper<TransactionDto, Transaction> {
     }
 
     @Override
-    public TransactionDto toDTO(Transaction entity, DetailLevel level) {
+    public TransactionDto   toDTO(Transaction entity, DetailLevel level) {
         if (entity == null) {
             return null;
         }
@@ -99,8 +99,7 @@ public class TransactionMapper extends BaseMapper<TransactionDto, Transaction> {
                 PaymentMethodDto.valueOf(entity.getPaymentMethod().name()));
         dto.setCreatedAt(DateTimeUtil.fromLocalToOffset(entity.getCreatedAt()));
         dto.setUpdatedAt(DateTimeUtil.fromLocalToOffset(entity.getUpdatedAt()));
-
-        return dto;
+            return dto;
     }
 
 }

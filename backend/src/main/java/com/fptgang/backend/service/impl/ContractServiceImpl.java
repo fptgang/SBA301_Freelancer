@@ -8,10 +8,7 @@ import com.fptgang.backend.model.Role;
 import com.fptgang.backend.repository.ContractRepos;
 import com.fptgang.backend.repository.MilestoneRepos;
 
-import com.fptgang.backend.service.AccountService;
-import com.fptgang.backend.service.ContractService;
-import com.fptgang.backend.service.ProposalService;
-import com.fptgang.backend.service.TransactionService;
+import com.fptgang.backend.service.*;
 import com.fptgang.backend.service.params.ListParams;
 import com.fptgang.backend.util.OpenApiHelper;
 import com.fptgang.backend.util.SecurityUtil;
@@ -40,7 +37,8 @@ public class ContractServiceImpl implements ContractService {
     @Autowired
     private ProposalService proposalService;
     @Autowired
-    private TransactionService transactionService;
+    private MilestoneService milestoneService;
+
 
 
     @Override
@@ -61,7 +59,7 @@ public class ContractServiceImpl implements ContractService {
         proposalService.acceptProposal(contract.getProposal().getProposalId(), SecurityUtil.requireCurrentUserId());
         contract.setStatus(Contract.ContractStatus.UNSIGNED);
         firstMilestone.getProject().setContract(contract);
-        transactionService.createEscrowDeposit(firstMilestone);
+        milestoneService.depositFund(firstMilestone.getMilestoneId());
         return contractRepos.save(contract);
     }
 

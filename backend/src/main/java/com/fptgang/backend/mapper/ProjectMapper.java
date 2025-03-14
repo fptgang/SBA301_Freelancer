@@ -30,6 +30,7 @@ public class ProjectMapper extends BaseMapper<ProjectDto, Project> {
     private final MessageMapper messageMapper;
     private final MessageService messageService;
     private final ProposalService proposalService;
+    private final ReportMapper reportMapper;
 
     public ProjectMapper(ProjectCategoryRepos projectCategoryRepos,
                          ProjectCategoryMapper projectCategoryMapper,
@@ -44,7 +45,7 @@ public class ProjectMapper extends BaseMapper<ProjectDto, Project> {
                          ProjectSkillMapper projectSkillMapper,
                          MessageMapper messageMapper,
                          MessageService messageService,
-                         ProposalService proposalService) {
+                         ProposalService proposalService, ReportMapper reportMapper) {
         this.projectCategoryRepos = projectCategoryRepos;
         this.projectCategoryMapper = projectCategoryMapper;
         this.accountRepos = accountRepos;
@@ -59,6 +60,7 @@ public class ProjectMapper extends BaseMapper<ProjectDto, Project> {
         this.messageMapper = messageMapper;
         this.messageService = messageService;
         this.proposalService = proposalService;
+        this.reportMapper = reportMapper;
     }
 
     @Override
@@ -162,6 +164,9 @@ public class ProjectMapper extends BaseMapper<ProjectDto, Project> {
                 messageService.findLatestVisibleMessageByProject(entity.getProjectId()),
                 DetailLevel.REFERENCE
         ));
+        dto.setReports(entity.getReports().stream()
+                .map(report -> reportMapper.toDTO(report, DetailLevel.SUMMARY))
+                .collect(Collectors.toList()));
         return dto;
     }
 }

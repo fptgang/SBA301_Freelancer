@@ -2,7 +2,7 @@ import React from "react";
 import { useShow, useOne } from "@refinedev/core";
 import { Show, TagField, TextField, DateField } from "@refinedev/antd";
 import { Typography } from "antd";
-import { ReportDto } from "../../../generated";
+import { ReportDto } from "../../../../generated";
 
 const { Title } = Typography;
 

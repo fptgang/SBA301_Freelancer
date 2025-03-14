@@ -7,7 +7,7 @@ import {
   useSubscription,
 } from "@refinedev/core";
 import { Layout, Grid, Tabs, Typography } from "antd";
-import { useLocation, useParams } from "react-router";
+import { data, useLocation, useParams } from "react-router";
 import { useEffect, useState } from "react";
 import { AccountDto, MessageDto, ProjectDto } from "../../../../generated";
 import { ProjectSidebar } from "../../../components/message/ProjectSidebar";
@@ -45,7 +45,7 @@ export const Message: React.FC = () => {
       setNewMessage(event.payload as MessageDto);
       if (
         // (event.payload as MessageDto).senderId !== user?.id ||
-        (event.payload as MessageDto).senderId !== userId
+        (event.payload as MessageDto).sender?.accountId !== userId
       ) {
         const audio = new Audio("./src/assets/notification.mp3");
         audio.play();
@@ -55,7 +55,7 @@ export const Message: React.FC = () => {
   });
 
   useEffect(() => {
-    if (projects?.data?.length && !selectedProject) {
+    if (projects?.data?.length) {
       if (location?.state?.projectId) {
         setSelectedProject(
           projects.data.find(
@@ -67,6 +67,23 @@ export const Message: React.FC = () => {
       }
     }
   }, [projects]);
+
+  useEffect(() => {
+    refetch().then((data) => {
+      if (data?.data?.length) {
+        if (location?.state?.projectId) {
+          setSelectedProject(
+            data?.data.find(
+              (project: ProjectDto) =>
+                project.projectId === location.state.projectId
+            )
+          );
+        } else {
+          setSelectedProject(data.data[0]);
+        }
+      }
+    });
+  }, [location]);
 
   useEffect(() => {
     refetch();

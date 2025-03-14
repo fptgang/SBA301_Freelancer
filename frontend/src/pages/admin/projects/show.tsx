@@ -26,7 +26,12 @@ import {
   TagsOutlined,
   EyeOutlined,
 } from "@ant-design/icons";
-import { AccountDto, ProjectDto } from "../../../../generated";
+import {
+  AccountDto,
+  ProficiencyEnum,
+  ProjectDto,
+  ProjectSkillDto,
+} from "../../../../generated";
 
 const { Title } = Typography;
 
@@ -75,7 +80,7 @@ export const ProjectsShow: React.FC = () => {
     );
   };
 
-  const getProficiencyColor = (proficiency: ProjectSkill["proficiency"]) => {
+  const getProficiencyColor = (proficiency: ProficiencyEnum) => {
     const colorMap: Record<string, string> = {
       BEGINNER: "green",
       INTERMEDIATE: "blue",
@@ -91,9 +96,9 @@ export const ProjectsShow: React.FC = () => {
   return (
     <Show isLoading={isLoading}>
       <Space direction="vertical" size="large" className="w-full">
-        {record?.activeProposalId && (
+        {record?.contract && (
           <Alert
-            message="Active Proposal"
+            message="Contract"
             description="This project has an active proposal and some details cannot be modified."
             type="info"
             showIcon
@@ -177,13 +182,15 @@ export const ProjectsShow: React.FC = () => {
               span={2}
             >
               <Space wrap>
-                {record?.requiredSkills.map((projectSkill) => (
+                {record?.requiredSkills?.map((projectSkill) => (
                   <Tag
                     key={projectSkill.projectSkillId}
-                    color={getProficiencyColor(projectSkill.proficiency)}
+                    color={getProficiencyColor(
+                      projectSkill.proficiency?.toUpperCase() as ProficiencyEnum
+                    )}
                   >
-                    {projectSkill.skill.name}{" "}
-                    <small>({projectSkill.proficiency.toLowerCase()})</small>
+                    {projectSkill.skill?.name}{" "}
+                    <small>({projectSkill.proficiency?.toLowerCase()})</small>
                   </Tag>
                 ))}
               </Space>
@@ -250,9 +257,9 @@ export const ProjectsShow: React.FC = () => {
               <Tag className="font-mono">{record?.projectId}</Tag>
             </Descriptions.Item>
 
-            {record?.activeProposalId && (
-              <Descriptions.Item label="Active Proposal ID" span={2}>
-                <Tag className="font-mono">{record?.activeProposalId}</Tag>
+            {record?.contract && (
+              <Descriptions.Item label="Contract ID" span={2}>
+                <Tag className="font-mono">{record?.contract?.contractId}</Tag>
               </Descriptions.Item>
             )}
           </Descriptions>

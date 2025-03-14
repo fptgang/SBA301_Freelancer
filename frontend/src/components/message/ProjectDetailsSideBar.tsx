@@ -11,6 +11,8 @@ import {
 } from "antd";
 import { ProjectDto } from "../../../generated";
 import { ReportModal } from "./ReportModal";
+import { store } from "../../store";
+import { ResolveModal } from "./ResolveModal";
 
 interface ProjectDetailsSidebarProps {
   project?: ProjectDto;
@@ -21,7 +23,9 @@ export const ProjectDetailsSidebar: React.FC<ProjectDetailsSidebarProps> = ({
 }) => {
   const [collapsed, setCollapsed] = useState(true);
   const [showReportModal, setShowReportModal] = useState(false);
+  const [showResolveModal, setShowResolveModal] = useState(false);
   const screens = Grid.useBreakpoint();
+  const user = store.getState().auth.account;
 
   return (
     <Layout.Sider
@@ -43,24 +47,40 @@ export const ProjectDetailsSidebar: React.FC<ProjectDetailsSidebarProps> = ({
             }}
           >
             <>Project Details</>
-            {project?.status === "IN_PROGRESS" && (
-              <>
-                <Button
-                  type="primary"
-                  danger
-                  style={{ marginLeft: 8 }}
-                  onClick={() => setShowReportModal(true)}
-                >
-                  Report
-                </Button>
+            {project?.status === "IN_PROGRESS" &&
+              (user?.role != "STAFF" ? (
+                <>
+                  <Button
+                    type="primary"
+                    danger
+                    style={{ marginLeft: 8 }}
+                    onClick={() => setShowReportModal(true)}
+                  >
+                    Report
+                  </Button>
 
-                <ReportModal
-                  showReportModal={showReportModal}
-                  setShowReportModal={setShowReportModal}
-                  project={project}
-                />
-              </>
-            )}
+                  <ReportModal
+                    showReportModal={showReportModal}
+                    setShowReportModal={setShowReportModal}
+                    project={project}
+                  />
+                </>
+              ) : (
+                <>
+                  <Button
+                    type="primary"
+                    style={{ marginLeft: 8 }}
+                    onClick={() => setShowResolveModal(true)}
+                  >
+                    Resolve
+                  </Button>
+                  <ResolveModal
+                    showResolveModal={showResolveModal}
+                    setShowResolveModal={setShowResolveModal}
+                    project={project}
+                  />
+                </>
+              ))}
           </Typography.Title>
 
           <Tabs

@@ -118,7 +118,7 @@ import WithdrawPage from "./pages/shared/wallet/withdraw";
 import ProjectDetailsScreen from "./pages/public/project";
 import { Message } from "./pages/public/message";
 import MessageLayout from "./components/layout/message-layout";
-import { ReportsEdit, ReportsList, ReportsShow } from "./pages/reports";
+import { ReportsEdit, ReportsList, ReportsShow } from "./pages/admin/reports";
 
 const resources = [
   {

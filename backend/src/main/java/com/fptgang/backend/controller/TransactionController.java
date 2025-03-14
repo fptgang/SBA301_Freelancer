@@ -54,15 +54,14 @@ public class TransactionController implements TransactionsApi {
     public ResponseEntity<GetTransactions200Response> getTransactions(Pageable pageable, String filter, String search) {
         log.info("Fetching transactions");
 
-        var includeInvisible = SecurityUtil.hasPermission(Role.ADMIN);
         var params = ListParams.builder()
                 .pageable(OpenApiHelper.toPageable(pageable))
                 .search(search)
-                .filter(filter)
-                .includeInvisible(includeInvisible);
+                .filter(filter);
 
         // Staff, Admin can view all transactions
-        if (SecurityUtil.hasPermission(Role.STAFF)) {
+        if (SecurityUtil.hasPermission(Role.STAFF)||
+                SecurityUtil.hasPermission(Role.ADMIN)) {
             return OpenApiHelper.respondPage(
                     transactionService.getAll(params.build())
                             .map(t -> transactionMapper.toDTO(t, DetailLevel.SUMMARY)),
@@ -79,4 +78,19 @@ public class TransactionController implements TransactionsApi {
         }
     }
 
+    @Override
+    public ResponseEntity<TransactionDto> getTransactionById(Long transactionId) {
+        Transaction transaction = transactionService.findById(transactionId);
+        if (transaction == null) {
+            return ResponseEntity.notFound().build();
+        }
+        if(!SecurityUtil.hasPermission(Role.STAFF) &&
+                !SecurityUtil.hasPermission(Role.ADMIN) &&
+                !transaction.getFromAccount().getAccountId().equals(SecurityUtil.getCurrentUserId()) &&
+                !transaction.getToAccount().getAccountId().equals(SecurityUtil.getCurrentUserId())
+        ){
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+        return ResponseEntity.ok(transactionMapper.toDTO(transaction, DetailLevel.FULL));
+    }
 }

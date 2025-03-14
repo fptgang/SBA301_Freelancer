@@ -11,6 +11,8 @@ ReportDto:
       format: int64
     reason:
       type: string
+    solution:
+      type: string
     status:
       type: string
       enum: [UNSOLVED,SOLVED,SOLVING]

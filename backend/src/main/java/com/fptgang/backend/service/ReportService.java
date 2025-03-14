@@ -1,6 +1,8 @@
 package com.fptgang.backend.service;
 
+import com.fptgang.backend.api.model.SolutionDto;
 import com.fptgang.backend.model.Report;
+import com.fptgang.backend.model.Role;
 import com.fptgang.backend.service.params.ListParams;
 import org.springframework.data.domain.Page;
 
@@ -9,4 +11,5 @@ public interface ReportService {
     Report update(Report report);
     Report findById(long id);
     Page<Report> getAll(ListParams params);
+    Report resolve(long reportId, SolutionDto solution);
 }
