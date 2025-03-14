@@ -1,6 +1,7 @@
 package com.fptgang.backend.mapper;
 
 import com.fptgang.backend.api.model.ReportDto;
+import com.fptgang.backend.api.model.ReportRequestDto;
 import com.fptgang.backend.model.Report;
 import com.fptgang.backend.repository.AccountRepos;
 import com.fptgang.backend.repository.ProjectRepos;
@@ -14,16 +15,13 @@ public class ReportMapper extends BaseMapper<ReportDto, Report> {
     private final AccountRepos accountRepos;
     private final AccountMapper accountMapper;
     private final ProjectRepos projectRepos;
-    private final ProjectMapper projectMapper;
 
     public ReportMapper(AccountRepos accountRepos,
                         AccountMapper accountMapper,
-                        ProjectRepos projectRepos,
-                        ProjectMapper projectMapper) {
+                        ProjectRepos projectRepos) {
         this.accountRepos = accountRepos;
         this.accountMapper = accountMapper;
         this.projectRepos = projectRepos;
-        this.projectMapper = projectMapper;
     }
 
     @Override
@@ -53,6 +51,25 @@ public class ReportMapper extends BaseMapper<ReportDto, Report> {
         return entity;
     }
 
+    public Report toEntity(ReportRequestDto dto) {
+        if (dto == null) {
+            return null;
+        }
+
+        Report entity = new Report();
+
+        if (dto.getReporterId() != null) {
+            entity.setReporter(accountRepos.getReferenceById(dto.getReporterId()));
+        }
+        if (dto.getProjectId() != null) {
+            entity.setProject(projectRepos.getReferenceById(dto.getProjectId()));
+        }
+        entity.setReason(dto.getReason());
+        entity.setStatus(Report.ReportStatus.UNSOLVED);
+
+        return entity;
+    }
+
     @Override
     public ReportDto toDTO(Report entity, DetailLevel level) {
         if (entity == null) {
@@ -70,6 +87,10 @@ public class ReportMapper extends BaseMapper<ReportDto, Report> {
         dto.setProjectId(entity.getProject().getProjectId());
         dto.setReason(entity.getReason());
         dto.setStatus(ReportDto.StatusEnum.valueOf(entity.getStatus().name()));
+        if(level == DetailLevel.SUMMARY) {
+            return dto;
+        }
+        dto.setSolution(entity.getSolution());
         dto.setCreatedAt(DateTimeUtil.fromLocalToOffset(entity.getCreatedAt()));
         dto.setUpdatedAt(DateTimeUtil.fromLocalToOffset(entity.getUpdatedAt()));
 

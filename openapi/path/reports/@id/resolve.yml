@@ -1,6 +1,6 @@
-get:
-  summary: Get a report by ID
-  operationId: getReportById
+put:
+  summary: Resolve an existing report
+  operationId: resolveReport
   security:
     - bearerAuth: []
   parameters:
@@ -10,6 +10,13 @@ get:
       schema:
         type: integer
         format: int64
+  requestBody:
+    description: Report to resolve
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../../../model/request/solution.yml#/SolutionDto'
   responses:
     '200':
       description: The operation was successful

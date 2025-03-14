@@ -1,11 +1,10 @@
 package com.fptgang.backend.controller;
 
 import com.fptgang.backend.api.controller.ReportsApi;
-import com.fptgang.backend.api.model.ReportDto;
-import com.fptgang.backend.api.model.GetReports200Response;
-import com.fptgang.backend.api.model.Pageable;
+import com.fptgang.backend.api.model.*;
 import com.fptgang.backend.mapper.ReportMapper;
 import com.fptgang.backend.mapper.DetailLevel;
+import com.fptgang.backend.model.Report;
 import com.fptgang.backend.model.Role;
 import com.fptgang.backend.service.ReportService;
 import com.fptgang.backend.service.params.ListParams;
@@ -32,8 +31,9 @@ public class ReportController implements ReportsApi {
     }
 
     @Override
-    public ResponseEntity<ReportDto> createReport(ReportDto reportDto) {
-        var report = reportMapper.toEntity(reportDto);
+    public ResponseEntity<ReportDto> createReport(ReportRequestDto reportRequestDto) {
+        reportRequestDto.setReporterId(SecurityUtil.getCurrentUserId());
+        var report = reportMapper.toEntity(reportRequestDto);
         return new ResponseEntity<>(reportMapper.toDTO(reportService.create(report), DetailLevel.FULL), HttpStatus.OK);
     }
 
@@ -62,4 +62,13 @@ public class ReportController implements ReportsApi {
         return OpenApiHelper.respondPage(res, GetReports200Response.class);
     }
 
+    @Override
+    public ResponseEntity<ReportDto> resolveReport(Long reportId, SolutionDto solutionDto) {
+        if(!SecurityUtil.hasPermission(Role.STAFF)){
+            throw new IllegalArgumentException("Only staff can resolve report");
+        }
+        solutionDto.setStaffId(SecurityUtil.getCurrentUserId());
+        Report report = reportService.resolve(reportId, solutionDto);
+        return new ResponseEntity<>(reportMapper.toDTO(report, DetailLevel.FULL), HttpStatus.OK);
+    }
 }

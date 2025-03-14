@@ -1,0 +1,19 @@
+# model/request/solution.yml
+SolutionDto:
+    type: object
+    required:
+        - projectStatus
+        - TransferDepositTo
+        - solution
+    properties:
+        staffId:
+            type: integer
+            format: int64
+        projectStatus:
+            type: string
+            enum: [CONTINUE, TERMINATE]
+        transferDepositTo:
+            type: string
+            enum: [CLIENT, FREELANCER]
+        solution:
+            type: string

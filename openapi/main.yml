@@ -143,6 +143,8 @@ paths:
 
   /transactions:
     $ref: 'path/transactions/index.yml'
+  /transactions/{transactionId}:
+    $ref: 'path/transactions/@id/index.yml'
   /transactions/deposit:
     $ref: 'path/transactions/deposit.yml'
 
@@ -160,6 +162,8 @@ paths:
     $ref: 'path/reports/index.yml'
   /reports/{reportId}:
     $ref: 'path/reports/@id/index.yml'
+  /reports/{reportId}/resolve:
+    $ref: 'path/reports/@id/resolve.yml'
 
   /stats/monthly-new-customers:
     $ref: "path/stats/monthly-new-customer.yml"

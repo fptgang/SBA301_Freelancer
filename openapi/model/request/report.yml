@@ -1,0 +1,11 @@
+ReportRequestDto:
+  type: object
+  properties:
+    projectId:
+      type: integer
+      format: int64
+    reason:
+      type: string
+    reporterId:
+      type: integer
+      format: int64

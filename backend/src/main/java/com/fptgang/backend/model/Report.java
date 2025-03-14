@@ -36,6 +36,10 @@ public class Report {
     @Searchable
     private String reason;
 
+    @Column(columnDefinition = "TEXT", length = 10000000)
+    @Searchable
+    private String solution;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private ReportStatus status;

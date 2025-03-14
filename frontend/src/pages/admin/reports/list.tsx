@@ -8,16 +8,18 @@ import {
   DateField,
 } from "@refinedev/antd";
 import { Table, Space, Tooltip, notification, Button } from "antd";
-import { ProjectDto, ReportDto } from "../../../generated";
-import api from "../../config/openapi-config";
+import { ProjectDto, ReportDto } from "../../../../generated";
+import api from "../../../config/openapi-config";
 import { LoginOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router";
+import { store } from "../../../store";
 
 export const ReportsList = () => {
   const { tableProps } = useTable({
     syncWithLocation: true,
   });
   const nav = useNavigate();
+  const user = store.getState().auth.account;
 
   const { data: reportData, isLoading: reportIsLoading } = useMany<ReportDto>({
     resource: "reports",
@@ -115,7 +117,11 @@ export const ReportsList = () => {
                   disabled={false}
                 />
               </Tooltip>
-              {record.status === "UNSOLVED" && (
+              {(record.status === "UNSOLVED" ||
+                (record.status === "SOLVING" &&
+                  projectData?.data?.find(
+                    (pr) => pr.projectId === record.projectId
+                  )?.staff?.accountId === user?.accountId)) && (
                 <Tooltip title="Join Project">
                   <Button onClick={() => joinProject(record.projectId || 0)}>
                     <LoginOutlined />

@@ -88,6 +88,7 @@ public class TransactionServiceImpl implements TransactionService {
         var to = accountService.getEscrowAccountReference();
         var fund = milestone.getProject().getContract()
                 .getBudget().multiply(milestone.getBudgetRatio());
+        milestone.setFundStatus(Milestone.FundStatus.DEPOSITED);
         return create(Transaction.builder()
                 .fromAccount(from)
                 .toAccount(to)
@@ -102,47 +103,62 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     @Transactional
     public synchronized Transaction createEscrowRelease(Milestone milestone) {
-        if (existByMilestone(Transaction.TransactionType.ESCROW_RELEASE,
+        if (existByMilestone(Transaction.TransactionType.ESCROW_DEPOSIT,
                 Transaction.TransactionStatus.SUCCESS,
                 milestone.getMilestoneId())) {
-            throw new IllegalArgumentException("Escrow deposit already exists on milestone");
+            if (existByMilestone(Transaction.TransactionType.ESCROW_RELEASE,
+                    Transaction.TransactionStatus.SUCCESS,
+                    milestone.getMilestoneId())) {
+                throw new IllegalArgumentException("Escrow deposit already exists on milestone");
+            }
+            var from = accountService.getEscrowAccountReference();
+            var to = milestone.getProject().getContract().getFreelancer();
+            var fund = milestone.getProject().getContract()
+                    .getBudget().multiply(milestone.getBudgetRatio());
+            milestone.setFundStatus(Milestone.FundStatus.RELEASED);
+            return create(Transaction.builder()
+                    .fromAccount(from)
+                    .toAccount(to)
+                    .milestone(milestone)
+                    .amount(fund)
+                    .type(Transaction.TransactionType.ESCROW_RELEASE)
+                    .status(Transaction.TransactionStatus.SUCCESS)
+                    .paymentMethod(Transaction.PaymentMethod.INTERNAL_WALLET)
+                    .build());
+        } else {
+            throw new IllegalArgumentException("Escrow deposit does not exist on milestone");
         }
-        var from = accountService.getEscrowAccountReference();
-        var to = milestone.getProject().getContract().getFreelancer();
-        var fund = milestone.getProject().getContract()
-                .getBudget().multiply(milestone.getBudgetRatio());
-        return create(Transaction.builder()
-                .fromAccount(from)
-                .toAccount(to)
-                .milestone(milestone)
-                .amount(fund)
-                .type(Transaction.TransactionType.ESCROW_RELEASE)
-                .status(Transaction.TransactionStatus.SUCCESS)
-                .paymentMethod(Transaction.PaymentMethod.INTERNAL_WALLET)
-                .build());
     }
 
     @Override
     @Transactional
     public synchronized Transaction createEscrowRefund(Milestone milestone) {
-        if (existByMilestone(Transaction.TransactionType.ESCROW_REFUND,
+        if (existByMilestone(Transaction.TransactionType.ESCROW_DEPOSIT,
                 Transaction.TransactionStatus.SUCCESS,
                 milestone.getMilestoneId())) {
-            throw new IllegalArgumentException("Escrow deposit already exists on milestone");
+
+            if (existByMilestone(Transaction.TransactionType.ESCROW_REFUND,
+                    Transaction.TransactionStatus.SUCCESS,
+                    milestone.getMilestoneId())) {
+                throw new IllegalArgumentException("Escrow deposit already exists on milestone");
+            }
+            var from = accountService.getEscrowAccountReference();
+            var to = milestone.getProject().getClient();
+            var fund = milestone.getProject().getContract()
+                    .getBudget().multiply(milestone.getBudgetRatio());
+            milestone.setFundStatus(Milestone.FundStatus.REFUNDED);
+            return create(Transaction.builder()
+                    .fromAccount(from)
+                    .toAccount(to)
+                    .milestone(milestone)
+                    .amount(fund)
+                    .type(Transaction.TransactionType.ESCROW_REFUND)
+                    .status(Transaction.TransactionStatus.SUCCESS)
+                    .paymentMethod(Transaction.PaymentMethod.INTERNAL_WALLET)
+                    .build());
+        } else {
+            throw new IllegalArgumentException("Escrow deposit does not exist on milestone");
         }
-        var from = accountService.getEscrowAccountReference();
-        var to = milestone.getProject().getClient();
-        var fund = milestone.getProject().getContract()
-                .getBudget().multiply(milestone.getBudgetRatio());
-        return create(Transaction.builder()
-                .fromAccount(from)
-                .toAccount(to)
-                .milestone(milestone)
-                .amount(fund)
-                .type(Transaction.TransactionType.ESCROW_REFUND)
-                .status(Transaction.TransactionStatus.SUCCESS)
-                .paymentMethod(Transaction.PaymentMethod.INTERNAL_WALLET)
-                .build());
     }
 
     @Override
@@ -164,7 +180,7 @@ public class TransactionServiceImpl implements TransactionService {
     public synchronized Transaction update(Transaction transaction) {
         Transaction existing = transactionRepos.findById(transaction.getTransactionId())
                 .orElseThrow(() -> new InvalidInputException("Transaction does not exist"));
-        if(!existing.getStatus().equals(Transaction.TransactionStatus.PENDING)) {
+        if (!existing.getStatus().equals(Transaction.TransactionStatus.PENDING)) {
             throw new IllegalArgumentException("Transaction is not pending");
         }
         EntityUtil.merge(existing, transaction);

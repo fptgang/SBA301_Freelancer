@@ -98,7 +98,7 @@ public class ProjectServiceImpl implements ProjectService {
         if (existing.getStatus() != Project.ProjectStatus.OPEN) {
             throw new InvalidInputException("Only OPEN projects can be updated");
         }
-        if (!existing.getMilestones().isEmpty()){
+        if (!existing.getMilestones().isEmpty()) {
             throw new InvalidInputException("The minimum amount of milestones is 1, The maximum amount of milestones is 10");
         }
         if (project.getMilestones() != null) {
@@ -205,8 +205,36 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public Project terminateByStaff(Project account) {
-        return null;
+    public Project terminateByStaff(Long projectId, Role transferToRole) {
+        Project project = projectRepos.findByProjectId(projectId).orElseThrow(
+                () -> new InvalidInputException("Project with project id " + projectId + "not found"));
+        if (project.getStatus() == Project.ProjectStatus.TERMINATED) {
+            throw new InvalidInputException("Project is already terminated");
+        }
+        project.setStatus(Project.ProjectStatus.TERMINATED);
+        project.setTerminationReason(Project.TerminationReason.STAFF_DECISION);
+        project.setToTerminate(true);
+        if (transferToRole == Role.CLIENT) {
+            // Refund client
+            project.getMilestones().forEach(milestone -> {
+                if (milestone.getStatus() == Milestone.MilestoneStatus.IN_PROGRESS) {
+                    Transaction refundTransaction = transactionService.createEscrowRefund(milestone);
+                    if (refundTransaction.getStatus() == Transaction.TransactionStatus.SUCCESS) {
+                        milestone.setFundStatus(Milestone.FundStatus.REFUNDED);
+                    }
+                }
+            });
+        } else if (transferToRole == Role.FREELANCER) {
+            project.getMilestones().forEach(milestone -> {
+                if (milestone.getStatus() == Milestone.MilestoneStatus.IN_PROGRESS) {
+                    Transaction refundTransaction = transactionService.createEscrowRelease(milestone);
+                    if (refundTransaction.getStatus() == Transaction.TransactionStatus.SUCCESS) {
+                        milestone.setFundStatus(Milestone.FundStatus.REFUNDED);
+                    }
+                }
+            });
+        }
+        return projectRepos.save(project);
     }
 
     @Override
@@ -525,14 +553,14 @@ public class ProjectServiceImpl implements ProjectService {
                 List<Milestone> milestones = project.getMilestones();
                 for (Milestone milestone : milestones) {
                     milestone.setStatus(Milestone.MilestoneStatus.TERMINATED);
-                        Transaction completedTransaction = transactionService.createEscrowRefund(milestone);
-                        if (completedTransaction.getStatus() == Transaction.TransactionStatus.SUCCESS) {
-                            milestone.setFundStatus(Milestone.FundStatus.REFUNDED);
-                            milestoneRepos.save(milestone);
-                        } else {
-                            log.error("Failed to refund milestone {} for project {}",
-                                    milestone.getMilestoneId(), project.getProjectId());
-                        }
+                    Transaction completedTransaction = transactionService.createEscrowRefund(milestone);
+                    if (completedTransaction.getStatus() == Transaction.TransactionStatus.SUCCESS) {
+                        milestone.setFundStatus(Milestone.FundStatus.REFUNDED);
+                        milestoneRepos.save(milestone);
+                    } else {
+                        log.error("Failed to refund milestone {} for project {}",
+                                milestone.getMilestoneId(), project.getProjectId());
+                    }
                     milestoneRepos.save(milestone);
                 }
                 projectRepos.save(project);
