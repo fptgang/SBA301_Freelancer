@@ -52,6 +52,7 @@ import { formatCurrency } from "../../../utils/formatter";
 import { ProjectDto } from "../../../../generated/models/ProjectDto";
 import { ProposalDto } from "../../../../generated/models/ProposalDto";
 import { store } from "../../../store";
+import ContractCreateButton from "./contract-create";
 
 const { Title, Text, Paragraph } = Typography;
 const { Step } = Steps;
@@ -60,11 +61,8 @@ const { TabPane } = Tabs;
 const ClientProjectShow: React.FC = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const apiUrl = useApiUrl();
   const { open } = useNotification();
-  const { mutate: acceptProposal } = useCustomMutation();
   const { mutate: rejectProposal } = useCustomMutation();
-  const token = store?.getState().auth.accessToken;
 
   // Fetch project data
   const { queryResult: projectQueryResult } = useShow<ProjectDto>({
@@ -81,10 +79,10 @@ const ClientProjectShow: React.FC = () => {
 
   // Fetch project category
   const { data: categoryData, isLoading: isCategoryLoading } = useOne({
-    resource: "projectCategories",
-    id: project?.projectCategoryId || "",
+    resource: "project-categories",
+    id: project?.projectCategory?.projectCategoryId || "",
     queryOptions: {
-      enabled: !!project?.projectCategoryId,
+      enabled: !!project?.projectCategory,
     },
   });
 
@@ -126,61 +124,13 @@ const ClientProjectShow: React.FC = () => {
     },
   };
 
-  // Handle accepting a proposal
-  const handleAcceptProposal = async (proposalId: number) => {
-    // Implementation would go here to accept a proposal
-    try {
-      acceptProposal({
-        url: `${apiUrl}/projects/${id}/${proposalId}`,
-        method: "put",
-        config: {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        },
-        values: {},
-        successNotification: () => {
-          return {
-            type: "success",
-            message: "Proposal accepted successfully",
-            description:
-              "The freelancer has been notified and the project is now in progress",
-          };
-        },
-        errorNotification: () => {
-          return {
-            type: "error",
-            message: "Failed to accept proposal",
-            description: "Please try again later",
-          };
-        },
-      });
-      // open?.({
-      //   type: "success",
-      //   message: "Proposal accepted successfully",
-      //   description:
-      //     "The freelancer has been notified and the project is now in progress",
-      // });
-
-      // Refresh data after successful operation
-      projectQueryResult.refetch();
-    } catch (error) {
-      open?.({
-        type: "error",
-        message: "Failed to accept proposal",
-        description: "Please try again later",
-      });
-    }
-  };
-
   // Handle rejecting a proposal
   const handleRejectProposal = async (proposalId: number) => {
     // Implementation would go here to reject a proposal
     try {
       rejectProposal({
-        url: `${apiUrl}/projects/${id}/${proposalId}`,
-        method: "delete",
+        url: `proposals/${proposalId}/reject`,
+        method: "put",
         values: {},
         successNotification: () => {
           return {
@@ -333,11 +283,15 @@ const ClientProjectShow: React.FC = () => {
             <Card className="h-full shadow-sm">
               <Statistic
                 title="Created On"
-                value={new Date(project.createdAt).toLocaleDateString("en-US", {
-                  month: "short",
-                  day: "numeric",
-                  year: "numeric",
-                })}
+                value={
+                  project.createdAt
+                    ? new Date(project.createdAt).toLocaleDateString("en-US", {
+                        month: "short",
+                        day: "numeric",
+                        year: "numeric",
+                      })
+                    : "N/A"
+                }
                 prefix={<CalendarOutlined />}
                 className="text-center"
               />
@@ -449,18 +403,29 @@ const ClientProjectShow: React.FC = () => {
                                 >
                                   <Button danger>Reject Proposal</Button>
                                 </Popconfirm>
-                                <Popconfirm
+                                {/* <Popconfirm
                                   title="Are you sure you want to accept this proposal?"
                                   onConfirm={() =>
                                     handleAcceptProposal(proposal.proposalId)
                                   }
                                   okText="Yes"
                                   cancelText="No"
-                                >
-                                  <Button type="primary">
-                                    Accept Proposal
-                                  </Button>
-                                </Popconfirm>
+                                > */}
+                                <ContractCreateButton
+                                  proposalId={proposal.proposalId || 0}
+                                  projectTitle={project.title || ""}
+                                  freelancerName={
+                                    proposal.freelancer?.firstName +
+                                      " " +
+                                      proposal.freelancer?.lastName || ""
+                                  }
+                                  milestoneAmount={
+                                    (proposal.budget || 0) *
+                                    (project?.milestones?.[0]?.budgetRatio || 0)
+                                  }
+                                  onSubmit={projectQueryResult.refetch}
+                                />
+                                {/* </Popconfirm> */}
                               </div>,
                             ]
                           : []

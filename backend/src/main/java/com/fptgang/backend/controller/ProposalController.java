@@ -14,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -37,8 +38,7 @@ public class ProposalController implements ProposalsApi {
         var params = ListParams.builder()
                 .pageable(page)
                 .search(search)
-                .filter(filter)
-                .includeInvisible(includeInvisible);
+                .filter(filter);
         var res = proposalService
                 .getAll(params.build())
                 .map(proposal -> proposalMapper.toDTO(proposal, DetailLevel.SUMMARY));
@@ -46,19 +46,30 @@ public class ProposalController implements ProposalsApi {
     }
 
     @Override
-    public ResponseEntity<ProposalDto> acceptProposal(Long proposalId) {
-        //projectService.acceptProjectProposal(projectId, proposalId);
-        return ProposalsApi.super.acceptProposal(proposalId);
+    public ResponseEntity<ProposalDto> createProposal(ProposalCreateDto proposalCreateDto) {
+        proposalCreateDto.setFreelancerId(SecurityUtil.requireCurrentUserId());
+        if(!SecurityUtil.hasRole(Role.FREELANCER)){
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+        return new ResponseEntity<>(proposalMapper.toDTO(
+                proposalService.create(proposalMapper.toEntity(proposalCreateDto)),
+                DetailLevel.FULL),
+                HttpStatus.CREATED);
     }
 
     @Override
     public ResponseEntity<ProposalDto> rejectProposal(Long proposalId) {
-        //projectService.rejectProjectProposal(projectId, proposalId);
-        return ProposalsApi.super.rejectProposal(proposalId);
+        return new ResponseEntity<>(proposalMapper.toDTO(
+                proposalService.rejectProposal(proposalId, SecurityUtil.requireCurrentUserId()),
+                DetailLevel.FULL),
+                HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity<ProposalDto> withdrawProposal(Long proposalId) {
-        return ProposalsApi.super.withdrawProposal(proposalId);
+        return new ResponseEntity<>(proposalMapper.toDTO(
+                proposalService.withdrawProposal(proposalId, SecurityUtil.requireCurrentUserId()),
+                DetailLevel.FULL),
+                HttpStatus.OK);
     }
 }

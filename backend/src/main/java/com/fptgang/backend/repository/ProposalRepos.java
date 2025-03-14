@@ -19,4 +19,9 @@ public interface ProposalRepos extends JpaRepository<Proposal, Long>, JpaSpecifi
             Project project,
             Proposal.ProposalStatus status
             );
+
+
+    List<Proposal> findByProject_ProjectId(Long projectId);
+    Optional<Proposal> findByProject_ProjectIdAndFreelancer_AccountIdAndStatus(Long projectId, Long freelancerId, Proposal.ProposalStatus status);
+
 }

@@ -53,18 +53,22 @@ public class TransactionServiceImpl implements TransactionService {
                         "Transaction must have both from and to account");
                 break;
         }
+        if (transaction.getStatus()
+                .equals(Transaction.TransactionStatus.SUCCESS)) {
 
-        if (from != null) {
-            if (from.getBalance().compareTo(transaction.getAmount()) < 0) {
-                throw new IllegalArgumentException("Insufficient balance");
+            if (from != null) {
+                if (from.getBalance().compareTo(transaction.getAmount()) < 0) {
+                    throw new IllegalArgumentException("Insufficient balance");
+                }
+                from.setBalance(from.getBalance().subtract(transaction.getAmount()));
+                from = accountService.update(from);
             }
-            from.setBalance(from.getBalance().subtract(transaction.getAmount()));
-            from = accountService.update(from);
-        }
 
-        if (to != null) {
-            to.setBalance(to.getBalance().add(transaction.getAmount()));
-            to = accountService.update(to);
+            if (to != null) {
+                to.setBalance(to.getBalance().add(transaction.getAmount()));
+                to = accountService.update(to);
+            }
+
         }
 
         transaction.setFromAccount(from);
@@ -160,7 +164,28 @@ public class TransactionServiceImpl implements TransactionService {
     public synchronized Transaction update(Transaction transaction) {
         Transaction existing = transactionRepos.findById(transaction.getTransactionId())
                 .orElseThrow(() -> new InvalidInputException("Transaction does not exist"));
+        if(!existing.getStatus().equals(Transaction.TransactionStatus.PENDING)) {
+            throw new IllegalArgumentException("Transaction is not pending");
+        }
         EntityUtil.merge(existing, transaction);
+        if (existing.getStatus()
+                .equals(Transaction.TransactionStatus.SUCCESS)) {
+            var from = existing.getFromAccount();
+            var to = existing.getToAccount();
+            if (from != null) {
+                if (from.getBalance().compareTo(transaction.getAmount()) < 0) {
+                    throw new IllegalArgumentException("Insufficient balance");
+                }
+                from.setBalance(from.getBalance().subtract(transaction.getAmount()));
+                from = accountService.update(from);
+            }
+
+            if (to != null) {
+                to.setBalance(to.getBalance().add(transaction.getAmount()));
+                to = accountService.update(to);
+            }
+
+        }
         return transactionRepos.save(existing);
     }
 

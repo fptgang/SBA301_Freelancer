@@ -142,7 +142,7 @@ const resources = [
     },
   },
   {
-    name: "projectCategories",
+    name: "project-categories",
     list: "/admin/project-categories",
     create: "/admin/project-categories/create",
     edit: "/admin/project-categories/edit/:id",

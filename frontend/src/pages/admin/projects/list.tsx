@@ -20,7 +20,7 @@ import {
   AccountDto,
   ProjectCategoryDto,
   ProjectDto,
-  ProjectDtoStatusEnum,
+  ProjectStatusDto,
 } from "../../../../generated";
 import { stompClient } from "../../../utils/stompClient";
 
@@ -71,10 +71,10 @@ export const ProjectsList: React.FC = () => {
 
   const { data: projectCategoryData, isLoading: projectCategoryIsLoading } =
     useMany<ProjectCategoryDto>({
-      resource: "projectCategories",
+      resource: "project-categories",
       ids:
         projectData?.data
-          ?.map((item) => item.projectCategoryId)
+          ?.map((item) => item.projectCategory?.projectCategoryId)
           .filter((id): id is number => id !== undefined) ?? [],
     });
 
@@ -89,7 +89,7 @@ export const ProjectsList: React.FC = () => {
   useEffect(() => {
     return () => {
       stompClient?.unsubscribe("resources/projects");
-      stompClient?.unsubscribe("resources/projectCategories");
+      stompClient?.unsubscribe("resources/project-categories");
     };
   }, []);
 
@@ -148,8 +148,11 @@ export const ProjectsList: React.FC = () => {
             ) : (
               <Tag color="blue">
                 {projectCategoryData?.data.find(
-                  (v) => v.projectCategoryId === record.projectCategoryId
-                )?.name || "Unknown " + record.projectCategoryId}
+                  (v) =>
+                    v.projectCategoryId ===
+                    record.projectCategory?.projectCategoryId
+                )?.name ||
+                  "Unknown " + record.projectCategory?.projectCategoryId}
               </Tag>
             )
           }
@@ -178,12 +181,10 @@ export const ProjectsList: React.FC = () => {
           dataIndex="status"
           title="Status"
           filterMode="menu"
-          filters={Object.values(ProjectDtoStatusEnum).map(
-            (status: string) => ({
-              text: status.toLowerCase().replace("_", " "),
-              value: status,
-            })
-          )}
+          filters={Object.values(ProjectStatusDto).map((status: string) => ({
+            text: status.toLowerCase().replace("_", " "),
+            value: status,
+          }))}
           filterMultiple={false}
           render={(value: keyof typeof STATUS_COLOR_MAP) => (
             <Tag

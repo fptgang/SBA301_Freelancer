@@ -55,18 +55,26 @@ public class ProjectController implements ProjectsApi {
     @Override
     public ResponseEntity<ProjectDto> getProjectById(Long projectId) {
         Project project = projectService.findByProjectId(projectId);
-        return ResponseEntity.ok(projectMapper.toDTO(project, DetailLevel.FULL));
+        if (Objects.equals(project.getClient().getAccountId(), SecurityUtil.getCurrentUserId()) ||
+                Objects.equals(project.getContract().getFreelancer().getAccountId(), SecurityUtil.getCurrentUserId()) ||
+                SecurityUtil.hasPermission(Role.STAFF) ||
+                SecurityUtil.hasPermission(Role.ADMIN)
+        ) {
+            return ResponseEntity.ok(projectMapper.toDTO(project, DetailLevel.FULL));
+
+        }
+        return ResponseEntity.ok(projectMapper.toDTO(project, DetailLevel.SUMMARY));
     }
 
     @Override
-    public ResponseEntity<GetProjects200Response> getProjects(Pageable pageable, String filter, String search,String type) {
+    public ResponseEntity<GetProjects200Response> getProjects(Pageable pageable, String filter, String search, String type) {
         log.info("Getting projects");
         var page = OpenApiHelper.toPageable(pageable);
         var includeInvisible = SecurityUtil.hasPermission(Role.ADMIN);
         Long participantId = SecurityUtil.getCurrentUserId();
-        if(type!=null && type.equalsIgnoreCase("chat")){
-            var res = projectService.getProjectsSortedByLatestMessage(page,includeInvisible,participantId).map(
-                    project -> projectMapper.toDTO(project, DetailLevel.SUMMARY)
+        if (type != null && type.equalsIgnoreCase("chat")) {
+            var res = projectService.getProjectsSortedByLatestMessage(page, includeInvisible, participantId).map(
+                    project -> projectMapper.toDTO(project, DetailLevel.FULL)
             );
             return OpenApiHelper.respondPage(res, GetProjects200Response.class);
         }
@@ -106,7 +114,7 @@ public class ProjectController implements ProjectsApi {
 
     @Override
     public ResponseEntity<ProjectDto> joinProject(Long projectId) {
-        if(!SecurityUtil.hasPermission(Role.STAFF)){
+        if (!SecurityUtil.hasPermission(Role.STAFF)) {
             throw new RuntimeException("You are not a staff");
         }
         Project project = projectService.joinProject(projectId, SecurityUtil.getCurrentUserId());
@@ -115,7 +123,7 @@ public class ProjectController implements ProjectsApi {
 
     @Override
     public ResponseEntity<ProjectDto> leaveProject(Long projectId) {
-        if(!SecurityUtil.hasPermission(Role.STAFF)){
+        if (!SecurityUtil.hasPermission(Role.STAFF)) {
             throw new RuntimeException("You are not a staff");
         }
         Project project = projectService.leaveProject(projectId, SecurityUtil.getCurrentUserId());

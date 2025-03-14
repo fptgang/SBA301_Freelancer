@@ -21,3 +21,6 @@ FileBlobDto:
     milestoneId:
       type: integer
       format: int64
+    contractId:
+      type: integer
+      format: int64
