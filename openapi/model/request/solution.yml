@@ -12,7 +12,7 @@ SolutionDto:
         projectStatus:
             type: string
             enum: [CONTINUE, TERMINATE]
-        TransferDepositTo:
+        transferDepositTo:
             type: string
             enum: [CLIENT, FREELANCER]
         solution:
