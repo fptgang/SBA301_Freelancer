@@ -70,9 +70,11 @@ public class SecurityConfig {
                                         "/swagger-ui/**",
                                         "/v3/**",
                                         "/swagger-ui.html",
-                                        "/api/v1/mail/**"
+                                        "/api/v1/mail/**",
+                                        "/api/v1/projects",
+                                        "/api/v1/profiles"
                                 ).permitAll()
-                                .anyRequest().permitAll();
+                                .anyRequest().authenticated();
                     }
                 })
                 .csrf(AbstractHttpConfigurer::disable)

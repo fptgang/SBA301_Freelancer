@@ -8,6 +8,7 @@ import com.fptgang.backend.model.Role;
 import com.fptgang.backend.repository.ContractRepos;
 import com.fptgang.backend.repository.MilestoneRepos;
 
+import com.fptgang.backend.service.AccountService;
 import com.fptgang.backend.service.ContractService;
 import com.fptgang.backend.service.ProposalService;
 import com.fptgang.backend.service.TransactionService;
@@ -19,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
@@ -33,7 +35,12 @@ public class ContractServiceImpl implements ContractService {
     private ContractRepos contractRepos;
     @Autowired
     private MilestoneRepos milestoneRepos;
-
+    @Autowired
+    private AccountService accountService;
+    @Autowired
+    private ProposalService proposalService;
+    @Autowired
+    private TransactionService transactionService;
 
 
     @Override

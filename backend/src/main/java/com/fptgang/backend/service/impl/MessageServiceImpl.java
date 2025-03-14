@@ -27,6 +27,7 @@ public class MessageServiceImpl implements MessageService {
     @Transactional
     public Message create(Message message) {
         message.setMessageId(null);
+        message.setIsVisible(true);
         message = messageRepos.save(message);
         messageRepos.updateLastMessageByProjectId(message.getMessageId(), message.getProjectId());
         return message;
