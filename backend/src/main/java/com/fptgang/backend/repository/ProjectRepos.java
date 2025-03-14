@@ -8,6 +8,8 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 @Repository
 public interface ProjectRepos extends JpaRepository<Project,Long>, JpaSpecificationExecutor<Project> {
@@ -20,4 +22,7 @@ public interface ProjectRepos extends JpaRepository<Project,Long>, JpaSpecificat
             "GROUP BY p.projectId " +
             "ORDER BY MAX(m.createdAt) DESC")
     Page<Project> findAllSortedByLatestMessage (Pageable pageable,boolean includeInvisible,Long participantId);
+
+    List<Project> findByStatusAndStartDateLessThanEqual(Project.ProjectStatus status, LocalDateTime date);
+    List<Project> findByStatusAndToTerminate(Project.ProjectStatus status, Boolean toTerminate);
 }

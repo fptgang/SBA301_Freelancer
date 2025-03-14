@@ -14,6 +14,7 @@ import com.fptgang.backend.util.OpenApiHelper;
 import com.fptgang.backend.util.SecurityUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -89,17 +90,18 @@ public class ProjectController implements ProjectsApi {
 
     @Override
     public ResponseEntity<ProjectDto> extendProjectDeadline(Long projectId, ProjectDeadlineExtendDto projectDeadlineExtendDto) {
+        projectDeadlineExtendDto.setProjectId(projectId);
         return ProjectsApi.super.extendProjectDeadline(projectId, projectDeadlineExtendDto);
     }
 
     @Override
     public ResponseEntity<ProjectDto> terminateProject(Long projectId) {
-        return ProjectsApi.super.terminateProject(projectId);
+        return new ResponseEntity<>(projectMapper.toDTO(projectService.terminateByClient(projectService.findByProjectId(projectId)),DetailLevel.FULL), HttpStatus.OK);
     }
 
     @Override
     public ResponseEntity<ProjectDto> unpauseProject(Long projectId) {
-        return ProjectsApi.super.unpauseProject(projectId);
+        return new ResponseEntity<>(projectMapper.toDTO(projectService.unpause(projectService.findByProjectId(projectId)),DetailLevel.FULL), HttpStatus.OK);
     }
 
     @Override
