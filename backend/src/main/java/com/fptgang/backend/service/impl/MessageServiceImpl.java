@@ -4,22 +4,32 @@ import com.fptgang.backend.exception.InvalidInputException;
 import com.fptgang.backend.model.Message;
 import com.fptgang.backend.repository.MessageRepos;
 import com.fptgang.backend.service.MessageService;
+import com.fptgang.backend.service.ProjectService;
 import com.fptgang.backend.util.EntityUtil;
 import com.fptgang.backend.util.OpenApiHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.function.Consumer;
 
 @Service
 public class MessageServiceImpl implements MessageService {
-    @Autowired
-    private MessageRepos messageRepos;
+    private final MessageRepos messageRepos;
+
+    public MessageServiceImpl(MessageRepos messageRepos) {
+        this.messageRepos = messageRepos;
+    }
 
     @Override
+    @Transactional
     public Message create(Message message) {
         message.setMessageId(null);
-        return messageRepos.save(message);
+        message = messageRepos.save(message);
+        messageRepos.updateLastMessageByProjectId(message.getMessageId(), message.getProjectId());
+        return message;
     }
 
     @Override
@@ -45,6 +55,10 @@ public class MessageServiceImpl implements MessageService {
                 () -> new InvalidInputException("Message with id " + messageId + "not found"));
         message.setIsVisible(false);
         messageRepos.save(message);
+
+        messageRepos.findLatestVisibleMessage(message.getProjectId()).ifPresent(m -> {
+            messageRepos.updateLastMessageByProjectId(m.getMessageId(), message.getProjectId());
+        });
     }
 
     @Override

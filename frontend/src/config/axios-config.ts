@@ -25,13 +25,13 @@ axiosInstance.interceptors.response.use(
   (response) => {
     return response;
   },
-  async (error
+  async (error 
   ) => {
     console.error("Response Error:", error);
     const originalRequest = error.config;
 
     if (
-      (error.response?.status === 401) ||
+      (error.response?.status === 401) || 
       (error.code === "ERR_NETWORK" && error.config?.headers?.Authorization)
     ) {
       const refreshToken = localStorage.getItem(REFRESH_TOKEN_KEY);
@@ -51,16 +51,17 @@ axiosInstance.interceptors.response.use(
 
           if (response.ok) {
             const { accessToken } = await response.json() as JwtResponseDto;
-            store.dispatch(setAccessToken(accessToken));
 
-            originalRequest.headers["Authorization"] = `Bearer ${accessToken}`;
-
-            return axiosInstance(originalRequest);
+            if (accessToken) {
+              store.dispatch(setAccessToken(accessToken));
+              originalRequest.headers["Authorization"] = `Bearer ${accessToken}`;
+              return axiosInstance(originalRequest);
+            }
           }
         } catch (refreshError) {
           localStorage.removeItem(REFRESH_TOKEN_KEY);
           store.dispatch(clearAuth());
-          window.location.href = '/login';
+          //window.location.href = '/login';
           return Promise.reject(refreshError);
         }
       }

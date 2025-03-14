@@ -65,7 +65,7 @@ export const authProvider: AuthProvider = {
     } else {
       return {
         authenticated: false,
-        redirectTo: "/login",
+        //redirectTo: "/login",
         error: {
           message: "Check failed",
           name: "Not authenticated"

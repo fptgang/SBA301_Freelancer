@@ -34,7 +34,7 @@ class TokenRefreshMiddleware implements Middleware {
       } catch (refreshError) {
         localStorage.removeItem(REFRESH_TOKEN_KEY);
         store.dispatch(clearAuth());
-        window.location.href = '/login';
+        //  window.location.href = '/login';
         throw refreshError;
       } finally {
         this.refreshInProgress = null;

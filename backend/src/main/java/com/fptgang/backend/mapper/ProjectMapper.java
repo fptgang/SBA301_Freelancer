@@ -26,6 +26,7 @@ public class ProjectMapper extends BaseMapper<ProjectDto, Project> {
     private final MilestoneMapper milestoneMapper;
     private final ProjectSkillMapper projectSkillMapper;
     private final MessageMapper messageMapper;
+    private final MessageRepos messageRepos;
 
     public ProjectMapper(ProjectCategoryRepos projectCategoryRepos,
                          ProjectCategoryMapper projectCategoryMapper,
@@ -37,7 +38,7 @@ public class ProjectMapper extends BaseMapper<ProjectDto, Project> {
                          ContractMapper contractMapper,
                          MilestoneRepos milestoneRepos,
                          MilestoneMapper milestoneMapper,
-                         ProjectSkillMapper projectSkillMapper, MessageMapper messageMapper) {
+                         ProjectSkillMapper projectSkillMapper, MessageMapper messageMapper, MessageRepos messageRepos) {
         this.projectCategoryRepos = projectCategoryRepos;
         this.projectCategoryMapper = projectCategoryMapper;
         this.accountRepos = accountRepos;
@@ -50,6 +51,7 @@ public class ProjectMapper extends BaseMapper<ProjectDto, Project> {
         this.milestoneMapper = milestoneMapper;
         this.projectSkillMapper = projectSkillMapper;
         this.messageMapper = messageMapper;
+        this.messageRepos = messageRepos;
     }
 
     @Override
@@ -91,6 +93,9 @@ public class ProjectMapper extends BaseMapper<ProjectDto, Project> {
                     .filter(e -> e.getMilestoneId() != null)
                     .map(e -> milestoneRepos.getReferenceById(e.getMilestoneId()))
                     .collect(Collectors.toList()));
+        }
+        if (dto.getLatestMessage() != null && dto.getLatestMessage().getMessageId() != null) {
+            entity.setLastMessage(messageRepos.getReferenceById(dto.getLatestMessage().getMessageId()));
         }
         if (dto.getRequiredSkills() != null) {
             entity.setRequiredSkills(dto.getRequiredSkills().stream()
@@ -149,7 +154,7 @@ public class ProjectMapper extends BaseMapper<ProjectDto, Project> {
                 .toList());
         dto.setContract(entity.getContract()!=null?contractMapper.toDTO(entity.getContract(), DetailLevel.FULL):null);
 
-        dto.setLatestMessage(entity.getMessages().isEmpty() ? null : messageMapper.toDTO(entity.getMessages().getLast(), DetailLevel.REFERENCE));
+        dto.setLatestMessage(messageMapper.toDTO(entity.getLastMessage(), DetailLevel.REFERENCE));
         return dto;
     }
 }
