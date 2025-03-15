@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Contract Signed Notification</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            padding: 20px;
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            margin: auto;
+        }
+        h2 {
+            color: #333;
+        }
+        .details-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        .details-table th, .details-table td {
+            text-align: left;
+            padding: 8px;
+            border-bottom: 1px solid #ddd;
+        }
+        .button {
+            display: inline-block;
+            padding: 10px 15px;
+            background-color: #007BFF;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>Contract Signed Successfully</h2>
+    <p>Dear {{freelancer.firstName}} {{freelancer.lastName}},</p>
+    <p>The contract for the project <strong>{{project.title}}</strong> has been successfully signed.</p>
+    <table class="details-table">
+        <tr>
+            <th>Contract ID:</th>
+            <td>{{contractId}}</td>
+        </tr>
+        <tr>
+            <th>Project Title:</th>
+            <td>{{project.title}}</td>
+        </tr>
+        <tr>
+            <th>Client:</th>
+            <td>{{project.client.firstName}} {{project.client.lastName}}</td>
+        </tr>
+        <tr>
+            <th>Budget:</th>
+            <td>{{budget}}</td>
+        </tr>
+        <tr>
+            <th>Signed Date:</th>
+            <td>{{signedAt}}</td>
+        </tr>
+    </table>
+    <p>You can download the contract file below:</p>
+    <a class="button" href="{{contractFile.fileUrl}}" target="_blank">Download Contract</a>
+    <p>Best regards,</p>
+    <p>FPTGang Team</p>
+</div>
+</body>
+</html>

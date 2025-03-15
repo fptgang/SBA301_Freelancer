@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Report Created Notification</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            background: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            color: #333;
+        }
+        .details {
+            margin: 20px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+        .button {
+            display: inline-block;
+            padding: 10px 15px;
+            background: #007bff;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>Report Created Notification</h2>
+    <p>Dear {{reporter.firstName}} {{reporter.lastName}},</p>
+    <p>Your report regarding the project <strong>{{project.title}}</strong> has been successfully created. Below are the details:</p>
+    <div class="details">
+        <table>
+            <tr>
+                <th>Report ID</th>
+                <td>{{reportId}}</td>
+            </tr>
+            <tr>
+                <th>Project</th>
+                <td>{{project.title}}</td>
+            </tr>
+            <tr>
+                <th>Reason</th>
+                <td>{{reason}}</td>
+            </tr>
+            <tr>
+                <th>Status</th>
+                <td>{{status}}</td>
+            </tr>
+            <tr>
+                <th>Created At</th>
+                <td>{{createdAt}}</td>
+            </tr>
+        </table>
+    </div>
+    <p>You can track the status of your report by clicking the button below:</p>
+    <a href="{{reportUrl}}" class="button">View Report</a>
+    <p>Best regards,<br>Support Team</p>
+</div>
+</body>
+</html>
