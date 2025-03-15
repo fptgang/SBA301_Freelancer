@@ -3,35 +3,34 @@ package com.fptgang.backend.service.impl;
 import com.fptgang.backend.config.HirableConfig;
 import com.fptgang.backend.exception.InvalidInputException;
 import com.fptgang.backend.model.*;
-import com.fptgang.backend.repository.ContractRepos;
-import com.fptgang.backend.repository.MilestoneRepos;
-import com.fptgang.backend.repository.ProjectRepos;
-import com.fptgang.backend.repository.ProposalRepos;
+import com.fptgang.backend.repository.*;
+import com.fptgang.backend.security.AuthContext;
 import com.fptgang.backend.service.AccountService;
+import com.fptgang.backend.service.MilestoneService;
 import com.fptgang.backend.service.ProjectService;
 import com.fptgang.backend.service.ProposalService;
 import com.fptgang.backend.service.params.ListParams;
 import com.fptgang.backend.util.EntityUtil;
 import com.fptgang.backend.util.OpenApiHelper;
+import com.fptgang.backend.util.ProjectTimeline;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Sets;
 import jakarta.transaction.Transactional;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 public class ProjectServiceImpl implements ProjectService {
-    private static final Logger log = LoggerFactory.getLogger(ProjectServiceImpl.class);
+    private final AuthContext authContext;
     private final ProjectRepos projectRepos;
     private final AccountService accountService;
     private final HirableConfig hirableConfig;
@@ -39,9 +38,20 @@ public class ProjectServiceImpl implements ProjectService {
     private final ContractRepos contractRepos;
     private final MilestoneRepos milestoneRepos;
     private final TransactionServiceImpl transactionService;
+    private final MilestoneService milestoneService;
+    private final AccountRepos accountRepos;
 
-    @Autowired
-    public ProjectServiceImpl(ProjectRepos projectRepos, ProposalService proposalService, AccountService accountService, HirableConfig hirableConfig, ProposalRepos proposalRepos, ContractRepos contractRepos, MilestoneRepos milestoneRepos, TransactionServiceImpl transactionService) {
+    public ProjectServiceImpl(AuthContext authContext,
+                              ProjectRepos projectRepos,
+                              AccountService accountService,
+                              HirableConfig hirableConfig,
+                              ProposalRepos proposalRepos,
+                              ContractRepos contractRepos,
+                              MilestoneRepos milestoneRepos,
+                              TransactionServiceImpl transactionService,
+                              MilestoneService milestoneService,
+                              AccountRepos accountRepos) {
+        this.authContext = authContext;
         this.projectRepos = projectRepos;
         this.accountService = accountService;
         this.hirableConfig = hirableConfig;
@@ -49,393 +59,285 @@ public class ProjectServiceImpl implements ProjectService {
         this.contractRepos = contractRepos;
         this.milestoneRepos = milestoneRepos;
         this.transactionService = transactionService;
+        this.milestoneService = milestoneService;
+        this.accountRepos = accountRepos;
     }
 
-
     @Override
+    @Transactional
     public Project create(Project project) {
-        // First save the project without milestones
-        var milestones = project.getMilestones();
-        var skills = project.getRequiredSkills();
-        project.setRequiredSkills(null);
-        project.setMilestones(null);
-        project = projectRepos.save(project);
-        // Then set and save milestones if present
-        if (milestones != null && !milestones.isEmpty()
-                && skills != null && !skills.isEmpty()
-        ) {
-            Project finalProject = project;
-            LocalDateTime lastDeadline = LocalDateTime.now();
-            BigDecimal totalBudgetRatio = BigDecimal.ZERO;
-            for (var milestone : milestones) {
-                milestone.setProject(finalProject);
-                if (milestone.getDeadline() != null && milestone.getDeadline().isAfter(lastDeadline)) {
-                    lastDeadline = milestone.getDeadline();
-                    totalBudgetRatio = totalBudgetRatio.add(milestone.getBudgetRatio());
-                } else
-                    throw new InvalidInputException("Milestone deadline must be after the previous milestone");
-            }
-            if (totalBudgetRatio.compareTo(BigDecimal.ONE) != 0) {
-                throw new InvalidInputException("Total budget ratio must be 1");
-            }
-            skills.forEach(skill -> {
-                skill.setProject(finalProject);
-            });
-            project.setRequiredSkills(skills);
-            project.setMilestones(milestones);
-            project = projectRepos.save(project);
+        project.setProjectId(null);
+        Preconditions.checkArgument(project.getMinBudget().compareTo(BigDecimal.ZERO) > 0,
+                "Min budget must be greater than 0");
+        Preconditions.checkArgument(project.getMaxBudget().compareTo(BigDecimal.ZERO) > 0,
+                "Max budget must be greater than 0");
+        Preconditions.checkArgument(project.getMaxBudget().compareTo(project.getMinBudget()) > 0,
+                "Max budget must be greater than min budget");
+        validateTimeline(project, true);
+
+        project.setClient(accountRepos.getReferenceById(authContext.requireAccountId()));
+        log.info("CreateProject, userID = {}", authContext.requireAccountId());
+        project.setStatus(Project.ProjectStatus.OPEN);
+
+        for (ProjectSkill skill : project.getRequiredSkills())
+            skill.setProject(project);
+
+        BigDecimal totalBudgetRatio = BigDecimal.ZERO;
+        for (Milestone milestone : project.getMilestones()) {
+            Preconditions.checkArgument(milestone.getBudgetRatio().compareTo(BigDecimal.ZERO) > 0,
+                    "Milestone budget ratio must be greater than 0");
+            Preconditions.checkArgument(milestone.getBudgetRatio().compareTo(BigDecimal.ONE) <= 0,
+                    "Milestone budget ratio must be less than or equal to 1");
+            milestone.setStatus(Milestone.MilestoneStatus.PENDING);
+            milestone.setFundStatus(Milestone.FundStatus.NONE);
+            milestone.setProject(project);
+            totalBudgetRatio = totalBudgetRatio.add(milestone.getBudgetRatio());
         }
+        if (totalBudgetRatio.compareTo(BigDecimal.ONE) != 0)
+            throw new InvalidInputException("Total budget ratio must be 1");
+
+        project = projectRepos.save(project); // also save milestones and project skills
         return project;
     }
 
     @Override
     public Project update(Project project) {
-        if (project.getProjectId() == null) {
-            throw new InvalidInputException("Project ID cannot be null");
-        }
         Project existing = projectRepos.findByProjectId(project.getProjectId()).orElseThrow(
                 () -> new InvalidInputException("Project does not exist"));
-        if (existing.getStatus() != Project.ProjectStatus.OPEN) {
-            throw new InvalidInputException("Only OPEN projects can be updated");
-        }
-        if (!existing.getMilestones().isEmpty()) {
-            throw new InvalidInputException("The minimum amount of milestones is 1, The maximum amount of milestones is 10");
-        }
-        if (project.getMilestones() != null) {
-//            existing.getMilestones().clear();
-            if (project.getMilestones().size() > 10) {
-                throw new InvalidInputException("Maximum number of milestones is 10");
+        if (existing.getStatus() != Project.ProjectStatus.OPEN)
+            throw new IllegalStateException("Only OPEN projects can be updated");
+        if (project.getStartDate().isBefore(existing.getStartDate()))
+            throw new InvalidInputException("Cannot shrink project startDate");
+        validateTimeline(project, false);
+
+        if (project.getMilestones() != null && !project.getMilestones().isEmpty()) {
+            BigDecimal totalBudgetRatio = BigDecimal.ZERO;
+            for (Milestone milestone : project.getMilestones()) {
+                Preconditions.checkArgument(milestone.getBudgetRatio().compareTo(BigDecimal.ZERO) > 0,
+                        "Milestone budget ratio must be greater than 0");
+                Preconditions.checkArgument(milestone.getBudgetRatio().compareTo(BigDecimal.ONE) <= 0,
+                        "Milestone budget ratio must be less than or equal to 1");
+                milestone.setStatus(Milestone.MilestoneStatus.PENDING);
+                milestone.setFundStatus(Milestone.FundStatus.NONE);
+                milestone.setProject(project);
+                totalBudgetRatio = totalBudgetRatio.add(milestone.getBudgetRatio());
             }
-            LocalDateTime now = LocalDateTime.now();
-            if (project.getStartDate() != null && project.getStartDate().isBefore(now.plusDays(3))) {
-                throw new InvalidInputException("Start date must be at least 3 days in the future");
-            }
-            LocalDateTime startDate = project.getStartDate() != null ?
-                    project.getStartDate() : existing.getStartDate();
+            if (totalBudgetRatio.compareTo(BigDecimal.ONE) != 0)
+                throw new InvalidInputException("Total budget ratio must be 1");
 
-            List<Milestone> milestones = project.getMilestones();
-            if (!milestones.isEmpty()) {
-                LocalDateTime lastDeadline = startDate;
-                BigDecimal totalBudgetRatio = BigDecimal.ZERO;
+            existing.setMilestones(project.getMilestones());
 
-                for (var milestone : milestones) {
-                    milestone.setProject(existing);
-                    if (milestone.getDeadline() == null) {
-                        throw new InvalidInputException("Milestone deadline cannot be null");
-                    }
-                    if (milestone.getDeadline().isBefore(lastDeadline.plusDays(hirableConfig.getMinProjectStartDelay()))) {
-                        throw new InvalidInputException("Milestone deadlines must be at least 3 days apart");
-                    }
-                    if (milestone.getDeadline().isAfter(lastDeadline.plusDays(hirableConfig.getMaxMilestoneDurationBetween()))) {
-                        throw new InvalidInputException("Milestone deadlines cannot be more than 30 days apart");
-                    }
+            Set<Long> existingMilestoneIds = existing.getMilestones().stream()
+                    .filter(Milestone::getIsVisible)
+                    .map(Milestone::getMilestoneId)
+                    .collect(Collectors.toSet());
+            Set<Long> newMilestoneIds = project.getMilestones().stream()
+                    .filter(Milestone::getIsVisible)
+                    .map(Milestone::getMilestoneId)
+                    .collect(Collectors.toSet());
+            log.info("Existing milestones {}", existingMilestoneIds.stream()
+                    .map(String::valueOf).collect(Collectors.joining(",")));
+            log.info("New milestones {}", existingMilestoneIds.stream()
+                    .map(String::valueOf).collect(Collectors.joining(",")));
 
-                    lastDeadline = milestone.getDeadline();
-                    totalBudgetRatio = totalBudgetRatio.add(milestone.getBudgetRatio());
-                }
-                if (totalBudgetRatio.compareTo(BigDecimal.ONE) != 0) {
-                    throw new InvalidInputException("Total budget ratio must be 1");
-                }
-
-                existing.setMilestones(milestones);
+            for (Long id : Sets.difference(existingMilestoneIds, newMilestoneIds)) {
+                log.info("Deleting milestone {}", id);
+                milestoneService.deleteById(id);
             }
         }
+
         if (project.getRequiredSkills() != null && !project.getRequiredSkills().isEmpty()) {
-            project.getRequiredSkills().forEach(skill -> {
-                skill.setProject(existing);
-                existing.getRequiredSkills().add(skill);
-            });
+            Map<Long, ProjectSkill> existingSkillsMap = existing.getRequiredSkills().stream()
+                    .collect(Collectors.toMap(skill -> skill.getSkill().getSkillId(), skill -> skill));
+
+            List<ProjectSkill> updatedSkills = project.getRequiredSkills().stream()
+                    .map(skill -> {
+                        ProjectSkill existingSkill = existingSkillsMap.get(skill.getSkill().getSkillId());
+
+                        if (existingSkill != null) {
+                            existingSkill.setProficiency(skill.getProficiency());
+                            return existingSkill;
+                        } else {
+                            skill.setProject(existing);
+                            return skill;
+                        }
+                    }).toList();
+
+            existing.getRequiredSkills().removeIf(skill -> !updatedSkills.contains(skill));
+            existing.getRequiredSkills().clear();
+            existing.getRequiredSkills().addAll(updatedSkills);
         }
+
         EntityUtil.merge(existing, project);
-
         return projectRepos.save(existing);
     }
 
     @Override
-    public Project terminateByClient(Project project) {
-        if (project.getProjectId() == null) {
-            throw new InvalidInputException("Project ID cannot be null");
-        }
-
-        Project existing = projectRepos.findByProjectId(project.getProjectId()).orElseThrow(
+    @Transactional
+    public Project terminateByClient(Long projectId) {
+        Project project = projectRepos.findByProjectId(projectId).orElseThrow(
                 () -> new InvalidInputException("Project does not exist"));
+        authContext.requireAccountId(project.getClientId());
 
-        if (existing.getStatus() != Project.ProjectStatus.OPEN) {
-            if (project.getTerminationReason() != Project.TerminationReason.OTHER) {
-                throw new InvalidInputException("OPEN projects can only be terminated with reason OTHER");
-            }
-        }
-        // Terminate By Client has contract or not
-        if (existing.getContract() == null) {
-            // No contract exists → Terminate all milestones & reject proposals
-            existing.getMilestones().forEach(milestone -> milestone.setStatus(Milestone.MilestoneStatus.TERMINATED));
-            existing.getProposals().forEach(proposal -> proposal.setStatus(Proposal.ProposalStatus.REJECTED));
-        } else if (existing.getStatus() == Project.ProjectStatus.IN_PROGRESS) {
-            // Contract exists → Terminate after the current milestone
-            List<Milestone> milestones = existing.getMilestones();
+        // Case 1: If the project is OPEN, terminate immediately
+        if (project.getStatus() == Project.ProjectStatus.OPEN) {
+            for (Milestone milestone : project.getMilestones())
+                milestone.setStatus(Milestone.MilestoneStatus.TERMINATED);
+            milestoneRepos.saveAll(project.getMilestones());
 
-            // Sort milestones by deadline to find the current and next
-            milestones.sort(Comparator.comparing(Milestone::getDeadline));
+            proposalRepos.saveAll(project.getProposals().stream()
+                    .filter(p -> p.getStatus() == Proposal.ProposalStatus.PENDING)
+                    .peek(p -> p.setStatus(Proposal.ProposalStatus.REJECTED)).toList());
 
-            LocalDateTime now = LocalDateTime.now();
-            Milestone currentMilestone = milestones.stream().filter(milestone -> milestone.getDeadline().isAfter(now) && milestone.getStatus() != Milestone.MilestoneStatus.TERMINATED).findFirst().orElse(null);
-            LocalDateTime deadlineMinusTwoDays = currentMilestone.getDeadline().minusDays(2);
-            if (now.isAfter(deadlineMinusTwoDays)) {
-                throw new InvalidInputException("Termination must be requested at least 2 days before milestone deadline");
-            }
-            // Pay for the current milestone
-            currentMilestone.setStatus(Milestone.MilestoneStatus.FINISHED);
-            currentMilestone.setFundStatus(Milestone.FundStatus.RELEASED);
-
-            // Terminate future milestones
-            milestones.stream()
-                    .filter(m -> m.getDeadline().isAfter(currentMilestone.getDeadline()))
-                    .forEach(m -> m.setStatus(Milestone.MilestoneStatus.TERMINATED));
-            existing.getProposals()
-                    .forEach(proposal -> proposal.setStatus(Proposal.ProposalStatus.REJECTED));
-            existing.setToTerminate(true);
+            project.setStatus(Project.ProjectStatus.TERMINATED);
+            project.setTerminationReason(Project.TerminationReason.OTHER);
+            return projectRepos.save(project);
         }
 
-        // Set project termination reason and status
-        existing.setStatus(Project.ProjectStatus.TERMINATED);
-        existing.setTerminationReason(Project.TerminationReason.CLIENT_REQUEST_TERMINATION);
-        existing.setToTerminate(true);
+        // Case 2: If the project is IN PROGRESS, schedule to terminate
+        if (project.getStatus() == Project.ProjectStatus.IN_PROGRESS) {
+            if (project.getToTerminate())
+                throw new IllegalStateException("The project is already scheduled to terminate");
+            if (project.getContract() == null ||
+                    project.getContract().getStatus() != Contract.ContractStatus.SIGNED ||
+                    project.getActiveMilestone() == null ||
+                    LocalDateTime.now().isAfter(project.getActiveMilestone().getDeadline().minusDays(2))) {
+                throw new IllegalStateException("Cannot terminate project for now");
+            }
 
-        return projectRepos.save(existing);
+            project.setToTerminate(true);
+            return projectRepos.save(project);
+        }
+
+        throw new IllegalStateException("Cannot terminate project for now");
     }
 
     @Override
+    @Transactional
     public Project terminateByStaff(Long projectId, Role transferToRole) {
+        authContext.requirePermission(Role.STAFF);
+
         Project project = projectRepos.findByProjectId(projectId).orElseThrow(
                 () -> new InvalidInputException("Project with project id " + projectId + "not found"));
-        if (project.getStatus() == Project.ProjectStatus.TERMINATED) {
-            throw new InvalidInputException("Project is already terminated");
+        if (project.getStatus() == Project.ProjectStatus.TERMINATED)
+            throw new IllegalStateException("Project is already terminated");
+        if (project.getActiveMilestone() == null)
+            throw new IllegalStateException("Project has no active milestone");
+
+        for (Milestone milestone : project.getMilestones()) {
+            // IF PENDING, return fund to client (if exists)
+            if (milestone.getStatus() == Milestone.MilestoneStatus.PENDING) {
+                milestoneService.returnFund(milestone);
+            }
+            // IF IN PROGRESS, based on staff decision
+            else if (milestone.getStatus() == Milestone.MilestoneStatus.IN_PROGRESS) {
+                if (transferToRole == Role.CLIENT)
+                    milestoneService.returnFund(milestone); // return (if exists)
+                else if (transferToRole == Role.FREELANCER)
+                    milestoneService.releaseFund(milestone); // release (if exists)
+            }
         }
+
+        milestoneRepos.saveAll(project.getMilestones().stream()
+                .filter(m -> m.getStatus().canBeTerminated())
+                .peek(m -> m.setStatus(Milestone.MilestoneStatus.TERMINATED)).toList());
+
+        proposalRepos.saveAll(project.getProposals().stream()
+                .filter(p -> p.getStatus() == Proposal.ProposalStatus.PENDING)
+                .peek(p -> p.setStatus(Proposal.ProposalStatus.REJECTED)).toList());
+
         project.setStatus(Project.ProjectStatus.TERMINATED);
         project.setTerminationReason(Project.TerminationReason.STAFF_DECISION);
-        project.setToTerminate(true);
-        if (transferToRole == Role.CLIENT) {
-            // Refund client
-            project.getMilestones().forEach(milestone -> {
-                if (milestone.getStatus() == Milestone.MilestoneStatus.IN_PROGRESS) {
-                    Transaction refundTransaction = transactionService.createEscrowRefund(milestone);
-                    if (refundTransaction.getStatus() == Transaction.TransactionStatus.SUCCESS) {
-                        milestone.setFundStatus(Milestone.FundStatus.REFUNDED);
-                    }
-                }
-            });
-        } else if (transferToRole == Role.FREELANCER) {
-            project.getMilestones().forEach(milestone -> {
-                if (milestone.getStatus() == Milestone.MilestoneStatus.IN_PROGRESS) {
-                    Transaction refundTransaction = transactionService.createEscrowRelease(milestone);
-                    if (refundTransaction.getStatus() == Transaction.TransactionStatus.SUCCESS) {
-                        milestone.setFundStatus(Milestone.FundStatus.REFUNDED);
-                    }
-                }
-            });
-        }
+
         return projectRepos.save(project);
     }
 
     @Override
-    public Project unpause(Project project) {
-        if (project.getProjectId() == null) {
-            throw new InvalidInputException("Project ID cannot be null");
-        }
-
-        Project existing = projectRepos.findByProjectId(project.getProjectId()).orElseThrow(
+    @Transactional
+    public Project unpause(Long projectId, ProjectTimeline timeline) {
+        Project existing = projectRepos.findByProjectId(projectId).orElseThrow(
                 () -> new InvalidInputException("Project does not exist"));
+        if (existing.getStatus() != Project.ProjectStatus.PAUSED)
+            throw new IllegalStateException("Only PAUSED projects can be unpaused");
 
-        // Check if project can be unpaused
-        if (existing.getStatus() != Project.ProjectStatus.PAUSED) {
-            throw new InvalidInputException("Only PAUSED projects can be unpaused");
+        existing.setStartDate(timeline.getProjectStartDate());
+        for (Milestone milestone : existing.getMilestones()) {
+            var date = timeline.getMilestoneDeadlines().get(milestone.getMilestoneId());
+            if (date == null || !milestone.getIsVisible()) continue;
+            milestone.setDeadline(date);
         }
 
-        // Check if project has contract (should not have one if just paused)
-        if (existing.getContract() != null) {
-            throw new InvalidInputException("Project with contract cannot be unpaused this way");
-        }
-
-        List<Milestone> updatedMilestones = project.getMilestones();
-        if (updatedMilestones == null || updatedMilestones.isEmpty()) {
-            throw new InvalidInputException("Milestone deadlines must be provided for unpausing");
-        }
-
-        LocalDateTime now = LocalDateTime.now();
-        LocalDateTime newStartDate = project.getStartDate();
-
-        if (newStartDate == null) {
-            newStartDate = now.plusDays(hirableConfig.getMinProjectStartDelay());
-        } else if (newStartDate.isBefore(now.plusDays(hirableConfig.getMinProjectStartDelay()))) {
-            throw new InvalidInputException("Start date must be at least " +
-                    hirableConfig.getMinProjectStartDelay() + " days in the future");
-        }
-
-        existing.setStartDate(newStartDate);
-
-        // Sort existing and updated milestones by deadline
-        List<Milestone> existingMilestones = existing.getMilestones();
-        existingMilestones.sort(Comparator.comparing(Milestone::getDeadline));
-        updatedMilestones.sort(Comparator.comparing(Milestone::getDeadline));
-
-        // Validate milestones match in count
-        if (existingMilestones.size() != updatedMilestones.size()) {
-            throw new InvalidInputException("Number of milestones must match the original project");
-        }
-
-        // Update milestone deadlines
-        LocalDateTime lastDeadline = newStartDate;
-        for (int i = 0; i < updatedMilestones.size(); i++) {
-            Milestone updatedMilestone = updatedMilestones.get(i);
-            Milestone existingMilestone = existingMilestones.get(i);
-
-            // Validate milestone deadline
-            if (updatedMilestone.getDeadline() == null) {
-                throw new InvalidInputException("Milestone deadline cannot be null");
-            }
-
-            if (updatedMilestone.getDeadline().isBefore(lastDeadline.plusDays(hirableConfig.getMinProjectStartDelay()))) {
-                throw new InvalidInputException("Milestone deadlines must be at least " +
-                        hirableConfig.getMinProjectStartDelay() + " days apart");
-            }
-
-            if (updatedMilestone.getDeadline().isAfter(lastDeadline.plusDays(hirableConfig.getMaxMilestoneDurationBetween()))) {
-                throw new InvalidInputException("Milestone deadlines cannot be more than " +
-                        hirableConfig.getMaxMilestoneDurationBetween() + " days apart");
-            }
-
-            // Update the deadline
-            existingMilestone.setDeadline(updatedMilestone.getDeadline());
-            lastDeadline = updatedMilestone.getDeadline();
-        }
-
-
+        validateTimeline(existing, true);
+        milestoneRepos.saveAll(existing.getMilestones());
         existing.setStatus(Project.ProjectStatus.OPEN);
-
         return projectRepos.save(existing);
     }
 
     @Override
-    public Project extendDeadline(Project project) {
-        if (project.getProjectId() == null) {
-            throw new InvalidInputException("Project ID cannot be null");
-        }
-
-        Project existing = projectRepos.findByProjectId(project.getProjectId()).orElseThrow(
+    @Transactional
+    public Project extendDeadline(Long projectId, ProjectTimeline timeline) {
+        Project existing = projectRepos.findByProjectId(projectId).orElseThrow(
                 () -> new InvalidInputException("Project does not exist"));
+        if (existing.getToTerminate() || existing.getActiveMilestone() == null)
+            throw new IllegalStateException("Cannot extend deadlines for now");
+        if (existing.getActiveMilestone().getDeadline().isAfter(LocalDateTime.now()))
+            throw new IllegalStateException("Deadline has not passed yet");
 
-        // Check if project has an active milestone (implying contract is made and SIGNED)
-        if (existing.getStatus() != Project.ProjectStatus.IN_PROGRESS) {
-            throw new InvalidInputException("Only IN_PROGRESS projects can have deadlines extended");
+        for (Milestone milestone : existing.getMilestones()) {
+            var date = timeline.getMilestoneDeadlines().get(milestone.getMilestoneId());
+            if (date == null || !milestone.getIsVisible()) continue;
+            if (milestone.getMilestoneId() < existing.getActiveMilestone().getMilestoneId())
+                throw new IllegalStateException("Cannot extend deadline for past milestones");
+            milestone.setDeadline(date);
         }
 
-        // Check if project is not scheduled for termination
-        if (Boolean.TRUE.equals(existing.getToTerminate())) {
-            throw new InvalidInputException("Cannot extend deadline for a project scheduled for termination");
+        validateTimeline(existing, false);
+        milestoneRepos.saveAll(existing.getMilestones());
+        return existing;
+    }
+
+    private void validateTimeline(Project project, boolean checkStartDateWithCurrent) {
+        if (checkStartDateWithCurrent && project.getStartDate().isBefore(LocalDateTime.now().plusDays(hirableConfig.getMinProjectStartDelay()))) {
+            throw new InvalidInputException("Project startDate must be at least " + hirableConfig.getMinProjectStartDelay() + " days later");
         }
-
-        // Find the active milestone
-        Milestone activeMilestone = existing.getMilestones().stream()
-                .filter(m -> m.getStatus() == Milestone.MilestoneStatus.IN_PROGRESS)
-                .findFirst()
-                .orElseThrow(() -> new InvalidInputException("No active milestone found for this project"));
-
-        // Check if the current activeMilestone is late (current date is after deadline)
-        LocalDateTime now = LocalDateTime.now();
-        if (!now.isAfter(activeMilestone.getDeadline())) {
-            throw new InvalidInputException("Current milestone is not late. Deadline extension is only allowed for late milestones");
-        }
-
-        // Get the new deadline for the active milestone
-        LocalDateTime newDeadline = null;
+        if (project.getMilestones() == null)
+            return;
+        LocalDateTime current = project.getStartDate();
+        int visibleCount = 0;
         for (Milestone milestone : project.getMilestones()) {
-            if (milestone.getMilestoneId().equals(activeMilestone.getMilestoneId())) {
-                newDeadline = milestone.getDeadline();
-                break;
+            if (!milestone.getIsVisible()) continue;
+            if (milestone.getDeadline().isBefore(current)) {
+                throw new InvalidInputException(visibleCount == 0 ?
+                        "Milestone deadline must be after the project start date" :
+                        "Milestone deadline must be after the previous");
             }
-        }
-
-        if (newDeadline == null) {
-            throw new InvalidInputException("New deadline for active milestone must be provided");
-        }
-
-        // Ensure the new deadline is in the future
-        if (newDeadline.isBefore(now)) {
-            throw new InvalidInputException("New deadline must be in the future");
-        }
-
-        // Sort milestones by deadline to maintain chronological order
-        List<Milestone> existingMilestones = existing.getMilestones().stream()
-                .sorted((m1, m2) -> m1.getDeadline().compareTo(m2.getDeadline()))
-                .toList();
-
-        // Find the index of the active milestone
-        int activeMilestoneIndex = -1;
-        for (int i = 0; i < existingMilestones.size(); i++) {
-            if (existingMilestones.get(i).getMilestoneId().equals(activeMilestone.getMilestoneId())) {
-                activeMilestoneIndex = i;
-                break;
+            if (milestone.getDeadline().isBefore(current.plusDays(hirableConfig.getMinMilestoneDurationBetween()))) {
+                throw new InvalidInputException("Milestone must have at least " + hirableConfig.getMinMilestoneDurationBetween() + " days in duration");
             }
-        }
-
-        if (activeMilestoneIndex == -1) {
-            throw new InvalidInputException("Cannot find active milestone in the project's milestone list");
-        }
-
-        // Update the active milestone's deadline
-        activeMilestone.setDeadline(newDeadline);
-
-        // If there are future milestones, adjust their deadlines
-        LocalDateTime lastDeadline = newDeadline;
-        for (int i = activeMilestoneIndex + 1; i < existingMilestones.size(); i++) {
-            Milestone futureMilestone = existingMilestones.get(i);
-
-            // Find if there's a corresponding update in the provided milestones
-            LocalDateTime providedDeadline = null;
-            for (Milestone milestone : project.getMilestones()) {
-                if (milestone.getMilestoneId().equals(futureMilestone.getMilestoneId())) {
-                    providedDeadline = milestone.getDeadline();
-                    break;
-                }
+            if (milestone.getDeadline().isAfter(current.plusDays(hirableConfig.getMaxMilestoneDurationBetween()))) {
+                throw new InvalidInputException("Milestone cannot exceed " + hirableConfig.getMaxMilestoneDurationBetween() + " days in duration");
             }
-
-            // If a new deadline was provided for this milestone, use it
-            if (providedDeadline != null) {
-                // Check that it's at least 3 days after the previous milestone
-                if (providedDeadline.isBefore(lastDeadline.plusDays(hirableConfig.getMinMilestoneDurationBetween()))) {
-                    throw new InvalidInputException("Milestone deadlines must be at least 3 days apart");
-                }
-
-                // Check that it's not more than 30 days after the previous milestone
-                if (providedDeadline.isAfter(lastDeadline.plusDays(hirableConfig.getMaxMilestoneDurationBetween()))) {
-                    throw new InvalidInputException("Milestone deadlines cannot be more than 30 days apart");
-                }
-
-                futureMilestone.setDeadline(providedDeadline);
-                lastDeadline = providedDeadline;
-            }
-            // Otherwise, check if existing deadline still satisfies the constraints
-            else {
-                // If not at least 3 days after previous deadline, adjust it
-                if (futureMilestone.getDeadline().isBefore(lastDeadline.plusDays(hirableConfig.getMinMilestoneDurationBetween()))) {
-                    futureMilestone.setDeadline(lastDeadline.plusDays(hirableConfig.getMinMilestoneDurationBetween()));
-                }
-
-                lastDeadline = futureMilestone.getDeadline();
-            }
+            visibleCount++;
         }
-        return projectRepos.save(existing);
+        if (visibleCount < 1) {
+            throw new InvalidInputException("Project must have at least 1 visible milestone");
+        }
+        if (visibleCount > hirableConfig.getMaxMilestoneAmount()) {
+            throw new InvalidInputException("Project cannot exceed " + hirableConfig.getMaxMilestoneAmount() + " milestones");
+        }
     }
 
     @Override
     public Project findByProjectId(long projectId) {
-        Project project = projectRepos.findByProjectId(projectId).orElseThrow(() -> new InvalidInputException("Project with project id " + projectId + "not found"));
-        return project;
+        return projectRepos.findByProjectId(projectId).orElseThrow(() -> new InvalidInputException("Project with project id " + projectId + "not found"));
     }
 
     @Override
     public void deleteById(long projectId) {
-        Project project = projectRepos.findByProjectId(projectId).orElseThrow(() -> new InvalidInputException("Project with project id " + projectId + "not found"));
+        Project project = projectRepos.findByProjectId(projectId)
+                .orElseThrow(() -> new InvalidInputException("Project with project id " + projectId + "not found"));
+        if (project.getStatus() != Project.ProjectStatus.TERMINATED)
+            throw new IllegalStateException("Can only delete project when it is terminated");
         project.setIsVisible(false);
         projectRepos.save(project);
     }

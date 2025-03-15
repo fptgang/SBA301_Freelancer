@@ -1,7 +1,7 @@
 package com.fptgang.backend.service;
 
 import com.fptgang.backend.model.Role;
-import jakarta.validation.constraints.NotNull;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.security.oauth2.jwt.Jwt;
 
 import javax.annotation.Nullable;

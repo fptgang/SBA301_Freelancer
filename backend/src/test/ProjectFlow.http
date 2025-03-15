@@ -1,0 +1,78 @@
+### Auth:
+POST http://localhost:8080/api/v1/auth/login
+Content-Type: application/json
+
+{
+  "email": "acc6@hirable.com",
+  "password": "1"
+}
+
+> {% client.global.set("auth_token", response.body.token); %}
+
+#### Create a new project
+#POST http://localhost:8080/api/v1/projects
+#Content-Type: application/json
+#Authorization: Bearer {{auth_token}}
+#
+#{
+#  "projectCategoryId": 1,
+#  "title": "Test",
+#  "description": "abc",
+#  "startDate": "2025-03-20T16:53:06.814427300Z",
+#  "minBudget": 5,
+#  "maxBudget": 10,
+#  "requiredSkills": [
+#    {
+#      "skillId": 1,
+#      "proficiency": "BEGINNER"
+#    }
+#  ],
+#  "milestones": [
+#    {
+#      "description": "a",
+#      "title": "Stage 1",
+#      "budgetRatio": 1,
+#      "deadline": "2025-03-23T16:53:06.814427300Z"
+#    }
+#  ]
+#}
+
+### Update
+PUT http://localhost:8080/api/v1/projects/114
+Content-Type: application/json
+Authorization: Bearer {{auth_token}}
+
+{
+  "projectCategoryId": 1,
+  "title": "Test",
+  "description": "abc",
+  "startDate": "2025-03-20T16:53:06.814427300Z",
+  "minBudget": 50,
+  "maxBudget": 100,
+  "requiredSkills": [
+    {
+      "skillId": 1,
+      "proficiency": "BEGINNER"
+    },
+    {
+      "skillId": 5,
+      "proficiency": "BEGINNER"
+    }
+  ],
+  "milestones": [
+    {
+      "milestoneId": 637,
+      "description": "a",
+      "title": "Stage 1",
+      "budgetRatio": 0.6,
+      "deadline": "2025-03-23T16:53:06.814427300Z"
+    },
+    {
+      "milestoneId": 638,
+      "description": "b",
+      "title": "Stage 2",
+      "budgetRatio": 0.4,
+      "deadline": "2025-03-23T16:53:06.814427300Z"
+    }
+  ]
+}

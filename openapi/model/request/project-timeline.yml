@@ -1,9 +1,9 @@
-ProjectDeadlineExtendDto:
+ProjectTimelineDto:
   type: object
   properties:
-    projectId:
-      type: integer
-      format: int64
+    newStartDate:
+      type: string
+      format: date-time
     milestones:
       type: array
       items:

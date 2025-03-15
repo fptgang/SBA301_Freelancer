@@ -6,7 +6,7 @@ import com.fptgang.backend.model.RefreshToken;
 import com.fptgang.backend.model.Role;
 import com.fptgang.backend.service.JwtService;
 import com.fptgang.backend.service.RefreshTokenService;
-import jakarta.validation.constraints.NotNull;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;

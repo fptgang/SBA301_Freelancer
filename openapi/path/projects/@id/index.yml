@@ -41,7 +41,7 @@ put:
     content:
       application/json:
         schema:
-          $ref: '../../../model/project.yml#/ProjectDto'
+          $ref: '../../../model/request/project-update.yml#/ProjectUpdateDto'
   responses:
     '200':
       description: The operation was success

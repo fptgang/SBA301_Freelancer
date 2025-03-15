@@ -63,7 +63,7 @@ public class    Proposal {
         REJECTED
     }
 
-    @OneToOne(mappedBy = "proposal", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    @OneToOne(mappedBy = "proposal", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Contract contract;
 }
 

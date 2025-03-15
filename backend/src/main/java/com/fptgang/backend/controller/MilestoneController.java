@@ -34,11 +34,6 @@ public class MilestoneController implements MilestonesApi {
     }
 
     @Override
-    public ResponseEntity<MilestoneDto> createMilestone(MilestoneCreateDto milestoneCreateDto) {
-        return MilestonesApi.super.createMilestone(milestoneCreateDto);
-    }
-
-    @Override
     public ResponseEntity<MilestoneDto> submitMilestoneWork(Long milestoneId) {
         return MilestonesApi.super.submitMilestoneWork(milestoneId);
     }

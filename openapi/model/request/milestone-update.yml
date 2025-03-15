@@ -1,6 +1,9 @@
-MilestoneCreateDto:
+MilestoneUpdateDto:
   type: object
   properties:
+    milestoneId:
+      type: integer
+      format: int64
     description:
       type: string
     title:

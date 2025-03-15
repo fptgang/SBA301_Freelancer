@@ -1,4 +1,4 @@
-ProjectCreateDto:
+ProjectUpdateDto:
   type: object
   properties:
     projectCategoryId:
@@ -24,4 +24,4 @@ ProjectCreateDto:
     milestones:
       type: array
       items:
-        $ref: 'milestone-create.yml#/MilestoneCreateDto'
+        $ref: 'milestone-update.yml#/MilestoneUpdateDto'
