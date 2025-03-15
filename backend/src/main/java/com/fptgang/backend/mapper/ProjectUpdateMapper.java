@@ -1,6 +1,6 @@
 package com.fptgang.backend.mapper;
 
-import com.fptgang.backend.api.model.ProjectCreateDto;
+import com.fptgang.backend.api.model.ProjectUpdateDto;
 import com.fptgang.backend.model.Proficiency;
 import com.fptgang.backend.model.Project;
 import com.fptgang.backend.model.ProjectSkill;
@@ -14,23 +14,24 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Component
-public class ProjectCreateMapper extends BaseMapper<ProjectCreateDto, Project> {
+public class ProjectUpdateMapper extends BaseMapper<ProjectUpdateDto, Project> {
     private final ProjectCategoryRepos projectCategoryRepos;
     private final SkillRepos skillRepos;
-    private final MilestoneCreateMapper milestoneMapper;
+    private final MilestoneUpdateMapper milestoneMapper;
 
-    public ProjectCreateMapper(ProjectCategoryRepos projectCategoryRepos,
+    public ProjectUpdateMapper(ProjectCategoryRepos projectCategoryRepos,
                                SkillRepos skillRepos,
-                               MilestoneCreateMapper milestoneMapper) {
+                               MilestoneUpdateMapper milestoneMapper) {
         this.projectCategoryRepos = projectCategoryRepos;
         this.skillRepos = skillRepos;
         this.milestoneMapper = milestoneMapper;
     }
 
     @Override
-    public Project toEntity(ProjectCreateDto dto) {
+    public Project toEntity(ProjectUpdateDto dto) {
         return Project.builder()
-                .category(projectCategoryRepos.getReferenceById(Objects.requireNonNull(dto.getProjectCategoryId())))
+                .category(dto.getProjectCategoryId() == null ? null :
+                        projectCategoryRepos.getReferenceById(dto.getProjectCategoryId()))
                 .title(dto.getTitle())
                 .description(dto.getDescription())
                 .startDate(DateTimeUtil.fromOffsetToLocal(dto.getStartDate()))
@@ -49,7 +50,7 @@ public class ProjectCreateMapper extends BaseMapper<ProjectCreateDto, Project> {
     }
 
     @Override
-    public ProjectCreateDto toDTO(Project entity, DetailLevel level) {
+    public ProjectUpdateDto toDTO(Project entity, DetailLevel level) {
         throw new UnsupportedOperationException();
     }
 }

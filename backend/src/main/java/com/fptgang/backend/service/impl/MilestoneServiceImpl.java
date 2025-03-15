@@ -80,9 +80,7 @@ public class MilestoneServiceImpl implements MilestoneService {
     }
 
     @Override
-    public Milestone depositFund(long id) {
-        var milestone = milestoneRepos.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Milestone does not exist"));
+    public Milestone depositFund(Milestone milestone) {
         Preconditions.checkArgument(milestone.getIsVisible(), "Milestone is not visible");
         Preconditions.checkArgument(
                 milestone.getStatus() == Milestone.MilestoneStatus.PENDING ||
@@ -99,9 +97,7 @@ public class MilestoneServiceImpl implements MilestoneService {
     }
 
     @Override
-    public Milestone releaseFund(long id) {
-        var milestone = milestoneRepos.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Milestone does not exist"));
+    public Milestone releaseFund(Milestone milestone) {
         Preconditions.checkArgument(milestone.getIsVisible(), "Milestone is not visible");
         Preconditions.checkArgument(
                 milestone.getStatus() != Milestone.MilestoneStatus.PENDING,
@@ -117,9 +113,7 @@ public class MilestoneServiceImpl implements MilestoneService {
     }
 
     @Override
-    public Milestone returnFund(long id) {
-        var milestone = milestoneRepos.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Milestone does not exist"));
+    public Milestone returnFund(Milestone milestone) {
         Preconditions.checkArgument(milestone.getIsVisible(), "Milestone is not visible");
         Preconditions.checkArgument(milestone.getFundStatus() == Milestone.FundStatus.DEPOSITED,
                 "Milestone is not in DEPOSITED fund status");

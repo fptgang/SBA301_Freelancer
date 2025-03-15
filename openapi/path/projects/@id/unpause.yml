@@ -10,6 +10,13 @@ put:
       schema:
         type: integer
         format: int64
+  requestBody:
+    description: Project timelines to be updated
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../../../model/request/project-timeline.yml#/ProjectTimelineDto'
   responses:
     '200':
       description: The operation was success

@@ -59,7 +59,7 @@ public class ContractServiceImpl implements ContractService {
         proposalService.acceptProposal(contract.getProposal().getProposalId(), SecurityUtil.requireCurrentUserId());
         contract.setStatus(Contract.ContractStatus.UNSIGNED);
         firstMilestone.getProject().setContract(contract);
-        milestoneService.depositFund(firstMilestone.getMilestoneId());
+        milestoneService.depositFund(firstMilestone);
         return contractRepos.save(contract);
     }
 

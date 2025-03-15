@@ -82,6 +82,7 @@ dependencies {
 	implementation 'com.azure.spring:spring-cloud-azure-starter-storage-blob:5.19.0'
 	implementation 'me.paulschwarz:spring-dotenv:4.0.0'
 	implementation 'com.github.spullara.mustache.java:compiler:0.9.10'
+	implementation 'org.jetbrains:annotations:26.0.2'
 
 	dependencyManagement {
 		imports {

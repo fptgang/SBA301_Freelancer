@@ -2,10 +2,7 @@ package com.fptgang.backend.controller;
 
 import com.fptgang.backend.api.controller.ProjectsApi;
 import com.fptgang.backend.api.model.*;
-import com.fptgang.backend.mapper.DetailLevel;
-import com.fptgang.backend.mapper.ProjectCreateMapper;
-import com.fptgang.backend.mapper.ProjectDeadlineExtendMapper;
-import com.fptgang.backend.mapper.ProjectMapper;
+import com.fptgang.backend.mapper.*;
 import com.fptgang.backend.model.Project;
 import com.fptgang.backend.model.Role;
 import com.fptgang.backend.service.ProjectService;
@@ -14,8 +11,8 @@ import com.fptgang.backend.util.OpenApiHelper;
 import com.fptgang.backend.util.SecurityUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -28,37 +25,47 @@ public class ProjectController implements ProjectsApi {
     private final ProjectService projectService;
     private final ProjectMapper projectMapper;
     private final ProjectCreateMapper projectCreateMapper;
-    private final ProjectDeadlineExtendMapper projectDeadlineExtendMapper;
+    private final ProjectUpdateMapper projectUpdateMapper;
+    private final ProjectTimelineMapper projectTimelineMapper;
 
     @Autowired
     public ProjectController(ProjectService projectService,
                              ProjectMapper projectMapper,
                              ProjectCreateMapper projectCreateMapper,
-                             ProjectDeadlineExtendMapper projectDeadlineExtendMapper) {
+                             ProjectUpdateMapper projectUpdateMapper,
+                             ProjectTimelineMapper projectTimelineMapper) {
         this.projectService = projectService;
         this.projectMapper = projectMapper;
         this.projectCreateMapper = projectCreateMapper;
-        this.projectDeadlineExtendMapper = projectDeadlineExtendMapper;
+        this.projectUpdateMapper = projectUpdateMapper;
+        this.projectTimelineMapper = projectTimelineMapper;
     }
 
     @Override
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ProjectDto> createProject(ProjectCreateDto projectCreateDto) {
-        return ProjectsApi.super.createProject(projectCreateDto);
+        return ResponseEntity.ok(
+                projectMapper.toDTO(
+                        projectService.create(projectCreateMapper.toEntity(projectCreateDto)),
+                        DetailLevel.FULL
+                )
+        );
     }
 
     @Override
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Void> deleteProject(Long projectId) {
         projectService.deleteById(projectId);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @Override
     public ResponseEntity<ProjectDto> getProjectById(Long projectId) {
         Project project = projectService.findByProjectId(projectId);
-        if (Objects.equals(project.getClient().getAccountId(), SecurityUtil.getCurrentUserId()) ||
-                Objects.equals(project.getContract().getFreelancer().getAccountId(), SecurityUtil.getCurrentUserId()) ||
-                SecurityUtil.hasPermission(Role.STAFF) ||
-                SecurityUtil.hasPermission(Role.ADMIN)
+        var userId = SecurityUtil.getCurrentUserId();
+        if (SecurityUtil.hasPermission(Role.STAFF) ||
+                Objects.equals(project.getClientId(), userId) ||
+                (project.getContract() != null && Objects.equals(project.getContract().getFreelancerId(), userId))
         ) {
             return ResponseEntity.ok(projectMapper.toDTO(project, DetailLevel.FULL));
 
@@ -90,26 +97,50 @@ public class ProjectController implements ProjectsApi {
     }
 
     @Override
-    public ResponseEntity<ProjectDto> updateProject(Long projectId, ProjectDto projectDto) {
-        projectDto.setProjectId(projectId); // Override projectId
-
-        return ResponseEntity.ok(projectMapper.toDTO(projectService.update(projectMapper.toEntity(projectDto)), DetailLevel.FULL));
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ProjectDto> updateProject(Long projectId, ProjectUpdateDto projectDto) {
+        var project = projectUpdateMapper.toEntity(projectDto);
+        project.setProjectId(projectId);
+        project = projectService.update(project);
+        return ResponseEntity.ok(
+                projectMapper.toDTO(
+                        project,
+                        DetailLevel.FULL
+                )
+        );
     }
 
     @Override
-    public ResponseEntity<ProjectDto> extendProjectDeadline(Long projectId, ProjectDeadlineExtendDto projectDeadlineExtendDto) {
-        projectDeadlineExtendDto.setProjectId(projectId);
-        return ProjectsApi.super.extendProjectDeadline(projectId, projectDeadlineExtendDto);
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ProjectDto> extendProjectDeadline(Long projectId, ProjectTimelineDto projectTimelineDto) {
+        projectTimelineDto.setNewStartDate(null); // don't troll
+        var timeline = projectTimelineMapper.toEntity(projectTimelineDto);
+        return ResponseEntity.ok(
+                projectMapper.toDTO(projectService.extendDeadline(projectId, timeline), DetailLevel.FULL)
+        );
     }
 
     @Override
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ProjectDto> terminateProject(Long projectId) {
-        return new ResponseEntity<>(projectMapper.toDTO(projectService.terminateByClient(projectService.findByProjectId(projectId)),DetailLevel.FULL), HttpStatus.OK);
+        return ResponseEntity.ok(
+                projectMapper.toDTO(
+                        projectService.terminateByClient(projectId),
+                        DetailLevel.FULL
+                )
+        );
     }
 
     @Override
-    public ResponseEntity<ProjectDto> unpauseProject(Long projectId) {
-        return new ResponseEntity<>(projectMapper.toDTO(projectService.unpause(projectService.findByProjectId(projectId)),DetailLevel.FULL), HttpStatus.OK);
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ProjectDto> unpauseProject(Long projectId, ProjectTimelineDto projectTimelineDto) {
+        var timeline = projectTimelineMapper.toEntity(projectTimelineDto);
+        return ResponseEntity.ok(
+                projectMapper.toDTO(
+                        projectService.unpause(projectId, timeline),
+                        DetailLevel.FULL
+                )
+        );
     }
 
     @Override

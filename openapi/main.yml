@@ -115,8 +115,6 @@ paths:
   /projects/{projectId}/extend-deadline:
     $ref: 'path/projects/@id/extend-deadline.yml'
 
-  /milestones:
-    $ref: 'path/milestones/index.yml'
   /milestones/{milestoneId}/deposit-fund:
     $ref: 'path/milestones/@id/deposit-fund.yml'
   /milestones/{milestoneId}/submit-work:

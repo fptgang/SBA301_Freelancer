@@ -10,6 +10,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.jetbrains.annotations.NotNull;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -79,7 +80,11 @@ public class Milestone {
         TERMINATED,
         IN_PROGRESS,
         REVIEWING,
-        FINISHED
+        FINISHED;
+
+        public boolean canBeTerminated() {
+            return this == PENDING || this == IN_PROGRESS || this == REVIEWING;
+        }
     }
 
     public enum FundStatus {

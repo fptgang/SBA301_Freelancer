@@ -1,15 +1,16 @@
 package com.fptgang.backend.mapper;
 
-import com.fptgang.backend.api.model.MilestoneCreateDto;
+import com.fptgang.backend.api.model.MilestoneUpdateDto;
 import com.fptgang.backend.model.Milestone;
 import com.fptgang.backend.util.DateTimeUtil;
 import org.springframework.stereotype.Component;
 
 @Component
-public class MilestoneCreateMapper extends BaseMapper<MilestoneCreateDto, Milestone> {
+public class MilestoneUpdateMapper extends BaseMapper<MilestoneUpdateDto, Milestone> {
     @Override
-    public Milestone toEntity(MilestoneCreateDto dto) {
+    public Milestone toEntity(MilestoneUpdateDto dto) {
         return Milestone.builder()
+                .milestoneId(dto.getMilestoneId())
                 .title(dto.getTitle())
                 .description(dto.getDescription())
                 .deadline(DateTimeUtil.fromOffsetToLocal(dto.getDeadline()))
@@ -18,7 +19,7 @@ public class MilestoneCreateMapper extends BaseMapper<MilestoneCreateDto, Milest
     }
 
     @Override
-    public MilestoneCreateDto toDTO(Milestone entity, DetailLevel level) {
+    public MilestoneUpdateDto toDTO(Milestone entity, DetailLevel level) {
         throw new UnsupportedOperationException();
     }
 }

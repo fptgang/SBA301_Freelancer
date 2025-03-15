@@ -93,6 +93,7 @@ export class Project {
         `'${project.status}'`,
         project.termination_reason ? `'${escapeSingleQuotes(project.termination_reason)}'` : 'NULL',
         project.to_terminate ? 1 : 0,
+        project.activeMilestone ? project.activeMilestone.milestoneId : 'NULL',
         `'${escapeSingleQuotes(project.title)}'`,
         project.updated_at ? `'${project.updated_at.toISOString().slice(0, 19)}.000000'` : 'NULL',
         project.project_category_id,
@@ -106,7 +107,7 @@ export class Project {
                                       \`is_visible\`, \`max_budget\`,
                                       \`min_budget\`, \`start_date\`,
                                       \`status\`, \`termination_reason\`,
-                                      \`to_terminate\`, \`title\`,
+                                      \`to_terminate\`, \`active_milestone_id\`, \`title\`,
                                       \`updated_at\`, \`project_category_id\`,
                                       \`client_id\`, \`staff_id\`)
             VALUES ${values};`;

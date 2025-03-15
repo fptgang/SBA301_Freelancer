@@ -2,8 +2,10 @@ package com.fptgang.backend.util;
 
 import com.fptgang.backend.model.Role;
 import com.fptgang.backend.security.AppUser;
-import jakarta.validation.constraints.NotNull;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -26,11 +28,10 @@ public class SecurityUtil {
         return !isAuthenticated();
     }
 
-    @NotNull
     public static long requireCurrentUserId() {
         var userId = getCurrentUserId();
         if (userId == null)
-            throw new AccessDeniedException("User is not authenticated");
+            throw new InsufficientAuthenticationException("User is not authenticated");
         return userId;
     }
 
@@ -44,7 +45,7 @@ public class SecurityUtil {
             if (auth.getPrincipal() instanceof AppUser appUser) {
                 return appUser.getAccountId();
             } else {
-                throw new RuntimeException("Unable to obtain AppUser");
+                throw new InsufficientAuthenticationException("Unable to obtain AppUser");
             }
         }
 
@@ -55,7 +56,7 @@ public class SecurityUtil {
     public static String requireCurrentUserEmail() {
         var email = getCurrentUserEmail();
         if (email == null)
-            throw new AccessDeniedException("User is not authenticated");
+            throw new InsufficientAuthenticationException("User is not authenticated");
         return email;
     }
 
@@ -73,13 +74,11 @@ public class SecurityUtil {
     }
 
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")
-    @NotNull
     public static boolean hasPermission(Role role) {
         var currentUserRole = getCurrentUserRole();
         return currentUserRole != null && currentUserRole.hasPermission(role);
     }
 
-    @NotNull
     public static boolean hasRole(Role... roles) {
         Role currentUserRole = getCurrentUserRole();
         for (Role role : roles) {
@@ -94,7 +93,7 @@ public class SecurityUtil {
     public static Role requireCurrentUserRole() {
         var role = getCurrentUserRole();
         if (role == null)
-            throw new AccessDeniedException("User is not authenticated");
+            throw new InsufficientAuthenticationException("User is not authenticated");
         return role;
     }
 
@@ -130,18 +129,16 @@ public class SecurityUtil {
 
     @NotNull
     public static String getEmailFromJwt(Jwt jwt) {
-        return Objects.requireNonNull(jwt.getSubject());
+        return jwt.getSubject();
     }
 
-    @Nullable
+    @NotNull
     public static Role getRoleFromJwt(Jwt jwt) {
         String role = jwt.getClaimAsString("scope");
-        if (role == null)
-            return null;
         try {
             return Role.valueOf(role);
         } catch (IllegalArgumentException e) {
-            throw new AccessDeniedException("JWT containing invalid role");
+            throw new BadCredentialsException("JWT containing invalid role");
         }
     }
 
@@ -152,7 +149,7 @@ public class SecurityUtil {
         try {
             return Long.parseLong(accountId);
         } catch (NumberFormatException e) {
-            throw new AccessDeniedException("JWT containing invalid id");
+            throw new BadCredentialsException("JWT containing invalid id");
         }
     }
 

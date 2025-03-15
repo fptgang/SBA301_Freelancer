@@ -58,11 +58,6 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
         String email = SecurityUtil.getEmailFromJwt(jwt);
         Role role = SecurityUtil.getRoleFromJwt(jwt);
 
-        if (role == null) {
-            LOGGER.debug("JWT using invalid role {}", token);
-            return;
-        }
-
         JwtAuthenticationToken authenticationToken = new JwtAuthenticationToken(
                 jwt,
                 List.of(new SimpleGrantedAuthority(role.toString()))
