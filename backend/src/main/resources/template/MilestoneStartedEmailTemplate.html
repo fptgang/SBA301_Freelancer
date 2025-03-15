@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Milestone Started Notification</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            max-width: 600px;
+            margin: auto;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            font-size: 20px;
+            font-weight: bold;
+            color: #333333;
+            margin-bottom: 20px;
+        }
+        .details-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .details-table th, .details-table td {
+            text-align: left;
+            padding: 8px;
+            border-bottom: 1px solid #ddd;
+        }
+        .button {
+            display: inline-block;
+            padding: 10px 15px;
+            background-color: #007bff;
+            color: #ffffff;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">Milestone Started: {{title}}</div>
+    <p>Dear {{freelancer.firstName}},</p>
+    <p>The milestone <strong>{{title}}</strong> for the project <strong>{{project.title}}</strong> has officially started.</p>
+    <table class="details-table">
+        <tr>
+            <th>Project</th>
+            <td>{{project.title}}</td>
+        </tr>
+        <tr>
+            <th>Client</th>
+            <td>{{project.client.firstName}} {{project.client.lastName}}</td>
+        </tr>
+        <tr>
+            <th>Budget</th>
+            <td>{{budgetFormatted}}</td>
+        </tr>
+        <tr>
+            <th>Deadline</th>
+            <td>{{deadlineFormatted}}</td>
+        </tr>
+    </table>
+    <p>Please start working on the milestone and ensure all deliverables are submitted on time.</p>
+    <a class="button" href="{{milestoneUrl}}">View Milestone</a>
+    <p>Best regards,</p>
+    <p>The Team</p>
+</div>
+</body>
+</html>

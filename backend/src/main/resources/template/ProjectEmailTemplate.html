@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{projectStatus}} Notification</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 600px;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            color: #333;
+        }
+        .button {
+            display: inline-block;
+            padding: 10px 15px;
+            margin: 10px 0;
+            background: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+        .footer {
+            margin-top: 20px;
+            font-size: 0.9em;
+            color: #666;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #007bff;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>Project Status Update: {{projectStatus}}</h2>
+    <p>Hello {{client.firstName}},</p>
+    <p>We wanted to inform you that your project <strong>{{title}}</strong> has been marked as <strong>{{projectStatus}}</strong>.</p>
+
+    {{#terminationReason}}
+    <p>Termination Reason: <strong>{{terminationReason}}</strong></p>
+    {{/terminationReason}}
+
+    <table>
+        <tr>
+            <th>Project Details</th>
+            <th>Information</th>
+        </tr>
+        <tr>
+            <td>Title</td>
+            <td>{{title}}</td>
+        </tr>
+        <tr>
+            <td>Budget</td>
+            <td>{{minBudget}} - {{maxBudget}}</td>
+        </tr>
+        <tr>
+            <td>Start Date</td>
+            <td>{{startDate}}</td>
+        </tr>
+    </table>
+
+    <p>For more details, please visit your project dashboard.</p>
+    <a href="{{projectLink}}" class="button">View Project</a>
+
+    <p class="footer">Thank you for using our platform.<br>Best regards,<br>The Team</p>
+</div>
+</body>
+</html>

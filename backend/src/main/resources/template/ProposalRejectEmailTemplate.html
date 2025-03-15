@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proposal Rejection Notification</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            background-color: #ffffff;
+            max-width: 600px;
+            margin: auto;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            color: #d9534f;
+        }
+        p {
+            color: #333;
+        }
+        .details {
+            margin-top: 20px;
+            border-collapse: collapse;
+            width: 100%;
+        }
+        .details th, .details td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        .details th {
+            background-color: #f8f8f8;
+        }
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #d9534f;
+            color: #ffffff;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>Proposal Rejected</h2>
+    <p>Dear {{freelancer.firstName}},</p>
+    <p>We regret to inform you that your proposal for the project <strong>{{project.title}}</strong> has been rejected by the client.</p>
+
+    <table class="details">
+        <tr>
+            <th>Project</th>
+            <td>{{project.title}}</td>
+        </tr>
+        <tr>
+            <th>Budget</th>
+            <td>{{budget}}</td>
+        </tr>
+        <tr>
+            <th>Submitted On</th>
+            <td>{{createdAt}}</td>
+        </tr>
+        <tr>
+            <th>Client</th>
+            <td>{{project.client.firstName}} {{project.client.lastName}}</td>
+        </tr>
+    </table>
+
+    <p>You can explore more opportunities and submit proposals for other projects on our platform.</p>
+
+    <a href="{{exploreProjectsUrl}}" class="button">Find New Projects</a>
+
+    <p>Best regards,</p>
+    <p><strong>Hirable</strong></p>
+</div>
+</body>
+</html>

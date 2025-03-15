@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Milestone Completed</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      margin: 0;
+      padding: 20px;
+    }
+    .container {
+      max-width: 600px;
+      background: #ffffff;
+      padding: 20px;
+      border-radius: 5px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    .header {
+      text-align: center;
+      font-size: 20px;
+      font-weight: bold;
+      color: #333;
+    }
+    .content {
+      margin-top: 20px;
+      font-size: 16px;
+      color: #555;
+    }
+    .table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+    }
+    .table th, .table td {
+      border: 1px solid #ddd;
+      padding: 10px;
+      text-align: left;
+    }
+    .table th {
+      background-color: #f8f8f8;
+      font-weight: bold;
+    }
+    .button {
+      display: inline-block;
+      margin-top: 20px;
+      padding: 10px 20px;
+      background-color: #007bff;
+      color: #ffffff;
+      text-decoration: none;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="header">Milestone Completed</div>
+  <div class="content">
+    <p>Dear {{project.client.firstName}},</p>
+    <p>The milestone <strong>{{title}}</strong> for the project <strong>{{project.title}}</strong> has been successfully completed.</p>
+    <table class="table">
+      <tr>
+        <th>Milestone</th>
+        <td>{{title}}</td>
+      </tr>
+      <tr>
+        <th>Project</th>
+        <td>{{project.title}}</td>
+      </tr>
+      <tr>
+        <th>Freelancer</th>
+        <td>{{project.contract.freelancer.firstName}} {{project.contract.freelancer.lastName}}</td>
+      </tr>
+      <tr>
+        <th>Budget</th>
+        <td>{{budgetFormatted}}</td>
+      </tr>
+      <tr>
+        <th>Completed On</th>
+        <td>{{completedAtFormatted}}</td>
+      </tr>
+    </table>
+    <p>You can review the submitted deliverables and release the payment accordingly.</p>
+    <a href="{{reviewUrl}}" class="button">Review Milestone</a>
+  </div>
+</div>
+</body>
+</html>
