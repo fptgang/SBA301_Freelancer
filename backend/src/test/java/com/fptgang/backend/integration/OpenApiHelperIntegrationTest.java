@@ -78,7 +78,7 @@ public class OpenApiHelperIntegrationTest {
         // Not Equal
         assertThat(accountRepos.findAll(
                 OpenApiHelper.filterToSpec("email,ne,test1@example.com")
-        )).hasSize(2);
+        )).hasSize(3);
 
         // Contains
         assertThat(accountRepos.findAll(
@@ -88,7 +88,7 @@ public class OpenApiHelperIntegrationTest {
         // Not Contains
         assertThat(accountRepos.findAll(
                 OpenApiHelper.filterToSpec("email,ncontains,test1")
-        )).hasSize(2);
+        )).hasSize(3);
 
         // StartsWith
         assertThat(accountRepos.findAll(
@@ -98,7 +98,7 @@ public class OpenApiHelperIntegrationTest {
         // Not StartsWith
         assertThat(accountRepos.findAll(
                 OpenApiHelper.filterToSpec("email,nstartswith,test")
-        )).hasSize(0);
+        )).hasSize(1);
 
         // EndsWith
         assertThat(accountRepos.findAll(
@@ -108,7 +108,7 @@ public class OpenApiHelperIntegrationTest {
         // Not EndsWith
         assertThat(accountRepos.findAll(
                 OpenApiHelper.filterToSpec("email,nendswith,@example.com")
-        )).hasSize(0);
+        )).hasSize(1);
     }
 
     // BigDecimal Tests
@@ -122,7 +122,7 @@ public class OpenApiHelperIntegrationTest {
         // Not Equal
         assertThat(accountRepos.findAll(
                 OpenApiHelper.filterToSpec("balance,ne,5000")
-        )).hasSize(2);
+        )).hasSize(3);
 
         // Greater Than
         assertThat(accountRepos.findAll(
@@ -132,7 +132,7 @@ public class OpenApiHelperIntegrationTest {
         // Less Than
         assertThat(accountRepos.findAll(
                 OpenApiHelper.filterToSpec("balance,lt,2000")
-        )).hasSize(1);
+        )).hasSize(2);
 
         // Greater Than or Equal
         assertThat(accountRepos.findAll(
@@ -142,7 +142,7 @@ public class OpenApiHelperIntegrationTest {
         // Less Than or Equal
         assertThat(accountRepos.findAll(
                 OpenApiHelper.filterToSpec("balance,lte,5000")
-        )).hasSize(2);
+        )).hasSize(3);
     }
 
     // Enum Tests (Role)
@@ -151,7 +151,7 @@ public class OpenApiHelperIntegrationTest {
         // Equals
         assertThat(accountRepos.findAll(
                 OpenApiHelper.filterToSpec("role,eq,ADMIN")
-        )).hasSize(1);
+        )).hasSize(2);
 
         // Not Equal
         assertThat(accountRepos.findAll(
@@ -161,7 +161,7 @@ public class OpenApiHelperIntegrationTest {
         // In (comma separated)
         assertThat(accountRepos.findAll(
                 OpenApiHelper.filterToSpec("role,in,ADMIN,CLIENT")
-        )).hasSize(2);
+        )).hasSize(3);
 
         // Not In (comma separated)
         assertThat(accountRepos.findAll(
@@ -175,7 +175,7 @@ public class OpenApiHelperIntegrationTest {
         // Equals True
         assertThat(accountRepos.findAll(
                 OpenApiHelper.filterToSpec("isVisible,eq,true")
-        )).hasSize(2);
+        )).hasSize(3);
 
         // Equals False
         assertThat(accountRepos.findAll(
@@ -190,7 +190,7 @@ public class OpenApiHelperIntegrationTest {
         // Not Equals False
         assertThat(accountRepos.findAll(
                 OpenApiHelper.filterToSpec("isVisible,ne,false")
-        )).hasSize(2);
+        )).hasSize(3);
     }
 
     // LocalDateTime Tests
@@ -201,21 +201,21 @@ public class OpenApiHelperIntegrationTest {
         // Less Than
         assertThat(accountRepos.findAll(
                 OpenApiHelper.filterToSpec("createdAt,lt," + currentTime.plusDays(1))
-        )).hasSize(3);
+        )).hasSize(4);
 
         // Greater Than
         assertThat(accountRepos.findAll(
                 OpenApiHelper.filterToSpec("createdAt,gt," + currentTime.minusDays(1))
-        )).hasSize(3);
+        )).hasSize(4);
 
         // Less Than or Equal
         assertThat(accountRepos.findAll(
                 OpenApiHelper.filterToSpec("createdAt,lte," + currentTime.plusDays(1))
-        )).hasSize(3);
+        )).hasSize(4);
 
         // Greater Than or Equal
         assertThat(accountRepos.findAll(
                 OpenApiHelper.filterToSpec("createdAt,gte," + currentTime.minusDays(1))
-        )).hasSize(3);
+        )).hasSize(4);
     }
 }

@@ -84,6 +84,8 @@ public class TransactionServiceImpl implements TransactionService {
                 milestone.getMilestoneId())) {
             throw new IllegalArgumentException("Escrow deposit already exists on milestone");
         }
+        if (milestone.getProject().getContract() == null)
+            throw new IllegalStateException("Contract does not exist");
         var from = milestone.getProject().getClient();
         var to = accountService.getEscrowAccountReference();
         var fund = milestone.getProject().getContract()

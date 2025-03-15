@@ -3,10 +3,7 @@ package com.fptgang.backend.model;
 
 import com.fptgang.backend.util.Searchable;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -34,6 +31,9 @@ public class    Proposal {
     @JoinColumn(name = "freelancer_id", nullable = false)
     private Account freelancer;
 
+    @Column(name = "freelancer_id", insertable = false, updatable = false)
+    private Long freelancerId;
+
     @Column(columnDefinition = "TEXT", length = 10000000)
     @Searchable
     private String notes;
@@ -51,8 +51,9 @@ public class    Proposal {
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
-    @OneToMany(mappedBy = "proposal", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "proposal", fetch = FetchType.LAZY)
     @Builder.Default
+    @ToString.Exclude
     private List<File> files = new ArrayList<>();
 
     public enum ProposalStatus {
@@ -63,7 +64,7 @@ public class    Proposal {
         REJECTED
     }
 
-    @OneToOne(mappedBy = "proposal", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "proposal", fetch = FetchType.LAZY)
     private Contract contract;
 }
 

@@ -3,10 +3,7 @@ package com.fptgang.backend.model;
 
 import com.fptgang.backend.util.Searchable;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.jetbrains.annotations.NotNull;
@@ -40,11 +37,13 @@ public class Skill {
     @Builder.Default
     private Boolean isVisible = true;
 
-    @OneToMany(mappedBy = "skill", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "skill", fetch = FetchType.LAZY)
     @Builder.Default
+    @ToString.Exclude
     private List<ProjectSkill> projectSkills = new ArrayList<>();
     
-    @OneToMany(mappedBy = "skill", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "skill", fetch = FetchType.LAZY)
     @Builder.Default
+    @ToString.Exclude
     private List<ProfileSkill> profileSkills = new ArrayList<>();
 }

@@ -1,56 +1,66 @@
 package com.fptgang.backend.service.impl;
 
+import com.fptgang.backend.config.HirableConfig;
 import com.fptgang.backend.exception.InvalidInputException;
 import com.fptgang.backend.model.Project;
 import com.fptgang.backend.model.Proposal;
+import com.fptgang.backend.repository.AccountRepos;
+import com.fptgang.backend.repository.ProjectRepos;
 import com.fptgang.backend.repository.ProposalRepos;
+import com.fptgang.backend.security.AuthContext;
 import com.fptgang.backend.service.ProposalService;
 import com.fptgang.backend.service.params.ListParams;
-import com.fptgang.backend.util.EntityUtil;
 import com.fptgang.backend.util.OpenApiHelper;
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Objects;
+import java.time.LocalDateTime;
 
 @Service
 public class ProposalServiceImpl implements ProposalService {
 
-    @Autowired
-    private ProposalRepos proposalRepos;
+    private final ProposalRepos proposalRepos;
+    private final ProjectRepos projectRepos;
+    private final AccountRepos accountRepos;
+    private final HirableConfig hirableConfig;
+    private final AuthContext authContext;
+
+    public ProposalServiceImpl(ProposalRepos proposalRepos,
+                               ProjectRepos projectRepos,
+                               AccountRepos accountRepos,
+                               HirableConfig hirableConfig,
+                               AuthContext authContext) {
+        this.proposalRepos = proposalRepos;
+        this.projectRepos = projectRepos;
+        this.accountRepos = accountRepos;
+        this.hirableConfig = hirableConfig;
+        this.authContext = authContext;
+    }
 
     @Override
     public Proposal create(Proposal proposal) {
         proposal.setProposalId(null);
-        if(proposal.getProject().getStatus() != Project.ProjectStatus.OPEN) {
-            throw new InvalidInputException("Project is not open");
+        proposal.setFreelancer(accountRepos.getReferenceById(authContext.requireAccountId()));
+        Project project = projectRepos.findByProjectId(proposal.getProject().getProjectId())
+                .orElseThrow(() -> new InvalidInputException("Project does not exist"));
+        proposal.setProject(project);
+
+        if (project.getStatus() != Project.ProjectStatus.OPEN)
+            throw new IllegalStateException("Project is not open");
+        if (LocalDateTime.now().isAfter(project.getStartDate().minusDays(hirableConfig.getProposalApplicationCutoffDuration())))
+            throw new IllegalStateException("Cannot send proposals for now");
+        if (proposalRepos.findByProject_ProjectIdAndFreelancer_AccountIdAndStatus
+                        (proposal.getProject().getProjectId(), proposal.getFreelancer().getAccountId(), Proposal.ProposalStatus.PENDING)
+                .isPresent()) {
+            throw new IllegalStateException("You already have a pending proposal for this project");
         }
-        if(proposal.getProject().getMinBudget().compareTo(
-                proposal.getBudget()) > 0 || proposal.getProject().getMaxBudget().compareTo(proposal.getBudget()) < 0) {
+        if (project.getMinBudget().compareTo(proposal.getBudget()) > 0 ||
+                proposal.getProject().getMaxBudget().compareTo(proposal.getBudget()) < 0) {
             throw new InvalidInputException("Budget is not within project's budget range");
         }
 
-        if(proposalRepos.findByProject_ProjectIdAndFreelancer_AccountIdAndStatus
-                (proposal.getProject().getProjectId(), proposal.getFreelancer().getAccountId(), Proposal.ProposalStatus.PENDING)
-                .isPresent()
-        ) {
-            throw new InvalidInputException("You already have a pending proposal for this project");
-        }
         proposal.setStatus(Proposal.ProposalStatus.PENDING);
-        return proposalRepos.save(proposal);
-    }
-
-    @Override
-    public Proposal update(Proposal proposal) {
-        if (proposal.getProposalId() == null ) {
-            throw new IllegalArgumentException("Proposal does not exist");
-        }
-        var existing = proposalRepos.findById(proposal.getProposalId()).orElseThrow(
-                () -> new IllegalArgumentException("Proposal does not exist"));
-        EntityUtil.merge(existing, proposal);
         return proposalRepos.save(proposal);
     }
 
@@ -68,64 +78,62 @@ public class ProposalServiceImpl implements ProposalService {
     }
 
     @Override
-    public Proposal acceptProposal(long proposalId, long currentUserId) {
+    @Transactional
+    public Proposal acceptProposal(long proposalId) {
         Proposal proposal = findById(proposalId);
-        if(proposal.getProject().getClient().getAccountId() != currentUserId) {
-            throw new InvalidInputException("You are not the client of this project");
+        authContext.requireAccountId(proposal.getProject().getClientId()); // Client operation
+        if (proposal.getStatus() != Proposal.ProposalStatus.PENDING) {
+            throw new IllegalStateException("Proposal is not pending");
         }
-        if(proposal.getStatus() != Proposal.ProposalStatus.PENDING) {
-            throw new InvalidInputException("Proposal is not pending");
+        if (proposalRepos.countByProjectIdAndStatus(proposal.getProject().getProjectId(), Proposal.ProposalStatus.ACCEPTED) > 0) {
+            throw new IllegalStateException("Project already has an accepted proposal");
         }
-        if(proposal.getProject().getContract() != null) {
-            throw new InvalidInputException("Project already has an active contract");
+        if (proposal.getProject().getStatus() != Project.ProjectStatus.OPEN) {
+            throw new IllegalStateException("Project is not OPEN");
         }
 
-        proposal.setStatus(Proposal.ProposalStatus.ACCEPTED);
         proposal.getProject().setStatus(Project.ProjectStatus.IN_PROGRESS);
-        proposal=update(proposal);
-        List<Proposal> proposals = proposalRepos.findByProject_ProjectId(proposal.getProject().getProjectId());
-        for (Proposal p : proposals) {
-            if (!Objects.equals(p.getProposalId(), proposal.getProposalId()) &&
-                    p.getStatus() == Proposal.ProposalStatus.PENDING) {
-                p.setStatus(Proposal.ProposalStatus.REJECTED);
-                update(p);
-            }
-        }
+        proposal.setProject(projectRepos.save(proposal.getProject()));
+
+        proposalRepos.saveAll(proposal.getProject().getProposals().stream()
+                .filter(p -> p.getStatus() == Proposal.ProposalStatus.PENDING)
+                .peek(p ->
+                        p.setStatus(p.getProposalId() == proposalId ?
+                                Proposal.ProposalStatus.ACCEPTED :
+                                Proposal.ProposalStatus.REJECTED))
+                .toList());
 
         return proposal;
     }
 
     @Override
-    public Proposal rejectProposal(long proposalId, long currentUserId) {
+    public Proposal rejectProposal(long proposalId) {
         Proposal proposal = findById(proposalId);
+        authContext.requireAccountId(proposal.getProject().getClientId()); // Client operation
 
-        if(proposal.getProject().getClient().getAccountId() != currentUserId) {
-            throw new InvalidInputException("You are not the client of this project");
+        if (proposal.getStatus() != Proposal.ProposalStatus.PENDING) {
+            throw new IllegalStateException("Proposal is not pending");
         }
-        if(proposal.getStatus() != Proposal.ProposalStatus.PENDING) {
-            throw new InvalidInputException("Proposal is not pending");
-        }
-        if(proposal.getProject().getContract() != null) {
-            throw new InvalidInputException("Project already has an active contract");
+        if (proposal.getProject().getStatus() != Project.ProjectStatus.OPEN) {
+            throw new IllegalStateException("Project is not OPEN");
         }
 
         proposal.setStatus(Proposal.ProposalStatus.REJECTED);
-        proposal=update(proposal);
-        return proposal;
+        return proposalRepos.save(proposal);
     }
 
     @Override
-    public Proposal withdrawProposal(long proposalId, long currentUserId) {
+    public Proposal withdrawProposal(long proposalId) {
         Proposal proposal = findById(proposalId);
-        if(proposal.getFreelancer().getAccountId() != currentUserId) {
-            throw new InvalidInputException("You are not the freelancer of this proposal");
+        authContext.requireAccountId(proposal.getFreelancerId()); // Freelancer operation
+        if (proposal.getStatus() != Proposal.ProposalStatus.PENDING) {
+            throw new IllegalStateException("Proposal is not pending");
         }
-        if(proposal.getStatus() != Proposal.ProposalStatus.PENDING) {
-            throw new InvalidInputException("Proposal is not pending");
+        if (proposal.getProject().getStatus() != Project.ProjectStatus.OPEN) {
+            throw new IllegalStateException("Project is not OPEN");
         }
         proposal.setStatus(Proposal.ProposalStatus.WITHDRAWN);
-        proposal=update(proposal);
-        return proposal;
+        return proposalRepos.save(proposal);
     }
 
     @Override

@@ -3,10 +3,7 @@ package com.fptgang.backend.model;
 import com.fptgang.backend.util.Searchable;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.jetbrains.annotations.NotNull;
@@ -73,18 +70,21 @@ public class Project {
     @Builder.Default
     private Boolean isVisible = true;
 
-    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "project", fetch = FetchType.LAZY)
     @Builder.Default
+    @ToString.Exclude
     private List<File> files = new ArrayList<>();
 
-    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "project", fetch = FetchType.LAZY)
     @Builder.Default
+    @ToString.Exclude
     private List<Proposal> proposals = new ArrayList<>();
 
-    @OneToOne(mappedBy = "project", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToOne(mappedBy = "project", fetch = FetchType.EAGER)
     @Nullable
     private Contract contract;
 
+    // Cascading milestones with project
     @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @Builder.Default
     private List<Milestone> milestones = new ArrayList<>();
@@ -98,16 +98,19 @@ public class Project {
     @Nullable
     private Long activeMilestoneId;
 
+    // Cascading project skills with project
     @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     @Builder.Default
     private List<ProjectSkill> requiredSkills = new ArrayList<>();
 
-    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "project", fetch = FetchType.LAZY)
     @Builder.Default
+    @ToString.Exclude
     private List<Message> messages = new ArrayList<>();
 
-    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @Builder.Default        
+    @OneToMany(mappedBy = "project", fetch = FetchType.LAZY)
+    @Builder.Default
+    @ToString.Exclude
     private List<Report> reports = new ArrayList<>();
 
     public enum ProjectStatus {

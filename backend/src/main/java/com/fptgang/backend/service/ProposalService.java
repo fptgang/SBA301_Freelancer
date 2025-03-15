@@ -7,11 +7,10 @@ import org.springframework.lang.Nullable;
 
 public interface ProposalService {
     Proposal create(Proposal proposal);
-    Proposal update(Proposal proposal);
     Proposal findById(long id);
     Page<Proposal> getAll(ListParams params);
-    Proposal acceptProposal(long proposalId, long currentUserId);
-    Proposal rejectProposal(long proposalId, long currentUserId);
-    Proposal withdrawProposal(long proposalId, long currentUserId);
+    Proposal acceptProposal(long proposalId);
+    Proposal rejectProposal(long proposalId);
+    Proposal withdrawProposal(long proposalId);
     long countByProjectIdAndStatus(long projectId, @Nullable Proposal.ProposalStatus status);
 }

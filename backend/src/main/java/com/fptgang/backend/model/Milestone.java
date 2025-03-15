@@ -4,10 +4,7 @@ import com.fptgang.backend.util.Searchable;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.jetbrains.annotations.NotNull;
@@ -68,11 +65,13 @@ public class Milestone {
 
     @OneToMany(mappedBy = "milestone", fetch = FetchType.LAZY)
     @Builder.Default
+    @ToString.Exclude
     private List<File> deliverables = new ArrayList<>();
 
     // A milestone can have up to 2 transactions
-    @OneToMany(mappedBy = "milestone", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "milestone", cascade = CascadeType.ALL)
     @Builder.Default
+    @ToString.Exclude
     private List<Transaction> transactions = new ArrayList<>();
 
     public enum MilestoneStatus {

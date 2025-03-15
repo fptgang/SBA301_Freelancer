@@ -62,6 +62,7 @@ public class Profile {
     @JoinColumn(name = "account_id")
     private Account account;
 
+    // Cascading profile skills with profile
     @OneToMany(mappedBy = "profile", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     @Builder.Default
     private List<ProfileSkill> skills = new ArrayList<>();

@@ -7,6 +7,7 @@ import org.springframework.data.domain.Pageable;
 
 public interface AccountService {
     long getEscrowAccountId();
+    void initEscrowAccount();
     Account getEscrowAccountReference();
     Account create(Account account);
     Account findById(long id);

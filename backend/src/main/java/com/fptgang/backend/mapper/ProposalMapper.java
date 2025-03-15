@@ -1,6 +1,5 @@
 package com.fptgang.backend.mapper;
 
-import com.fptgang.backend.api.model.ProposalCreateDto;
 import com.fptgang.backend.api.model.ProposalDto;
 import com.fptgang.backend.api.model.ProposalStatusDto;
 import com.fptgang.backend.model.Proposal;
@@ -63,24 +62,6 @@ public class ProposalMapper extends BaseMapper<ProposalDto, Proposal> {
                 .filter(e -> e.getFileId() != null)
                 .map(e -> fileRepos.getReferenceById(e.getFileId()))
                 .toList());
-
-        return entity;
-    }
-
-    public Proposal toEntity(ProposalCreateDto dto) {
-        if (dto == null) {
-            return null;
-        }
-
-        Proposal entity = new Proposal();
-        if (dto.getProjectId() != null) {
-            entity.setProject(projectRepos.getReferenceById(dto.getProjectId()));
-        }
-        if (dto.getFreelancerId() != null) {
-            entity.setFreelancer(accountRepos.getReferenceById(dto.getFreelancerId()));
-        }
-        entity.setNotes(dto.getNotes());
-        entity.setBudget(dto.getBudget());
 
         return entity;
     }
