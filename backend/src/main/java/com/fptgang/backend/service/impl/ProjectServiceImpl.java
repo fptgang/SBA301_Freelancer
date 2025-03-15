@@ -5,10 +5,7 @@ import com.fptgang.backend.exception.InvalidInputException;
 import com.fptgang.backend.model.*;
 import com.fptgang.backend.repository.*;
 import com.fptgang.backend.security.AuthContext;
-import com.fptgang.backend.service.AccountService;
-import com.fptgang.backend.service.MilestoneService;
-import com.fptgang.backend.service.ProjectService;
-import com.fptgang.backend.service.ProposalService;
+import com.fptgang.backend.service.*;
 import com.fptgang.backend.service.params.ListParams;
 import com.fptgang.backend.util.EntityUtil;
 import com.fptgang.backend.util.OpenApiHelper;
@@ -40,6 +37,7 @@ public class ProjectServiceImpl implements ProjectService {
     private final TransactionServiceImpl transactionService;
     private final MilestoneService milestoneService;
     private final AccountRepos accountRepos;
+    private final ContractService contractService;
 
     public ProjectServiceImpl(AuthContext authContext,
                               ProjectRepos projectRepos,
@@ -50,7 +48,8 @@ public class ProjectServiceImpl implements ProjectService {
                               MilestoneRepos milestoneRepos,
                               TransactionServiceImpl transactionService,
                               MilestoneService milestoneService,
-                              AccountRepos accountRepos) {
+                              AccountRepos accountRepos,
+                              ContractService contractService) {
         this.authContext = authContext;
         this.projectRepos = projectRepos;
         this.accountService = accountService;
@@ -61,6 +60,7 @@ public class ProjectServiceImpl implements ProjectService {
         this.transactionService = transactionService;
         this.milestoneService = milestoneService;
         this.accountRepos = accountRepos;
+        this.contractService = contractService;
     }
 
     @Override
@@ -104,6 +104,7 @@ public class ProjectServiceImpl implements ProjectService {
     public Project update(Project project) {
         Project existing = projectRepos.findByProjectId(project.getProjectId()).orElseThrow(
                 () -> new InvalidInputException("Project does not exist"));
+        authContext.requireAccountId(existing.getClientId()); // Client operation
         if (existing.getStatus() != Project.ProjectStatus.OPEN)
             throw new IllegalStateException("Only OPEN projects can be updated");
         if (project.getStartDate().isBefore(existing.getStartDate()))
@@ -177,7 +178,7 @@ public class ProjectServiceImpl implements ProjectService {
     public Project terminateByClient(Long projectId) {
         Project project = projectRepos.findByProjectId(projectId).orElseThrow(
                 () -> new InvalidInputException("Project does not exist"));
-        authContext.requireAccountId(project.getClientId());
+        authContext.requireAccountId(project.getClientId()); // Client operation
 
         // Case 1: If the project is OPEN, terminate immediately
         if (project.getStatus() == Project.ProjectStatus.OPEN) {
@@ -221,8 +222,6 @@ public class ProjectServiceImpl implements ProjectService {
                 () -> new InvalidInputException("Project with project id " + projectId + "not found"));
         if (project.getStatus() == Project.ProjectStatus.TERMINATED)
             throw new IllegalStateException("Project is already terminated");
-        if (project.getActiveMilestone() == null)
-            throw new IllegalStateException("Project has no active milestone");
 
         for (Milestone milestone : project.getMilestones()) {
             // IF PENDING, return fund to client (if exists)
@@ -246,6 +245,9 @@ public class ProjectServiceImpl implements ProjectService {
                 .filter(p -> p.getStatus() == Proposal.ProposalStatus.PENDING)
                 .peek(p -> p.setStatus(Proposal.ProposalStatus.REJECTED)).toList());
 
+        if (project.getContract() != null)
+            project.setContract(contractService.terminateContract(project.getContract()));
+
         project.setStatus(Project.ProjectStatus.TERMINATED);
         project.setTerminationReason(Project.TerminationReason.STAFF_DECISION);
 
@@ -257,6 +259,7 @@ public class ProjectServiceImpl implements ProjectService {
     public Project unpause(Long projectId, ProjectTimeline timeline) {
         Project existing = projectRepos.findByProjectId(projectId).orElseThrow(
                 () -> new InvalidInputException("Project does not exist"));
+        authContext.requireAccountId(existing.getClientId()); // Client operation
         if (existing.getStatus() != Project.ProjectStatus.PAUSED)
             throw new IllegalStateException("Only PAUSED projects can be unpaused");
 
@@ -278,6 +281,7 @@ public class ProjectServiceImpl implements ProjectService {
     public Project extendDeadline(Long projectId, ProjectTimeline timeline) {
         Project existing = projectRepos.findByProjectId(projectId).orElseThrow(
                 () -> new InvalidInputException("Project does not exist"));
+        authContext.requireAccountId(existing.getClientId()); // Client operation
         if (existing.getToTerminate() || existing.getActiveMilestone() == null)
             throw new IllegalStateException("Cannot extend deadlines for now");
         if (existing.getActiveMilestone().getDeadline().isAfter(LocalDateTime.now()))
@@ -336,6 +340,7 @@ public class ProjectServiceImpl implements ProjectService {
     public void deleteById(long projectId) {
         Project project = projectRepos.findByProjectId(projectId)
                 .orElseThrow(() -> new InvalidInputException("Project with project id " + projectId + "not found"));
+        authContext.requirePermissionOrAccountIds(Role.STAFF, project.getClientId()); // Client operation
         if (project.getStatus() != Project.ProjectStatus.TERMINATED)
             throw new IllegalStateException("Can only delete project when it is terminated");
         project.setIsVisible(false);
@@ -360,6 +365,7 @@ public class ProjectServiceImpl implements ProjectService {
     public Project joinProject(Long projectId, Long currentUserId) {
         Project project = projectRepos.findByProjectId(projectId).orElseThrow(
                 () -> new InvalidInputException("Project with project id " + projectId + "not found"));
+        authContext.requirePermission(Role.STAFF);
         if (project.getStaff() != null && !Objects.equals(project.getStaff().getAccountId(), currentUserId)) {
             throw new InvalidInputException("Project already has a staff");
         }
@@ -378,6 +384,7 @@ public class ProjectServiceImpl implements ProjectService {
     public Project leaveProject(Long projectId, Long currentUserId) {
         Project project = projectRepos.findByProjectId(projectId).orElseThrow(
                 () -> new InvalidInputException("Project with project id " + projectId + "not found"));
+        authContext.requirePermission(Role.STAFF);
         if (project.getStaff() == null) {
             throw new InvalidInputException("Project does not have a staff");
         } else if (!Objects.equals(project.getStaff().getAccountId(), currentUserId)) {

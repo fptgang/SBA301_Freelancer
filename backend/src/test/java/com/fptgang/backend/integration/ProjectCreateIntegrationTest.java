@@ -13,7 +13,6 @@ import com.fptgang.backend.repository.AccountRepos;
 import com.fptgang.backend.repository.ProjectCategoryRepos;
 import com.fptgang.backend.security.WithMockAppUser;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.runner.RunWith;
@@ -42,7 +41,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Import(TestcontainersConfiguration.class)
 @ActiveProfiles("dev")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class ProjectIntegrationTest {
+public class ProjectCreateIntegrationTest {
 
     @Autowired
     private MockMvc mockMvc;

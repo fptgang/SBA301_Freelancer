@@ -9,6 +9,7 @@ import com.fptgang.backend.service.params.ListParams;
 import com.fptgang.backend.util.EntityUtil;
 import com.fptgang.backend.util.OpenApiHelper;
 import com.google.common.base.Preconditions;
+import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -80,6 +81,7 @@ public class MilestoneServiceImpl implements MilestoneService {
     }
 
     @Override
+    @Transactional
     public Milestone depositFund(Milestone milestone) {
         Preconditions.checkArgument(milestone.getIsVisible(), "Milestone is not visible");
         Preconditions.checkArgument(
@@ -97,6 +99,7 @@ public class MilestoneServiceImpl implements MilestoneService {
     }
 
     @Override
+    @Transactional
     public Milestone releaseFund(Milestone milestone) {
         Preconditions.checkArgument(milestone.getIsVisible(), "Milestone is not visible");
         Preconditions.checkArgument(
@@ -113,6 +116,7 @@ public class MilestoneServiceImpl implements MilestoneService {
     }
 
     @Override
+    @Transactional
     public Milestone returnFund(Milestone milestone) {
         Preconditions.checkArgument(milestone.getIsVisible(), "Milestone is not visible");
         Preconditions.checkArgument(milestone.getFundStatus() == Milestone.FundStatus.DEPOSITED,

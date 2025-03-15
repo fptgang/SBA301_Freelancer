@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -28,16 +29,14 @@ public class ContractController implements ContractsApi {
     }
 
     @Override
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ContractDto> signContract(Long contractId) {
         return new ResponseEntity<>(contractMapper.toDTO(contractService.signContract(contractId), DetailLevel.FULL), HttpStatus.OK);
     }
 
     @Override
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ContractDto> createContract(Long proposalId) {
-        ContractDto contractDto = new ContractDto();
-        ProposalDto proposalDto = new ProposalDto();
-        proposalDto.setProposalId(proposalId);
-        contractDto.setProposal(proposalDto);
-        return new ResponseEntity<>(contractMapper.toDTO(contractService.create(contractMapper.toEntity(contractDto)), DetailLevel.FULL), HttpStatus.OK);
+        return new ResponseEntity<>(contractMapper.toDTO(contractService.create(proposalId), DetailLevel.FULL), HttpStatus.OK);
     }
 }

@@ -38,5 +38,16 @@ public interface AuthContext {
             throw new AccessDeniedException("No access");
         }
     }
+    default void requirePermissionOrAccountIds(Role role, long... accountIds) {
+        if (requireRole().hasPermission(role)) {
+            return;
+        }
+        for (long accountId : accountIds) {
+            if (requireAccountId() == accountId) {
+                return;
+            }
+        }
+        throw new AccessDeniedException("No access");
+    }
     boolean isAuthenticated();
 }

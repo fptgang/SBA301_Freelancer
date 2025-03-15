@@ -43,7 +43,7 @@ public class Message {
     @Builder.Default
     private Boolean isVisible = true;
 
-    @OneToMany(mappedBy = "message", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "message", fetch = FetchType.LAZY)
     @Builder.Default
     private List<File> files = new ArrayList<>();
 }

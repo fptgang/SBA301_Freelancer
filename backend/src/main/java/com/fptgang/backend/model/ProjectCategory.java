@@ -39,7 +39,7 @@ public class ProjectCategory {
     @Builder.Default
     private Boolean isVisible = true;
 
-    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "category", fetch = FetchType.LAZY)
     @Builder.Default
     private List<Project> projects = new ArrayList<>();
 }

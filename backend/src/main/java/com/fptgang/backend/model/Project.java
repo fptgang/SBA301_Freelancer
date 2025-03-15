@@ -73,18 +73,19 @@ public class Project {
     @Builder.Default
     private Boolean isVisible = true;
 
-    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "project", fetch = FetchType.LAZY)
     @Builder.Default
     private List<File> files = new ArrayList<>();
 
-    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "project", fetch = FetchType.LAZY)
     @Builder.Default
     private List<Proposal> proposals = new ArrayList<>();
 
-    @OneToOne(mappedBy = "project", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToOne(mappedBy = "project", fetch = FetchType.EAGER)
     @Nullable
     private Contract contract;
 
+    // Cascading milestones with project
     @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @Builder.Default
     private List<Milestone> milestones = new ArrayList<>();
@@ -98,15 +99,16 @@ public class Project {
     @Nullable
     private Long activeMilestoneId;
 
+    // Cascading project skills with project
     @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     @Builder.Default
     private List<ProjectSkill> requiredSkills = new ArrayList<>();
 
-    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "project", fetch = FetchType.LAZY)
     @Builder.Default
     private List<Message> messages = new ArrayList<>();
 
-    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "project", fetch = FetchType.LAZY)
     @Builder.Default        
     private List<Report> reports = new ArrayList<>();
 

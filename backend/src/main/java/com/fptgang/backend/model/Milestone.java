@@ -71,7 +71,7 @@ public class Milestone {
     private List<File> deliverables = new ArrayList<>();
 
     // A milestone can have up to 2 transactions
-    @OneToMany(mappedBy = "milestone", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "milestone", cascade = CascadeType.ALL)
     @Builder.Default
     private List<Transaction> transactions = new ArrayList<>();
 

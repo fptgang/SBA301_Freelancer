@@ -40,11 +40,11 @@ public class Skill {
     @Builder.Default
     private Boolean isVisible = true;
 
-    @OneToMany(mappedBy = "skill", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "skill", fetch = FetchType.LAZY)
     @Builder.Default
     private List<ProjectSkill> projectSkills = new ArrayList<>();
     
-    @OneToMany(mappedBy = "skill", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "skill", fetch = FetchType.LAZY)
     @Builder.Default
     private List<ProfileSkill> profileSkills = new ArrayList<>();
 }

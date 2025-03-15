@@ -34,6 +34,9 @@ public class    Proposal {
     @JoinColumn(name = "freelancer_id", nullable = false)
     private Account freelancer;
 
+    @Column(name = "freelancer_id", insertable = false, updatable = false)
+    private Long freelancerId;
+
     @Column(columnDefinition = "TEXT", length = 10000000)
     @Searchable
     private String notes;
@@ -51,7 +54,7 @@ public class    Proposal {
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
-    @OneToMany(mappedBy = "proposal", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "proposal", fetch = FetchType.LAZY)
     @Builder.Default
     private List<File> files = new ArrayList<>();
 
@@ -63,7 +66,7 @@ public class    Proposal {
         REJECTED
     }
 
-    @OneToOne(mappedBy = "proposal", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "proposal", fetch = FetchType.LAZY)
     private Contract contract;
 }
 
