@@ -76,14 +76,14 @@ class AccountIntegrationTest {
 
         assertThat(response).isNotNull();
         assertThat(response.getContent()).isNotEmpty();
-        assertThat(response.getTotalElements()).isEqualTo(2L);
+        assertThat(response.getTotalElements()).isEqualTo(3L);
         assertThat(response.getTotalPages()).isEqualTo(1);
         assertThat(response.getLast()).isTrue();
         assertThat(response.getFirst()).isTrue();
-        assertThat(response.getNumberOfElements()).isEqualTo(2);
+        assertThat(response.getNumberOfElements()).isEqualTo(3);
         assertThat(response.getEmpty()).isFalse();
 
-        var account1 = response.getContent().get(0);
+        var account1 = response.getContent().get(1);
         assertThat(account1.getEmail()).isEqualTo("a@test.com");
         assertThat(account1.getFirstName()).isEqualTo("a");
         assertThat(account1.getLastName()).isEqualTo("x");
@@ -91,7 +91,7 @@ class AccountIntegrationTest {
         assertThat(account1.getRole()).isEqualTo(AccountDto.RoleEnum.ADMIN);
         assertThat(account1.getIsVerified()).isFalse();
 
-        var account2 = response.getContent().get(1);
+        var account2 = response.getContent().get(2);
         assertThat(account2.getEmail()).isEqualTo("b@test.com");
         assertThat(account2.getFirstName()).isEqualTo("b");
         assertThat(account2.getLastName()).isEqualTo("y");

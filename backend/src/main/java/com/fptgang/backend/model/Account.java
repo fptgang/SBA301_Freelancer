@@ -3,10 +3,7 @@ package com.fptgang.backend.model;
 import com.fptgang.backend.util.Searchable;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.jetbrains.annotations.NotNull;
@@ -54,10 +51,12 @@ public class Account {
 
     @OneToMany(mappedBy = "fromAccount", fetch = FetchType.LAZY)
     @Builder.Default
+    @ToString.Exclude
     private List<Transaction> outgoingTransactions = new ArrayList<>();
 
     @OneToMany(mappedBy = "toAccount", fetch = FetchType.LAZY)
     @Builder.Default
+    @ToString.Exclude
     private List<Transaction> incomingTransactions = new ArrayList<>();
 
     @Column(nullable = false)
@@ -83,6 +82,7 @@ public class Account {
 
     @OneToMany(mappedBy = "account", fetch = FetchType.LAZY)
     @Builder.Default
+    @ToString.Exclude
     private List<RefreshToken> refreshTokens = new ArrayList<>();
 
     // Cascading profile with account

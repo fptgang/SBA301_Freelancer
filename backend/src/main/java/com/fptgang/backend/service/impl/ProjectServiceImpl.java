@@ -107,7 +107,7 @@ public class ProjectServiceImpl implements ProjectService {
         authContext.requireAccountId(existing.getClientId()); // Client operation
         if (existing.getStatus() != Project.ProjectStatus.OPEN)
             throw new IllegalStateException("Only OPEN projects can be updated");
-        if (project.getStartDate().isBefore(existing.getStartDate()))
+        if (project.getStartDate() != null && project.getStartDate().isBefore(existing.getStartDate()))
             throw new InvalidInputException("Cannot shrink project startDate");
         validateTimeline(project, false);
 
@@ -224,6 +224,8 @@ public class ProjectServiceImpl implements ProjectService {
             throw new IllegalStateException("Project is already terminated");
 
         for (Milestone milestone : project.getMilestones()) {
+            if (!milestone.getIsVisible()) continue;
+
             // IF PENDING, return fund to client (if exists)
             if (milestone.getStatus() == Milestone.MilestoneStatus.PENDING) {
                 milestoneService.returnFund(milestone);
@@ -301,27 +303,32 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     private void validateTimeline(Project project, boolean checkStartDateWithCurrent) {
-        if (checkStartDateWithCurrent && project.getStartDate().isBefore(LocalDateTime.now().plusDays(hirableConfig.getMinProjectStartDelay()))) {
+        LocalDateTime current = project.getStartDate();
+        if (checkStartDateWithCurrent &&
+                current != null &&
+                current.isBefore(LocalDateTime.now().plusDays(hirableConfig.getMinProjectStartDelay()))) {
             throw new InvalidInputException("Project startDate must be at least " + hirableConfig.getMinProjectStartDelay() + " days later");
         }
         if (project.getMilestones() == null)
             return;
-        LocalDateTime current = project.getStartDate();
         int visibleCount = 0;
         for (Milestone milestone : project.getMilestones()) {
             if (!milestone.getIsVisible()) continue;
-            if (milestone.getDeadline().isBefore(current)) {
-                throw new InvalidInputException(visibleCount == 0 ?
-                        "Milestone deadline must be after the project start date" :
-                        "Milestone deadline must be after the previous");
-            }
-            if (milestone.getDeadline().isBefore(current.plusDays(hirableConfig.getMinMilestoneDurationBetween()))) {
-                throw new InvalidInputException("Milestone must have at least " + hirableConfig.getMinMilestoneDurationBetween() + " days in duration");
-            }
-            if (milestone.getDeadline().isAfter(current.plusDays(hirableConfig.getMaxMilestoneDurationBetween()))) {
-                throw new InvalidInputException("Milestone cannot exceed " + hirableConfig.getMaxMilestoneDurationBetween() + " days in duration");
+            if (current != null) {
+                if (milestone.getDeadline().isBefore(current)) {
+                    throw new InvalidInputException(visibleCount == 0 ?
+                            "Milestone deadline must be after the project start date" :
+                            "Milestone deadline must be after the previous");
+                }
+                if (milestone.getDeadline().isBefore(current.plusDays(hirableConfig.getMinMilestoneDurationBetween()))) {
+                    throw new InvalidInputException("Milestone must have at least " + hirableConfig.getMinMilestoneDurationBetween() + " days in duration");
+                }
+                if (milestone.getDeadline().isAfter(current.plusDays(hirableConfig.getMaxMilestoneDurationBetween()))) {
+                    throw new InvalidInputException("Milestone cannot exceed " + hirableConfig.getMaxMilestoneDurationBetween() + " days in duration");
+                }
             }
             visibleCount++;
+            current = milestone.getDeadline();
         }
         if (visibleCount < 1) {
             throw new InvalidInputException("Project must have at least 1 visible milestone");

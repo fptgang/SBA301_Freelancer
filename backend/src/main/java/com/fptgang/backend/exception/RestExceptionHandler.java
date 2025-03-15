@@ -44,9 +44,9 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 
         log.info("Error status {} due to exception {}", status, ex.getClass().getName());
 
-        //if (exceptionLog) {
+        if (exceptionLog) {
             ex.printStackTrace();
-        //}
+        }
 
         ErrorResponse error = new ErrorResponse().error(ex.getMessage());
         return ResponseEntity.status(status).body(error);

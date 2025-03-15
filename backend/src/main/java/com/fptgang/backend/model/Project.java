@@ -3,10 +3,7 @@ package com.fptgang.backend.model;
 import com.fptgang.backend.util.Searchable;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.jetbrains.annotations.NotNull;
@@ -75,10 +72,12 @@ public class Project {
 
     @OneToMany(mappedBy = "project", fetch = FetchType.LAZY)
     @Builder.Default
+    @ToString.Exclude
     private List<File> files = new ArrayList<>();
 
     @OneToMany(mappedBy = "project", fetch = FetchType.LAZY)
     @Builder.Default
+    @ToString.Exclude
     private List<Proposal> proposals = new ArrayList<>();
 
     @OneToOne(mappedBy = "project", fetch = FetchType.EAGER)
@@ -106,10 +105,12 @@ public class Project {
 
     @OneToMany(mappedBy = "project", fetch = FetchType.LAZY)
     @Builder.Default
+    @ToString.Exclude
     private List<Message> messages = new ArrayList<>();
 
     @OneToMany(mappedBy = "project", fetch = FetchType.LAZY)
-    @Builder.Default        
+    @Builder.Default
+    @ToString.Exclude
     private List<Report> reports = new ArrayList<>();
 
     public enum ProjectStatus {

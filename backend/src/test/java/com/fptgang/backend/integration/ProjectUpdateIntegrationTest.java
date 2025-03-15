@@ -63,17 +63,30 @@ public class ProjectUpdateIntegrationTest {
 
     @BeforeAll
     public void setUp() {
+        projectRepos.deleteAll();
         accountRepos.deleteAll();
         clientAccount = accountRepos.save(
-            Account.builder()
-                .email("test@example.com")
-                .firstName("Test")
-                .lastName("User")
-                .password("password")
-                .role(Role.CLIENT)
-                .isVerified(true)
-                .isVisible(true)
-                .build()
+                Account.builder()
+                        .email("test@example.com")
+                        .firstName("Test")
+                        .lastName("User")
+                        .password("password")
+                        .role(Role.CLIENT)
+                        .isVerified(true)
+                        .isVisible(true)
+                        .build()
+        );
+
+        accountRepos.save(
+                Account.builder()
+                        .email("test2@example.com")
+                        .firstName("Test 2")
+                        .lastName("User 2")
+                        .password("password")
+                        .role(Role.CLIENT)
+                        .isVerified(true)
+                        .isVisible(true)
+                        .build()
         );
 
         projectCategoryRepos.deleteAll();
@@ -94,7 +107,7 @@ public class ProjectUpdateIntegrationTest {
     }
 
     @Test
-    @WithMockAppUser(accountId = 1, username = "test@example.com", role = "ROLE_CLIENT")
+    @WithMockAppUser(accountId = 2, username = "test@example.com", role = "ROLE_CLIENT")
     public void testUpdateProject_Success() throws Exception {
         ProjectUpdateDto updateDto = new ProjectUpdateDto()
             .title("Updated Title")
@@ -141,10 +154,26 @@ public class ProjectUpdateIntegrationTest {
     }
 
     @Test
-    @WithMockAppUser(accountId = 2, username = "other@example.com", role = "ROLE_CLIENT")
+    @WithMockAppUser(accountId = 3, username = "other@example.com", role = "ROLE_CLIENT")
     public void testUpdateProject_WrongClient() throws Exception {
         ProjectUpdateDto updateDto = new ProjectUpdateDto()
-            .title("Updated Title");
+            .title("Updated Title")
+            .description("Updated Description")
+            .minBudget(BigDecimal.valueOf(150))
+            .maxBudget(BigDecimal.valueOf(250))
+            .startDate(OffsetDateTime.now().plusDays(8))
+            .milestones(Arrays.asList(
+                    new MilestoneUpdateDto()
+                            .title("Updated Milestone 1")
+                            .description("Updated Description 1")
+                            .budgetRatio(BigDecimal.valueOf(0.5))
+                            .deadline(OffsetDateTime.now().plusDays(15)),
+                    new MilestoneUpdateDto()
+                            .title("Updated Milestone 2")
+                            .description("Updated Description 2")
+                            .budgetRatio(BigDecimal.valueOf(0.5))
+                            .deadline(OffsetDateTime.now().plusDays(22))
+            ));
 
         mockMvc.perform(put("/api/v1/projects/" + existingProject.getProjectId())
                 .contentType(MediaType.APPLICATION_JSON)
@@ -153,7 +182,19 @@ public class ProjectUpdateIntegrationTest {
     }
 
     @Test
-    @WithMockAppUser(accountId = 1, username = "test@example.com", role = "ROLE_CLIENT")
+    @WithMockAppUser(accountId = 2, username = "other@example.com", role = "ROLE_CLIENT")
+    public void testUpdateProject_NoVisibleMilestone() throws Exception {
+        ProjectUpdateDto updateDto = new ProjectUpdateDto()
+                .title("Updated Title");
+
+        mockMvc.perform(put("/api/v1/projects/" + existingProject.getProjectId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updateDto)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @WithMockAppUser(accountId = 2, username = "test@example.com", role = "ROLE_CLIENT")
     public void testUpdateProject_InvalidBudget() throws Exception {
         ProjectUpdateDto updateDto = new ProjectUpdateDto()
             .minBudget(BigDecimal.valueOf(300))
@@ -166,7 +207,7 @@ public class ProjectUpdateIntegrationTest {
     }
 
     @Test
-    @WithMockAppUser(accountId = 1, username = "test@example.com", role = "ROLE_CLIENT")
+    @WithMockAppUser(accountId = 2, username = "test@example.com", role = "ROLE_CLIENT")
     public void testUpdateProject_InvalidMilestoneBudgetRatio() throws Exception {
         ProjectUpdateDto updateDto = new ProjectUpdateDto()
             .milestones(Arrays.asList(
@@ -187,7 +228,7 @@ public class ProjectUpdateIntegrationTest {
     }
 
     @Test
-    @WithMockAppUser(accountId = 1, username = "test@example.com", role = "ROLE_CLIENT")
+    @WithMockAppUser(accountId = 2, username = "test@example.com", role = "ROLE_CLIENT")
     public void testUpdateProject_InvalidStartDate() throws Exception {
         ProjectUpdateDto updateDto = new ProjectUpdateDto()
             .startDate(OffsetDateTime.now().minusDays(1));
@@ -199,7 +240,7 @@ public class ProjectUpdateIntegrationTest {
     }
 
     @Test
-    @WithMockAppUser(accountId = 1, username = "test@example.com", role = "ROLE_CLIENT")
+    @WithMockAppUser(accountId = 2, username = "test@example.com", role = "ROLE_CLIENT")
     public void testUpdateProject_InvalidMilestoneDeadline() throws Exception {
         ProjectUpdateDto updateDto = new ProjectUpdateDto()
             .startDate(OffsetDateTime.now().plusDays(7))
@@ -217,7 +258,7 @@ public class ProjectUpdateIntegrationTest {
     }
 
     @Test
-    @WithMockAppUser(accountId = 1, username = "test@example.com", role = "ROLE_CLIENT")
+    @WithMockAppUser(accountId = 2, username = "test@example.com", role = "ROLE_CLIENT")
     public void testUpdateProject_NonExistentProject() throws Exception {
         ProjectUpdateDto updateDto = new ProjectUpdateDto()
             .title("Updated Title");
@@ -225,6 +266,6 @@ public class ProjectUpdateIntegrationTest {
         mockMvc.perform(put("/api/v1/projects/99999")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(updateDto)))
-            .andExpect(status().isNotFound());
+            .andExpect(status().isBadRequest());
     }
 }

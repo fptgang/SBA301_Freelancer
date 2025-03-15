@@ -11,6 +11,7 @@ import com.fptgang.backend.model.ProjectCategory;
 import com.fptgang.backend.model.Role;
 import com.fptgang.backend.repository.AccountRepos;
 import com.fptgang.backend.repository.ProjectCategoryRepos;
+import com.fptgang.backend.repository.ProjectRepos;
 import com.fptgang.backend.security.WithMockAppUser;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -55,10 +56,14 @@ public class ProjectCreateIntegrationTest {
     @Autowired
     private ProjectCategoryRepos projectCategoryRepos;
 
+    @Autowired
+    private ProjectRepos projectRepos;
+
     private ProjectCategory projectCategory;
 
     @BeforeAll
     public void setUp() {
+        projectRepos.deleteAll();
         accountRepos.deleteAll();
         accountRepos.save(
             Account.builder()
@@ -126,7 +131,7 @@ public class ProjectCreateIntegrationTest {
     }
 
     @Test
-    @WithMockUser(username = "test@example.com")
+    @WithMockAppUser(accountId = 2, username = "test@example.com", role = "ROLE_CLIENT")
     public void testCreateProject_InvalidBudget() throws Exception {
         ProjectCreateDto projectCreateDto = new ProjectCreateDto()
             .projectCategoryId(projectCategory.getProjectCategoryId())
@@ -149,7 +154,7 @@ public class ProjectCreateIntegrationTest {
     }
 
     @Test
-    @WithMockAppUser(accountId = 1, username = "test@example.com", role = "ROLE_CLIENT")
+    @WithMockAppUser(accountId = 2, username = "test@example.com", role = "ROLE_CLIENT")
     public void testCreateProject_InvalidMilestoneBudgetRatio() throws Exception {
         ProjectCreateDto projectCreateDto = new ProjectCreateDto()
             .projectCategoryId(projectCategory.getProjectCategoryId())
@@ -176,7 +181,7 @@ public class ProjectCreateIntegrationTest {
     }
 
     @Test
-    @WithMockUser(username = "test@example.com")
+    @WithMockAppUser(accountId = 2, username = "test@example.com", role = "ROLE_CLIENT")
     public void testCreateProject_InvalidStartDate() throws Exception {
         ProjectCreateDto projectCreateDto = new ProjectCreateDto()
             .projectCategoryId(projectCategory.getProjectCategoryId())
@@ -199,7 +204,7 @@ public class ProjectCreateIntegrationTest {
     }
 
     @Test
-    @WithMockUser(username = "test@example.com")
+    @WithMockAppUser(accountId = 2, username = "test@example.com", role = "ROLE_CLIENT")
     public void testCreateProject_InvalidMilestoneDeadline() throws Exception {
         ProjectCreateDto projectCreateDto = new ProjectCreateDto()
             .projectCategoryId(projectCategory.getProjectCategoryId())

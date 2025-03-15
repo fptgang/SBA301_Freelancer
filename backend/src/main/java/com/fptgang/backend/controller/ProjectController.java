@@ -11,7 +11,9 @@ import com.fptgang.backend.util.OpenApiHelper;
 import com.fptgang.backend.util.SecurityUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -44,6 +46,9 @@ public class ProjectController implements ProjectsApi {
     @Override
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ProjectDto> createProject(ProjectCreateDto projectCreateDto) {
+        if(!SecurityUtil.hasRole(Role.CLIENT)){
+            throw new AccessDeniedException("Non-client cannot create project");
+        }
         return ResponseEntity.ok(
                 projectMapper.toDTO(
                         projectService.create(projectCreateMapper.toEntity(projectCreateDto)),

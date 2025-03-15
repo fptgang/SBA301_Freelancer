@@ -2,10 +2,7 @@ package com.fptgang.backend.model;
 
 import com.fptgang.backend.util.Searchable;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.jetbrains.annotations.NotNull;
 
@@ -45,5 +42,6 @@ public class Message {
 
     @OneToMany(mappedBy = "message", fetch = FetchType.LAZY)
     @Builder.Default
+    @ToString.Exclude
     private List<File> files = new ArrayList<>();
 }
