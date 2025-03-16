@@ -45,27 +45,26 @@ public class ContractServiceImpl implements ContractService {
     @Transactional
     public Contract create(Long proposalId) {
         Proposal accepted = proposalService.acceptProposal(proposalId); // already check access
-
-        Account client = accepted.getProject().getClient();
-        Milestone firstMilestone = accepted.getProject().getMilestones().stream()
+        Project project = accepted.getProject();
+        Account client = project.getClient();
+        Milestone firstMilestone = project.getMilestones().stream()
                 .filter(Milestone::getIsVisible)
                 .findFirst().orElseThrow(() -> new IllegalStateException("Project has no visible milestones"));
         BigDecimal firstMilestoneBudget = firstMilestone.getBudgetRatio().multiply(accepted.getBudget());
         if (client.getBalance().compareTo(firstMilestoneBudget) < 0) {
             throw new IllegalStateException("Not enough balance to fund the first milestone");
         }
-        milestoneService.depositFund(firstMilestone);
-
         Contract contract = Contract.builder()
                 .budget(accepted.getBudget())
                 .freelancer(accepted.getFreelancer())
-                .project(accepted.getProject())
+                .project(project)
                 .proposal(accepted)
                 .status(Contract.ContractStatus.UNSIGNED)
                 .build();
         contract = contractRepos.save(contract);
-
-        firstMilestone.getProject().setContract(contract);
+        project.setContract(contract);
+        contract.setProject(projectRepos.save(project));
+        milestoneService.depositFund(firstMilestone);
         return contract;
     }
 
@@ -90,10 +89,15 @@ public class ContractServiceImpl implements ContractService {
     public Contract signContract(long contractId) {
         Contract contract = contractRepos.findById(contractId)
                 .orElseThrow(() -> new InvalidInputException("Contract does not exist"));
-        authContext.requireAccountId(contract.getFreelancerId()); // Freelancer operation
+        authContext.requireAccountId(contract.getFreelancer().getAccountId()); // Freelancer operation
+        System.out.println("contract " + contract.getStatus());
 
         if (contract.getStatus() == Contract.ContractStatus.SIGNED) {
             throw new IllegalStateException("Contract is already signed");
+        }
+
+        if (contract.getStatus() == Contract.ContractStatus.TERMINATED) {
+            throw new IllegalStateException("Contract is terminated");
         }
 
         Project project = contract.getProject();

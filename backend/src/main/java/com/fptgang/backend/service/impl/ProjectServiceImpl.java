@@ -104,7 +104,7 @@ public class ProjectServiceImpl implements ProjectService {
     public Project update(Project project) {
         Project existing = projectRepos.findByProjectId(project.getProjectId()).orElseThrow(
                 () -> new InvalidInputException("Project does not exist"));
-        authContext.requireAccountId(existing.getClientId()); // Client operation
+        authContext.requireAccountId(existing.getClient().getAccountId()); // Client operation
         if (existing.getStatus() != Project.ProjectStatus.OPEN)
             throw new IllegalStateException("Only OPEN projects can be updated");
         if (project.getStartDate() != null && project.getStartDate().isBefore(existing.getStartDate()))
@@ -178,7 +178,7 @@ public class ProjectServiceImpl implements ProjectService {
     public Project terminateByClient(Long projectId) {
         Project project = projectRepos.findByProjectId(projectId).orElseThrow(
                 () -> new InvalidInputException("Project does not exist"));
-        authContext.requireAccountId(project.getClientId()); // Client operation
+        authContext.requireAccountId(project.getClient().getAccountId()); // Client operation
 
         // Case 1: If the project is OPEN, terminate immediately
         if (project.getStatus() == Project.ProjectStatus.OPEN) {
@@ -261,7 +261,7 @@ public class ProjectServiceImpl implements ProjectService {
     public Project unpause(Long projectId, ProjectTimeline timeline) {
         Project existing = projectRepos.findByProjectId(projectId).orElseThrow(
                 () -> new InvalidInputException("Project does not exist"));
-        authContext.requireAccountId(existing.getClientId()); // Client operation
+        authContext.requireAccountId(existing.getClient().getAccountId()); // Client operation
         if (existing.getStatus() != Project.ProjectStatus.PAUSED)
             throw new IllegalStateException("Only PAUSED projects can be unpaused");
 
@@ -283,7 +283,7 @@ public class ProjectServiceImpl implements ProjectService {
     public Project extendDeadline(Long projectId, ProjectTimeline timeline) {
         Project existing = projectRepos.findByProjectId(projectId).orElseThrow(
                 () -> new InvalidInputException("Project does not exist"));
-        authContext.requireAccountId(existing.getClientId()); // Client operation
+        authContext.requireAccountId(existing.getClient().getAccountId()); // Client operation
         if (existing.getToTerminate() || existing.getActiveMilestone() == null)
             throw new IllegalStateException("Cannot extend deadlines for now");
         if (existing.getActiveMilestone().getDeadline().isAfter(LocalDateTime.now()))
@@ -347,7 +347,7 @@ public class ProjectServiceImpl implements ProjectService {
     public void deleteById(long projectId) {
         Project project = projectRepos.findByProjectId(projectId)
                 .orElseThrow(() -> new InvalidInputException("Project with project id " + projectId + "not found"));
-        authContext.requirePermissionOrAccountIds(Role.STAFF, project.getClientId()); // Client operation
+        authContext.requirePermissionOrAccountIds(Role.STAFF, project.getClient().getAccountId()); // Client operation
         if (project.getStatus() != Project.ProjectStatus.TERMINATED)
             throw new IllegalStateException("Can only delete project when it is terminated");
         project.setIsVisible(false);

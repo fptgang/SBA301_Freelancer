@@ -30,9 +30,6 @@ public class Contract {
     @JoinColumn(name = "freelancer_id", nullable = false)
     private Account freelancer;
 
-    @Column(name = "freelancer_id", insertable = false, updatable = false)
-    private Long freelancerId;
-
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "proposal_id", nullable = false, unique = true)
     private Proposal proposal;

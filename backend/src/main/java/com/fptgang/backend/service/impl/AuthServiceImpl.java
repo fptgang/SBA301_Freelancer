@@ -88,9 +88,9 @@ public class AuthServiceImpl implements AuthService {
             GoogleIdToken idToken = verifier.verify(token);
             GoogleIdToken.Payload payload = idToken.getPayload();
             String email = payload.getEmail();
-            String firstName = payload.get("given_name").toString();
-            String lastName = payload.get("family_name").toString();
-            String picture = payload.get("picture").toString();
+            Object firstName = payload.get("given_name");
+            Object lastName = payload.get("family_name");
+            Object picture = payload.get("picture");
 
             Account account = accountRepos.findByEmail(email).orElseGet(() -> {
                 log.info("User {} registered using Google account", email);
@@ -99,9 +99,9 @@ public class AuthServiceImpl implements AuthService {
                 return accountRepos.saveAndFlush(
                         Account.builder()
                                 .email(email)
-                                .firstName(firstName)
-                                .lastName(lastName)
-                                .avatarUrl(picture)
+                                .firstName(firstName == null ? "" : firstName.toString())
+                                .lastName(lastName == null ? null : lastName.toString())
+                                .avatarUrl(picture == null ? null : picture.toString())
                                 .role(Role.CLIENT)  // TODO CHANGE THIS
                                 .isVerified(true)
                                 .verifiedAt(LocalDateTime.now())

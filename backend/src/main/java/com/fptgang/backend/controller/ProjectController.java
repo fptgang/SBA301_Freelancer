@@ -69,8 +69,8 @@ public class ProjectController implements ProjectsApi {
         Project project = projectService.findByProjectId(projectId);
         var userId = SecurityUtil.getCurrentUserId();
         if (SecurityUtil.hasPermission(Role.STAFF) ||
-                Objects.equals(project.getClientId(), userId) ||
-                (project.getContract() != null && Objects.equals(project.getContract().getFreelancerId(), userId))
+                Objects.equals(project.getClient().getAccountId(), userId) ||
+                (project.getContract() != null && Objects.equals(project.getContract().getFreelancer().getAccountId(), userId))
         ) {
             return ResponseEntity.ok(projectMapper.toDTO(project, DetailLevel.FULL));
 
