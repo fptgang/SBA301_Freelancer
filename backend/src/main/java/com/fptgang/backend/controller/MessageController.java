@@ -84,9 +84,9 @@ public class MessageController implements MessagesApi {
             messageDto = messageMapper.toDTO(messageService.create(message), DetailLevel.FULL);
             messagingTemplate.convertAndSend("message/" + message.getProject().getClient().getEmail(), messageDto);
             log.info("Sending message: {} to {} ", message.getContent(), "message/" + message.getSender().getEmail());
-            if (message.getProject().getContract().getFreelancer() != null) {
-                messagingTemplate.convertAndSend("message/" + message.getProject().getContract().getFreelancer().getEmail(), messageDto);
-                log.info("Sending message: {} to {} ", message.getContent(), "message/" + message.getProject().getContract().getFreelancer().getEmail());
+            if (message.requireFreelancer() != null) {
+                messagingTemplate.convertAndSend("message/" + message.requireFreelancer().getEmail(), messageDto);
+                log.info("Sending message: {} to {} ", message.getContent(), "message/" + message.requireFreelancer().getEmail());
             }
             if(message.getProject().getStaff() != null) {
                 messagingTemplate.convertAndSend("message/" + message.getProject().getStaff().getEmail(), messageDto);

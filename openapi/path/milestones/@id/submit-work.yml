@@ -1,4 +1,4 @@
-put:
+post:
   summary: Submit the work
   operationId: submitMilestoneWork
   security:
@@ -10,6 +10,19 @@ put:
       schema:
         type: integer
         format: int64
+  requestBody:
+    description: File to upload
+    required: true
+    content:
+      multipart/form-data:
+        schema:
+          type: object
+          properties:
+            blobs:
+              type: array
+              items:
+                type: string
+                format: binary
   responses:
     '200':
       description: The operation was success

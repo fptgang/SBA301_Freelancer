@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -43,5 +44,20 @@ public class Message {
     @OneToMany(mappedBy = "message", fetch = FetchType.LAZY)
     @Builder.Default
     @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private List<File> files = new ArrayList<>();
+
+    @Nullable
+    public Account getFreelancer() {
+        if (getProject().getContract() == null)
+            return null;
+        return getProject().getContract().getFreelancer();
+    }
+
+    @NotNull
+    public Account requireFreelancer() {
+        if (getProject().getContract() == null)
+            throw new IllegalStateException("Contract does not exist");
+        return getProject().getContract().getFreelancer();
+    }
 }

@@ -1,7 +1,6 @@
 package com.fptgang.backend.model;
 
 import com.fptgang.backend.util.Searchable;
-import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,10 +8,10 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Entity
 @Data
@@ -55,4 +54,18 @@ public class Report {
 
     @UpdateTimestamp
     private LocalDateTime updatedAt;
+
+    @Nullable
+    public Account getFreelancer() {
+        if (getProject().getContract() == null)
+            return null;
+        return getProject().getContract().getFreelancer();
+    }
+
+    @NotNull
+    public Account requireFreelancer() {
+        if (getProject().getContract() == null)
+            throw new IllegalStateException("Contract does not exist");
+        return getProject().getContract().getFreelancer();
+    }
 }

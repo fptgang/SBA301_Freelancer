@@ -70,11 +70,14 @@ public class Project {
     @OneToMany(mappedBy = "project", fetch = FetchType.LAZY)
     @Builder.Default
     @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private List<File> files = new ArrayList<>();
 
     @OneToMany(mappedBy = "project", fetch = FetchType.LAZY)
     @Builder.Default
     @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    @OrderBy("proposalId ASC")
     private List<Proposal> proposals = new ArrayList<>();
 
     @OneToOne(mappedBy = "project", fetch = FetchType.EAGER)
@@ -84,10 +87,15 @@ public class Project {
     // Cascading milestones with project
     @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @Builder.Default
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    @OrderBy("milestoneId ASC")
     private List<Milestone> milestones = new ArrayList<>();
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "active_milestone_id")
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     @Nullable
     private Milestone activeMilestone;
 
@@ -99,11 +107,15 @@ public class Project {
     @OneToMany(mappedBy = "project", fetch = FetchType.LAZY)
     @Builder.Default
     @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    @OrderBy("messageId ASC")
     private List<Message> messages = new ArrayList<>();
 
     @OneToMany(mappedBy = "project", fetch = FetchType.LAZY)
     @Builder.Default
     @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    @OrderBy("reportId ASC")
     private List<Report> reports = new ArrayList<>();
 
     public enum ProjectStatus {

@@ -164,14 +164,12 @@ public class ContractIntegrationTest {
     @Transactional
     @Commit
     public void testFreelancer1SignContract_Success() throws Exception {
-        System.out.println("testFreelancer1SignContract_Success ");
         String response = mockMvc.perform(put("/api/v1/contracts/" + contract.getContractId() + "/sign")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andReturn()
                 .getResponse()
                 .getContentAsString();
-        System.out.println(response);
 
         var dto = objectMapper.readValue(response, ContractDto.class);
         assertThat(dto.getBudget().compareTo(BigDecimal.valueOf(100))).isZero();
@@ -186,7 +184,6 @@ public class ContractIntegrationTest {
     @Order(4)
     @WithMockAppUser(accountId = 3, username = "freelancer1@example.com", role = "ROLE_FREELANCER")
     public void testFreelancer1SignContract_Signed() throws Exception {
-        System.out.println("testFreelancer1SignContract_Signed ");
         mockMvc.perform(put("/api/v1/contracts/" + contract.getContractId() + "/sign")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest());

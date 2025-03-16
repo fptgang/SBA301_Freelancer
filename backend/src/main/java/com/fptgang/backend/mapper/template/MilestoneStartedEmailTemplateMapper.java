@@ -14,7 +14,7 @@ public class MilestoneStartedEmailTemplateMapper implements TemplateMapper<Miles
         return Map.of(
                 "title", entity.getTitle(),
                 "freelancer", Map.of(
-                        "firstName", entity.getProject().getContract().getFreelancer().getFirstName()
+                        "firstName", entity.requireFreelancer().getFirstName()
                 ),
                 "project", Map.of(
                         "title", entity.getProject().getTitle(),

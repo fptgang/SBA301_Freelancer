@@ -17,8 +17,8 @@ public class MilestoneCompletedEmailTemplateMapper implements TemplateMapper<Mil
                         "client", Map.of("firstName", entity.getProject().getClient().getFirstName()),
                         "contract", Map.of(
                                 "freelancer", Map.of(
-                                        "firstName", entity.getProject().getContract().getFreelancer().getFirstName(),
-                                        "lastName", entity.getProject().getContract().getFreelancer().getLastName()
+                                        "firstName", entity.requireFreelancer().getFirstName(),
+                                        "lastName", entity.requireFreelancer().getLastName()
                                 )
                         )
                 ),

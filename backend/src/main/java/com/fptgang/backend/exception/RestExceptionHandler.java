@@ -45,7 +45,13 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
         log.info("Error status {} due to exception {}", status, ex.getClass().getName());
 
         if (exceptionLog) {
-            ex.printStackTrace();
+            log.error("err: {}", ex.getMessage()); // Print exception message
+            var stackTrace = ex.getStackTrace();
+            for (int i = stackTrace.length - 1; i >= 0; i--) {
+                if (stackTrace[i].getClassName().startsWith("com.fptgang.backend")) {
+                    System.out.println("\tat " + stackTrace[i]);
+                }
+            }
         }
 
         ErrorResponse error = new ErrorResponse().error(ex.getMessage());
