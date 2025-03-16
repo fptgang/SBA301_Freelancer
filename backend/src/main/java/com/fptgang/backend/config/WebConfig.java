@@ -7,15 +7,14 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
-    @Value("${FRONTEND_CORS_SERVER:}")
-    private  String FRONTEND_SERVER_URL="http://localhost:5173";
+    @Value("${FRONTEND_CORS_SERVER:http://localhost:5173}")
+    private String FRONTEND_SERVER_URL;
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
-                .allowedOriginPatterns("*")
-                .allowedOrigins("http://localhost:5173") // Your frontend origin
-                .allowedMethods("*")
+                .allowedOrigins(FRONTEND_SERVER_URL,"ws://localhost:5173")
+                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS") // Allowed HTTP methods
                 .allowedHeaders("*")
                 .allowCredentials(true);
     }

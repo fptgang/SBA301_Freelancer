@@ -37,15 +37,7 @@ export const SkillsList: React.FC = () => {
         },
       ],
     },
-    filters: {
-      initial: [
-        {
-          field: "isVisible",
-          operator: "eq",
-          value: undefined,
-        },
-      ],
-    },
+
   });
 
   const getSkillTag = (name: string) => {

@@ -72,7 +72,6 @@ const ClientCreateButton = () => {
         },
         estimateBudget: updatedProjectData.estimateBudget,
         status: "OPEN",
-        isVisible: true,
       };
 
       // Transform the skills to match ProjectSkillDto format

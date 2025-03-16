@@ -11,13 +11,13 @@ import com.nimbusds.jose.proc.SecurityContext;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -52,17 +52,22 @@ public class SecurityConfig {
     @Value("${security.disableAuthorization:false}")
     private boolean disableAuthorization;
 
-    public SecurityConfig(CustomUserDetailsService customUserDetailsService, PasswordEncoderConfig passwordEncoderConfig) {
+    public SecurityConfig(CustomUserDetailsService customUserDetailsService,
+                          PasswordEncoderConfig passwordEncoderConfig
+    ) {
         this.customUserDetailsService = customUserDetailsService;
         this.passwordEncoderConfig = passwordEncoderConfig;
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http, JWTAuthenticationFilter jwtAuthenticationFilter) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http,
+                                                   JWTAuthenticationFilter jwtAuthenticationFilter
+    ) throws Exception {
         http
                 .authorizeHttpRequests((authorize) -> {
                     if (disableAuthorization) {
-                        authorize.anyRequest().permitAll();
+                        authorize.anyRequest()
+                                 .permitAll();
                     } else {
                         authorize
                                 .requestMatchers(
@@ -73,8 +78,16 @@ public class SecurityConfig {
                                         "/api/v1/mail/**",
                                         "/api/v1/projects",
                                         "/api/v1/profiles"
-                                ).permitAll()
-                                .anyRequest().authenticated();
+                                )
+                                .permitAll()
+                                .requestMatchers(HttpMethod.GET,
+                                        "/api/v1/projects/**",
+                                        "/api/v1/project-categories/**",
+                                        "/api/v1/skills/**"
+                                )
+                                .permitAll()
+                                .anyRequest()
+                                .authenticated();
                     }
                 })
                 .csrf(AbstractHttpConfigurer::disable)
@@ -100,10 +113,10 @@ public class SecurityConfig {
     public RoleHierarchy roleHierarchy() {
         return RoleHierarchyImpl.fromHierarchy(
                 """
-                        ROLE_ADMIN > ROLE_STAFF
-                        ROLE_STAFF > ROLE_CLIENT
-                        ROLE_STAFF > ROLE_FREELANCER
-                """
+                                ROLE_ADMIN > ROLE_STAFF
+                                ROLE_STAFF > ROLE_CLIENT
+                                ROLE_STAFF > ROLE_FREELANCER
+                        """
         );
     }
 
@@ -122,18 +135,21 @@ public class SecurityConfig {
 
     @Bean
     public AuthenticationManager authenticationManager(
-            AuthenticationConfiguration authenticationConfiguration) throws Exception {
+            AuthenticationConfiguration authenticationConfiguration
+    ) throws Exception {
         return authenticationConfiguration.getAuthenticationManager();
     }
 
     @Bean
     public JwtDecoder jwtDecoder() {
-        return NimbusJwtDecoder.withPublicKey(this.key).build();
+        return NimbusJwtDecoder.withPublicKey(this.key)
+                               .build();
     }
 
     @Bean
     public JwtEncoder jwtEncoder() {
-        JWK jwk = new RSAKey.Builder(this.key).privateKey(this.privateKey).build();
+        JWK jwk = new RSAKey.Builder(this.key).privateKey(this.privateKey)
+                                              .build();
         JWKSource<SecurityContext> jwks = new ImmutableJWKSet<>(new JWKSet(jwk));
         return new NimbusJwtEncoder(jwks);
     }

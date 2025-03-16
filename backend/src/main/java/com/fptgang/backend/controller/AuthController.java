@@ -72,7 +72,7 @@ public class AuthController implements AuthApi {
 
     @Override
     public ResponseEntity<JwtResponseDto> refreshToken(String token) {
-        log.info("Refreshing token{}",token.replace("\"", "").trim());
+//        log.info("Refreshing token{}",token.replace("\"", "").trim());
         JwtResponseDto jwtResponseDto = new JwtResponseDto();
         jwtResponseDto.setAccessToken(jwtService.createJwtFromRefreshToken(token.replace("\\", "")
                 .replace("\"", "")));
