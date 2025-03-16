@@ -63,29 +63,24 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http,
                                                    JWTAuthenticationFilter jwtAuthenticationFilter
     ) throws Exception {
-        http.authorizeHttpRequests((authorize) -> {
-                if (disableAuthorization) {
-                    authorize.anyRequest()
-                             .permitAll();
-                } else {
-                    authorize.requestMatchers("/api/v1/auth/**",
+        http.cors(Customizer.withDefaults())
+                .authorizeHttpRequests((authorize) -> {
+                //if (disableAuthorization) {
+                //    authorize.anyRequest()
+                //             .permitAll();
+                //} else {
+                    authorize.requestMatchers(
                                      "/swagger-ui/**",
                                      "/v3/**",
                                      "/swagger-ui.html",
+                                     "/api/v1/auth/**",
                                      "/api/v1/mail/**",
-                                     "/api/v1/projects",
-                                     "/api/v1/project-categories",
-                                     "/api/v1/profiles")
-                             .permitAll()
-                             .requestMatchers(HttpMethod.GET,
-                                     "/api/v1/project-categories",
-                                     "/api/v1/projects",
-                                     "/api/v1/skills")
-
+                                     "/api/v1/projects/**",
+                                     "/api/v1/project-categories/**")
                              .permitAll()
                              .anyRequest()
                              .authenticated();
-                }
+                //}
             })
             .csrf(AbstractHttpConfigurer::disable)
             .authenticationProvider(daoAuthenticationProvider())
