@@ -168,7 +168,7 @@ const ClientCreateButton = () => {
     setProjectData(updatedProjectData);
 
     if (currentStep === 2) {
-      // Final step - validate milestones
+      // Final step - validate milestones 
       if (!validateMilestoneDates(updatedProjectData.milestones)) {
         return;
       }
@@ -184,7 +184,7 @@ const ClientCreateButton = () => {
         maxBudget: updatedProjectData.maxBudget,
         requiredSkills: [],
         milestones: [],
-        startDate: updatedProjectData.startDate
+        startDate: moment(new Date(updatedProjectData.startDate)).toDate()
       };
 
       // Transform the skills to match SkillSetDto format
@@ -195,7 +195,7 @@ const ClientCreateButton = () => {
         projectCreateDto.requiredSkills = updatedProjectData.requiredSkills.map(
           (skillId: number): SkillSetDto => ({
             skillId: skillId,
-            proficiency: ProficiencyEnum.Intermediate
+            proficiency: updatedProjectData.skillProficiency || ProficiencyEnum.Beginner
           })
         );
       }
@@ -210,7 +210,7 @@ const ClientCreateButton = () => {
             title: milestone.title,
             description: milestone.description,
             budgetRatio: milestone.budget,
-            deadline: moment(milestone.deadline).toDate()
+            deadline: moment(new Date(milestone.deadline)).toDate()
           })
         );
       }
@@ -357,6 +357,48 @@ const ClientCreateButton = () => {
               </Col>
             </Row>
 
+            <Row gutter={16}>
+              <Col span={24}>
+                <Form.Item
+                  name="startDate"
+                  label={
+                    <span className="flex items-center">
+                      Project Start Date
+                      <Tooltip title="When would you like the project to start?">
+                        <QuestionCircleOutlined className="ml-1" />
+                      </Tooltip>
+                    </span>
+                  }
+                  rules={[
+                    { required: true, message: "Please select a start date" },
+                    {
+                      validator: (_, value) => {
+                        if (!value) {
+                          return Promise.reject("Start date is required");
+                        }
+                        
+                        const minDate = moment().add(3, "d");
+                        
+                        if (moment(new Date(value)).isBefore(minDate)) {
+                          return Promise.reject("Start date must be at least 3 days from today");
+                        }
+                        
+                        return Promise.resolve();
+                      }
+                    }
+                  ]}
+                >
+                  <DatePicker 
+                    className="w-full" 
+                    disabledDate={(current) => {
+                      // Can't select days before today + 3 days
+                      return current && current < moment().add(3, 'days').startOf('day');
+                    }}
+                  />
+                </Form.Item>
+              </Col>
+            </Row>
+
             <div className="flex justify-end">
               <Button type="primary" htmlType="submit">
                 Next
@@ -417,6 +459,27 @@ const ClientCreateButton = () => {
                   value: skill.skillId,
                 }))}
               />
+            </Form.Item>
+
+            <Form.Item
+              name="skillProficiency"
+              label={
+                <span className="flex items-center">
+                  Skill Proficiency Level
+                  <Tooltip title="Select the minimum proficiency level needed">
+                    <QuestionCircleOutlined className="ml-1" />
+                  </Tooltip>
+                </span>
+              }
+              initialValue="BEGINNER"
+              rules={[{ required: true, message: "Please select proficiency level" }]}
+            >
+              <Select placeholder="Select proficiency level">
+                <Select.Option value="BEGINNER">Beginner</Select.Option>
+                <Select.Option value="INTERMEDIATE">Intermediate</Select.Option>
+                <Select.Option value="ADVANCED">Advanced</Select.Option>
+                <Select.Option value="EXPERT">Expert</Select.Option>
+              </Select>
             </Form.Item>
 
             <Form.Item
@@ -532,23 +595,23 @@ const ClientCreateButton = () => {
                           <Form.Item
                             {...restField}
                             name={[name, "budget"]}
-                            label="Budget"
+                            label="Budget Ratio"
                             rules={[
-                              { required: true, message: "Missing budget" },
+                              { required: true, message: "Missing budget ratio" },
+                              { 
+                                validator: (_, value) => {
+                                  if (value <= 0) {
+                                    return Promise.reject("Budget ratio must be greater than 0");
+                                  }
+                                  return Promise.resolve();
+                                }
+                              }
                             ]}
                           >
                             <InputNumber
                               min={1}
-                              placeholder="Budget"
-                              formatter={(value) =>
-                                `$ ${value}`.replace(
-                                  /\B(?=(\d{3})+(?!\d))/g,
-                                  ","
-                                )
-                              }
-                              parser={(value) =>
-                                parseFloat(value!.replace(/\$\s?|(,*)/g, "")) as any
-                              }
+                              max={100}
+                              placeholder="Budget ratio"
                               className="w-full"
                             />
                           </Form.Item>
@@ -569,14 +632,12 @@ const ClientCreateButton = () => {
                               { required: true, message: "Missing deadline" },
                               {
                                 validator: (_, value) => {
-
                                   if (!value) {
                                     return Promise.reject("Date is required");
                                   }
                                   
                                   const minDate = moment().add(3,"d");
-
-                               
+                                  
                                   if (moment(new Date(value)).isBefore(minDate)) {
                                     return Promise.reject("Date must be at least 3 days from today");
                                   } 
