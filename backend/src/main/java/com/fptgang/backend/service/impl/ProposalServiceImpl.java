@@ -81,7 +81,7 @@ public class ProposalServiceImpl implements ProposalService {
     @Transactional
     public Proposal acceptProposal(long proposalId) {
         Proposal proposal = findById(proposalId);
-        authContext.requireAccountId(proposal.getProject().getClientId()); // Client operation
+        authContext.requireAccountId(proposal.getProject().getClient().getAccountId()); // Client operation
         if (proposal.getStatus() != Proposal.ProposalStatus.PENDING) {
             throw new IllegalStateException("Proposal is not pending");
         }
@@ -109,7 +109,7 @@ public class ProposalServiceImpl implements ProposalService {
     @Override
     public Proposal rejectProposal(long proposalId) {
         Proposal proposal = findById(proposalId);
-        authContext.requireAccountId(proposal.getProject().getClientId()); // Client operation
+        authContext.requireAccountId(proposal.getProject().getClient().getAccountId()); // Client operation
 
         if (proposal.getStatus() != Proposal.ProposalStatus.PENDING) {
             throw new IllegalStateException("Proposal is not pending");
@@ -125,7 +125,7 @@ public class ProposalServiceImpl implements ProposalService {
     @Override
     public Proposal withdrawProposal(long proposalId) {
         Proposal proposal = findById(proposalId);
-        authContext.requireAccountId(proposal.getFreelancerId()); // Freelancer operation
+        authContext.requireAccountId(proposal.getFreelancer().getAccountId()); // Freelancer operation
         if (proposal.getStatus() != Proposal.ProposalStatus.PENDING) {
             throw new IllegalStateException("Proposal is not pending");
         }

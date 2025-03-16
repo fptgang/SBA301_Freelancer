@@ -31,9 +31,6 @@ public class    Proposal {
     @JoinColumn(name = "freelancer_id", nullable = false)
     private Account freelancer;
 
-    @Column(name = "freelancer_id", insertable = false, updatable = false)
-    private Long freelancerId;
-
     @Column(columnDefinition = "TEXT", length = 10000000)
     @Searchable
     private String notes;

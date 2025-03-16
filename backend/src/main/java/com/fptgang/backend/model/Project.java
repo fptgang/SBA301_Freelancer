@@ -32,9 +32,6 @@ public class Project {
     @JoinColumn(name = "client_id", nullable = false)
     private Account client;
 
-    @Column(name = "client_id", insertable = false, updatable = false)
-    private Long clientId;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "staff_id")
     private Account staff;
@@ -93,10 +90,6 @@ public class Project {
     @JoinColumn(name = "active_milestone_id")
     @Nullable
     private Milestone activeMilestone;
-
-    @Column(name = "active_milestone_id", insertable = false, updatable = false)
-    @Nullable
-    private Long activeMilestoneId;
 
     // Cascading project skills with project
     @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)

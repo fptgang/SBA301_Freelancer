@@ -31,10 +31,20 @@ public class TransactionServiceImpl implements TransactionService {
         this.accountService = accountService;
     }
 
-    public Transaction create(Transaction transaction) {
+    @Override
+    @Transactional
+    public synchronized Transaction create(Transaction transaction) {
         if (transaction.getAmount().compareTo(BigDecimal.ZERO) <= 0) {
             throw new InvalidInputException("Amount must be greater than 0");
         }
+
+        log.info("Transaction type={}, method={}, status={}, amount={} from {} to {}",
+                transaction.getType(),
+                transaction.getPaymentMethod(),
+                transaction.getStatus(),
+                transaction.getAmount(),
+                transaction.getFromAccount(),
+                transaction.getToAccount());
 
         var from = transaction.getFromAccount();
         var to = transaction.getToAccount();
@@ -69,10 +79,10 @@ public class TransactionServiceImpl implements TransactionService {
                 to = accountService.update(to);
             }
 
+            transaction.setFromAccount(from);
+            transaction.setToAccount(to);
         }
 
-        transaction.setFromAccount(from);
-        transaction.setToAccount(to);
         return transactionRepos.save(transaction);
     }
 

@@ -3,14 +3,12 @@ package com.fptgang.backend.integration;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fptgang.backend.TestcontainersConfiguration;
 import com.fptgang.backend.api.model.*;
-import com.fptgang.backend.model.Account;
-import com.fptgang.backend.model.Project;
-import com.fptgang.backend.model.ProjectCategory;
-import com.fptgang.backend.model.Role;
+import com.fptgang.backend.model.*;
 import com.fptgang.backend.repository.AccountRepos;
 import com.fptgang.backend.repository.ProjectCategoryRepos;
 import com.fptgang.backend.repository.ProjectRepos;
 import com.fptgang.backend.security.WithMockAppUser;
+import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.*;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,12 +16,16 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.test.annotation.Commit;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -37,6 +39,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ActiveProfiles("dev")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class ProposalIntegrationTest {
 
     @Autowired
@@ -115,6 +118,73 @@ public class ProposalIntegrationTest {
                 .category(projectCategory)
                 .isVisible(true)
                 .build();
+        project.setMilestones(new ArrayList<>(
+                        List.of(
+                                Milestone.builder()
+                                        .project(project)
+                                        .title("Milestone DEAD")
+                                        .budgetRatio(BigDecimal.valueOf(1))
+                                        .deadline(LocalDateTime.now().plusDays(0))
+                                        .status(Milestone.MilestoneStatus.PENDING)
+                                        .fundStatus(Milestone.FundStatus.NONE)
+                                        .build(),
+                                Milestone.builder()
+                                        .project(project)
+                                        .title("Milestone 1")
+                                        .budgetRatio(BigDecimal.valueOf(0.4))
+                                        .deadline(LocalDateTime.now().plusDays(12))
+                                        .status(Milestone.MilestoneStatus.PENDING)
+                                        .fundStatus(Milestone.FundStatus.NONE)
+                                        .build(),
+                                Milestone.builder()
+                                        .project(project)
+                                        .title("Milestone DEAD")
+                                        .budgetRatio(BigDecimal.valueOf(1))
+                                        .deadline(LocalDateTime.now().plusDays(0))
+                                        .status(Milestone.MilestoneStatus.PENDING)
+                                        .fundStatus(Milestone.FundStatus.NONE)
+                                        .build(),
+                                Milestone.builder()
+                                        .project(project)
+                                        .title("Milestone 1")
+                                        .budgetRatio(BigDecimal.valueOf(0.4))
+                                        .deadline(LocalDateTime.now().plusDays(12))
+                                        .status(Milestone.MilestoneStatus.PENDING)
+                                        .fundStatus(Milestone.FundStatus.NONE)
+                                        .build(),
+                                Milestone.builder()
+                                        .project(project)
+                                        .title("Milestone DEAD")
+                                        .budgetRatio(BigDecimal.valueOf(1))
+                                        .deadline(LocalDateTime.now().plusDays(0))
+                                        .status(Milestone.MilestoneStatus.PENDING)
+                                        .fundStatus(Milestone.FundStatus.NONE)
+                                        .build(),
+                                Milestone.builder()
+                                        .project(project)
+                                        .title("Milestone DEAD")
+                                        .budgetRatio(BigDecimal.valueOf(1))
+                                        .deadline(LocalDateTime.now().plusDays(0))
+                                        .status(Milestone.MilestoneStatus.PENDING)
+                                        .fundStatus(Milestone.FundStatus.NONE)
+                                        .build(),
+                                Milestone.builder()
+                                        .project(project)
+                                        .title("Milestone DEAD")
+                                        .budgetRatio(BigDecimal.valueOf(1))
+                                        .deadline(LocalDateTime.now().plusDays(0))
+                                        .status(Milestone.MilestoneStatus.PENDING)
+                                        .fundStatus(Milestone.FundStatus.NONE)
+                                        .build(),
+                                Milestone.builder()
+                                        .project(project)
+                                        .title("Milestone 2")
+                                        .budgetRatio(BigDecimal.valueOf(0.6))
+                                        .deadline(LocalDateTime.now().plusDays(15))
+                                        .status(Milestone.MilestoneStatus.PENDING)
+                                        .fundStatus(Milestone.FundStatus.NONE)
+                                        .build())
+                ));
         project = projectRepos.save(project);
     }
 
@@ -285,5 +355,65 @@ public class ProposalIntegrationTest {
         mockMvc.perform(put("/api/v1/proposals/" + proposalOfFreelancer2 + "/reject")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @Order(11)
+    @WithMockAppUser(accountId = 2, username = "client@example.com", role = "ROLE_CLIENT")
+    public void testClientAcceptProposal2_Failed() throws Exception {
+        mockMvc.perform(post("/api/v1/contracts?proposalId=" + proposalOfFreelancer2)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @Order(12)
+    @WithMockAppUser(accountId = 2, username = "client@example.com", role = "ROLE_CLIENT")
+    public void testClientAcceptProposal3_NotEnoughBudget() throws Exception {
+        mockMvc.perform(post("/api/v1/contracts?proposalId=" + proposalOfFreelancer3)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @Order(13)
+    @WithMockAppUser(accountId = 2, username = "client@example.com", role = "ROLE_CLIENT")
+    @Transactional
+    @Commit
+    public void testClientAcceptProposal3_Success() throws Exception {
+        clientAccount.setBalance(BigDecimal.valueOf(10000));
+        clientAccount = accountRepos.save(clientAccount);
+        var response = mockMvc.perform(post("/api/v1/contracts?proposalId=" + proposalOfFreelancer3)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        var dto = objectMapper.readValue(response, ContractDto.class);
+        assertThat(dto.getStatus()).isEqualTo(ContractStatusDto.UNSIGNED);
+        assertThat(dto.getBudget().compareTo(BigDecimal.valueOf(500))).isZero();
+        assertThat(dto.getFreelancer().getAccountId()).isEqualTo(5);
+
+        project = projectRepos.findByProjectId(project.getProjectId()).orElseThrow();
+        assertThat(project.getStatus()).isEqualTo(Project.ProjectStatus.IN_PROGRESS);
+        assertThat(project.getContract()).isNotNull();
+        assertThat(project.getActiveMilestone()).isNull();
+        assertThat(project.getContract().getStatus()).isEqualTo(Contract.ContractStatus.UNSIGNED);
+        assertThat(project.getContract().getBudget().compareTo(BigDecimal.valueOf(500))).isZero();
+        assertThat(project.getContract().getFreelancer().getAccountId()).isEqualTo(5);
+
+        var firstVisible = project.getMilestones().stream()
+                .filter(Milestone::getIsVisible)
+                .findFirst().orElseThrow();
+
+        for (Milestone milestone : project.getMilestones()) {
+            assertThat(milestone.getStatus()).isEqualTo(Milestone.MilestoneStatus.PENDING);
+
+            if (milestone != firstVisible)
+                assertThat(milestone.getFundStatus()).isEqualTo(Milestone.FundStatus.NONE);
+        }
+
+        assertThat(firstVisible.getFundStatus()).isEqualTo(Milestone.FundStatus.DEPOSITED);
     }
 }
