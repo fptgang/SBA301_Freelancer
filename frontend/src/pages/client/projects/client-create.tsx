@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useGetIdentity, useCreate } from "@refinedev/core";
+import { useGetIdentity, useCreate, HttpError } from "@refinedev/core";
 import {
   Button,
   Modal,
@@ -13,9 +13,27 @@ import {
   Row,
   Col,
   message,
+  Upload,
+  Tooltip,
+  Alert,
 } from "antd";
-import { PlusOutlined } from "@ant-design/icons";
+import { 
+  PlusOutlined, 
+  QuestionCircleOutlined, 
+  UploadOutlined,
+  InfoCircleOutlined 
+} from "@ant-design/icons";
 import { useForm, useModal, useSelect } from "@refinedev/antd";
+import moment, { Moment } from "moment";
+import type { UploadFile, RcFile } from "antd/es/upload/interface";
+import api from "../../../services/api/openapi-config";
+import { store } from "../../../store";
+import { 
+  ProjectCreateDto, 
+  SkillSetDto, 
+  MilestoneCreateDto, 
+  ProficiencyEnum 
+} from "../../../../generated/models";
 
 const { Step } = Steps;
 
@@ -28,6 +46,8 @@ const ClientCreateButton = () => {
   const { modalProps, show, close } = useModal();
   const [currentStep, setCurrentStep] = useState(0);
   const [projectData, setProjectData] = useState<any>({});
+  const [fileList, setFileList] = useState<UploadFile[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Fetch categories for select
   const { selectProps: categorySelectProps } = useSelect({
@@ -53,8 +73,94 @@ const ClientCreateButton = () => {
       close();
       setCurrentStep(0);
       setProjectData({});
+      setFileList([]);
     },
   });
+
+  // Handle file change
+  const handleFileChange = ({ fileList: newFileList }: { fileList: UploadFile[] }) => {
+    // Limit to 5 files
+    const limitedList = newFileList.slice(-5);
+    setFileList(limitedList);
+  };
+
+  // Date validation rules
+  const isDateValid = (date: Moment | null) => {
+    const minDate = moment().add(3, 'days');
+    return date && date.isAfter(minDate);
+  };
+
+  // Validate milestone dates
+  const validateMilestoneDates = (milestones: any[]) => {
+    if (!milestones || milestones.length === 0) {
+      return false;
+    }
+
+    if (milestones.length > 10) {
+      message.error("Maximum 10 milestones allowed");
+      return false;
+    }
+
+    // Sort milestones by deadline
+    const sortedMilestones = [...milestones].sort((a, b) => 
+      moment(a.deadline).valueOf() - moment(b.deadline).valueOf()
+    );
+
+    // Check if first milestone is at least 3 days from now
+    const firstMilestoneDate = moment(new Date(sortedMilestones[0].deadline));
+    if (!isDateValid(firstMilestoneDate)) {
+      message.error("First milestone deadline must be at least 3 days from now");
+      return false;
+    }
+
+    // Check distance between milestones (3-30 days)
+    for (let i = 1; i < sortedMilestones.length; i++) {
+      const prevDate = moment(sortedMilestones[i-1].deadline);
+      const currDate = moment(sortedMilestones[i].deadline);
+      
+      const daysBetween = currDate.diff(prevDate, 'days');
+      
+      if (daysBetween < 3) {
+        message.error("Milestones must be at least 3 days apart");
+        return false;
+      }
+      
+      if (daysBetween > 30) {
+        message.error("Milestones should not be more than 30 days apart");
+        return false;
+      }
+    }
+
+    return true;
+  };
+
+  // Upload files after project creation
+  const uploadProjectFiles = async (projectId: number) => {
+    if (fileList.length === 0) {
+      setIsSubmitting(false);
+      return;
+    }
+
+    try {
+      const token = store?.getState().auth.accessToken;
+      const uploadPromises = fileList.map(file => {
+        return api.uploadFile({
+          uploaderId: userId,
+          blob: file.originFileObj,
+          projectId: projectId,
+          isVisible: true
+        });
+      });
+
+      await Promise.all(uploadPromises);
+      message.success("Files uploaded successfully");
+    } catch (error) {
+      console.error("File upload error:", error);
+      message.error("Error uploading files. Project was created successfully.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   // Handle step form submission
   const handleStepSubmit = async (values: any) => {
@@ -62,53 +168,76 @@ const ClientCreateButton = () => {
     setProjectData(updatedProjectData);
 
     if (currentStep === 2) {
-      // Final step - prepare the project data according to API spec
-      const formattedData = {
+      // Final step - validate milestones
+      if (!validateMilestoneDates(updatedProjectData.milestones)) {
+        return;
+      }
+
+      setIsSubmitting(true);
+
+      // Create the DTO with properly typed properties
+      const projectCreateDto: ProjectCreateDto = {
         title: updatedProjectData.title,
         description: updatedProjectData.description,
         projectCategoryId: updatedProjectData.projectCategoryId,
-        client: {
-          accountId: userId,
-        },
-        estimateBudget: updatedProjectData.estimateBudget,
-        status: "OPEN",
-        isVisible: true,
+        minBudget: updatedProjectData.minBudget,
+        maxBudget: updatedProjectData.maxBudget,
+        requiredSkills: [],
+        milestones: [],
+        startDate: updatedProjectData.startDate
       };
 
-      // Transform the skills to match ProjectSkillDto format
+      // Transform the skills to match SkillSetDto format
       if (
         updatedProjectData.requiredSkills &&
         Array.isArray(updatedProjectData.requiredSkills)
       ) {
-        formattedData.requiredSkills = updatedProjectData.requiredSkills.map(
-          (skillId: number) => ({
-            skill: {
-              skillId: skillId,
-            },
-            proficiency: "INTERMEDIATE", // Default proficiency level
+        projectCreateDto.requiredSkills = updatedProjectData.requiredSkills.map(
+          (skillId: number): SkillSetDto => ({
+            skillId: skillId,
+            proficiency: ProficiencyEnum.Intermediate
           })
         );
       }
 
-      // Format milestones according to MilestoneDto
+      // Format milestones according to MilestoneCreateDto
       if (
         updatedProjectData.milestones &&
         Array.isArray(updatedProjectData.milestones)
       ) {
-        formattedData.milestones = updatedProjectData.milestones.map(
-          (milestone: any) => ({
+        projectCreateDto.milestones = updatedProjectData.milestones.map(
+          (milestone: any): MilestoneCreateDto => ({
             title: milestone.title,
             description: milestone.description,
-            budget: milestone.budget,
-            deadline: milestone.deadline?.toISOString(),
-            status: "PENDING",
-            isVisible: true,
+            budgetRatio: milestone.budget,
+            deadline: moment(milestone.deadline).toDate()
           })
         );
       }
 
-      // Submit the formatted data
-      await onFinish(formattedData);
+      try {
+        // Create project
+        const response = await api.createProject({
+          projectCreateDto: projectCreateDto
+        });
+
+        // After successful project creation, upload files
+        if (response && response.projectId) {
+          await uploadProjectFiles(response.projectId);
+        }
+
+        // Reset state and close modal
+        message.success("Project created successfully");
+        close();
+        setCurrentStep(0);
+        setProjectData({});
+        setFileList([]);
+        setIsSubmitting(false);
+      } catch (error) {
+        console.error("Project creation error:", error);
+        message.error("Failed to create project. Please try again.");
+        setIsSubmitting(false);
+      }
     } else {
       // Move to next step
       setCurrentStep(currentStep + 1);
@@ -132,9 +261,18 @@ const ClientCreateButton = () => {
           >
             <Form.Item
               name="title"
-              label="Project Title"
+              label={
+                <span className="flex items-center">
+                  Project Title
+                  <Tooltip title="Give your project a clear, descriptive name">
+                    <QuestionCircleOutlined className="ml-1" />
+                  </Tooltip>
+                </span>
+              }
               rules={[
                 { required: true, message: "Please enter a project title" },
+                { min: 3, message: "Title must be at least 3 characters" },
+                { max: 100, message: "Title cannot exceed 100 characters" }
               ]}
             >
               <Input placeholder="Enter project title" />
@@ -142,27 +280,82 @@ const ClientCreateButton = () => {
 
             <Form.Item
               name="projectCategoryId"
-              label="Project Category"
+              label={
+                <span className="flex items-center">
+                  Project Category
+                  <Tooltip title="Select the most relevant category for your project">
+                    <QuestionCircleOutlined className="ml-1" />
+                  </Tooltip>
+                </span>
+              }
               rules={[{ required: true, message: "Please select a category" }]}
             >
               <Select placeholder="Select category" {...categorySelectProps} />
             </Form.Item>
 
-            <Form.Item
-              name="estimateBudget"
-              label="Estimated Budget ($)"
-              rules={[{ required: true, message: "Please enter budget" }]}
-            >
-              <InputNumber
-                min={1}
-                placeholder="Enter budget"
-                formatter={(value) =>
-                  `$ ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-                }
-                parser={(value) => value!.replace(/\$\s?|(,*)/g, "")}
-                className="w-full"
-              />
-            </Form.Item>
+            <Row gutter={16}>
+              <Col span={12}>
+                <Form.Item
+                  name="minBudget"
+                  label={
+                    <span className="flex items-center">
+                      Minimum Budget ($)
+                      <Tooltip title="The minimum budget you're willing to spend">
+                        <QuestionCircleOutlined className="ml-1" />
+                      </Tooltip>
+                    </span>
+                  }
+                  rules={[
+                    { required: true, message: "Please enter minimum budget" },
+                    {
+                      validator: (_, value) => {
+                        if (value <= 0) {
+                          return Promise.reject("Budget must be greater than 0");
+                        }
+                        return Promise.resolve();
+                      }
+                    }
+                  ]}
+                >
+                  <InputNumber
+                    min={1}
+                    placeholder="Min budget"
+                    formatter={(value) =>
+                      `$ ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                    }
+                    parser={(value) => parseFloat(value!.replace(/\$\s?|(,*)/g, "")) as any}
+                    className="w-full"
+                  />
+                </Form.Item>
+              </Col>
+              <Col span={12}>
+                <Form.Item
+                  name="maxBudget"
+                  label={
+                    <span className="flex items-center">
+                      Maximum Budget ($)
+                      <Tooltip title="The maximum budget you're willing to spend">
+                        <QuestionCircleOutlined className="ml-1" />
+                      </Tooltip>
+                    </span>
+                  }
+                  rules={[
+                    { required: true, message: "Please enter maximum budget" },
+                 
+                  ]}
+                >
+                  <InputNumber
+                    min={1}
+                    placeholder="Max budget"
+                    formatter={(value) =>
+                      `$ ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                    }
+                    parser={(value) => parseFloat(value!.replace(/\$\s?|(,*)/g, "")) as any}
+                    className="w-full"
+                  />
+                </Form.Item>
+              </Col>
+            </Row>
 
             <div className="flex justify-end">
               <Button type="primary" htmlType="submit">
@@ -181,9 +374,18 @@ const ClientCreateButton = () => {
           >
             <Form.Item
               name="description"
-              label="Project Description"
+              label={
+                <span className="flex items-center">
+                  Project Description
+                  <Tooltip title="Provide detailed information about your project requirements">
+                    <QuestionCircleOutlined className="ml-1" />
+                  </Tooltip>
+                </span>
+              }
               rules={[
                 { required: true, message: "Please enter a description" },
+                { min: 10, message: "Description must be at least 10 characters" },
+                { max: 1000, message: "Description cannot exceed 1000 characters" }
               ]}
             >
               <Input.TextArea
@@ -194,7 +396,14 @@ const ClientCreateButton = () => {
 
             <Form.Item
               name="requiredSkills"
-              label="Required Skills"
+              label={
+                <span className="flex items-center">
+                  Required Skills
+                  <Tooltip title="Select skills that are required for this project">
+                    <QuestionCircleOutlined className="ml-1" />
+                  </Tooltip>
+                </span>
+              }
               rules={[
                 { required: true, message: "Please select at least one skill" },
               ]}
@@ -209,6 +418,32 @@ const ClientCreateButton = () => {
                 }))}
               />
             </Form.Item>
+
+            <Form.Item
+              name="files"
+              label={
+                <span className="flex items-center">
+                  Project Documents (Optional)
+                  <Tooltip title="Upload any relevant files or documentation">
+                    <QuestionCircleOutlined className="ml-1" />
+                  </Tooltip>
+                </span>
+              }
+              getValueFromEvent={() => fileList}
+            >
+              <Upload
+                multiple
+                fileList={fileList}
+                onChange={handleFileChange}
+                beforeUpload={() => false} // Prevent auto upload
+                maxCount={5}
+              >
+                <Button icon={<UploadOutlined />}>Select Files (Max 5)</Button>
+              </Upload>
+            </Form.Item>
+            <div className="text-xs text-gray-500 mt-1 mb-4">
+              Accepted file types: PDF, DOC, DOCX, JPG, PNG (Max 5MB per file)
+            </div>
 
             <div className="flex justify-between">
               <Button onClick={handlePrevStep}>Previous</Button>
@@ -231,7 +466,36 @@ const ClientCreateButton = () => {
               ],
             }}
           >
-            <Form.List name="milestones">
+            <Alert 
+              message="Milestone Requirements"
+              description={
+                <ul className="list-disc pl-4 mt-2">
+                  <li>At least 1 milestone is required (maximum 10)</li>
+                  <li>First milestone must be at least 3 days from today</li>
+                  <li>Milestones must be spaced 3-30 days apart</li>
+                  <li>Deadlines must be in chronological order</li>
+                </ul>
+              }
+              type="info"
+              showIcon
+              className="mb-4"
+            />
+            
+            <Form.List 
+              name="milestones"
+              rules={[
+                {
+                  validator: async (_, milestones) => {
+                    if (!milestones || milestones.length < 1) {
+                      return Promise.reject(new Error('At least one milestone is required'));
+                    }
+                    if (milestones.length > 10) {
+                      return Promise.reject(new Error('Maximum 10 milestones allowed'));
+                    }
+                  },
+                },
+              ]}
+            >
               {(fields, { add, remove }) => (
                 <>
                   {fields.map(({ key, name, ...restField }) => (
@@ -240,7 +504,10 @@ const ClientCreateButton = () => {
                         {...restField}
                         name={[name, "title"]}
                         label="Milestone Title"
-                        rules={[{ required: true, message: "Missing title" }]}
+                        rules={[
+                          { required: true, message: "Missing title" },
+                          { max: 100, message: "Title cannot exceed 100 characters" }
+                        ]}
                       >
                         <Input placeholder="Milestone title" />
                       </Form.Item>
@@ -249,6 +516,10 @@ const ClientCreateButton = () => {
                         {...restField}
                         name={[name, "description"]}
                         label="Description"
+                        rules={[
+                          { required: true, message: "Description is required" },
+                          { max: 500, message: "Description cannot exceed 500 characters" }
+                        ]}
                       >
                         <Input.TextArea
                           rows={2}
@@ -276,7 +547,7 @@ const ClientCreateButton = () => {
                                 )
                               }
                               parser={(value) =>
-                                value!.replace(/\$\s?|(,*)/g, "")
+                                parseFloat(value!.replace(/\$\s?|(,*)/g, "")) as any
                               }
                               className="w-full"
                             />
@@ -286,12 +557,42 @@ const ClientCreateButton = () => {
                           <Form.Item
                             {...restField}
                             name={[name, "deadline"]}
-                            label="Deadline"
+                            label={
+                              <span className="flex items-center">
+                                Deadline
+                                <Tooltip title="Must be at least 3 days from today, and milestones must be 3-30 days apart">
+                                  <InfoCircleOutlined className="ml-1" />
+                                </Tooltip>
+                              </span>
+                            }
                             rules={[
                               { required: true, message: "Missing deadline" },
+                              {
+                                validator: (_, value) => {
+
+                                  if (!value) {
+                                    return Promise.reject("Date is required");
+                                  }
+                                  
+                                  const minDate = moment().add(3,"d");
+
+                               
+                                  if (moment(new Date(value)).isBefore(minDate)) {
+                                    return Promise.reject("Date must be at least 3 days from today");
+                                  } 
+                                  
+                                  return Promise.resolve();
+                                }
+                              }
                             ]}
                           >
-                            <DatePicker className="w-full" />
+                            <DatePicker 
+                              className="w-full" 
+                              disabledDate={(current) => {
+                                // Can't select days before today + 3 days
+                                return current && current < moment().add(3, 'days').startOf('day');
+                              }} 
+                            />
                           </Form.Item>
                         </Col>
                       </Row>
@@ -314,9 +615,15 @@ const ClientCreateButton = () => {
                       onClick={() => add()}
                       block
                       icon={<PlusOutlined />}
+                      disabled={fields.length >= 10}
                     >
                       Add Milestone
                     </Button>
+                    {fields.length >= 10 && (
+                      <div className="text-red-500 mt-1">
+                        Maximum 10 milestones allowed
+                      </div>
+                    )}
                   </Form.Item>
                 </>
               )}
@@ -324,7 +631,12 @@ const ClientCreateButton = () => {
 
             <div className="flex justify-between">
               <Button onClick={handlePrevStep}>Previous</Button>
-              <Button type="primary" htmlType="submit">
+              <Button 
+                type="primary" 
+                htmlType="submit" 
+                loading={isSubmitting}
+                disabled={isSubmitting}
+              >
                 Create Project
               </Button>
             </div>
@@ -345,6 +657,7 @@ const ClientCreateButton = () => {
           show();
           setCurrentStep(0);
           setProjectData({});
+          setFileList([]);
         }}
       >
         Create Project
@@ -356,6 +669,16 @@ const ClientCreateButton = () => {
         title="Create New Project"
         width={700}
         footer={null}
+        maskClosable={false}
+        closable={!isSubmitting}
+        onCancel={() => {
+          if (!isSubmitting) {
+            close();
+            setCurrentStep(0);
+            setProjectData({});
+            setFileList([]);
+          }
+        }}
       >
         <Steps current={currentStep} className="mb-8">
           <Step title="Basic Info" description="Project details" />
