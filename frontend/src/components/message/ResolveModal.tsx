@@ -29,7 +29,7 @@ import {
   SolutionOutlined,
   UserOutlined,
 } from "@ant-design/icons";
-import api from "../../config/openapi-config";
+import api from "../../services/api/openapi-config";
 import { useNavigate } from "react-router";
 interface ResolveModalProps {
   showResolveModal: boolean;

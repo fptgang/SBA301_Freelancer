@@ -9,7 +9,7 @@ import {
 } from "@refinedev/antd";
 import { Table, Space, Tooltip, notification, Button } from "antd";
 import { ProjectDto, ReportDto } from "../../../../generated";
-import api from "../../../config/openapi-config";
+import api from "../../../services/api/openapi-config";
 import { LoginOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router";
 import { store } from "../../../store";

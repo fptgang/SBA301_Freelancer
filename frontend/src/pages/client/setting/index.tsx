@@ -9,7 +9,7 @@ import {
 } from "@ant-design/icons";
 import { useGo } from "@refinedev/core";
 import { Outlet } from "react-router";
-import SettingsLayout from "../../../components/layout/settings-layout";
+import SettingsLayout from "../../../layouts/settings-layout";
 
 const { Sider, Content } = Layout;
 

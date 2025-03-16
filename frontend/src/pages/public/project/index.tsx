@@ -10,12 +10,12 @@ import {
   AccountDtoRoleEnum,
 } from "../../../../generated";
 
-import { ProjectDescription } from "../../../components/project-details/ProjectDescription";
-import { ProjectActivity } from "../../../components/project-details/ProjectActivity";
-import { ProjectMilestones } from "../../../components/project-details/ProjectMilestones";
-import { ClientInformation } from "../../../components/project-details/ClientInformation";
-import { ActionCard } from "../../../components/project-details/ActionCard";
-import { ProjectHeader } from "../../../components/project-details/ProjectHeader";
+import { ProjectDescription } from "../../../components/features/project/details/ProjectDescription";
+import { ProjectActivity } from "../../../components/features/project/details/ProjectActivity";
+import { ProjectMilestones } from "../../../components/features/project/details/ProjectMilestones";
+import { ClientInformation } from "../../../components/features/project/details/ClientInformation";
+import { ActionCard } from "../../../components/features/project/details/ActionCard";
+import { ProjectHeader } from "../../../components/features/project/details/ProjectHeader";
 import { store } from "../../../store";
 
 const ProjectDetailsScreen: React.FC = () => {

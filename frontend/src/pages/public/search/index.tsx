@@ -14,9 +14,9 @@ import {
 } from "../../../../generated";
 import { HttpError, useList } from "@refinedev/core";
 import { useSearchParams } from "react-router";
-import ProjectCard from "../../../components/pages/search/projectCard";
-import ProfileCard from "../../../components/pages/search/profileCard";
-import RenderFilter from "../../../components/pages/search/renderFilter";
+import ProjectCard from "../../../components/features/project/cards/projectCard";
+import ProfileCard from "../../../components/features/profile/card/profileCard";
+import RenderFilter from "../../../components/features/project/filters/renderFilter";
 
 const { Content, Sider } = Layout;
 

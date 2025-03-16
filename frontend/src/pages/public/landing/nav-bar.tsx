@@ -18,7 +18,7 @@ import {
 } from "@ant-design/icons";
 import { useNavigate } from "react-router";
 import { Authenticated } from "@refinedev/core";
-import { ProfileDropdownButton } from "../../../components/common/button/profile-dropdown-button";
+import { ProfileDropdownButton } from "../../../components/common/buttons/profile-dropdown-button";
 
 const { Header } = Layout;
 const { Title } = Typography;

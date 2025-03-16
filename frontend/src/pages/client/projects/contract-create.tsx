@@ -28,7 +28,7 @@ import { useForm, useModal } from "@refinedev/antd";
 import type { UploadFile } from "antd/es/upload/interface";
 import { RcFile } from "antd/es/upload";
 import { store } from "../../../store";
-import api from "../../../config/openapi-config";
+import api from "../../../services/api/openapi-config";
 import { on } from "events";
 import DepositModal from "../../../components/DepositModal";
 

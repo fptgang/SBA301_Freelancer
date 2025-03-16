@@ -4,7 +4,7 @@ import {
   DepositDto,
   DepositDtoPaymentMethodEnum,
 } from "../../generated/models/DepositDto";
-import api from "../config/openapi-config";
+import api from "../services/api/openapi-config";
 
 interface DepositModalProps {
   visible: boolean;

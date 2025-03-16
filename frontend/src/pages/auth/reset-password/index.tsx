@@ -1,7 +1,7 @@
 import { useGo, useNotification, useParsed } from "@refinedev/core";
 import { Button, Card, Form, Input, Typography, theme } from "antd";
 import React, { useEffect } from "react";
-import api from "../../../config/openapi-config";
+import api from "../../../services/api/openapi-config";
 
 const { Title } = Typography;
 const { useToken } = theme;
