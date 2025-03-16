@@ -9,7 +9,7 @@ import {
 } from "antd";
 import React, { useContext } from "react";
 import { ColorModeContext } from "../../contexts/color-mode";
-import { ProfileDropdownButton } from "../common/button/profile-dropdown-button";
+import { ProfileDropdownButton } from "../common/buttons/profile-dropdown-button";
 
 const { Text } = Typography;
 const { useToken } = theme;

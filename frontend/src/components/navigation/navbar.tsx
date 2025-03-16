@@ -14,7 +14,7 @@ import {
 } from "@ant-design/icons";
 import { useNavigate, useLocation } from "react-router";
 import { Authenticated, useGetIdentity } from "@refinedev/core";
-import { ProfileDropdownButton } from "../common/button/profile-dropdown-button";
+import { ProfileDropdownButton } from "../common/buttons/profile-dropdown-button";
 import { AccountDto, AccountDtoRoleEnum } from "../../../generated";
 import { NavDropdown } from "./nav-downdrop";
 

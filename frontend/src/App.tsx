@@ -77,13 +77,13 @@ import { dataProvider } from "./providers/data-provider";
 import { notificationProvider } from "./providers/notification-provider";
 import { accessControlProvider } from "./providers/access-control-provider";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router";
-import axiosConfig from "./config/axios-config";
-import { authProvider } from "./authProvider";
+import axiosConfig from "./services/api/axios-config";
+import { authProvider } from "./services/auth/authProvider";
 import { API_URL } from "./utils/constants";
-import PublicLayout from "./components/layout/public-layout";
-import AdminLayout from "./components/layout/admin-layout";
-import ClientLayout from "./components/layout/client-layout";
-import FreelancerLayout from "./components/layout/freelancer-layout";
+import PublicLayout from "./layouts/public-layout";
+import AdminLayout from "./layouts/admin-layout";
+import ClientLayout from "./layouts/client-layout";
+import FreelancerLayout from "./layouts/freelancer-layout";
 import ClientList from "./pages/client/projects/client-list";
 import { ForgotPassword } from "./pages/auth/forgotPassword";
 import LandingPage from "./pages/public/landing/landing-page";
@@ -107,17 +107,17 @@ import FreelancerProposalShow from "./pages/freelancer/proposal/show";
 import SharedProjectShow from "./pages/shared/projects/show";
 import { liveProvider } from "./providers/live-provider";
 import { stompClient } from "./utils/stompClient";
-import SettingsLayout from "./components/layout/settings-layout";
+import SettingsLayout from "./layouts/settings-layout";
 import AccountSettingsPage from "./pages/shared/setting/account";
 import SecuritySettingsPage from "./pages/shared/setting/security";
 import LocalSettingsPage from "./pages/shared/setting/local";
 import WalletPage from "./pages/shared/wallet";
-import WalletLayout from "./components/layout/wallet-layout";
+import WalletLayout from "./layouts/wallet-layout";
 import DepositPage from "./pages/shared/wallet/deposit";
 import WithdrawPage from "./pages/shared/wallet/withdraw";
 import ProjectDetailsScreen from "./pages/public/project";
 import { Message } from "./pages/public/message";
-import MessageLayout from "./components/layout/message-layout";
+import MessageLayout from "./layouts/message-layout";
 import { ReportsEdit, ReportsList, ReportsShow } from "./pages/admin/reports";
 
 const resources = [
@@ -210,12 +210,12 @@ function App() {
                 // accessControlProvider={accessControlProvider}
                 routerProvider={routerBindings}
                 resources={resources}
-                liveProvider={liveProvider(stompClient)}
+                // liveProvider={liveProvider(stompClient)}
                 options={{
                   syncWithLocation: true,
                   warnWhenUnsavedChanges: true,
                   useNewQueryKeys: true,
-                  mutationMode: "pessimistic",
+                  mutationMode: "optimistic",
                   liveMode: "off",
                 }}
               >
