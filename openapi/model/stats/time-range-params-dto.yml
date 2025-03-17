@@ -1,0 +1,16 @@
+TimeRangeParamsDto:
+  type: object
+  properties:
+    startDate:
+      type: string
+      format: date
+      description: Start date in ISO format (yyyy-MM-dd)
+    endDate:
+      type: string
+      format: date
+      description: End date in ISO format (yyyy-MM-dd)
+    groupBy:
+      type: string
+      enum: [day, week, month]
+      default: month
+      description: Group data by day, week, or month

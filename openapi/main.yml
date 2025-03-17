@@ -14,154 +14,174 @@ components:
 
   parameters:
     Pageable:
-      $ref: 'param/pageable.yml#/Pageable'
+      $ref: "param/pageable.yml#/Pageable"
     Filter:
-      $ref: 'param/filter.yml#/Filter'
+      $ref: "param/filter.yml#/Filter"
     Search:
-      $ref: 'param/search.yml#/Search'
+      $ref: "param/search.yml#/Search"
 
   schemas:
     AccountDto:
       $ref: "model/account.yml#/AccountDto"
     ContractDto:
-      $ref: 'model/contract.yml#/ContractDto'
+      $ref: "model/contract.yml#/ContractDto"
     FileDto:
-      $ref: 'model/file.yml#/FileDto'
+      $ref: "model/file.yml#/FileDto"
     FileBlobDto:
-      $ref: 'model/file-blob.yml#/FileBlobDto'
+      $ref: "model/file-blob.yml#/FileBlobDto"
     MessageDto:
-      $ref: 'model/message.yml#/MessageDto'
+      $ref: "model/message.yml#/MessageDto"
     MilestoneDto:
-      $ref: 'model/milestone.yml#/MilestoneDto'
+      $ref: "model/milestone.yml#/MilestoneDto"
     ProficiencyEnum:
-      $ref: 'model/proficiency.yml#/ProficiencyEnum'
+      $ref: "model/proficiency.yml#/ProficiencyEnum"
     ProfileDto:
-      $ref: 'model/profile.yml#/ProfileDto'
+      $ref: "model/profile.yml#/ProfileDto"
     ProjectDto:
-      $ref: 'model/project.yml#/ProjectDto'
+      $ref: "model/project.yml#/ProjectDto"
     ProjectCategoryDto:
-      $ref: 'model/project-category.yml#/ProjectCategoryDto'
+      $ref: "model/project-category.yml#/ProjectCategoryDto"
     ProposalDto:
-      $ref: 'model/proposal.yml#/ProposalDto'
+      $ref: "model/proposal.yml#/ProposalDto"
     RefreshTokenDto:
-      $ref: 'model/refresh-token.yml#/RefreshTokenDto'
+      $ref: "model/refresh-token.yml#/RefreshTokenDto"
     TransactionDto:
-      $ref: 'model/transaction.yml#/TransactionDto'
+      $ref: "model/transaction.yml#/TransactionDto"
     #    SkillDto:
     #      $ref: 'model/skill.yml#/SkillDto'
     ProfileSkillDto:
-      $ref: 'model/profile-skill.yml#/ProfileSkillDto'
+      $ref: "model/profile-skill.yml#/ProfileSkillDto"
     ProjectSkillDto:
-      $ref: 'model/project-skill.yml#/ProjectSkillDto'
+      $ref: "model/project-skill.yml#/ProjectSkillDto"
     ProjectStatusDto:
-      $ref: 'model/project-status.yml#/ProjectStatusDto'
+      $ref: "model/project-status.yml#/ProjectStatusDto"
     ProjectCreateDto:
-      $ref: 'model/request/project-create.yml#/ProjectCreateDto'
+      $ref: "model/request/project-create.yml#/ProjectCreateDto"
     MilestoneCreateDto:
-      $ref: 'model/request/milestone-create.yml#/MilestoneCreateDto'
+      $ref: "model/request/milestone-create.yml#/MilestoneCreateDto"
     TransactionStatusDto:
-      $ref: 'model/transaction-status.yml#/TransactionStatusDto'
+      $ref: "model/transaction-status.yml#/TransactionStatusDto"
     TransactionTypeDto:
-      $ref: 'model/transaction-type.yml#/TransactionTypeDto'
+      $ref: "model/transaction-type.yml#/TransactionTypeDto"
     ProposalStatusDto:
-      $ref: 'model/proposal-status.yml#/ProposalStatusDto'
+      $ref: "model/proposal-status.yml#/ProposalStatusDto"
     StringBigDecimalDatapointDto:
-      $ref: 'model/stats/string-bigdecimal-datapoint.yml#/StringBigDecimalDatapointDto'
+      $ref: "model/stats/string-bigdecimal-datapoint.yml#/StringBigDecimalDatapointDto"
     StringIntegerDatapointDto:
-      $ref: 'model/stats/string-integer-datapoint.yml#/StringIntegerDatapointDto'
+      $ref: "model/stats/string-integer-datapoint.yml#/StringIntegerDatapointDto"
+    TimeRangeParamsDto:
+      $ref: "model/stats/time-range-params-dto.yml#/TimeRangeParamsDto"
+    ChartTypeDto:
+      $ref: "model/stats/chart-type-dto.yml#/ChartTypeDto"
+    TransactionStatDto:
+      $ref: "model/stats/transaction-stat-dto.yml#/TransactionStatDto"
 paths:
   /auth/me:
-    $ref: 'path/auth/me.yml'
+    $ref: "path/auth/me.yml"
   /auth/login-with-google:
-    $ref: 'path/auth/login-with-google.yml'
+    $ref: "path/auth/login-with-google.yml"
   /auth/refresh-token:
-    $ref: 'path/auth/refresh-token.yml'
+    $ref: "path/auth/refresh-token.yml"
   /auth/login:
-    $ref: 'path/auth/login.yml'
+    $ref: "path/auth/login.yml"
   /auth/register:
-    $ref: 'path/auth/register.yml'
+    $ref: "path/auth/register.yml"
   /auth/logout:
-    $ref: 'path/auth/log-out.yml'
+    $ref: "path/auth/log-out.yml"
   /auth/forgot-password:
-    $ref: 'path/auth/forgot-password.yml'
+    $ref: "path/auth/forgot-password.yml"
   /auth/reset-password:
-    $ref: 'path/auth/reset-password.yml'
+    $ref: "path/auth/reset-password.yml"
 
   /accounts:
-    $ref: 'path/accounts/index.yml'
+    $ref: "path/accounts/index.yml"
   /accounts/{accountId}:
-    $ref: 'path/accounts/@id/index.yml'
+    $ref: "path/accounts/@id/index.yml"
 
   /profiles:
-    $ref: 'path/profiles/index.yml'
+    $ref: "path/profiles/index.yml"
   /profiles/{profileId}:
-    $ref: 'path/profiles/@id/index.yml'
+    $ref: "path/profiles/@id/index.yml"
 
   /project-categories:
-    $ref: 'path/project-categories/index.yml'
+    $ref: "path/project-categories/index.yml"
   /project-categories/{projectCategoryId}:
-    $ref: 'path/project-categories/@id/index.yml'
+    $ref: "path/project-categories/@id/index.yml"
 
   /projects:
-    $ref: 'path/projects/index.yml'
+    $ref: "path/projects/index.yml"
   /projects/{projectId}:
-    $ref: 'path/projects/@id/index.yml'
+    $ref: "path/projects/@id/index.yml"
   /projects/{projectId}/staff:
-    $ref: 'path/projects/@id/staff.yml'
+    $ref: "path/projects/@id/staff.yml"
   /projects/{projectId}/terminate:
-    $ref: 'path/projects/@id/terminate.yml'
+    $ref: "path/projects/@id/terminate.yml"
   /projects/{projectId}/unpause:
-    $ref: 'path/projects/@id/unpause.yml'
+    $ref: "path/projects/@id/unpause.yml"
   /projects/{projectId}/extend-deadline:
-    $ref: 'path/projects/@id/extend-deadline.yml'
+    $ref: "path/projects/@id/extend-deadline.yml"
 
   /milestones/{milestoneId}/deposit-fund:
-    $ref: 'path/milestones/@id/deposit-fund.yml'
+    $ref: "path/milestones/@id/deposit-fund.yml"
   /milestones/{milestoneId}/submit-work:
-    $ref: 'path/milestones/@id/submit-work.yml'
+    $ref: "path/milestones/@id/submit-work.yml"
   /milestones/{milestoneId}/confirm-work:
-    $ref: 'path/milestones/@id/confirm-work.yml'
+    $ref: "path/milestones/@id/confirm-work.yml"
 
   /skills:
-    $ref: 'path/skills/index.yml'
+    $ref: "path/skills/index.yml"
   /skills/{skillId}:
-    $ref: 'path/skills/@id/index.yml'
+    $ref: "path/skills/@id/index.yml"
 
   /proposals:
-    $ref: 'path/proposals/index.yml'
+    $ref: "path/proposals/index.yml"
   /proposals/{proposalId}/reject:
-    $ref: 'path/proposals/@id/reject.yml'
+    $ref: "path/proposals/@id/reject.yml"
   /proposals/{proposalId}/withdraw:
-    $ref: 'path/proposals/@id/withdraw.yml'
+    $ref: "path/proposals/@id/withdraw.yml"
 
   /contracts/{contractId}/sign:
-    $ref: 'path/contracts/@id/sign.yml'
+    $ref: "path/contracts/@id/sign.yml"
   /contracts:
-    $ref: 'path/contracts/index.yml'
+    $ref: "path/contracts/index.yml"
 
   /transactions:
-    $ref: 'path/transactions/index.yml'
+    $ref: "path/transactions/index.yml"
   /transactions/{transactionId}:
-    $ref: 'path/transactions/@id/index.yml'
+    $ref: "path/transactions/@id/index.yml"
   /transactions/deposit:
-    $ref: 'path/transactions/deposit.yml'
+    $ref: "path/transactions/deposit.yml"
 
   /messages:
-    $ref: 'path/messages/index.yml'
+    $ref: "path/messages/index.yml"
   /messages/{messageId}:
-    $ref: 'path/messages/@id/index.yml'
+    $ref: "path/messages/@id/index.yml"
 
   /files:
-    $ref: 'path/files/index.yml'
+    $ref: "path/files/index.yml"
   /files/{fileId}:
-    $ref: 'path/files/@id/index.yml'
+    $ref: "path/files/@id/index.yml"
 
   /reports:
-    $ref: 'path/reports/index.yml'
+    $ref: "path/reports/index.yml"
   /reports/{reportId}:
-    $ref: 'path/reports/@id/index.yml'
+    $ref: "path/reports/@id/index.yml"
   /reports/{reportId}/resolve:
-    $ref: 'path/reports/@id/resolve.yml'
+    $ref: "path/reports/@id/resolve.yml"
 
   /stats/monthly-new-customers:
     $ref: "path/stats/monthly-new-customer.yml"
+  /stats/transactions:
+    $ref: "path/stats/transactions.yml"
+  /stats/new-projects:
+    $ref: "path/stats/new-projects.yml"
+  /stats/contracts-signed:
+    $ref: "path/stats/contracts-signed.yml"
+  /stats/milestones-completed:
+    $ref: "path/stats/milestones-completed.yml"
+  /stats/funds-released:
+    $ref: "path/stats/funds-released.yml"
+  /stats/user-registrations:
+    $ref: "path/stats/user-registrations.yml"
+  /stats/project-termination:
+    $ref: "path/stats/project-termination.yml"

@@ -1,0 +1,40 @@
+get:
+  summary: Get statistics of newly created projects over time
+  operationId: getNewProjectStats
+  security:
+    - bearerAuth: []
+  parameters:
+    - name: startDate
+      in: query
+      required: false
+      schema:
+        type: string
+        format: date
+    - name: endDate
+      in: query
+      required: false
+      schema:
+        type: string
+        format: date
+    - name: groupBy
+      in: query
+      required: false
+      schema:
+        type: string
+        enum: [day, week, month]
+        default: month
+  responses:
+    "200":
+      description: Operation successful
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: "../../model/stats/string-integer-datapoint.yml#/StringIntegerDatapointDto"
+    "400":
+      description: Operation failed
+      content:
+        application/json:
+          schema:
+            $ref: "../../component/error.yml#/ErrorResponse"

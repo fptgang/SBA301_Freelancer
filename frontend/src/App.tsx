@@ -51,6 +51,7 @@ import {
   SkillsShow,
 } from "./pages/admin/skills";
 import { TransactionsList, TransactionsShow } from "./pages/admin/transactions";
+import AdminDashboard from "./pages/admin/dashboard";
 
 // Client Pages
 import ClientDashboard from "./pages/client/dashboard";
@@ -255,10 +256,7 @@ function App() {
                     }
                   >
                     <Route index element={<Navigate to="/admin/dashboard" />} />
-                    <Route
-                      path="dashboard"
-                      element={<NavigateToResource resource={"accounts"} />}
-                    />
+                    <Route path="dashboard" element={<AdminDashboard />} />
                     <Route path="accounts">
                       <Route index element={<AccountsList />} />
                       <Route path="create" element={<AccountsCreate />} />
