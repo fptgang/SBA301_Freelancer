@@ -39,7 +39,7 @@ public class EmailServiceImpl implements EmailService {
     private Resource milestoneStartedTemplate;
     @Value("classpath:template/MilestoneCompletedEmailTemplate.html")
     private Resource milestoneCompletedTemplate;
-    @Value("classpath:template/MilestoneFundEmailTemplate.html")
+    @Value("classpath:template/MilestoneFundRefundedEmailTemplate.html")
     private Resource milestoneFundTemplate;
     @Value("classpath:template/ProjectEmailTemplate.html")
     private Resource projectCompletedTemplate;
@@ -47,6 +47,8 @@ public class EmailServiceImpl implements EmailService {
     private Resource reportEmailTemplate;
     @Value("classpath:template/TransactionDepositEmailTemplate.html")
     private Resource transactionEmailTemplate;
+    @Value("classpath:template/MilestoneFundReleasedEmailTemplate.html")
+    private Resource milestoneReleasedEmailTemplate;
 
     private final ResetPasswordEmailTemplateMapper resetPasswordEmailTemplateMapper;
     private final ContractCreatedEmailTemplateMapper contractCreatedEmailTemplateMapper;
@@ -58,8 +60,9 @@ public class EmailServiceImpl implements EmailService {
     private final ProjectEmailTemplateMapper projectEmailTemplateMapper;
     private final ReportEmailTemplateMapper reportEmailTemplateMapper;
     private final TransactionDepositEmailTemplateMapper transactionDepositEmailTemplateMapper;
+    private final MilestoneReleasedEmailTemplateMapper milestoneReleasedEmailTemplateMapper;
 
-    public EmailServiceImpl(ContractCreatedEmailTemplateMapper contractCreatedEmailTemplateMapper, ProposalRejectedEmailTemplateMapper proposalRejectedEmailTemplateMapper, ResetPasswordEmailTemplateMapper resetPasswordEmailTemplateMapper, ContractSignedEmailTemplateMapper contractSignedEmailTemplateMapper, MilestoneStartedEmailTemplateMapper milestoneStartedEmailTemplateMapper, MilestoneCompletedEmailTemplateMapper milestoneCompletedEmailTemplateMapper, MilestoneFundEmailTemplateMapper milestoneFundEmailTemplateMapper, ProjectEmailTemplateMapper projectEmailTemplateMapper, ReportEmailTemplateMapper reportEmailTemplateMapper, TransactionDepositEmailTemplateMapper transactionDepositEmailTemplateMapper) {
+    public EmailServiceImpl(ContractCreatedEmailTemplateMapper contractCreatedEmailTemplateMapper, ProposalRejectedEmailTemplateMapper proposalRejectedEmailTemplateMapper, ResetPasswordEmailTemplateMapper resetPasswordEmailTemplateMapper, ContractSignedEmailTemplateMapper contractSignedEmailTemplateMapper, MilestoneStartedEmailTemplateMapper milestoneStartedEmailTemplateMapper, MilestoneCompletedEmailTemplateMapper milestoneCompletedEmailTemplateMapper, MilestoneFundEmailTemplateMapper milestoneFundEmailTemplateMapper, ProjectEmailTemplateMapper projectEmailTemplateMapper, ReportEmailTemplateMapper reportEmailTemplateMapper, TransactionDepositEmailTemplateMapper transactionDepositEmailTemplateMapper, MilestoneReleasedEmailTemplateMapper milestoneReleasedEmailTemplateMapper) {
         this.contractCreatedEmailTemplateMapper = contractCreatedEmailTemplateMapper;
         this.proposalRejectedEmailTemplateMapper = proposalRejectedEmailTemplateMapper;
         this.resetPasswordEmailTemplateMapper = resetPasswordEmailTemplateMapper;
@@ -70,6 +73,7 @@ public class EmailServiceImpl implements EmailService {
         this.projectEmailTemplateMapper = projectEmailTemplateMapper;
         this.reportEmailTemplateMapper = reportEmailTemplateMapper;
         this.transactionDepositEmailTemplateMapper = transactionDepositEmailTemplateMapper;
+        this.milestoneReleasedEmailTemplateMapper = milestoneReleasedEmailTemplateMapper;
     }
 
     @Override
@@ -251,10 +255,10 @@ public class EmailServiceImpl implements EmailService {
         }
         log.info("Preparing send milestone released for: {}", milestone.getProject().getContract().getFreelancer().getEmail());
 
-        var template = milestoneFundTemplate.getContentAsString(StandardCharsets.UTF_8);
+        var template = milestoneReleasedEmailTemplate.getContentAsString(StandardCharsets.UTF_8);
         var data = milestoneFundEmailTemplateMapper.create(milestone);
         String subject = "Milestone Fund Released";
-        String content = TemplateUtil.render(milestoneFundTemplate.getFilename(),template,data);
+        String content = TemplateUtil.render(milestoneReleasedEmailTemplate.getFilename(),template,data);
 
         sendMail(emailFrom, milestone.getProject().getContract().getFreelancer().getEmail(), subject, content);
     }
