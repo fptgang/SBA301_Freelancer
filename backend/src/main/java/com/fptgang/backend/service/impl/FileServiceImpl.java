@@ -6,6 +6,7 @@ import com.fptgang.backend.service.AzureBlobService;
 import com.fptgang.backend.service.FileService;
 import com.fptgang.backend.service.params.ListParams;
 import com.fptgang.backend.util.OpenApiHelper;
+import com.google.common.io.Files;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -36,10 +37,11 @@ public class FileServiceImpl implements FileService {
         if (file.getFileName() == null)
             file.setFileName(multipartFile.getOriginalFilename());
 
-        if (file.getFileName() == null) { // Fallback again
+        if (file.getFileName() == null) { // Fallback
             file.setFileName(UUID.randomUUID().toString());
         } else { // add a random suffix to avoid duplication
-            file.setFileName(file.getFileName() + "-" + RandomStringUtils.secure().nextAlphanumeric(6));
+            file.setFileName(Files.getNameWithoutExtension(file.getFileName()) +
+                    "-" + RandomStringUtils.secure().nextAlphanumeric(6));
         }
 
         if (file.getFileType() == null) {
@@ -70,10 +72,11 @@ public class FileServiceImpl implements FileService {
         if (file.getFileName() == null)
             file.setFileName(multipartFile.getOriginalFilename());
 
-        if (file.getFileName() == null) { // Fallback again
+        if (file.getFileName() == null) { // Fallback
             file.setFileName(UUID.randomUUID().toString());
         } else { // add a random suffix to avoid duplication
-            file.setFileName(file.getFileName() + "-" + RandomStringUtils.secure().nextAlphanumeric(6));
+            file.setFileName(Files.getNameWithoutExtension(file.getFileName()) +
+                    "-" + RandomStringUtils.secure().nextAlphanumeric(6));
         }
 
         if (file.getFileType() == null) {
