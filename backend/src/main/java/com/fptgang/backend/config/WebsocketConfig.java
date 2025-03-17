@@ -91,10 +91,10 @@ public class WebsocketConfig implements WebSocketMessageBrokerConfigurer {
             public Message<?> preSend(Message<?> message, MessageChannel channel) {
                 StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
 
-                if (StompCommand.SUBSCRIBE.equals(accessor.getCommand())) {
+                if (StompCommand.SUBSCRIBE.equals(accessor.getCommand())||StompCommand.SEND.equals(accessor.getCommand())) {
                     // Get JWT token from headers
                     List<String> authorization = accessor.getNativeHeader("Authorization");
-                    String token = authorization != null && !authorization.isEmpty() ? authorization.get(0).split(" ")[1] : null;
+                    String token = authorization != null && !authorization.isEmpty() ? authorization.getFirst().split(" ")[1] : null;
                     // Get destination (channel) being subscribed to
                     String destination = accessor.getDestination();
                     String email = SecurityUtil.getEmailFromJwt(jwtService.parseToken(token));
@@ -102,7 +102,6 @@ public class WebsocketConfig implements WebSocketMessageBrokerConfigurer {
                         if(destination.startsWith("noti/")||destination.startsWith("message/")) {
                             String destinationEmail = destination.split("/")[1];
                             if (!email.equals(destinationEmail)) {
-                                log.info("User {} subscribed to {} failed", email, destination);
                                 return null; // This prevents the subscription
                             }
                         }

@@ -119,7 +119,7 @@ public class AccountServiceImpl implements AccountService {
         Account existing = accountRepos.findById(account.getAccountId())
                 .orElseThrow(() -> new IllegalArgumentException("Account does not exist"));
         EntityUtil.merge(existing, account);
-        return accountRepos.save(account);
+        return accountRepos.save(existing);
     }
 
     @Override

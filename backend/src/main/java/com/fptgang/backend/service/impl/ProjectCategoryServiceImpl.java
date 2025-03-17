@@ -39,7 +39,7 @@ public class ProjectCategoryServiceImpl implements ProjectCategoryService {
         var existing = projectCategoryRepos.findByProjectCategoryId(projectCategory.getProjectCategoryId()).orElseThrow(
                 () -> new InvalidInputException("Project Category does not exist"));
         EntityUtil.merge(existing, projectCategory);
-        return projectCategoryRepos.save(projectCategory);
+        return projectCategoryRepos.save(existing);
     }
 
     @Override

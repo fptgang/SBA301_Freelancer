@@ -33,7 +33,7 @@ public class AccountMapper extends BaseMapper<AccountDto, Account> {
         account.setBalance(dto.getBalance());
         account.setRole(dto.getRole() == null ? null : Role.valueOf(dto.getRole().name()));
         account.setIsVerified(dto.getIsVerified());
-        account.setIsVisible(dto.getIsVisible());
+        account.setIsVisible(dto.getIsVisible()!=null ? dto.getIsVisible() : true);
         account.setVerifiedAt(dto.getVerifiedAt() != null ? DateTimeUtil.fromOffsetToLocal(dto.getVerifiedAt()) : null);
         account.setCreatedAt(dto.getCreatedAt() != null ? DateTimeUtil.fromOffsetToLocal(dto.getCreatedAt()) : null);
         account.setUpdatedAt(dto.getUpdatedAt() != null ? DateTimeUtil.fromOffsetToLocal(dto.getUpdatedAt()) : null);

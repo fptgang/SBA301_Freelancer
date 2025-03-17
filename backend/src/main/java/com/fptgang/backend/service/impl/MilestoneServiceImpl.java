@@ -65,7 +65,7 @@ public class MilestoneServiceImpl implements MilestoneService {
                     "Invalid milestone status transition");
 
         EntityUtil.merge(existing, milestone);
-        return milestoneRepos.save(milestone);
+        return milestoneRepos.save(existing);
     }
 
     @Override

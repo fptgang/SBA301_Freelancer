@@ -34,7 +34,7 @@ public class ProfileServiceImpl implements ProfileService {
                 () -> new InvalidInputException("Profile does not exist"));
         EntityUtil.merge(existing, profile);
 
-        return profileRepos.save(profile);
+        return profileRepos.save(existing);
     }
 
     @Override

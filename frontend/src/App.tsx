@@ -18,7 +18,7 @@ import { App as AntdApp } from "antd";
 import {
   AppstoreOutlined,
   DashboardOutlined,
-  DollarCircleFilled,
+  DollarCircleOutlined,
   FileTextOutlined,
   IdcardOutlined,
   MessageOutlined,
@@ -50,12 +50,7 @@ import {
   SkillsEdit,
   SkillsShow,
 } from "./pages/admin/skills";
-import {
-  TransactionsList,
-  TransactionsCreate,
-  TransactionsEdit,
-  TransactionsShow,
-} from "./pages/admin/transactions";
+import { TransactionsList, TransactionsShow } from "./pages/admin/transactions";
 
 // Client Pages
 import ClientDashboard from "./pages/client/dashboard";
@@ -106,7 +101,6 @@ import SettingPage from "./pages/shared/setting";
 import FreelancerProposalShow from "./pages/freelancer/proposal/show";
 import SharedProjectShow from "./pages/shared/projects/show";
 import { liveProvider } from "./providers/live-provider";
-import { stompClient } from "./utils/stompClient";
 import SettingsLayout from "./layouts/settings-layout";
 import AccountSettingsPage from "./pages/shared/setting/account";
 import SecuritySettingsPage from "./pages/shared/setting/security";
@@ -119,6 +113,7 @@ import ProjectDetailsScreen from "./pages/public/project";
 import { Message } from "./pages/public/message";
 import MessageLayout from "./layouts/message-layout";
 import { ReportsEdit, ReportsList, ReportsShow } from "./pages/admin/reports";
+import { stompClient } from "./utils";
 
 const resources = [
   {
@@ -180,7 +175,7 @@ const resources = [
     edit: "/admin/transactions/edit/:id",
     show: "/admin/transactions/show/:id",
     meta: {
-      icon: <DollarCircleFilled />,
+      icon: <DollarCircleOutlined />,
     },
   },
   {
@@ -210,7 +205,7 @@ function App() {
                 // accessControlProvider={accessControlProvider}
                 routerProvider={routerBindings}
                 resources={resources}
-                // liveProvider={liveProvider(stompClient)}
+                liveProvider={liveProvider(stompClient)}
                 options={{
                   syncWithLocation: true,
                   warnWhenUnsavedChanges: true,
@@ -303,8 +298,6 @@ function App() {
 
                     <Route path="transactions">
                       <Route index element={<TransactionsList />} />
-                      <Route path="create" element={<TransactionsCreate />} />
-                      <Route path="edit/:id" element={<TransactionsEdit />} />
                       <Route path="show/:id" element={<TransactionsShow />} />
                     </Route>
 
