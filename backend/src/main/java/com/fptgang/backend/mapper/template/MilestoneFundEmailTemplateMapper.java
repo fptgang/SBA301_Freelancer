@@ -13,18 +13,18 @@ public class MilestoneFundEmailTemplateMapper implements TemplateMapper<Mileston
     public Map<String, Object> create(Milestone milestone) {
         return Map.of(
                 "freelancer", Map.of(
-                        "firstName", milestone.requireFreelancer().getFirstName()
+                        "firstName", milestone.requireFreelancer().getFirstName(),
+                        "lastName", milestone.requireFreelancer().getLastName()
                 ),
                 "project", Map.of(
                         "title", milestone.getProject().getTitle()
                 ),
                 "milestone", Map.of(
                         "title", milestone.getTitle(),
-                        "budget", CurrencyUtil.format(milestone.getBudgetRatio())
+                        "budgetRatio", milestone.getBudgetRatio().toString() + "%",
+                        "updatedAt", DateTimeUtil.formatDateTime(milestone.getUpdatedAt())
                 ),
-                "milestoneStatus", milestone.getFundStatus().name().replace("_", " "),
-                "updatedAt", DateTimeUtil.formatDateTime(milestone.getUpdatedAt()),
-                "dashboardUrl", "https://example.com/dashboard/milestones"
+                "projectUrl", "https://example.com/projects/" + milestone.getProject().getProjectId()
         );
     }
 }

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Milestone Refunded</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            background: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            color: #0073e6;
+        }
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            margin-top: 20px;
+            background-color: #0073e6;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #0073e6;
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>Milestone Refunded</h2>
+    <p>Dear {{freelancer.firstName}} {{freelancer.lastName}},</p>
+    <p>We would like to inform you that a milestone in your project <strong>{{project.title}}</strong> has been refunded.</p>
+
+    <table>
+        <tr>
+            <th>Milestone</th>
+            <td>{{milestone.title}}</td>
+        </tr>
+        <tr>
+            <th>Refund Amount</th>
+            <td>{{milestone.budgetRatio}}</td>
+        </tr>
+        <tr>
+            <th>Refund Date</th>
+            <td>{{milestone.updatedAt}}</td>
+        </tr>
+    </table>
+
+    <p>You can review the details of this milestone in your project dashboard.</p>
+    <a href="{{projectUrl}}" class="button">View Project</a>
+
+    <p>If you have any questions, please contact our support team.</p>
+    <p>Best regards,<br>Support Team</p>
+</div>
+</body>
+</html>
