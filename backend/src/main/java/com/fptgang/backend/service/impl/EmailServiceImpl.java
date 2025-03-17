@@ -186,14 +186,14 @@ public class EmailServiceImpl implements EmailService {
             throw new IllegalArgumentException("Milestone is missing.");
         }
 
-        log.info("Preparing send milestone started for: {}", milestone.getProject().getContract().getFreelancer().getEmail());
+        log.info("Preparing send milestone started for: {}", milestone.requireFreelancer().getEmail());
 
         var template = milestoneStartedTemplate.getContentAsString(StandardCharsets.UTF_8);
         var data = milestoneStartedEmailTemplateMapper.create(milestone);
         String subject = "Started Milestone To Freelancer";
         String content = TemplateUtil.render(milestoneStartedTemplate.getFilename(),template,data);
 
-        sendMail(emailFrom, milestone.getProject().getContract().getFreelancer().getEmail(), subject, content);
+        sendMail(emailFrom, milestone.requireFreelancer().getEmail(), subject, content);
     }
 
     @Override
@@ -234,14 +234,14 @@ public class EmailServiceImpl implements EmailService {
             throw new IllegalArgumentException("Milestone is missing.");
         }
 
-        log.info("Preparing send milestone completed for: {}", milestone.getProject().getContract().getFreelancer().getEmail());
+        log.info("Preparing send milestone completed for: {}", milestone.requireFreelancer().getEmail());
 
         var template = milestoneCompletedTemplate.getContentAsString(StandardCharsets.UTF_8);
         var data = milestoneCompletedEmailTemplateMapper.create(milestone);
         String subject = "Completed Milestone To Freelancer";
         String content = TemplateUtil.render(milestoneCompletedTemplate.getFilename(),template,data);
 
-        sendMail(emailFrom, milestone.getProject().getContract().getFreelancer().getEmail(), subject, content);
+        sendMail(emailFrom, milestone.requireFreelancer().getEmail(), subject, content);
     }
 
     @Override
@@ -253,14 +253,14 @@ public class EmailServiceImpl implements EmailService {
             log.info("Milestone fund status is not valid for client notification: {}", milestone.getFundStatus());
             return;
         }
-        log.info("Preparing send milestone released for: {}", milestone.getProject().getContract().getFreelancer().getEmail());
+        log.info("Preparing send milestone released for: {}", milestone.requireFreelancer().getEmail());
 
         var template = milestoneReleasedEmailTemplate.getContentAsString(StandardCharsets.UTF_8);
         var data = milestoneFundEmailTemplateMapper.create(milestone);
         String subject = "Milestone Fund Released";
         String content = TemplateUtil.render(milestoneReleasedEmailTemplate.getFilename(),template,data);
 
-        sendMail(emailFrom, milestone.getProject().getContract().getFreelancer().getEmail(), subject, content);
+        sendMail(emailFrom, milestone.requireFreelancer().getEmail(), subject, content);
     }
 
     @Override
@@ -320,7 +320,7 @@ public class EmailServiceImpl implements EmailService {
         if (report.getReportId() == null) {
             throw new IllegalArgumentException("Project is missing.");
         }
-        log.info("Preparing to send Report completed both to client,freelancer: {} ,{}", report.getProject().getClient().getEmail(),report.getProject().getContract().getFreelancer().getEmail());
+        log.info("Preparing to send Report completed both to client,freelancer: {} ,{}", report.getProject().getClient().getEmail(),report.requireFreelancer().getEmail());
 
         var template = reportEmailTemplate.getContentAsString(StandardCharsets.UTF_8);
         var data = reportEmailTemplateMapper.create(report);
@@ -329,7 +329,7 @@ public class EmailServiceImpl implements EmailService {
         String content = TemplateUtil.render(projectCompletedTemplate.getFilename(), template, data);
 
         sendMail(emailFrom, report.getProject().getClient().getEmail(), subject, content);
-        sendMail(emailFrom, report.getProject().getContract().getFreelancer().getEmail(), subject, content);
+        sendMail(emailFrom, report.requireFreelancer().getEmail(), subject, content);
     }
 
     @Override

@@ -6,10 +6,12 @@ import com.fptgang.backend.service.AzureBlobService;
 import com.fptgang.backend.service.FileService;
 import com.fptgang.backend.service.params.ListParams;
 import com.fptgang.backend.util.OpenApiHelper;
+import com.google.common.io.Files;
+import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -30,69 +32,30 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
-    public File create(File image, MultipartFile file) {
-        try {
-            // Get original filename and sanitize it
-            String originalFilename = file.getOriginalFilename();
-            String safeFilename = sanitizeFilename(originalFilename);
+    @Transactional
+    public File create(File file, MultipartFile multipartFile) {
+        if (file.getFileName() == null)
+            file.setFileName(multipartFile.getOriginalFilename());
 
-            // Set the filename in the File entity
-            image.setFileName("");
-
-            // Upload the file with the safe filename
-            image.setFileUrl(azureBlobService.upload(file, safeFilename));
-            return fileRepos.save(image);
-        } catch (IOException e) {
-            log.error("Failed to upload file: {}", e.getMessage());
-            throw new RuntimeException(e);
+        if (file.getFileName() == null) { // Fallback
+            file.setFileName(UUID.randomUUID().toString());
+        } else { // add a random suffix to avoid duplication
+            file.setFileName(Files.getNameWithoutExtension(file.getFileName()) +
+                    "-" + RandomStringUtils.secure().nextAlphanumeric(6));
         }
-    }
 
-    @Override
-    public File update(File file, MultipartFile blob) {
-        if (file.getFileId() == null) {
-            throw new IllegalArgumentException("File does not exist");
+        if (file.getFileType() == null) {
+            file.setFileType(multipartFile.getContentType() == null ? "N/A" : multipartFile.getContentType());
         }
+
         try {
-            // Get original filename and sanitize it
-            String originalFilename = blob.getOriginalFilename();
-            String safeFilename = sanitizeFilename(originalFilename);
-
-            // Set the filename in the File entity
-            file.setFileName(safeFilename);
-
-            // Upload with safe filename
-            file.setFileUrl(azureBlobService.upload(blob, safeFilename));
+            String fileUrl = azureBlobService.upload(multipartFile, file.getFileName());
+            file.setFileUrl(fileUrl);
             return fileRepos.save(file);
         } catch (IOException e) {
-            log.error("Failed to update file: {}", e.getMessage());
+            log.error(e.getMessage());
             throw new RuntimeException(e);
         }
-    }
-
-    /**
-     * Sanitizes filename for Azure Blob Storage compatibility
-     */
-    private String sanitizeFilename(String filename) {
-        if (filename == null || filename.trim().isEmpty()) {
-            return "file_" + UUID.randomUUID();
-        }
-
-        // Replace invalid characters with underscores
-        String sanitized = filename.replaceAll("[\\\\/:*?\"<>|]", "_");
-
-        // Remove any leading/trailing whitespaces
-        sanitized = sanitized.trim();
-
-        // Handle folder structure if needed (preserving path separators)
-        sanitized = sanitized.replace('\\', '/');
-
-        // Ensure the name isn't empty after sanitization
-        if (sanitized.isEmpty()) {
-            sanitized = "file_" + UUID.randomUUID();
-        }
-
-        return sanitized;
     }
 
     @Override
@@ -101,16 +64,50 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
+    @Transactional
+    public File update(File file, MultipartFile multipartFile) {
+        if (file.getFileId() == null) {
+            throw new IllegalArgumentException("File does not exist");
+        }
+        if (file.getFileName() == null)
+            file.setFileName(multipartFile.getOriginalFilename());
+
+        if (file.getFileName() == null) { // Fallback
+            file.setFileName(UUID.randomUUID().toString());
+        } else { // add a random suffix to avoid duplication
+            file.setFileName(Files.getNameWithoutExtension(file.getFileName()) +
+                    "-" + RandomStringUtils.secure().nextAlphanumeric(6));
+        }
+
+        if (file.getFileType() == null) {
+            file.setFileType(multipartFile.getContentType() == null ? "N/A" : multipartFile.getContentType());
+        }
+
+        if (file.getFileType() == null) {
+            file.setFileType(multipartFile.getContentType() == null ? "N/A" : multipartFile.getContentType());
+        }
+
+        try {
+            String fileUrl = azureBlobService.upload(multipartFile, file.getFileName());
+            file.setFileUrl(fileUrl);
+            return fileRepos.save(file);
+        } catch (IOException e) {
+            log.error(e.getMessage());
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
     public File deleteById(long id) {
         File file = fileRepos.findById(id)
-                             .orElseThrow(() -> new IllegalArgumentException("File does not exist"));
+                .orElseThrow(() -> new IllegalArgumentException("File does not exist"));
         file.setIsVisible(false);
         return fileRepos.save(file);
     }
 
     @Override
     public Page<File> getAll(ListParams params) {
-        var spec = OpenApiHelper.groupBy(params.<File>toSpec(), "fileId");
+        var spec = OpenApiHelper.groupBy( params.<File>toSpec(), "fileId");
         return fileRepos.findAll(spec, params.getPageable());
     }
 }

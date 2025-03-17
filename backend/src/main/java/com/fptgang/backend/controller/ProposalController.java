@@ -54,7 +54,7 @@ public class ProposalController implements ProposalsApi {
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ProposalDto> createProposal(ProposalCreateDto proposalCreateDto) {
         if(!SecurityUtil.hasRole(Role.FREELANCER)){
-            throw new AccessDeniedException("Non-freelancer cannot create project");
+            throw new AccessDeniedException("Non-freelancer cannot create proposal");
         }
         return new ResponseEntity<>(
                 proposalMapper.toDTO(

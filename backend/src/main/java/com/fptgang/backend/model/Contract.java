@@ -2,10 +2,7 @@ package com.fptgang.backend.model;
 
 import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -24,6 +21,7 @@ public class Contract {
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "project_id", nullable = false, unique = true)
+    @EqualsAndHashCode.Exclude
     private Project project;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -32,6 +30,7 @@ public class Contract {
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "proposal_id", nullable = false, unique = true)
+    @EqualsAndHashCode.Exclude
     private Proposal proposal;
 
     @Column(nullable = false, precision = 10, scale = 2)

@@ -51,6 +51,7 @@ public class    Proposal {
     @OneToMany(mappedBy = "proposal", fetch = FetchType.LAZY)
     @Builder.Default
     @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private List<File> files = new ArrayList<>();
 
     public enum ProposalStatus {

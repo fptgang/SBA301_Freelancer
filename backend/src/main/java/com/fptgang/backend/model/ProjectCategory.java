@@ -39,5 +39,6 @@ public class ProjectCategory {
     @OneToMany(mappedBy = "category", fetch = FetchType.LAZY)
     @Builder.Default
     @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private List<Project> projects = new ArrayList<>();
 }
