@@ -49,20 +49,30 @@ export const SkillsList: React.FC = () => {
   });
 
   const getSkillTag = (name: string) => {
-    const colorMap: Record<string, string> = {
-      JavaScript: "yellow",
-      Python: "blue",
-      SQL: "cyan",
-      Java: "red",
-      "C++": "purple",
-      HTML: "orange",
-      CSS: "pink",
-      Ruby: "red",
-      PHP: "violet",
-      Swift: "geekblue",
-    };
+    // Define a list of colors available in Ant Design
+    const antdColors = [
+      "magenta",
+      "red",
+      "volcano",
+      "orange",
+      "gold",
+      "lime",
+      "green",
+      "cyan",
+      "blue",
+      "geekblue",
+      "purple",
+    ];
 
-    return <Tag color={colorMap[name] || "default"}>{name}</Tag>;
+    // Get a random color from the array based on the skill name
+    // Using the name as a seed ensures the same skill always gets the same color
+    const hash = name
+      .split("")
+      .reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    const colorIndex = hash % antdColors.length;
+    const color = antdColors[colorIndex];
+
+    return <Tag color={color || "default"}>{name}</Tag>;
   };
 
   return (

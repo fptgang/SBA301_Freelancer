@@ -1,0 +1,18 @@
+TransactionStatDto:
+  type: object
+  properties:
+    timePeriod:
+      type: string
+      description: Time period (day/week/month) of the data
+    successful:
+      type: integer
+      format: int32
+      description: Number of successful transactions
+    pending:
+      type: integer
+      format: int32
+      description: Number of pending transactions
+    failed:
+      type: integer
+      format: int32
+      description: Number of failed transactions

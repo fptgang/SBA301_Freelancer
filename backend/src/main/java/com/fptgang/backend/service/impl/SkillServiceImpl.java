@@ -7,11 +7,13 @@ import com.fptgang.backend.service.SkillService;
 import com.fptgang.backend.service.params.ListParams;
 import com.fptgang.backend.util.EntityUtil;
 import com.fptgang.backend.util.OpenApiHelper;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
 public class SkillServiceImpl implements SkillService {
     private final SkillRepos skillRepos;
@@ -35,9 +37,12 @@ public class SkillServiceImpl implements SkillService {
         }
         var existing = skillRepos.findBySkillId(skill.getSkillId()).orElseThrow(
                 ()-> new InvalidInputException("skill does not exist"));
+        log.info("existing skill: {}", existing.getCreatedAt());
+        log.info("new skill: {}", skill.getCreatedAt());
         EntityUtil.merge(existing, skill);
+        log.info("merged skill: {}", existing.getCreatedAt());
 
-        return skillRepos.save(skill);
+        return skillRepos.save(existing);
     }
 
     @Override

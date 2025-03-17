@@ -40,7 +40,7 @@ public class MessageServiceImpl implements MessageService {
         Message existing = messageRepos.findByMessageId(message.getMessageId()).orElseThrow(
                 () -> new InvalidInputException("Message does not exist"));
         EntityUtil.merge(existing, message);
-        return messageRepos.save(message);
+        return messageRepos.save(existing);
     }
 
     @Override

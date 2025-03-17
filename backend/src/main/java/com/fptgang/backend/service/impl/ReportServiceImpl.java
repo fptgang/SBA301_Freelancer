@@ -51,7 +51,7 @@ public class ReportServiceImpl implements ReportService {
         Report existing = reportRepos.findById(report.getReportId())
                 .orElseThrow(() -> new IllegalArgumentException("Report does not exist"));
         EntityUtil.merge(existing, report);
-        return reportRepos.save(report);
+        return reportRepos.save(existing);
     }
 
     @Override

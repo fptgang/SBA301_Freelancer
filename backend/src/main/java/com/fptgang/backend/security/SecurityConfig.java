@@ -76,7 +76,8 @@ public class SecurityConfig {
                                      "/api/v1/auth/**",
                                      "/api/v1/mail/**",
                                      "/api/v1/projects/**",
-                                     "/api/v1/project-categories/**")
+                                     "/api/v1/project-categories/**",
+                                    "/hirable-ws")
                              .permitAll()
                              .anyRequest()
                              .authenticated();

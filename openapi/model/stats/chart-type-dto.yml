@@ -1,0 +1,5 @@
+ChartTypeDto:
+  type: string
+  enum: [line, bar, pie]
+  default: line
+  description: Chart type to display data
