@@ -11,7 +11,7 @@ import {
   Button,
   Tooltip,
 } from "antd";
-import { Line, Bar, Pie } from "@ant-design/plots";
+import { Line, Bar } from "@ant-design/plots";
 import dayjs from "dayjs";
 import {
   StringBigDecimalDatapointDto,
@@ -19,11 +19,8 @@ import {
   TransactionStatDto,
 } from "../../../../generated";
 import api from "../../../services/api/openapi-config";
-import {
-  BarChartOutlined,
-  LineChartOutlined,
-  PieChartOutlined,
-} from "@ant-design/icons";
+import { BarChartOutlined, LineChartOutlined } from "@ant-design/icons";
+import { color } from "framer-motion";
 
 const { Title, Text } = Typography;
 const { RangePicker } = DatePicker;
@@ -251,6 +248,22 @@ const AdminDashboard: React.FC = () => {
           duration: 1000,
         },
       },
+      point: {
+        shapeField: "square",
+        sizeField: 4,
+      },
+      interaction: {
+        tooltip: {
+          marker: false,
+        },
+      },
+      style: {
+        lineWidth: 3,
+      },
+      sizeField: "value",
+      // size: [10, 20],
+      colorField: "type",
+      color: ["#1890FF", "#13C2C2", "#2FC25B", "#FACC14", "#F0483E"],
     };
 
     return chartType === "line" ? <Line {...config} /> : <Bar {...config} />;

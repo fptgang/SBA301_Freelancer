@@ -40,7 +40,7 @@ public class StatsReposImpl implements StatsRepos {
                 jpql = """
                         SELECT NEW com.fptgang.backend.model.stats.TransactionStat(
                             MIN(CONCAT(CAST(YEAR(t.createdAt) AS string), '-', LPAD(CAST(MONTH(t.createdAt) AS string), 2, '0'), '-', LPAD(CAST(DAY(t.createdAt) AS string), 2, '0'))),
-                            CAST(SUM(CASE WHEN t.status='SUCCESSFUL' THEN 1 ELSE 0 END) AS integer),
+                            CAST(SUM(CASE WHEN t.status='SUCCESS' THEN 1 ELSE 0 END) AS integer),
                             CAST(SUM(CASE WHEN t.status='PENDING' THEN 1 ELSE 0 END) AS integer),
                             CAST(SUM(CASE WHEN t.status='FAILED' THEN 1 ELSE 0 END) AS integer)
                         )
@@ -54,7 +54,7 @@ public class StatsReposImpl implements StatsRepos {
                 jpql = """
                         SELECT NEW com.fptgang.backend.model.stats.TransactionStat(
                             MIN(CONCAT(CAST(YEAR(t.createdAt) AS string), '-W', LPAD(CAST(WEEK(t.createdAt) AS string), 2, '0'))),
-                            CAST(SUM(CASE WHEN t.status='SUCCESSFUL' THEN 1 ELSE 0 END) AS integer),
+                            CAST(SUM(CASE WHEN t.status='SUCCESS' THEN 1 ELSE 0 END) AS integer),
                             CAST(SUM(CASE WHEN t.status='PENDING' THEN 1 ELSE 0 END) AS integer),
                             CAST(SUM(CASE WHEN t.status='FAILED' THEN 1 ELSE 0 END) AS integer)
                         )
@@ -68,7 +68,7 @@ public class StatsReposImpl implements StatsRepos {
                 jpql = """
                         SELECT NEW com.fptgang.backend.model.stats.TransactionStat(
                             MIN(CONCAT(CAST(YEAR(t.createdAt) AS string), '-', LPAD(CAST(MONTH(t.createdAt) AS string), 2, '0'))),
-                            CAST(SUM(CASE WHEN t.status='SUCCESSFUL' THEN 1 ELSE 0 END) AS integer),
+                            CAST(SUM(CASE WHEN t.status='SUCCESS' THEN 1 ELSE 0 END) AS integer),
                             CAST(SUM(CASE WHEN t.status='PENDING' THEN 1 ELSE 0 END) AS integer),
                             CAST(SUM(CASE WHEN t.status='FAILED' THEN 1 ELSE 0 END) AS integer)
                         )
