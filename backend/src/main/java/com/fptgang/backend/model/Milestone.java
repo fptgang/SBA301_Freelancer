@@ -8,11 +8,14 @@ import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 
 @Entity
 @Table(name = "milestones")
@@ -27,6 +30,8 @@ public class Milestone {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "project_id", nullable = false)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private Project project;
 
     @Column(columnDefinition = "NVARCHAR(255)", length = 255, nullable = false)
@@ -66,12 +71,14 @@ public class Milestone {
     @OneToMany(mappedBy = "milestone", fetch = FetchType.LAZY)
     @Builder.Default
     @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private List<File> deliverables = new ArrayList<>();
 
     // A milestone can have up to 2 transactions
     @OneToMany(mappedBy = "milestone", cascade = CascadeType.ALL)
     @Builder.Default
     @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private List<Transaction> transactions = new ArrayList<>();
 
     public enum MilestoneStatus {
@@ -92,4 +99,63 @@ public class Milestone {
         RELEASED,
         REFUNDED
     }
+
+    @Nullable
+    public Account getFreelancer() {
+        if (getProject().getContract() == null)
+            return null;
+        return getProject().getContract().getFreelancer();
+    }
+
+    @NotNull
+    public Account requireFreelancer() {
+        if (getProject().getContract() == null)
+            throw new IllegalStateException("Contract does not exist");
+        return getProject().getContract().getFreelancer();
+    }
+
+    @Nullable
+    public BigDecimal getContractualBudget() {
+        if (getProject().getContract() == null)
+            return null;
+        return getProject().getContract().getBudget().multiply(budgetRatio);
+    }
+
+    @NotNull
+    public BigDecimal requireContractualBudget() {
+        if (getProject().getContract() == null)
+            throw new IllegalStateException("Contract does not exist");
+        return getProject().getContract().getBudget().multiply(budgetRatio);
+    }
+
+    @Nullable
+    public Milestone getNextVisibleMilestone() {
+        List<Milestone> visibleMilestones = getProject().getMilestones().stream()
+                .filter(Milestone::getIsVisible)
+                .toList();
+
+        for (int i = 0; i < visibleMilestones.size() - 1; i++) {
+            if (visibleMilestones.get(i).getMilestoneId().equals(getMilestoneId())) {
+                return visibleMilestones.get(i + 1);
+            }
+        }
+
+        return null;
+    }
+
+    @Nullable
+    public Milestone getPrevVisibleMilestone() {
+        List<Milestone> visibleMilestones = getProject().getMilestones().stream()
+                .filter(Milestone::getIsVisible)
+                .toList();
+
+        for (int i = 1; i < visibleMilestones.size(); i++) {
+            if (visibleMilestones.get(i).getMilestoneId().equals(getMilestoneId())) {
+                return visibleMilestones.get(i - 1);
+            }
+        }
+
+        return null;
+    }
+
 }

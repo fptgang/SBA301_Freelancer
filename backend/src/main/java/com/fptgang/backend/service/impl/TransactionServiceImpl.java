@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.Objects;
 
 @Slf4j
 @Service
@@ -98,8 +99,7 @@ public class TransactionServiceImpl implements TransactionService {
             throw new IllegalStateException("Contract does not exist");
         var from = milestone.getProject().getClient();
         var to = accountService.getEscrowAccountReference();
-        var fund = milestone.getProject().getContract()
-                .getBudget().multiply(milestone.getBudgetRatio());
+        var fund = milestone.requireContractualBudget();
         milestone.setFundStatus(Milestone.FundStatus.DEPOSITED);
         return create(Transaction.builder()
                 .fromAccount(from)
@@ -124,9 +124,8 @@ public class TransactionServiceImpl implements TransactionService {
                 throw new IllegalArgumentException("Escrow deposit already exists on milestone");
             }
             var from = accountService.getEscrowAccountReference();
-            var to = milestone.getProject().getContract().getFreelancer();
-            var fund = milestone.getProject().getContract()
-                    .getBudget().multiply(milestone.getBudgetRatio());
+            var to = milestone.requireFreelancer();
+            var fund = milestone.requireContractualBudget();
             milestone.setFundStatus(Milestone.FundStatus.RELEASED);
             return create(Transaction.builder()
                     .fromAccount(from)
@@ -156,8 +155,7 @@ public class TransactionServiceImpl implements TransactionService {
             }
             var from = accountService.getEscrowAccountReference();
             var to = milestone.getProject().getClient();
-            var fund = milestone.getProject().getContract()
-                    .getBudget().multiply(milestone.getBudgetRatio());
+            var fund = milestone.requireContractualBudget();
             milestone.setFundStatus(Milestone.FundStatus.REFUNDED);
             return create(Transaction.builder()
                     .fromAccount(from)

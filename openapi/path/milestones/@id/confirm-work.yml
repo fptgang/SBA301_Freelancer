@@ -1,4 +1,4 @@
-put:
+post:
   summary: Confirm the work
   operationId: confirmMilestoneWork
   security:

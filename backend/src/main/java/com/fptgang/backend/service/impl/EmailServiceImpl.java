@@ -39,7 +39,7 @@ public class EmailServiceImpl implements EmailService {
     private Resource milestoneStartedTemplate;
     @Value("classpath:template/MilestoneCompletedEmailTemplate.html")
     private Resource milestoneCompletedTemplate;
-    @Value("classpath:template/MilestoneFundEmailTemplate.html")
+    @Value("classpath:template/MilestoneFundRefundedEmailTemplate.html")
     private Resource milestoneFundTemplate;
     @Value("classpath:template/ProjectEmailTemplate.html")
     private Resource projectCompletedTemplate;
@@ -47,6 +47,8 @@ public class EmailServiceImpl implements EmailService {
     private Resource reportEmailTemplate;
     @Value("classpath:template/TransactionDepositEmailTemplate.html")
     private Resource transactionEmailTemplate;
+    @Value("classpath:template/MilestoneFundReleasedEmailTemplate.html")
+    private Resource milestoneReleasedEmailTemplate;
 
     private final ResetPasswordEmailTemplateMapper resetPasswordEmailTemplateMapper;
     private final ContractCreatedEmailTemplateMapper contractCreatedEmailTemplateMapper;
@@ -58,8 +60,9 @@ public class EmailServiceImpl implements EmailService {
     private final ProjectEmailTemplateMapper projectEmailTemplateMapper;
     private final ReportEmailTemplateMapper reportEmailTemplateMapper;
     private final TransactionDepositEmailTemplateMapper transactionDepositEmailTemplateMapper;
+    private final MilestoneReleasedEmailTemplateMapper milestoneReleasedEmailTemplateMapper;
 
-    public EmailServiceImpl(ContractCreatedEmailTemplateMapper contractCreatedEmailTemplateMapper, ProposalRejectedEmailTemplateMapper proposalRejectedEmailTemplateMapper, ResetPasswordEmailTemplateMapper resetPasswordEmailTemplateMapper, ContractSignedEmailTemplateMapper contractSignedEmailTemplateMapper, MilestoneStartedEmailTemplateMapper milestoneStartedEmailTemplateMapper, MilestoneCompletedEmailTemplateMapper milestoneCompletedEmailTemplateMapper, MilestoneFundEmailTemplateMapper milestoneFundEmailTemplateMapper, ProjectEmailTemplateMapper projectEmailTemplateMapper, ReportEmailTemplateMapper reportEmailTemplateMapper, TransactionDepositEmailTemplateMapper transactionDepositEmailTemplateMapper) {
+    public EmailServiceImpl(ContractCreatedEmailTemplateMapper contractCreatedEmailTemplateMapper, ProposalRejectedEmailTemplateMapper proposalRejectedEmailTemplateMapper, ResetPasswordEmailTemplateMapper resetPasswordEmailTemplateMapper, ContractSignedEmailTemplateMapper contractSignedEmailTemplateMapper, MilestoneStartedEmailTemplateMapper milestoneStartedEmailTemplateMapper, MilestoneCompletedEmailTemplateMapper milestoneCompletedEmailTemplateMapper, MilestoneFundEmailTemplateMapper milestoneFundEmailTemplateMapper, ProjectEmailTemplateMapper projectEmailTemplateMapper, ReportEmailTemplateMapper reportEmailTemplateMapper, TransactionDepositEmailTemplateMapper transactionDepositEmailTemplateMapper, MilestoneReleasedEmailTemplateMapper milestoneReleasedEmailTemplateMapper) {
         this.contractCreatedEmailTemplateMapper = contractCreatedEmailTemplateMapper;
         this.proposalRejectedEmailTemplateMapper = proposalRejectedEmailTemplateMapper;
         this.resetPasswordEmailTemplateMapper = resetPasswordEmailTemplateMapper;
@@ -70,6 +73,7 @@ public class EmailServiceImpl implements EmailService {
         this.projectEmailTemplateMapper = projectEmailTemplateMapper;
         this.reportEmailTemplateMapper = reportEmailTemplateMapper;
         this.transactionDepositEmailTemplateMapper = transactionDepositEmailTemplateMapper;
+        this.milestoneReleasedEmailTemplateMapper = milestoneReleasedEmailTemplateMapper;
     }
 
     @Override
@@ -182,14 +186,14 @@ public class EmailServiceImpl implements EmailService {
             throw new IllegalArgumentException("Milestone is missing.");
         }
 
-        log.info("Preparing send milestone started for: {}", milestone.getProject().getContract().getFreelancer().getEmail());
+        log.info("Preparing send milestone started for: {}", milestone.requireFreelancer().getEmail());
 
         var template = milestoneStartedTemplate.getContentAsString(StandardCharsets.UTF_8);
         var data = milestoneStartedEmailTemplateMapper.create(milestone);
         String subject = "Started Milestone To Freelancer";
         String content = TemplateUtil.render(milestoneStartedTemplate.getFilename(),template,data);
 
-        sendMail(emailFrom, milestone.getProject().getContract().getFreelancer().getEmail(), subject, content);
+        sendMail(emailFrom, milestone.requireFreelancer().getEmail(), subject, content);
     }
 
     @Override
@@ -230,14 +234,14 @@ public class EmailServiceImpl implements EmailService {
             throw new IllegalArgumentException("Milestone is missing.");
         }
 
-        log.info("Preparing send milestone completed for: {}", milestone.getProject().getContract().getFreelancer().getEmail());
+        log.info("Preparing send milestone completed for: {}", milestone.requireFreelancer().getEmail());
 
         var template = milestoneCompletedTemplate.getContentAsString(StandardCharsets.UTF_8);
         var data = milestoneCompletedEmailTemplateMapper.create(milestone);
         String subject = "Completed Milestone To Freelancer";
         String content = TemplateUtil.render(milestoneCompletedTemplate.getFilename(),template,data);
 
-        sendMail(emailFrom, milestone.getProject().getContract().getFreelancer().getEmail(), subject, content);
+        sendMail(emailFrom, milestone.requireFreelancer().getEmail(), subject, content);
     }
 
     @Override
@@ -249,14 +253,14 @@ public class EmailServiceImpl implements EmailService {
             log.info("Milestone fund status is not valid for client notification: {}", milestone.getFundStatus());
             return;
         }
-        log.info("Preparing send milestone released for: {}", milestone.getProject().getContract().getFreelancer().getEmail());
+        log.info("Preparing send milestone released for: {}", milestone.requireFreelancer().getEmail());
 
-        var template = milestoneFundTemplate.getContentAsString(StandardCharsets.UTF_8);
+        var template = milestoneReleasedEmailTemplate.getContentAsString(StandardCharsets.UTF_8);
         var data = milestoneFundEmailTemplateMapper.create(milestone);
         String subject = "Milestone Fund Released";
-        String content = TemplateUtil.render(milestoneFundTemplate.getFilename(),template,data);
+        String content = TemplateUtil.render(milestoneReleasedEmailTemplate.getFilename(),template,data);
 
-        sendMail(emailFrom, milestone.getProject().getContract().getFreelancer().getEmail(), subject, content);
+        sendMail(emailFrom, milestone.requireFreelancer().getEmail(), subject, content);
     }
 
     @Override
@@ -316,7 +320,7 @@ public class EmailServiceImpl implements EmailService {
         if (report.getReportId() == null) {
             throw new IllegalArgumentException("Project is missing.");
         }
-        log.info("Preparing to send Report completed both to client,freelancer: {} ,{}", report.getProject().getClient().getEmail(),report.getProject().getContract().getFreelancer().getEmail());
+        log.info("Preparing to send Report completed both to client,freelancer: {} ,{}", report.getProject().getClient().getEmail(),report.requireFreelancer().getEmail());
 
         var template = reportEmailTemplate.getContentAsString(StandardCharsets.UTF_8);
         var data = reportEmailTemplateMapper.create(report);
@@ -325,7 +329,7 @@ public class EmailServiceImpl implements EmailService {
         String content = TemplateUtil.render(projectCompletedTemplate.getFilename(), template, data);
 
         sendMail(emailFrom, report.getProject().getClient().getEmail(), subject, content);
-        sendMail(emailFrom, report.getProject().getContract().getFreelancer().getEmail(), subject, content);
+        sendMail(emailFrom, report.requireFreelancer().getEmail(), subject, content);
     }
 
     @Override

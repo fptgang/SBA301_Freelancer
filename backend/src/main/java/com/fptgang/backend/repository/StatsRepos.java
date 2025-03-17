@@ -23,4 +23,5 @@ public interface StatsRepos {
     List<StringIntegerDatapoint> getUserRegistrationsStats(LocalDate startDate, LocalDate endDate, String groupBy);
 
     List<StringIntegerDatapoint> getProjectTerminationRateStats(LocalDate startDate, LocalDate endDate, String groupBy);
+
 }

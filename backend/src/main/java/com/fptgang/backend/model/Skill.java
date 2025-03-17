@@ -40,10 +40,12 @@ public class Skill {
     @OneToMany(mappedBy = "skill", fetch = FetchType.LAZY)
     @Builder.Default
     @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private List<ProjectSkill> projectSkills = new ArrayList<>();
     
     @OneToMany(mappedBy = "skill", fetch = FetchType.LAZY)
     @Builder.Default
     @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private List<ProfileSkill> profileSkills = new ArrayList<>();
 }

@@ -1,5 +1,8 @@
 package com.fptgang.backend.util;
 
+import com.fptgang.backend.model.File;
+import org.springframework.web.multipart.MultipartFile;
+
 import java.util.Base64;
 
 public class FileUtils {

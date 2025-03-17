@@ -3,11 +3,14 @@ package com.fptgang.backend.repository;
 import com.fptgang.backend.model.stats.StringBigDecimalDatapoint;
 import com.fptgang.backend.model.stats.StringIntegerDatapoint;
 import com.fptgang.backend.model.stats.TransactionStat;
+
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
+
 import java.util.List;
 
 @Repository
@@ -15,6 +18,8 @@ public class StatsReposImpl implements StatsRepos {
 
     @PersistenceContext
     private EntityManager entityManager;
+    @Autowired
+    private DateGroupingUtil dateGroupingUtil;
 
     @Override
     public List<StringIntegerDatapoint> getMonthlyNewCustomers() {

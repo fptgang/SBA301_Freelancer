@@ -6,14 +6,17 @@ import com.fptgang.backend.service.AzureBlobService;
 import com.fptgang.backend.service.FileService;
 import com.fptgang.backend.service.params.ListParams;
 import com.fptgang.backend.util.OpenApiHelper;
+import com.google.common.io.Files;
+import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.UUID;
 
 @Service
 @Slf4j
@@ -29,10 +32,26 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
-    public File create(File image, MultipartFile file) {
+    @Transactional
+    public File create(File file, MultipartFile multipartFile) {
+        if (file.getFileName() == null)
+            file.setFileName(multipartFile.getOriginalFilename());
+
+        if (file.getFileName() == null) { // Fallback
+            file.setFileName(UUID.randomUUID().toString());
+        } else { // add a random suffix to avoid duplication
+            file.setFileName(Files.getNameWithoutExtension(file.getFileName()) +
+                    "-" + RandomStringUtils.secure().nextAlphanumeric(6));
+        }
+
+        if (file.getFileType() == null) {
+            file.setFileType(multipartFile.getContentType() == null ? "N/A" : multipartFile.getContentType());
+        }
+
         try {
-            image.setFileUrl(azureBlobService.upload(file, file.getName()));
-            return fileRepos.save(image);
+            String fileUrl = azureBlobService.upload(multipartFile, file.getFileName());
+            file.setFileUrl(fileUrl);
+            return fileRepos.save(file);
         } catch (IOException e) {
             log.error(e.getMessage());
             throw new RuntimeException(e);
@@ -45,12 +64,32 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
-    public File update(File file, MultipartFile blob) {
+    @Transactional
+    public File update(File file, MultipartFile multipartFile) {
         if (file.getFileId() == null) {
             throw new IllegalArgumentException("File does not exist");
         }
+        if (file.getFileName() == null)
+            file.setFileName(multipartFile.getOriginalFilename());
+
+        if (file.getFileName() == null) { // Fallback
+            file.setFileName(UUID.randomUUID().toString());
+        } else { // add a random suffix to avoid duplication
+            file.setFileName(Files.getNameWithoutExtension(file.getFileName()) +
+                    "-" + RandomStringUtils.secure().nextAlphanumeric(6));
+        }
+
+        if (file.getFileType() == null) {
+            file.setFileType(multipartFile.getContentType() == null ? "N/A" : multipartFile.getContentType());
+        }
+
+        if (file.getFileType() == null) {
+            file.setFileType(multipartFile.getContentType() == null ? "N/A" : multipartFile.getContentType());
+        }
+
         try {
-            file.setFileUrl(azureBlobService.upload(blob, blob.getName()));
+            String fileUrl = azureBlobService.upload(multipartFile, file.getFileName());
+            file.setFileUrl(fileUrl);
             return fileRepos.save(file);
         } catch (IOException e) {
             log.error(e.getMessage());

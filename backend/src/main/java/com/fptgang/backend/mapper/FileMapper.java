@@ -80,7 +80,7 @@ public class FileMapper extends BaseMapper<FileDto, File> {
         dto.setMessageId(entity.getMessage() != null ? entity.getMessage().getMessageId() : null);
         dto.setProposalId(entity.getProposal() != null ? entity.getProposal().getProposalId() : null);
         dto.setProjectId(entity.getProject() != null ? entity.getProject().getProjectId() : null);
-        dto.setProposalId(entity.getMilestone() != null ? entity.getMilestone().getMilestoneId() : null);
+        dto.setMilestoneId(entity.getMilestone() != null ? entity.getMilestone().getMilestoneId() : null);
 
         return dto;
     }

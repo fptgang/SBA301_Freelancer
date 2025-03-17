@@ -11,6 +11,7 @@ import com.fptgang.backend.service.*;
 import com.fptgang.backend.service.params.ListParams;
 import com.fptgang.backend.util.OpenApiHelper;
 import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
@@ -18,6 +19,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Service
+@Slf4j
 public class ContractServiceImpl implements ContractService {
 
     private final ContractRepos contractRepos;
@@ -90,7 +92,6 @@ public class ContractServiceImpl implements ContractService {
         Contract contract = contractRepos.findById(contractId)
                 .orElseThrow(() -> new InvalidInputException("Contract does not exist"));
         authContext.requireAccountId(contract.getFreelancer().getAccountId()); // Freelancer operation
-        System.out.println("contract " + contract.getStatus());
 
         if (contract.getStatus() == Contract.ContractStatus.SIGNED) {
             throw new IllegalStateException("Contract is already signed");
@@ -118,6 +119,7 @@ public class ContractServiceImpl implements ContractService {
         project.setActiveMilestone(firstMilestone);
         project.setContract(contract);
         projectRepos.save(project);
+        log.info("Milestone {} started", firstMilestone.getMilestoneId());
 
         return contract;
     }
