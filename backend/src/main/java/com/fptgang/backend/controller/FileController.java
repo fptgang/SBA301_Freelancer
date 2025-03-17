@@ -1,18 +1,13 @@
 package com.fptgang.backend.controller;
 
 import com.fptgang.backend.api.controller.FilesApi;
-import com.fptgang.backend.api.controller.ProfilesApi;
-import com.fptgang.backend.api.model.*;
+import com.fptgang.backend.api.model.FileDto;
 import com.fptgang.backend.mapper.DetailLevel;
 import com.fptgang.backend.mapper.FileMapper;
-import com.fptgang.backend.mapper.ProfileMapper;
 import com.fptgang.backend.model.Account;
-import com.fptgang.backend.model.Role;
+import com.fptgang.backend.model.File;
+import com.fptgang.backend.model.Project;
 import com.fptgang.backend.service.FileService;
-import com.fptgang.backend.service.ProfileService;
-import com.fptgang.backend.service.params.ListParams;
-import com.fptgang.backend.util.OpenApiHelper;
-import com.fptgang.backend.util.SecurityUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -29,21 +24,58 @@ public class FileController implements FilesApi {
     private final FileMapper fileMapper;
 
     @Autowired
-    public FileController(FileService fileService, FileMapper fileMapper) {
+    public FileController(FileService fileService,
+                          FileMapper fileMapper
+    ) {
         this.fileService = fileService;
         this.fileMapper = fileMapper;
     }
 
     @Override
-    public ResponseEntity<FileDto> uploadFile(Long uploaderId, MultipartFile blob,
-                                              Boolean isVisible, Long messageId, Long proposalId, Long projectId, Long milestoneId, Long contractId) {
-        return FilesApi.super.uploadFile(uploaderId, blob, isVisible, messageId, proposalId, projectId, milestoneId, contractId);
+    public ResponseEntity<FileDto> uploadFile(Long uploaderId,
+                                              MultipartFile blob,
+                                              Boolean isVisible,
+                                              Long messageId,
+                                              Long proposalId,
+                                              Long projectId,
+                                              Long milestoneId,
+                                              Long contractId
+    ) {
+        File file = fileService.create(
+                File.builder()
+                    .isVisible(isVisible)
+                    .project(Project.builder()
+                                    .projectId(projectId)
+                                    .build())
+                    .uploader(Account.builder()
+                                     .accountId(uploaderId)
+                                     .build())
+                    .build(),
+                blob
+        );
+        return new ResponseEntity<>(fileMapper.toDTO(file, DetailLevel.FULL), HttpStatus.OK);
     }
 
     @Override
-    public ResponseEntity<FileDto> updateFile(Long fileId, Long uploaderId, MultipartFile blob,
-                                              Boolean isVisible, Long messageId, Long proposalId, Long projectId, Long milestoneId, Long contractId) {
-        return FilesApi.super.updateFile(fileId, uploaderId, blob, isVisible, messageId, proposalId, projectId, milestoneId, contractId);
+    public ResponseEntity<FileDto> updateFile(Long fileId,
+                                              Long uploaderId,
+                                              MultipartFile blob,
+                                              Boolean isVisible,
+                                              Long messageId,
+                                              Long proposalId,
+                                              Long projectId,
+                                              Long milestoneId,
+                                              Long contractId
+    ) {
+        return FilesApi.super.updateFile(fileId,
+                uploaderId,
+                blob,
+                isVisible,
+                messageId,
+                proposalId,
+                projectId,
+                milestoneId,
+                contractId);
     }
 
     @Override
