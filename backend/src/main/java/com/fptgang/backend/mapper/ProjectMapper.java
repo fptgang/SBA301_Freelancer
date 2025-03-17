@@ -97,6 +97,8 @@ public class ProjectMapper extends BaseMapper<ProjectDto, Project> {
         if (dto.getContract() != null && dto.getContract().getContractId() != null) {
             entity.setContract(contractRepos.getReferenceById(dto.getContract().getContractId()));
         }
+        if (dto.getActiveMilestone() != null && dto.getActiveMilestone().getMilestoneId() != null)
+            entity.setActiveMilestone(milestoneRepos.getReferenceById(dto.getActiveMilestone().getMilestoneId()));
         if (dto.getMilestones() != null) {
             entity.setMilestones(dto.getMilestones().stream()
                     .filter(e -> e.getMilestoneId() != null)
@@ -145,6 +147,7 @@ public class ProjectMapper extends BaseMapper<ProjectDto, Project> {
         dto.setMilestones(entity.getMilestones().stream()
                 .map(milestone -> milestoneMapper.toDTO(milestone, DetailLevel.FULL))
                 .collect(Collectors.toList()));
+        dto.setActiveMilestone(milestoneMapper.toDTO(entity.getActiveMilestone(), DetailLevel.FULL));
         dto.setRequiredSkills(entity.getRequiredSkills().stream()
                 .map(skill -> projectSkillMapper.toDTO(skill, DetailLevel.FULL))
                 .collect(Collectors.toList()));

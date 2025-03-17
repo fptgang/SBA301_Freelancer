@@ -47,6 +47,8 @@ ProjectDto:
       type: array
       items:
         $ref: 'milestone.yml#/MilestoneDto'
+    activeMilestone:
+      $ref: 'milestone.yml#/MilestoneDto'
     requiredSkills:
       type: array
       items:

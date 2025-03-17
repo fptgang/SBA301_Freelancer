@@ -2,10 +2,7 @@ package com.fptgang.backend.model;
 
 import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.math.BigDecimal;
@@ -24,16 +21,19 @@ public class Transaction {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "from_account_id")
+    @ToString.Exclude
     @Nullable
     private Account fromAccount;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "to_account_id")
+    @ToString.Exclude
     @Nullable
     private Account toAccount;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "milestone_id")
+    @ToString.Exclude
     @Nullable
     private Milestone milestone;
 
