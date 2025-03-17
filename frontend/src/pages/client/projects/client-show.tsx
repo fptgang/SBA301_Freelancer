@@ -53,6 +53,7 @@ import { ProjectDto } from "../../../../generated/models/ProjectDto";
 import { ProposalDto } from "../../../../generated/models/ProposalDto";
 import { store } from "../../../store";
 import ContractCreateButton from "./contract-create";
+import ClientProjectEditButton from "./client-edit";
 
 const { Title, Text, Paragraph } = Typography;
 const { Step } = Steps;
@@ -126,7 +127,6 @@ const ClientProjectShow: React.FC = () => {
 
   // Handle rejecting a proposal
   const handleRejectProposal = async (proposalId: number) => {
-    // Implementation would go here to reject a proposal
     try {
       rejectProposal({
         url: `proposals/${proposalId}/reject`,
@@ -145,15 +145,36 @@ const ClientProjectShow: React.FC = () => {
           };
         },
       });
-      // open?.({
-      //   type: "success",
-      //   message: "Proposal rejected",
-      // });
       projectQueryResult.refetch();
     } catch (error) {
       open?.({
         type: "error",
         message: "Failed to reject proposal",
+      });
+    }
+  };
+
+  // Handle terminating a project
+  const handleTerminateProject = async () => {
+    try {
+      await fetch(`${useApiUrl()}/projects/${project?.projectId}/terminate`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${store.getState().auth.accessToken}`,
+        },
+      });
+      
+      open?.({
+        type: "success",
+        message: "Project closed successfully",
+      });
+      
+      projectQueryResult.refetch();
+    } catch (error) {
+      open?.({
+        type: "error",
+        message: "Failed to close project",
       });
     }
   };
@@ -227,16 +248,30 @@ const ClientProjectShow: React.FC = () => {
               >
                 Back
               </Button>
+              
+              {/* Add Edit Button Here */}
               {project.status === "OPEN" && (
-                <Button
-                  type="primary"
-                  danger
-                  onClick={() => {
-                    // Logic to close project
-                  }}
+                <ClientProjectEditButton 
+                  project={project} 
+                  onSuccess={projectQueryResult.refetch}
+                />
+              )}
+              
+              {project.status === "OPEN" && (
+                <Popconfirm
+                  title="Are you sure you want to close this project?"
+                  onConfirm={handleTerminateProject}
+                  okText="Yes"
+                  cancelText="No"
+                  placement="bottomRight"
                 >
-                  Close Project
-                </Button>
+                  <Button
+                    type="primary"
+                    danger
+                  >
+                    Close Project
+                  </Button>
+                </Popconfirm>
               )}
             </div>
           </div>
@@ -268,7 +303,7 @@ const ClientProjectShow: React.FC = () => {
 
         {/* Project Stats */}
         <Row gutter={16} className="mb-6">
-          <Col xs={24} sm={12} md={8}>
+          <Col xs={24} sm={12} md={6}>
             <Card className="h-full shadow-sm">
               <Statistic
                 title="Proposals Received"
@@ -279,7 +314,7 @@ const ClientProjectShow: React.FC = () => {
               />
             </Card>
           </Col>
-          <Col xs={24} sm={12} md={8}>
+          <Col xs={24} sm={12} md={6}>
             <Card className="h-full shadow-sm">
               <Statistic
                 title="Created On"
@@ -297,13 +332,32 @@ const ClientProjectShow: React.FC = () => {
               />
             </Card>
           </Col>
-          <Col xs={24} md={8}>
+          <Col xs={24} sm={12} md={6}>
             <Card className="h-full shadow-sm">
               <Statistic
-                title="Project ID"
-                value={`#${project.projectId}`}
-                valueStyle={{ fontSize: "18px" }}
-                prefix={<ProjectOutlined />}
+                title="Budget Range"
+                value={`$${project.minBudget} - $${project.maxBudget}`}
+                valueStyle={{ fontSize: "16px" }}
+                prefix={<DollarOutlined />}
+                className="text-center"
+              />
+            </Card>
+          </Col>
+          <Col xs={24} sm={12} md={6}>
+            <Card className="h-full shadow-sm">
+              <Statistic
+                title="Start Date"
+                value={
+                  project.startDate
+                    ? new Date(project.startDate).toLocaleDateString("en-US", {
+                        month: "short",
+                        day: "numeric",
+                        year: "numeric",
+                      })
+                    : "N/A"
+                }
+                valueStyle={{ fontSize: "16px" }}
+                prefix={<CalendarOutlined />}
                 className="text-center"
               />
             </Card>
@@ -356,6 +410,51 @@ const ClientProjectShow: React.FC = () => {
                     No specific skills required
                   </Text>
                 )}
+                
+                <Divider />
+                
+                <Title level={5} className="text-blue-600">
+                  Milestones
+                </Title>
+                {project.milestones && project.milestones.length > 0 ? (
+                  <List
+                    itemLayout="horizontal"
+                    dataSource={project.milestones}
+                    renderItem={(milestone, index) => (
+                      <List.Item>
+                        <List.Item.Meta
+                          avatar={
+                            <Avatar size="large">
+                              {index + 1}
+                            </Avatar>
+                          }
+                          title={
+                            <div className="flex justify-between">
+                              <span>{milestone.title}</span>
+                              <span>
+                                Budget: {(milestone.budgetRatio * 100).toFixed(0)}%
+                              </span>
+                            </div>
+                          }
+                          description={
+                            <div>
+                              <div>{milestone.description}</div>
+                              <div className="mt-1">
+                                <CalendarOutlined /> Deadline: {
+                                  new Date(milestone.deadline).toLocaleDateString()
+                                }
+                              </div>
+                            </div>
+                          }
+                        />
+                      </List.Item>
+                    )}
+                  />
+                ) : (
+                  <Text type="secondary" className="italic">
+                    No milestones defined
+                  </Text>
+                )}
               </div>
             </TabPane>
 
@@ -403,14 +502,6 @@ const ClientProjectShow: React.FC = () => {
                                 >
                                   <Button danger>Reject Proposal</Button>
                                 </Popconfirm>
-                                {/* <Popconfirm
-                                  title="Are you sure you want to accept this proposal?"
-                                  onConfirm={() =>
-                                    handleAcceptProposal(proposal.proposalId)
-                                  }
-                                  okText="Yes"
-                                  cancelText="No"
-                                > */}
                                 <ContractCreateButton
                                   proposalId={proposal.proposalId || 0}
                                   projectTitle={project.title || ""}
@@ -425,7 +516,6 @@ const ClientProjectShow: React.FC = () => {
                                   }
                                   onSubmit={projectQueryResult.refetch}
                                 />
-                                {/* </Popconfirm> */}
                               </div>,
                             ]
                           : []
@@ -437,28 +527,36 @@ const ClientProjectShow: React.FC = () => {
                             icon={<UserOutlined />}
                             size={64}
                             className="bg-blue-500"
+                            src={proposal.freelancer?.avatarUrl}
                           />
                         }
                         title={
                           <div className="flex justify-between items-center">
                             <Text strong className="text-lg">
-                              Freelancer #{proposal.freelancerId}
+                              {proposal.freelancer ? 
+                                `${proposal.freelancer.firstName} ${proposal.freelancer.lastName}` : 
+                                `Freelancer #${proposal.freelancerId}`}
                             </Text>
-                            <Badge
-                              status={
-                                proposal.status === "ACCEPTED"
-                                  ? "success"
-                                  : proposal.status === "REJECTED"
-                                  ? "error"
-                                  : "processing"
-                              }
-                              text={
-                                <span className="font-medium">
-                                  {proposal.status}
-                                </span>
-                              }
-                              className="px-3 py-1"
-                            />
+                            <div className="flex items-center">
+                              <Tag color="blue">
+                                Budget: ${proposal.budget}
+                              </Tag>
+                              <Badge
+                                status={
+                                  proposal.status === "ACCEPTED"
+                                    ? "success"
+                                    : proposal.status === "REJECTED"
+                                    ? "error"
+                                    : "processing"
+                                }
+                                text={
+                                  <span className="font-medium">
+                                    {proposal.status}
+                                  </span>
+                                }
+                                className="ml-2"
+                              />
+                            </div>
                           </div>
                         }
                         description={
@@ -497,6 +595,31 @@ const ClientProjectShow: React.FC = () => {
                           {proposal.notes}
                         </Paragraph>
                       </div>
+                      
+                      {proposal.files && proposal.files.length > 0 && (
+                        <div className="mt-4">
+                          <Title level={5} className="text-gray-700">
+                            Attachments
+                          </Title>
+                          <List
+                            size="small"
+                            dataSource={proposal.files}
+                            renderItem={(file) => (
+                              <List.Item>
+                                <a 
+                                  href={file.fileUrl} 
+                                  target="_blank" 
+                                  rel="noopener noreferrer"
+                                  className="flex items-center text-blue-500 hover:text-blue-700"
+                                >
+                                  <FileTextOutlined className="mr-2" />
+                                  {file.fileName}
+                                </a>
+                              </List.Item>
+                            )}
+                          />
+                        </div>
+                      )}
                     </List.Item>
                   )}
                 />
@@ -511,25 +634,75 @@ const ClientProjectShow: React.FC = () => {
               }
               key="milestones"
             >
-              <div className="py-8 text-center">
-                <Empty
-                  description={
-                    <span className="text-gray-500">
-                      No milestones created yet for this project
-                    </span>
-                  }
-                />
-                {/* Add Milestone button would go here for active projects */}
-                {project.status === "IN_PROGRESS" && (
-                  <Button
-                    type="primary"
-                    icon={<PlusOutlined />}
-                    className="mt-4"
-                  >
-                    Create Milestone
-                  </Button>
-                )}
-              </div>
+              {project.milestones && project.milestones.length > 0 ? (
+                <Timeline className="mt-4 px-4">
+                  {project.milestones.map((milestone, index) => (
+                    <Timeline.Item 
+                      key={milestone.milestoneId || index}
+                      color={
+                        milestone.status === "FINISHED" ? "green" : 
+                        milestone.status === "IN_PROGRESS" ? "blue" : 
+                        milestone.status === "REVIEWING" ? "orange" : "gray"
+                      }
+                    >
+                      <Card className="mb-4">
+                        <Row>
+                          <Col span={18}>
+                            <Title level={5}>{milestone.title}</Title>
+                            <Paragraph>{milestone.description}</Paragraph>
+                            <div className="flex gap-4 mt-2">
+                              <Tag color="blue">
+                                Budget: {(milestone.budgetRatio * 100).toFixed(0)}%
+                              </Tag>
+                              <Text type="secondary">
+                                <CalendarOutlined className="mr-1" />
+                                Deadline: {new Date(milestone.deadline).toLocaleDateString()}
+                              </Text>
+                              {milestone.status && (
+                                <Tag 
+                                  color={
+                                    milestone.status === "FINISHED" ? "green" : 
+                                    milestone.status === "IN_PROGRESS" ? "blue" : 
+                                    milestone.status === "REVIEWING" ? "orange" : "default"
+                                  }
+                                >
+                                  {milestone.status}
+                                </Tag>
+                              )}
+                            </div>
+                          </Col>
+                          <Col span={6} className="flex justify-end">
+                            {milestone.status === "REVIEWING" && (
+                              <Button type="primary">
+                                Confirm Completion
+                              </Button>
+                            )}
+                          </Col>
+                        </Row>
+                      </Card>
+                    </Timeline.Item>
+                  ))}
+                </Timeline>
+              ) : (
+                <div className="py-8 text-center">
+                  <Empty
+                    description={
+                      <span className="text-gray-500">
+                        No milestones created yet for this project
+                      </span>
+                    }
+                  />
+                  {project.status === "IN_PROGRESS" && (
+                    <Button
+                      type="primary"
+                      icon={<PlusOutlined />}
+                      className="mt-4"
+                    >
+                      Create Milestone
+                    </Button>
+                  )}
+                </div>
+              )}
             </TabPane>
           </Tabs>
         </Card>
