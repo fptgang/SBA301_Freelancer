@@ -11,7 +11,7 @@ import java.math.BigDecimal;
 import java.util.Map;
 
 @RestController
-@RequestMapping("api/v1")
+@RequestMapping("api/currencies")
 public class CurrencyController {
     private final CurrencyExchangeService currencyExchangeService;
 
