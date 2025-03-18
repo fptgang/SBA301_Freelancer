@@ -5,9 +5,27 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="d21bfcd3-12cd-4298-bc9e-f7b2eb78a303" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/model/auth/change-password.yml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/model/request/avatar.yml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/path/auth/change-password.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/com/fptgang/backend/controller/AccountController.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/com/fptgang/backend/controller/AccountController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/com/fptgang/backend/controller/AuthController.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/com/fptgang/backend/controller/AuthController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/com/fptgang/backend/service/AuthService.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/com/fptgang/backend/service/AuthService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/com/fptgang/backend/service/impl/AuthServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/com/fptgang/backend/service/impl/AuthServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../frontend/src/App.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/src/App.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../frontend/src/components/common/buttons/profile-dropdown-button.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/src/components/common/buttons/profile-dropdown-button.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../frontend/src/layouts/freelancer-layout.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/src/layouts/freelancer-layout.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../frontend/src/layouts/message-layout.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/src/layouts/message-layout.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../frontend/src/layouts/settings-layout.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/src/layouts/settings-layout.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../frontend/src/layouts/wallet-layout.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/src/layouts/wallet-layout.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../frontend/src/pages/shared/setting/account.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/src/pages/shared/setting/account.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../frontend/src/pages/shared/setting/security.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/src/pages/shared/setting/security.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../frontend/src/pages/shared/wallet/components/history.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/src/pages/shared/wallet/components/history.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../frontend/src/pages/shared/wallet/deposit.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/src/pages/shared/wallet/deposit.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../frontend/src/pages/shared/wallet/index.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/src/pages/shared/wallet/index.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.yml" beforeDir="false" afterPath="$PROJECT_DIR$/main.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/path/entityFile-fileId.yml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/path/accounts/index.yml" beforeDir="false" afterPath="$PROJECT_DIR$/path/accounts/index.yml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -40,22 +58,25 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;com.codeium.enabled&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;Frontend/FixAPIIssue&quot;,
-    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/Users/vidz/Documents/GitHub/SBA301_Freelancer/openapi&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "com.codeium.enabled": "true",
+    "git-widget-placeholder": "Feature/Phuc__FreelancerProfile",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "D:/GitHub/SBA301_Freelancer/openapi/model/request",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="D:\GitHub\SBA301_Freelancer\openapi\model\request" />
+    </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="C:\Users\phucx\OneDrive\Documents\GitHub\SBA301_Freelancer\openapi\path" />
     </key>

@@ -5,71 +5,21 @@ import {
   TransactionStatusDto,
   TransactionTypeDto,
 } from "../../../../../generated";
-
-const CURRENT_USER_ID = 0;
-
-// Sample transaction data
-const transactions: TransactionDto[] = [
-  {
-    transactionId: 1,
-    fromAccount: {
-      accountId: 1,
-      firstName: "John",
-      lastName: "Doe",
-    },
-    toAccount: {
-      accountId: 2,
-      firstName: "Jane",
-      lastName: "Doe",
-    },
-    amount: 100.0,
-    type: TransactionTypeDto.Withdrawal,
-    status: TransactionStatusDto.Success,
-    createdAt: new Date("2024-03-20T10:00:00Z"),
-  },
-  {
-    transactionId: 2,
-    fromAccount: {
-      accountId: 1,
-      firstName: "John",
-      lastName: "Doe",
-    },
-    toAccount: {
-      accountId: 2,
-      firstName: "Jane",
-      lastName: "Doe",
-    },
-    amount: 250.0,
-    type: TransactionTypeDto.Deposit,
-    status: TransactionStatusDto.Success,
-    createdAt: new Date("2024-03-19T15:30:00Z"),
-  },
-  {
-    transactionId: 3,
-    fromAccount: {
-      accountId: 1,
-      firstName: "John",
-      lastName: "Doe",
-    },
-    toAccount: {
-      accountId: 2,
-      firstName: "Jane",
-      lastName: "Doe",
-    },
-    amount: 500.0,
-    type: TransactionTypeDto.EscrowDeposit,
-    status: TransactionStatusDto.Success,
-    createdAt: new Date("2024-03-18T09:15:00Z"),
-  },
-];
+import { useList } from "@refinedev/core";
+import { store } from "../../../../store";
 
 const TransactionHistoryTable: React.FC = () => {
+  const CURRENT_USER_ID = store.getState().auth.account?.accountId || 0;
+  const { data } = useList<TransactionDto>({
+    resource: "transactions",
+  });
+  const transactions = data?.data || [];
   const columns: ColumnsType<TransactionDto> = [
     {
       title: "Date",
       dataIndex: "createdAt",
       key: "createdAt",
-      render: (date: Date) => date.toLocaleDateString(),
+      render: (date: string) => new Date(date).toLocaleDateString(),
     },
     {
       title: "Type",

@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.Duration;
+import java.util.Objects;
 import java.util.UUID;
 
 @RestController
@@ -116,6 +117,19 @@ public class AuthController implements AuthApi {
         authService.logout(email, getFingerprint());
         return ResponseEntity.ok().build();
     }
+
+    @Override
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<Void> changePassword(ChangePasswordRequestDto changePasswordRequestDto) {
+        String email = SecurityUtil.requireCurrentUserEmail();
+        if(!Objects.equals(changePasswordRequestDto.getConfirmPassword(), changePasswordRequestDto.getNewPassword())) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
+        authService.changePassword(email, changePasswordRequestDto.getOldPassword(), changePasswordRequestDto.getNewPassword());
+        return ResponseEntity.ok().build();
+    }
+
+
 
     private void attachSessionIdCookie() {
         String sessionId = UUID.randomUUID().toString();

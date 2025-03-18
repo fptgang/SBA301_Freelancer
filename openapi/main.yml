@@ -88,6 +88,8 @@ paths:
     $ref: "path/auth/forgot-password.yml"
   /auth/reset-password:
     $ref: "path/auth/reset-password.yml"
+  /auth/change-password:
+    $ref: "path/auth/change-password.yml"
 
   /accounts:
     $ref: "path/accounts/index.yml"

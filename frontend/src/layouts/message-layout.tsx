@@ -9,7 +9,9 @@ const { Header, Content, Footer } = Layout;
 const MessageLayout: React.FC = () => {
   return (
     <Layout>
-      <NavBar />
+      <Header className="sticky top-0 z-[1] w-full flex items-center bg-inherit">
+        <NavBar />
+      </Header>
       <Content>
         <Outlet />
       </Content>

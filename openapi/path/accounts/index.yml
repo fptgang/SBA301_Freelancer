@@ -2,7 +2,7 @@ get:
   summary: Get a list of accounts
   operationId: getAccounts
   security:
-    - bearerAuth: []
+    - bearerAuth: [ ]
   parameters:
     - $ref: '../../param/pageable.yml#/Pageable'
     - $ref: '../../param/filter.yml#/Filter'
@@ -31,7 +31,7 @@ post:
   summary: Create an account
   operationId: createAccount
   security:
-    - bearerAuth: []
+    - bearerAuth: [ ]
   requestBody:
     description: Account to create
     required: true
@@ -48,6 +48,31 @@ post:
             $ref: '../../model/account.yml#/AccountDto'
     '400':
       description: The operation was failed
+      content:
+        application/json:
+          schema:
+            $ref: '../../component/error.yml#/ErrorResponse'
+put:
+  summary: Update account avatar
+  operationId: updateAccountAvatar
+  security:
+    - bearerAuth: [ ]
+  requestBody:
+    description: File to upload
+    required: true
+    content:
+      multipart/form-data:
+        schema:
+          $ref: '../../model/request/avatar.yml#/AvatarDto'
+  responses:
+    '200':
+      description: The operation was successful
+      content:
+        application/json:
+          schema:
+            $ref: '../../model/account.yml#/AccountDto'
+    '400':
+      description: The operation failed
       content:
         application/json:
           schema:

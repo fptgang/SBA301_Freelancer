@@ -7,8 +7,11 @@ import com.fptgang.backend.api.model.Pageable;
 import com.fptgang.backend.mapper.AccountMapper;
 import com.fptgang.backend.mapper.DetailLevel;
 import com.fptgang.backend.model.Account;
+import com.fptgang.backend.model.File;
+import com.fptgang.backend.model.Project;
 import com.fptgang.backend.model.Role;
 import com.fptgang.backend.service.AccountService;
+import com.fptgang.backend.service.FileService;
 import com.fptgang.backend.service.params.ListParams;
 import com.fptgang.backend.util.OpenApiHelper;
 import com.fptgang.backend.util.SecurityUtil;
@@ -19,6 +22,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 @Slf4j
 @RestController
@@ -27,11 +31,13 @@ public class AccountController implements AccountsApi {
     private final AccountService accountService;
     private final AccountMapper accountMapper;
     private final SimpMessagingTemplate messagingTemplate;
+    private final FileService fileService;
 
-    public AccountController(AccountService accountService, AccountMapper accountMapper, SimpMessagingTemplate messagingTemplate) {
+    public AccountController(AccountService accountService, AccountMapper accountMapper, SimpMessagingTemplate messagingTemplate, FileService fileService) {
         this.accountService = accountService;
         this.accountMapper = accountMapper;
         this.messagingTemplate = messagingTemplate;
+        this.fileService = fileService;
     }
 
     @Override
@@ -108,5 +114,27 @@ public class AccountController implements AccountsApi {
         }
         messagingTemplate.convertAndSend("resources/accounts", accountDto);
         return ResponseEntity.ok(accountMapper.toDTO(accountService.update(accountMapper.toEntity(accountDto)), DetailLevel.FULL));
+    }
+
+    @Override
+    public ResponseEntity<AccountDto> updateAccountAvatar(MultipartFile blob) {
+        log.info("Updating account avatar");
+        File file = fileService.create(
+                File.builder()
+                        .isVisible(true)
+                        .uploader(Account.builder()
+                                .accountId(SecurityUtil.requireCurrentUserId())
+                                .build())
+                        .build(),
+                blob
+        );
+        Account account = accountService.update(
+                Account.builder()
+                        .accountId(SecurityUtil.requireCurrentUserId())
+                        .avatarUrl(file.getFileUrl())
+                        .build()
+        );
+
+        return new ResponseEntity<>(accountMapper.toDTO(account, DetailLevel.FULL), HttpStatus.OK);
     }
 }
