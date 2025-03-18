@@ -54,8 +54,12 @@ public class ProfileController implements ProfilesApi {
     @Override
     public ResponseEntity<ProfileDto> updateProfile(Long profileId, ProfileDto profileDto) {
         profileDto.setProfileId(profileId); // Override profileId
-
+        log.info("Updating profile with id: {}", profileDto);
         return new ResponseEntity<>(profileMapper.toDTO(profileService.update(profileMapper.toEntity(profileDto)),DetailLevel.FULL), HttpStatus.OK);
     }
 
+    @Override
+    public ResponseEntity<ProfileDto> getProfileById(Long profileId) {
+        return new ResponseEntity<>(profileMapper.toDTO(profileService.findByProfileId(profileId), DetailLevel.FULL), HttpStatus.OK);
+    }
 }
