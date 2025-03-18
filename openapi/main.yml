@@ -69,10 +69,6 @@ components:
       $ref: "model/stats/string-bigdecimal-datapoint.yml#/StringBigDecimalDatapointDto"
     StringIntegerDatapointDto:
       $ref: "model/stats/string-integer-datapoint.yml#/StringIntegerDatapointDto"
-    TimeRangeParamsDto:
-      $ref: "model/stats/time-range-params-dto.yml#/TimeRangeParamsDto"
-    ChartTypeDto:
-      $ref: "model/stats/chart-type-dto.yml#/ChartTypeDto"
     TransactionStatDto:
       $ref: "model/stats/transaction-stat-dto.yml#/TransactionStatDto"
 paths:
@@ -92,6 +88,8 @@ paths:
     $ref: "path/auth/forgot-password.yml"
   /auth/reset-password:
     $ref: "path/auth/reset-password.yml"
+  /auth/change-password:
+    $ref: "path/auth/change-password.yml"
 
   /accounts:
     $ref: "path/accounts/index.yml"

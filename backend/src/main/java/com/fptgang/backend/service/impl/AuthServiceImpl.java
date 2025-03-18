@@ -244,4 +244,17 @@ public class AuthServiceImpl implements AuthService {
     private record Result(String jwt, AuthResponseDto dto) {
     }
 
+    @Override
+    public void changePassword(String email, String oldPassword, String newPassword) {
+        Account account = accountRepos.findByEmail(email)
+                .orElseThrow(() -> new InvalidInputException("User not found"));
+
+        if (passwordEncoderConfig.bcryptEncoder().matches(oldPassword, account.getPassword())) {
+            account.setPassword(passwordEncoderConfig.bcryptEncoder().encode(newPassword));
+            accountRepos.save(account);
+        } else {
+            throw new InvalidInputException("Old password is incorrect");
+        }
+    }
+
 }

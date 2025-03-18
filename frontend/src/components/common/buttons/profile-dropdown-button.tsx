@@ -3,15 +3,16 @@ import { useGetIdentity, useLogout } from "@refinedev/core";
 import { Button, Dropdown } from "antd";
 import { useNavigate } from "react-router";
 import { AccountDto, AccountDtoRoleEnum } from "../../../../generated";
+import { store } from "../../../store";
 
 export const ProfileDropdownButton = () => {
   const nav = useNavigate();
   const { mutate: logout } = useLogout();
-  const { data: user } = useGetIdentity<AccountDto>();
+  const user = store.getState().auth.account;
 
   const menuItems = [
     // Add Dashboard item conditionally for admin users
-    ...(localStorage.getRole === "ADMIN"
+    ...(user?.role === AccountDtoRoleEnum.Admin
       ? [
           {
             key: "dashboard",
@@ -32,9 +33,7 @@ export const ProfileDropdownButton = () => {
       key: "settings",
       label: "Settings",
       onClick: () => {
-        if (user?.role === AccountDtoRoleEnum.Client) nav("/client/settings");
-        if (user?.role === AccountDtoRoleEnum.Freelancer)
-          nav("/settings");
+        nav("/settings");
       },
     },
     {

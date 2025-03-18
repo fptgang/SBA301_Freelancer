@@ -32,6 +32,13 @@ public class ProfileServiceImpl implements ProfileService {
         }
         var existing = profileRepos.findByProfileId(profile.getProfileId()).orElseThrow(
                 () -> new InvalidInputException("Profile does not exist"));
+        if (profile.getSkills() != null&& !profile.getSkills().equals(existing.getSkills())) {
+            existing.getSkills().clear();
+            for (var ps : profile.getSkills()) {
+                ps.setProfile(existing);
+                existing.getSkills().add(ps);
+            }
+        }
         EntityUtil.merge(existing, profile);
 
         return profileRepos.save(existing);

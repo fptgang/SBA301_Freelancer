@@ -115,6 +115,7 @@ import { Message } from "./pages/public/message";
 import MessageLayout from "./layouts/message-layout";
 import { ReportsEdit, ReportsList, ReportsShow } from "./pages/admin/reports";
 import { stompClient } from "./utils";
+import VNPayReturnHandler from "./pages/shared/payment/VNPayReturnHandler";
 
 const resources = [
   {
@@ -241,6 +242,10 @@ function App() {
                     }
                   >
                     <Route path="message" element={<Message />} />
+                    <Route
+                      path="payment/vnpay/return"
+                      element={<VNPayReturnHandler />}
+                    />
                   </Route>
 
                   {/* Admin Routes */}
@@ -314,15 +319,15 @@ function App() {
                       <Route index element={<ClientList />} />
                       <Route path=":id" element={<ClientProjectShow />} />
                     </Route>
-                    <Route path="wallet">
-                      <Route index element={<Navigate to="transactions" />} />
-                      {/* <Route path="deposit" element={<DepositFunds />} /> */}
-                      {/* <Route path="withdraw" element={<WithdrawFunds />} /> */}
-                      <Route
+                    {/* <Route path="wallet">
+                      <Route index element={<Navigate to="transactions" />} /> */}
+                    {/* <Route path="deposit" element={<DepositFunds />} /> */}
+                    {/* <Route path="withdraw" element={<WithdrawFunds />} /> */}
+                    {/* <Route
                         path="transactions"
                         element={<ClientTransactionList />}
                       />
-                    </Route>
+                    </Route> */}
                     <Route path="chat" element={<ChatPage />} />
                   </Route>
 
@@ -344,13 +349,13 @@ function App() {
 
                     <Route path="profile" element={<FreelancerProfilePage />} />
 
-                    <Route path="wallet">
+                    {/* <Route path="wallet">
                       <Route index element={<Navigate to="transactions" />} />
                       <Route
                         path="transactions"
                         element={<ClientTransactionList />}
                       />
-                    </Route>
+                    </Route> */}
                     <Route path="chat" element={<ChatPage />} />
                   </Route>
 

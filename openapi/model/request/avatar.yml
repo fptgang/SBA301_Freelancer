@@ -1,0 +1,7 @@
+AvatarDto:
+  type: object
+  properties:
+    blob:
+      type: string
+      format: binary
+
