@@ -69,18 +69,7 @@ public class SecurityConfig {
                 //    authorize.anyRequest()
                 //             .permitAll();
                 //} else {
-                    authorize.requestMatchers(
-                                     "/swagger-ui/**",
-                                     "/v3/**",
-                                     "/swagger-ui.html",
-                                     "/api/v1/auth/**",
-                                     "/api/v1/mail/**",
-                                     "/api/v1/projects/**",
-                                     "/api/v1/project-categories/**",
-                                    "/hirable-ws")
-                             .permitAll()
-                             .anyRequest()
-                             .authenticated();
+                    authorize.anyRequest().permitAll(); // Check in controller and service, not here
                 //}
             })
             .csrf(AbstractHttpConfigurer::disable)
