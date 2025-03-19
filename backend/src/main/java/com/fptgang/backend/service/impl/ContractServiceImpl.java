@@ -129,9 +129,6 @@ public class ContractServiceImpl implements ContractService {
         if (contract.getStatus() == Contract.ContractStatus.TERMINATED) {
             throw new IllegalStateException("Contract is already terminated");
         }
-        if (contract.getStatus() != Contract.ContractStatus.SIGNED) {
-            throw new IllegalStateException("Contract is not signed");
-        }
         contract.setStatus(Contract.ContractStatus.TERMINATED);
         return contractRepos.save(contract);
     }

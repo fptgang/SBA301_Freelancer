@@ -72,6 +72,7 @@ public class MilestoneMapper extends BaseMapper<MilestoneDto, Milestone> {
         dto.setProjectId(entity.getProject().getProjectId());
         dto.setDescription(entity.getDescription());
         dto.setBudgetRatio(entity.getBudgetRatio());
+        dto.setContractualBudget(entity.getContractualBudget());
         dto.setDeadline(DateTimeUtil.fromLocalToOffset(entity.getDeadline()));
         dto.setStatus(MilestoneStatusDto.valueOf(entity.getStatus().name()));
         dto.setFundStatus(MilestoneFundStatusDto.valueOf(entity.getFundStatus().name()));

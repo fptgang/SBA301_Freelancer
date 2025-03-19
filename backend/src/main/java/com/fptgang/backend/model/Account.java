@@ -81,12 +81,12 @@ public class Account {
 
     @UpdateTimestamp
     private LocalDateTime updatedAt;
-
-    @OneToMany(mappedBy = "account", fetch = FetchType.LAZY)
-    @Builder.Default
-    @ToString.Exclude
-    @EqualsAndHashCode.Exclude
-    private List<RefreshToken> refreshTokens = new ArrayList<>();
+//
+//    @OneToMany(mappedBy = "account", fetch = FetchType.LAZY)
+//    @Builder.Default
+//    @ToString.Exclude
+//    @EqualsAndHashCode.Exclude
+//    private List<RefreshToken> refreshTokens = new ArrayList<>();
 
     // Cascading profile with account
     @OneToOne(mappedBy = "account", cascade = CascadeType.ALL, fetch = FetchType.LAZY)

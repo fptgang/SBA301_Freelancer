@@ -178,6 +178,10 @@ public class ProjectServiceImpl implements ProjectService {
     public Project terminateByClient(Long projectId) {
         Project project = projectRepos.findByProjectId(projectId).orElseThrow(
                 () -> new InvalidInputException("Project does not exist"));
+        if (project.getStatus() == Project.ProjectStatus.TERMINATED)
+            throw new IllegalStateException("Project is already terminated");
+        if (project.getStatus() == Project.ProjectStatus.FINISHED)
+            throw new IllegalStateException("Project is already finished");
         authContext.requireAccountId(project.getClient().getAccountId()); // Client operation
 
         // Case 1: If the project is OPEN, terminate immediately
@@ -222,16 +226,19 @@ public class ProjectServiceImpl implements ProjectService {
                 () -> new InvalidInputException("Project with project id " + projectId + "not found"));
         if (project.getStatus() == Project.ProjectStatus.TERMINATED)
             throw new IllegalStateException("Project is already terminated");
+        if (project.getStatus() == Project.ProjectStatus.FINISHED)
+            throw new IllegalStateException("Project is already finished");
 
         for (Milestone milestone : project.getMilestones()) {
-            if (!milestone.getIsVisible()) continue;
+            if (!milestone.getIsVisible() || milestone.getFundStatus() != Milestone.FundStatus.DEPOSITED) continue;
 
             // IF PENDING, return fund to client (if exists)
             if (milestone.getStatus() == Milestone.MilestoneStatus.PENDING) {
                 milestoneService.returnFund(milestone);
             }
             // IF IN PROGRESS, based on staff decision
-            else if (milestone.getStatus() == Milestone.MilestoneStatus.IN_PROGRESS) {
+            else if (milestone.getStatus() == Milestone.MilestoneStatus.IN_PROGRESS
+                    || milestone.getStatus() == Milestone.MilestoneStatus.REVIEWING) {
                 if (transferToRole == Role.CLIENT)
                     milestoneService.returnFund(milestone); // return (if exists)
                 else if (transferToRole == Role.FREELANCER)
@@ -252,6 +259,7 @@ public class ProjectServiceImpl implements ProjectService {
 
         project.setStatus(Project.ProjectStatus.TERMINATED);
         project.setTerminationReason(Project.TerminationReason.STAFF_DECISION);
+        project.setActiveMilestone(null);
 
         return projectRepos.save(project);
     }

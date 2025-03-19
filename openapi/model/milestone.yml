@@ -16,6 +16,9 @@ MilestoneDto:
       format: double
       minimum: 0
       maximum: 1
+    contractualBudget:
+      type: number
+      format: double
     deadline:
       type: string
       format: date-time

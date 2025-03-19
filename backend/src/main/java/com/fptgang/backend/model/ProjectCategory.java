@@ -36,9 +36,9 @@ public class ProjectCategory {
     @Builder.Default
     private Boolean isVisible = true;
 
-    @OneToMany(mappedBy = "category", fetch = FetchType.LAZY)
-    @Builder.Default
-    @ToString.Exclude
-    @EqualsAndHashCode.Exclude
-    private List<Project> projects = new ArrayList<>();
+//    @OneToMany(mappedBy = "category", fetch = FetchType.LAZY)
+//    @Builder.Default
+//    @ToString.Exclude
+//    @EqualsAndHashCode.Exclude
+//    private List<Project> projects = new ArrayList<>();
 }
