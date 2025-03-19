@@ -1,14 +1,9 @@
 FileBlobDto:
   type: object
   properties:
-    uploaderId:
-      type: integer
-      format: int64
     blob:
       type: string
       format: binary
-    isVisible:
-      type: boolean
     messageId:
       type: integer
       format: int64

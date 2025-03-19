@@ -119,15 +119,7 @@ public class AccountController implements AccountsApi {
     @Override
     public ResponseEntity<AccountDto> updateAccountAvatar(MultipartFile blob) {
         log.info("Updating account avatar");
-        File file = fileService.create(
-                File.builder()
-                        .isVisible(true)
-                        .uploader(Account.builder()
-                                .accountId(SecurityUtil.requireCurrentUserId())
-                                .build())
-                        .build(),
-                blob
-        );
+        File file = fileService.create(blob);
         Account account = accountService.update(
                 Account.builder()
                         .accountId(SecurityUtil.requireCurrentUserId())
