@@ -303,7 +303,7 @@ public class EmailServiceImpl implements EmailService {
             return;
         }
 
-        log.info("Preparing to send project completed both to client,freelancer: {} ,{}", project.getClient().getEmail(),project.getContract().getFreelancer().getEmail());
+        log.info("Preparing to send project completed both to client,freelancer: {} ,{}", project.getClient().getEmail(),project.getFreelancer().getEmail());
 
         var template = projectCompletedTemplate.getContentAsString(StandardCharsets.UTF_8);
         var data = projectEmailTemplateMapper.create(project);
@@ -312,7 +312,7 @@ public class EmailServiceImpl implements EmailService {
         String content = TemplateUtil.render(projectCompletedTemplate.getFilename(), template, data);
 
         sendMail(emailFrom, project.getClient().getEmail(), subject, content);
-        sendMail(emailFrom, project.getContract().getFreelancer().getEmail(), subject, content);
+        sendMail(emailFrom, project.getFreelancer().getEmail(), subject, content);
     }
 
     @Override

@@ -16,6 +16,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 public class ProposalServiceImpl implements ProposalService {
@@ -139,5 +140,10 @@ public class ProposalServiceImpl implements ProposalService {
     @Override
     public long countByProjectIdAndStatus(long projectId, Proposal.ProposalStatus status) {
         return proposalRepos.countByProjectIdAndStatus(projectId, status);
+    }
+
+    @Override
+    public List<Proposal> findByProjectAndFreelancer(long projectId, long freelancerId) {
+        return proposalRepos.findByProject_ProjectIdAndFreelancer_AccountIdOrderByProposalIdDesc(projectId, freelancerId);
     }
 }

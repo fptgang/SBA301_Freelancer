@@ -102,16 +102,15 @@ public class Milestone {
 
     @Nullable
     public Account getFreelancer() {
-        if (getProject().getContract() == null)
-            return null;
-        return getProject().getContract().getFreelancer();
+        return getProject().getFreelancer();
     }
 
     @NotNull
     public Account requireFreelancer() {
-        if (getProject().getContract() == null)
+        var freelancer = getProject().getFreelancer();
+        if (freelancer == null)
             throw new IllegalStateException("Contract does not exist");
-        return getProject().getContract().getFreelancer();
+        return freelancer;
     }
 
     @Nullable

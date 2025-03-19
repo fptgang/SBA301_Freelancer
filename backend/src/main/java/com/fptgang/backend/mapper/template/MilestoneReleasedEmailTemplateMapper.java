@@ -12,7 +12,7 @@ public class MilestoneReleasedEmailTemplateMapper implements TemplateMapper<Mile
     public Map<String, Object> create(Milestone milestone) {
         return Map.of(
                 "freelancer", Map.of(
-                        "firstName", milestone.getProject().getContract().getFreelancer().getFirstName()
+                        "firstName", milestone.getProject().getFreelancer().getFirstName()
                 ),
                 "milestone", Map.of(
                         "title", milestone.getTitle(),

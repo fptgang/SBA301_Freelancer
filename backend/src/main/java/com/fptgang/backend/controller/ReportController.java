@@ -14,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -30,9 +31,12 @@ public class ReportController implements ReportsApi {
         this.reportMapper = reportMapper;
     }
 
+    /**
+     * Can access: Authenticated users
+     */
     @Override
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ReportDto> createReport(ReportRequestDto reportRequestDto) {
-        reportRequestDto.setReporterId(SecurityUtil.getCurrentUserId());
         var report = reportMapper.toEntity(reportRequestDto);
         return new ResponseEntity<>(reportMapper.toDTO(reportService.create(report), DetailLevel.FULL), HttpStatus.OK);
     }
@@ -62,6 +66,9 @@ public class ReportController implements ReportsApi {
         return OpenApiHelper.respondPage(res, GetReports200Response.class);
     }
 
+    /**
+     * Can access: Staff+
+     */
     @Override
     public ResponseEntity<ReportDto> resolveReport(Long reportId, SolutionDto solutionDto) {
         if(!SecurityUtil.hasPermission(Role.STAFF)){

@@ -6,6 +6,3 @@ ReportRequestDto:
       format: int64
     reason:
       type: string
-    reporterId:
-      type: integer
-      format: int64

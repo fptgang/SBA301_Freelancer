@@ -50,6 +50,9 @@ public class ProposalController implements ProposalsApi {
         return OpenApiHelper.respondPage(res, GetProposals200Response.class);
     }
 
+    /**
+     * Can access: Authenticated users
+     */
     @Override
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ProposalDto> createProposal(ProposalCreateDto proposalCreateDto) {
@@ -65,6 +68,9 @@ public class ProposalController implements ProposalsApi {
         );
     }
 
+    /**
+     * Can access: Client of the project
+     */
     @Override
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ProposalDto> rejectProposal(Long proposalId) {
@@ -77,6 +83,9 @@ public class ProposalController implements ProposalsApi {
         );
     }
 
+    /**
+     * Can access: Freelancer owns his proposal
+     */
     @Override
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ProposalDto> withdrawProposal(Long proposalId) {

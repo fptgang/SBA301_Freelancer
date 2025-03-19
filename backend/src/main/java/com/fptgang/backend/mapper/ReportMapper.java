@@ -58,9 +58,6 @@ public class ReportMapper extends BaseMapper<ReportDto, Report> {
 
         Report entity = new Report();
 
-        if (dto.getReporterId() != null) {
-            entity.setReporter(accountRepos.getReferenceById(dto.getReporterId()));
-        }
         if (dto.getProjectId() != null) {
             entity.setProject(projectRepos.getReferenceById(dto.getProjectId()));
         }

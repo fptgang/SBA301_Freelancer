@@ -1,0 +1,15 @@
+ProfileFormDto:
+  type: object
+  properties:
+    overview:
+      type: string
+    education:
+      type: string
+    phoneNumber:
+      type: string
+    language:
+      type: string
+    skills:
+      type: array
+      items:
+        $ref: 'skill-set.yml#/SkillSetDto'

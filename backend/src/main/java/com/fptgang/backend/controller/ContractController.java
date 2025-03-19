@@ -28,12 +28,19 @@ public class ContractController implements ContractsApi {
         this.contractMapper = contractMapper;
     }
 
+
+    /**
+     * Can access: Freelancer of the contract
+     */
     @Override
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ContractDto> signContract(Long contractId) {
         return new ResponseEntity<>(contractMapper.toDTO(contractService.signContract(contractId), DetailLevel.FULL), HttpStatus.OK);
     }
 
+    /**
+     * Can access: Client
+     */
     @Override
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ContractDto> createContract(Long proposalId) {

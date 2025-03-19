@@ -6,6 +6,7 @@ import com.fptgang.backend.api.model.MilestoneStatusDto;
 import com.fptgang.backend.model.Milestone;
 import com.fptgang.backend.repository.FileRepos;
 import com.fptgang.backend.repository.ProjectRepos;
+import com.fptgang.backend.security.AuthContext;
 import com.fptgang.backend.util.DateTimeUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -16,13 +17,15 @@ public class MilestoneMapper extends BaseMapper<MilestoneDto, Milestone> {
     private final ProjectRepos projectRepos;
     private final FileRepos fileRepos;
     private final FileMapper fileMapper;
+    private final AuthContext authContext;
 
     public MilestoneMapper(ProjectRepos projectRepos,
                            FileRepos fileRepos,
-                           FileMapper fileMapper) {
+                           FileMapper fileMapper, AuthContext authContext) {
         this.projectRepos = projectRepos;
         this.fileRepos = fileRepos;
         this.fileMapper = fileMapper;
+        this.authContext = authContext;
     }
 
     @Override
@@ -72,14 +75,18 @@ public class MilestoneMapper extends BaseMapper<MilestoneDto, Milestone> {
         dto.setProjectId(entity.getProject().getProjectId());
         dto.setDescription(entity.getDescription());
         dto.setBudgetRatio(entity.getBudgetRatio());
-        dto.setContractualBudget(entity.getContractualBudget());
         dto.setDeadline(DateTimeUtil.fromLocalToOffset(entity.getDeadline()));
         dto.setStatus(MilestoneStatusDto.valueOf(entity.getStatus().name()));
         dto.setFundStatus(MilestoneFundStatusDto.valueOf(entity.getFundStatus().name()));
 
-        dto.setDeliverables(entity.getDeliverables().stream()
-                .map(f -> fileMapper.toDTO(f, DetailLevel.FULL))
-                .toList());
+        // Only staff, the client and freelancer involved in this project can see internal stuff
+        if (authContext.hasInternalAccess(entity.getProject())) {
+            dto.setContractualBudget(entity.getContractualBudget());
+            dto.setDeliverables(entity.getDeliverables().stream()
+                    .map(f -> fileMapper.toDTO(f, DetailLevel.FULL))
+                    .toList());
+        }
+
         dto.setCreatedAt(DateTimeUtil.fromLocalToOffset(entity.getCreatedAt()));
         dto.setUpdatedAt(DateTimeUtil.fromLocalToOffset(entity.getUpdatedAt()));
 

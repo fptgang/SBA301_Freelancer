@@ -401,7 +401,7 @@ public class ProposalIntegrationTest {
         assertThat(project.getActiveMilestone()).isNull();
         assertThat(project.getContract().getStatus()).isEqualTo(Contract.ContractStatus.UNSIGNED);
         assertThat(project.getContract().getBudget().compareTo(BigDecimal.valueOf(500))).isZero();
-        assertThat(project.getContract().getFreelancer().getAccountId()).isEqualTo(5);
+        assertThat(project.getFreelancer().getAccountId()).isEqualTo(5);
 
         var firstVisible = project.getMilestones().stream()
                 .filter(Milestone::getIsVisible)
