@@ -183,13 +183,7 @@ public class MilestoneServiceImpl implements MilestoneService {
 
         for (MultipartFile blob : blobs) {
             milestone.getDeliverables().add(
-                    fileService.create(
-                            File.of(blob)
-                                    .uploader(milestone.requireFreelancer())
-                                    .milestone(milestone)
-                                    .build(),
-                            blob
-                    )
+                    fileService.createForMilestone(milestone.getMilestoneId(), blob)
             );
         }
 
