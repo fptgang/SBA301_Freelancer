@@ -31,6 +31,9 @@ public class FileController implements FilesApi {
         this.fileMapper = fileMapper;
     }
 
+    /**
+     * Can access: Who can access related entity
+     */
     @Override
     public ResponseEntity<FileDto> uploadFile(MultipartFile blob,
                                               Long messageId,
@@ -55,6 +58,9 @@ public class FileController implements FilesApi {
         return new ResponseEntity<>(fileMapper.toDTO(file, DetailLevel.FULL), HttpStatus.OK);
     }
 
+    /**
+     * Can access: Who can access related entity
+     */
     @Override
     public ResponseEntity<Void> deleteFile(Long fileId) {
         fileService.deleteById(fileId);

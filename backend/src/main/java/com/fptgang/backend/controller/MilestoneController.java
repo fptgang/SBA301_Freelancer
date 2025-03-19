@@ -28,6 +28,9 @@ public class MilestoneController implements MilestonesApi {
         this.milestoneService = milestoneService;
     }
 
+    /**
+     * Can access: Freelancer
+     */
     @Override
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<MilestoneDto> submitMilestoneWork(Long milestoneId, List<MultipartFile> blobs) {
@@ -39,6 +42,9 @@ public class MilestoneController implements MilestonesApi {
         );
     }
 
+    /**
+     * Can access: Client
+     */
     @Override
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<MilestoneDto> confirmMilestoneWork(Long milestoneId) {
@@ -50,6 +56,9 @@ public class MilestoneController implements MilestonesApi {
         );
     }
 
+    /**
+     * Can access: Client
+     */
     @Override
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<MilestoneDto> depositMilestoneFund(Long milestoneId) {

@@ -1,8 +1,12 @@
 package com.fptgang.backend.service.impl;
 
 import com.fptgang.backend.api.model.SolutionDto;
+import com.fptgang.backend.exception.InvalidInputException;
 import com.fptgang.backend.model.*;
+import com.fptgang.backend.repository.AccountRepos;
+import com.fptgang.backend.repository.ProjectRepos;
 import com.fptgang.backend.repository.ReportRepos;
+import com.fptgang.backend.security.AuthContext;
 import com.fptgang.backend.service.ProjectService;
 import com.fptgang.backend.service.ReportService;
 import com.fptgang.backend.service.TransactionService;
@@ -12,6 +16,7 @@ import com.fptgang.backend.util.OpenApiHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -20,26 +25,50 @@ import java.util.List;
 @Service
 public class ReportServiceImpl implements ReportService {
 
-    @Autowired
-    private ReportRepos reportRepos;
-    @Autowired
-    private ProjectService projectService;
-    @Autowired
-    private TransactionService transactionService;
+    private final ReportRepos reportRepos;
+    private final ProjectService projectService;
+    private final TransactionService transactionService;
+    private final AuthContext authContext;
+    private final ProjectRepos projectRepos;
+    private final AccountRepos accountRepos;
 
+    public ReportServiceImpl(ReportRepos reportRepos,
+                             ProjectService projectService,
+                             TransactionService transactionService,
+                             AuthContext authContext,
+                             ProjectRepos projectRepos,
+                             AccountRepos accountRepos) {
+        this.reportRepos = reportRepos;
+        this.projectService = projectService;
+        this.transactionService = transactionService;
+        this.authContext = authContext;
+        this.projectRepos = projectRepos;
+        this.accountRepos = accountRepos;
+    }
 
     @Override
     public Report create(Report report) {
-        if (report.getProject().getStatus() != Project.ProjectStatus.IN_PROGRESS) {
-            throw new IllegalArgumentException("Project must be in progress to create a report");
+        Project project = projectRepos.findByProjectId(report.getProject().getProjectId())
+                .orElseThrow(() -> new InvalidInputException("Unknown project"));
+        if (!project.getIsVisible())
+            throw new IllegalStateException("Project was deleted");
+        if (project.getStatus() != Project.ProjectStatus.IN_PROGRESS)
+            throw new IllegalStateException("Project must be in progress to create a report");
+
+        if (!authContext.hasInternalAccess(project)){
+            throw new AccessDeniedException("No access to this project");
         }
-        List<Report> unsolvedReports = reportRepos.findAllByProject_ProjectIdAndAndStatusNot(report.getProject().getProjectId(), Report.ReportStatus.SOLVED);
+
+        List<Report> unsolvedReports = reportRepos.findAllByProject_ProjectIdAndAndStatusNot(
+                project.getProjectId(), Report.ReportStatus.SOLVED);
         if (unsolvedReports != null && !unsolvedReports.isEmpty()) {
             throw new IllegalArgumentException("There is already an unsolved report for this project");
         }
+
         report.setReportId(null);
         report.setSolution(null);
         report.setStatus(Report.ReportStatus.UNSOLVED);
+        report.setReporter(accountRepos.getReferenceById(authContext.requireAccountId()));
         return reportRepos.save(report);
     }
 

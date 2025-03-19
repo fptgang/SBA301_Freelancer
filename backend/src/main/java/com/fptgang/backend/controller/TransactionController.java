@@ -7,6 +7,7 @@ import com.fptgang.backend.mapper.TransactionMapper;
 import com.fptgang.backend.model.Account;
 import com.fptgang.backend.model.Role;
 import com.fptgang.backend.model.Transaction;
+import com.fptgang.backend.security.AuthContext;
 import com.fptgang.backend.service.PaymentService;
 import com.fptgang.backend.service.TransactionService;
 import com.fptgang.backend.service.impl.PaymentServiceImpl;
@@ -16,6 +17,8 @@ import com.fptgang.backend.util.SecurityUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -26,16 +29,23 @@ public class TransactionController implements TransactionsApi {
     private final TransactionService transactionService;
     private final TransactionMapper transactionMapper;
     private final PaymentService paymentService;
+    private final AuthContext authContext;
 
-    public TransactionController(TransactionService transactionService, TransactionMapper transactionMapper, PaymentService paymentService) {
+    public TransactionController(TransactionService transactionService,
+                                 TransactionMapper transactionMapper,
+                                 PaymentService paymentService,
+                                 AuthContext authContext) {
         this.transactionService = transactionService;
         this.transactionMapper = transactionMapper;
         this.paymentService = paymentService;
+        this.authContext = authContext;
     }
 
-
-
+    /**
+     * Can access: Authenticated users
+     */
     @Override
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<CreateDeposit200Response> createDeposit(DepositDto depositDto) {
         depositDto.setAccountId(SecurityUtil.getCurrentUserId());
         Transaction transaction = transactionService.create(
@@ -50,7 +60,13 @@ public class TransactionController implements TransactionsApi {
         return new ResponseEntity<>( new CreateDeposit200Response().paymentRedirectUrl(paymentLink), HttpStatus.OK);
     }
 
+    /**
+     * Can access: Authenticated users
+     * - Staff+ can view all
+     * - Client/Freelancer can only see his transactions
+     */
     @Override
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<GetTransactions200Response> getTransactions(Pageable pageable, String filter, String search) {
         log.info("Fetching transactions");
 
@@ -71,26 +87,29 @@ public class TransactionController implements TransactionsApi {
         // Customers can only view their own transactions
         else {
             return OpenApiHelper.respondPage(
-                    transactionService.getAllInvolvingAccount(params.build(), SecurityUtil.getCurrentUserId())
+                    transactionService.getAllInvolvingAccount(params.build(), SecurityUtil.requireCurrentUserId())
                             .map(t -> transactionMapper.toDTO(t, DetailLevel.SUMMARY)),
                     GetTransactions200Response.class
             );
         }
     }
 
+    /**
+     * Can access: Authenticated users
+     * - Staff+ can view all
+     * - Client/Freelancer can only see his transactions
+     */
     @Override
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<TransactionDto> getTransactionById(Long transactionId) {
         Transaction transaction = transactionService.findById(transactionId);
         if (transaction == null) {
             return ResponseEntity.notFound().build();
         }
-        if(!SecurityUtil.hasPermission(Role.STAFF) &&
-                !SecurityUtil.hasPermission(Role.ADMIN) &&
-                !transaction.getFromAccount().getAccountId().equals(SecurityUtil.getCurrentUserId()) &&
-                !transaction.getToAccount().getAccountId().equals(SecurityUtil.getCurrentUserId())
-        ){
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
+
+        if (!authContext.hasInternalAccess(transaction))
+            throw new AccessDeniedException("Cannot access this transaction");
+
         return ResponseEntity.ok(transactionMapper.toDTO(transaction, DetailLevel.FULL));
     }
 }

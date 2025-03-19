@@ -41,6 +41,7 @@ public class AccountController implements AccountsApi {
     }
 
     @Override
+    @PreAuthorize("hasAnyRole('ADMIN')")
     public ResponseEntity<AccountDto> createAccount(AccountDto accountDto) {
         log.info("Creating account");
         accountDto = accountMapper
@@ -117,6 +118,9 @@ public class AccountController implements AccountsApi {
         return ResponseEntity.ok(accountMapper.toDTO(accountService.update(accountMapper.toEntity(accountDto)), DetailLevel.FULL));
     }
 
+    /**
+     * Can access: Any
+     */
     @Override
     public ResponseEntity<AccountDto> updateAccountAvatar(MultipartFile blob) {
         log.info("Updating account avatar");

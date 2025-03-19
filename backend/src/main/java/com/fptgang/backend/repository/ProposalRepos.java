@@ -13,6 +13,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
+
 @Repository
 public interface ProposalRepos extends JpaRepository<Proposal, Long>, JpaSpecificationExecutor<Proposal> {
     Optional<Proposal> findByProposalId(Long proposalId);
@@ -27,4 +28,6 @@ public interface ProposalRepos extends JpaRepository<Proposal, Long>, JpaSpecifi
     """)
     long countByProjectIdAndStatus(@Param("projectId") Long projectId,
                                    @Param("status") Proposal.ProposalStatus status);
+
+    List<Proposal> findByProject_ProjectIdAndFreelancer_AccountIdOrderByProposalIdDesc(Long projectId, Long freelancerId);
 }
