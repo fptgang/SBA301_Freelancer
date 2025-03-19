@@ -51,7 +51,8 @@ public class AuthIntegrationTest {
                 .email("a@b.com")
                 .firstName("Bob")
                 .password("123")
-                .confirmPassword("123");
+                .confirmPassword("123")
+                .role(RegisterRequestDto.RoleEnum.CLIENT);
         var request =
                 MockMvcRequestBuilders
                         .post("/api/v1/auth/register")

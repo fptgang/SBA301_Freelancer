@@ -20,6 +20,7 @@ import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.gson.GsonFactory;
+import com.google.common.base.Preconditions;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -79,35 +80,17 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public AuthResponseDto loginWithGoogle(String token, Fingerprint fingerprint) {
+    public AuthResponseDto loginWithGoogle(String credential, Fingerprint fingerprint) {
         HttpTransport httpTransport = new NetHttpTransport();
         JsonFactory jsonFactory = new GsonFactory();
         GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier(httpTransport, jsonFactory);
 
         try {
-            GoogleIdToken idToken = verifier.verify(token);
+            GoogleIdToken idToken = verifier.verify(credential);
             GoogleIdToken.Payload payload = idToken.getPayload();
             String email = payload.getEmail();
-            Object firstName = payload.get("given_name");
-            Object lastName = payload.get("family_name");
-            Object picture = payload.get("picture");
-
-            Account account = accountRepos.findByEmail(email).orElseGet(() -> {
-                log.info("User {} registered using Google account", email);
-                log.info("User {} is verified using Google account ", email);
-
-                return accountRepos.saveAndFlush(
-                        Account.builder()
-                                .email(email)
-                                .firstName(firstName == null ? "" : firstName.toString())
-                                .lastName(lastName == null ? null : lastName.toString())
-                                .avatarUrl(picture == null ? null : picture.toString())
-                                .role(Role.CLIENT)  // TODO CHANGE THIS
-                                .isVerified(true)
-                                .verifiedAt(LocalDateTime.now())
-                                .build()
-                );
-            });
+            Account account = accountRepos.findByEmail(email)
+                    .orElseThrow(() -> new InvalidInputException("User not found"));
 
             Result result = authenticate(account, fingerprint);
             log.info("User {} logged using Google account: token = {}", email, result.jwt);
@@ -124,12 +107,15 @@ public class AuthServiceImpl implements AuthService {
         if (accountRepos.findByEmail(dto.getEmail()).isEmpty()) {
             if (dto.getPassword().equals(dto.getConfirmPassword())) {
                 String hashPass = passwordEncoderConfig.bcryptEncoder().encode(dto.getPassword());
+                Role role = Role.valueOf(dto.getRole().name());
+                Preconditions.checkArgument(role == Role.FREELANCER || role == Role.CLIENT,
+                        "Role must be FREELANCER or CLIENT");
                 accountRepos.save(
                         Account.builder()
                                 .email(dto.getEmail())
                                 .firstName(dto.getFirstName())
                                 .lastName(dto.getLastName())
-                                .role(Role.CLIENT)  // TODO CHANGE THIS
+                                .role(role)
                                 .password(hashPass)
                                 .isVerified(false)
                                 .build());
@@ -141,6 +127,49 @@ public class AuthServiceImpl implements AuthService {
         } else {
             throw new InvalidInputException("Email already exists");
         }
+    }
+
+    @Override
+    public boolean registerWithGoogle(String credential, Role role) {
+        Preconditions.checkArgument(role == Role.FREELANCER || role == Role.CLIENT,
+                "Role must be FREELANCER or CLIENT");
+        HttpTransport httpTransport = new NetHttpTransport();
+        JsonFactory jsonFactory = new GsonFactory();
+        GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier(httpTransport, jsonFactory);
+
+        try {
+            GoogleIdToken idToken = verifier.verify(credential);
+            GoogleIdToken.Payload payload = idToken.getPayload();
+            String email = payload.getEmail();
+            Object firstName = payload.get("given_name");
+            Object lastName = payload.get("family_name");
+            Object picture = payload.get("picture");
+
+            if (accountRepos.findByEmail(email).isPresent()) {
+                throw new InvalidInputException("Email already exists");
+            }
+            log.info("User {} registered using Google account", email);
+            log.info("User {} is verified using Google account ", email);
+
+            accountRepos.save(
+                Account.builder()
+                        .email(email)
+                        .firstName(firstName == null ? "" : firstName.toString())
+                        .lastName(lastName == null ? null : lastName.toString())
+                        .avatarUrl(picture == null ? null : picture.toString())
+                        .role(role)
+                        .isVerified(true)
+                        .verifiedAt(LocalDateTime.now())
+                        .build()
+            );
+
+            log.info("User {} registered using Google account", email);
+
+            return true;
+        } catch (GeneralSecurityException | IOException e) {
+            log.error("Error Google login {}", e.getMessage());
+        }
+        return false;
     }
 
     @Override

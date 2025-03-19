@@ -7,7 +7,7 @@ import {
   useActiveAuthProvider,
   useLogin,
   useTranslate,
-  useRouterContext,
+  useRouterContext, useNotification,
 } from "@refinedev/core";
 import { ThemedTitleV2 } from "@refinedev/antd";
 import {
@@ -65,6 +65,7 @@ export const LoginPage: React.FC<LoginProps> = ({
   const routerType = useRouterType();
   const Link = useLink();
   const { Link: LegacyLink } = useRouterContext();
+  const { open } = useNotification();
 
   const ActiveLink = routerType === "legacy" ? LegacyLink : Link;
   const authProvider = useActiveAuthProvider();
@@ -197,7 +198,17 @@ export const LoginPage: React.FC<LoginProps> = ({
         <Form<LoginFormTypes>
           layout="vertical"
           form={form}
-          onFinish={(values) => login({ ...values, ...mutationVariables })}
+          onFinish={(values) => {
+            try {
+              login({...values, ...mutationVariables})
+            } catch (e) {
+              open?.({
+                type: "error",
+                message: "Error",
+                description: e.toString(),
+              });
+            }
+          }}
           requiredMark={false}
           initialValues={{
             remember: false,

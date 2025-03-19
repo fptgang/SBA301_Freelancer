@@ -4,11 +4,15 @@ import {
   DefaultApi,
   Middleware,
   ResponseContext,
-  RequestContext, JwtResponseDto,
+  RequestContext,
+  JwtResponseDto,
+  AuthResponseDtoFromJSON,
+  ErrorResponseFromJSON,
 } from "../../../generated";
 import {store} from "../../store";
 import {clearAuth, setAccessToken} from "../../store/auth";
 import {REFRESH_TOKEN_KEY} from "../auth/authProvider";
+import * as runtime from "../../../generated/runtime";
 
 class TokenRefreshMiddleware implements Middleware {
   private refreshInProgress: Promise<string | undefined> | null = null;
@@ -39,6 +43,12 @@ class TokenRefreshMiddleware implements Middleware {
       } finally {
         this.refreshInProgress = null;
       }
+    }
+
+    if (context.response.status < 200 || context.response.status >= 300) {
+      const dto = await (new runtime.JSONApiResponse(context.response,
+        (jsonValue) => ErrorResponseFromJSON(jsonValue))).value();
+      throw new Error(dto.error);
     }
 
     return context.response;
