@@ -71,6 +71,7 @@ public class AccountController implements AccountsApi {
     }
 
     @Override
+    @PreAuthorize("hasAnyRole('ADMIN', 'STAFF')")
     public ResponseEntity<GetAccounts200Response> getAccounts(Pageable pageable, String filter, String search) {
         log.info("Getting accounts");
         var includeInvisible = SecurityUtil.hasPermission(Role.ADMIN);
