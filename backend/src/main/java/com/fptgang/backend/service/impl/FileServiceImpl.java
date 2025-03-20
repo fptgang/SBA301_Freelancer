@@ -1,5 +1,6 @@
 package com.fptgang.backend.service.impl;
 
+import com.fptgang.backend.model.Contract;
 import com.fptgang.backend.model.File;
 import com.fptgang.backend.repository.*;
 import com.fptgang.backend.security.AuthContext;
@@ -29,6 +30,7 @@ public class FileServiceImpl implements FileService {
     private final MessageRepos messageRepos;
     private final ProposalRepos proposalRepos;
     private final AuthContext authContext;
+    private final ContractRepos contractRepos;
 
     @Autowired
     public FileServiceImpl(FileRepos fileRepos,
@@ -38,7 +40,7 @@ public class FileServiceImpl implements FileService {
                            MilestoneRepos milestoneRepos,
                            MessageRepos messageRepos,
                            ProposalRepos proposalRepos,
-                           AuthContext authContext) {
+                           AuthContext authContext, ContractRepos contractRepos) {
         this.fileRepos = fileRepos;
         this.azureBlobService = azureBlobService;
         this.accountRepos = accountRepos;
@@ -47,6 +49,7 @@ public class FileServiceImpl implements FileService {
         this.messageRepos = messageRepos;
         this.authContext = authContext;
         this.proposalRepos = proposalRepos;
+        this.contractRepos = contractRepos;
     }
 
     @Override
@@ -71,6 +74,16 @@ public class FileServiceImpl implements FileService {
     @Transactional
     public File createForMessage(Long messageId, MultipartFile blob) {
         return create(File.builder().message(messageRepos.getReferenceById(messageId)).build(), blob);
+    }
+
+    @Override
+    @Transactional
+    public File createForContract(Long proposalId, MultipartFile blob) {
+        Contract contract = contractRepos.getReferenceById(proposalId);
+        File file=create(File.builder().contract(contract).build(), blob);
+        contract.setContractFile(file);
+        contractRepos.save(contract);
+        return file;
     }
 
     @Override

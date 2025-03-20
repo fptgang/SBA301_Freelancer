@@ -12,4 +12,4 @@ ProfileFormDto:
     skills:
       type: array
       items:
-        $ref: 'skill-set.yml#/SkillSetDto'
+        $ref: '../profile-skill.yml#/ProfileSkillDto'

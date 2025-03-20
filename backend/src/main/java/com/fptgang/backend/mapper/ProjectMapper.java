@@ -3,7 +3,9 @@ package com.fptgang.backend.mapper;
 import com.fptgang.backend.api.model.ProjectDto;
 import com.fptgang.backend.api.model.ProjectStatusDto;
 import com.fptgang.backend.api.model.ProjectTerminationReasonDto;
+import com.fptgang.backend.api.model.ProposalDto;
 import com.fptgang.backend.model.Project;
+import com.fptgang.backend.model.Proposal;
 import com.fptgang.backend.model.Role;
 import com.fptgang.backend.repository.*;
 import com.fptgang.backend.security.AuthContext;
@@ -14,6 +16,7 @@ import com.fptgang.backend.util.SecurityUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -194,11 +197,13 @@ public class ProjectMapper extends BaseMapper<ProjectDto, Project> {
         // Freelancers can view his own proposals to this project
         // The freelancer is not necessarily the one get contracted
         if (authContext.getRole() != null && authContext.getRole() == Role.FREELANCER) {
-            dto.setMyProposals(proposalService
+            List<ProposalDto> mps= proposalService
                     .findByProjectAndFreelancer(
                             entity.getProjectId(),
                             authContext.requireAccountId()
-                    ).stream().map(e -> proposalMapper.toDTO(e, DetailLevel.FULL)).toList());
+                    ).stream().map(e -> proposalMapper.toDTO(e, DetailLevel.FULL)).toList();
+            log.info("get my Proposals: {}",mps.size());
+            dto.setMyProposals(mps);
         }
 
         return dto;

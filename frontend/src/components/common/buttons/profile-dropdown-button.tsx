@@ -26,7 +26,8 @@ export const ProfileDropdownButton = () => {
       label: "Profile",
       onClick: () => {
         if (user?.role === AccountDtoRoleEnum.Client) nav("/client");
-        if (user?.role === AccountDtoRoleEnum.Freelancer) nav("/freelancer");
+        if (user?.role === AccountDtoRoleEnum.Freelancer)
+          nav("/freelancer/profile");
       },
     },
     {

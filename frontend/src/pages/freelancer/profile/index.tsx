@@ -11,11 +11,13 @@ import {
   Form,
   Select,
   notification,
+  Button,
 } from "antd";
 import type { SelectProps } from "antd/es/select";
 import {
   ProficiencyEnum,
   ProfileDto,
+  ProfileFormDto,
   ProfileSkillDto,
   SkillDto,
 } from "../../../../generated";
@@ -34,18 +36,11 @@ const FreelancerProfilePage: React.FC = () => {
   const user = store.getState().auth.account;
   const [newSkill, setNewSkill] = useState<Partial<ProfileSkillDto>>({});
 
-  const { formProps, saveButtonProps, queryResult } = useForm<ProfileDto>({
+  const { formProps, saveButtonProps, queryResult } = useForm<ProfileFormDto>({
     resource: "profiles",
     id: user?.profileId,
     action: "edit",
   });
-
-  const { queryResult: profileData } = useShow<ProfileDto>({
-    resource: "profiles",
-    id: user?.profileId,
-  });
-
-  const profile = profileData?.data?.data;
 
   const { selectProps: skillSelectProps, queryResult: skillData } =
     useSelect<SkillDto>({
@@ -61,6 +56,7 @@ const FreelancerProfilePage: React.FC = () => {
     <Edit
       saveButtonProps={saveButtonProps}
       title={<Title level={3}>Freelancer Profile</Title>}
+      headerButtons={<></>}
     >
       <Form {...formProps} layout="vertical">
         <Card>
@@ -76,7 +72,6 @@ const FreelancerProfilePage: React.FC = () => {
                 <TextArea
                   rows={4}
                   placeholder="Introduce yourself and your experience"
-                  defaultValue={profile?.overview}
                 />
               </Form.Item>
             </Col>
@@ -95,7 +90,6 @@ const FreelancerProfilePage: React.FC = () => {
                 <TextArea
                   rows={2}
                   placeholder="Education level and certificates"
-                  defaultValue={profile?.education}
                 />
               </Form.Item>
             </Col>
@@ -108,10 +102,7 @@ const FreelancerProfilePage: React.FC = () => {
                   { required: true, message: "Please enter phone number" },
                 ]}
               >
-                <Input
-                  placeholder="Enter phone number"
-                  defaultValue={profile?.phoneNumber}
-                />
+                <Input placeholder="Enter phone number" />
               </Form.Item>
             </Col>
 
@@ -121,10 +112,7 @@ const FreelancerProfilePage: React.FC = () => {
                 name="language"
                 rules={[{ required: true, message: "Please select language" }]}
               >
-                <Input
-                  placeholder="Enter language"
-                  defaultValue={profile?.language}
-                />
+                <Input placeholder="Enter language" />
               </Form.Item>
             </Col>
 
