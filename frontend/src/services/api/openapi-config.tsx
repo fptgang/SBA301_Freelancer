@@ -26,6 +26,7 @@ class TokenRefreshMiddleware implements Middleware {
 
       try {
         const newAccessToken = await this.refreshInProgress;
+        console.log('newAccessToken ', newAccessToken)
         const newHeaders = new Headers(context.init.headers);
         newHeaders.set('Authorization', `Bearer ${newAccessToken}`);
 
@@ -36,9 +37,9 @@ class TokenRefreshMiddleware implements Middleware {
 
         return fetch(context.url, retriedInit);
       } catch (refreshError) {
+        console.error(refreshError);
         localStorage.removeItem(REFRESH_TOKEN_KEY);
         store.dispatch(clearAuth());
-        //  window.location.href = '/login';
         throw refreshError;
       } finally {
         this.refreshInProgress = null;
@@ -58,6 +59,7 @@ class TokenRefreshMiddleware implements Middleware {
     const refreshToken = localStorage.getItem(REFRESH_TOKEN_KEY);
 
     if (!refreshToken) {
+      window.location.href = '/login';
       throw new Error('No refresh token available');
     }
 

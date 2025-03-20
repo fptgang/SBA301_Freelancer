@@ -1,13 +1,15 @@
 import React from "react";
 import { Card, Form, Input, Button, Typography, message } from "antd";
 import api from "../../../services/api/openapi-config";
+import {useNotification} from "@refinedev/core";
 
 const { Title } = Typography;
 
 const SecuritySettingsPage: React.FC = () => {
   const [passwordForm] = Form.useForm();
+  const { open } = useNotification();
 
-  const handlePasswordChange = (values: {
+  const handlePasswordChange = async (values: {
     currentPassword: string;
     newPassword: string;
     confirmPassword: string;
@@ -22,20 +24,27 @@ const SecuritySettingsPage: React.FC = () => {
       message.error("Password must be at least 6 characters long");
       return;
     }
-    api
-      .changePassword({
-        changePasswordRequestDto: {
-          oldPassword: values.currentPassword,
-          newPassword: values.newPassword,
-          confirmPassword: values.confirmPassword,
-        },
-      })
-      .then(() => {
-        message.success("Password changed successfully");
-      })
-      .catch((error) => {
-        message.error(error.response.data.message);
+    try {
+      await api
+        .changePassword({
+          changePasswordRequestDto: {
+            oldPassword: values.currentPassword,
+            newPassword: values.newPassword,
+            confirmPassword: values.confirmPassword,
+          },
+        })
+      open?.({
+        type: "success",
+        message: "ChangePassword",
+        description: "Password changed successfully",
       });
+    } catch (e) {
+      open?.({
+        type: "error",
+        message: "ChangePassword",
+        description: e.toString(),
+      });
+    }
     passwordForm.resetFields();
   };
 

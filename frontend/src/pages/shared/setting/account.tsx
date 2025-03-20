@@ -23,6 +23,7 @@ import { AccountDto } from "../../../../generated";
 import { on } from "events";
 import { API_URL } from "../../../utils";
 import api from "../../../services/api/openapi-config";
+import {useNotification} from "@refinedev/core";
 
 const { Title } = Typography;
 
@@ -31,19 +32,27 @@ const apiUrl = API_URL;
 const AccountSettingsPage: React.FC = () => {
   const user = store.getState().auth.account;
   const token = store.getState().auth.accessToken;
-  const nav = useNavigate();
+  const { open } = useNotification();
 
-  const { formProps, form, onFinish } = useForm<AccountDto>({
-    resource: "accounts",
-    id: user?.accountId,
-    action: "edit",
-  });
   const [fileList, setFileList] = useState<UploadFile[]>([]);
+
+  // Initialize fileList when component mounts and user is available
+  React.useEffect(() => {
+    if (user?.avatarUrl) {
+      setFileList([{
+        uid: '-1',
+        name: 'avatar',
+        status: 'done',
+        url: user.avatarUrl,
+      }]);
+    }
+  }, [user?.avatarUrl]);
+
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewImage, setPreviewImage] = useState("");
   const [previewTitle, setPreviewTitle] = useState("");
 
-  const handleProfileUpdate = (values: AccountDto) => {
+  const handleProfileUpdate = async (values: AccountDto) => {
     // Validate names
     if (!values.firstName || values.firstName.trim().length < 2) {
       message.error("First name must be at least 2 characters long");
@@ -54,11 +63,30 @@ const AccountSettingsPage: React.FC = () => {
       message.error("Last name must be at least 2 characters long");
       return;
     }
-    api.updateAccount({
-      accountId: user?.accountId || 0,
-      accountDto: values,
-    });
+    try {
+      await api.updateAccount({
+        accountId: user?.accountId || 0,
+        accountDto: values,
+      });
+      open?.({
+        type: "success",
+        message: "UpdateAccount",
+        description: "Profile updated successfully",
+      });
+    } catch (e) {
+      open?.({
+        type: "error",
+        message: "UpdateAccount",
+        description: e.toString(),
+      });
+    }
   };
+
+  const { formProps } = useForm<AccountDto>();
+
+  if (!user) {
+    return <div>Loading...</div>;
+  }
 
   const getBase64 = (file: RcFile): Promise<string> =>
     new Promise((resolve, reject) => {
@@ -100,8 +128,9 @@ const AccountSettingsPage: React.FC = () => {
           <Form.Item label="Avatar" style={{ textAlign: "center" }}>
             <ImgCrop rotationSlider aspectSlider showReset>
               <Upload
-                action={apiUrl + "/accounts"}
-                method="put"
+                action={apiUrl + "/accounts/" + user?.accountId + "/upload-avatar"}
+                method="post"
+                name="blob"
                 headers={{ Authorization: `Bearer ${token}` }}
                 listType="picture-circle"
                 fileList={fileList}
@@ -126,8 +155,12 @@ const AccountSettingsPage: React.FC = () => {
         <Form
           {...formProps}
           layout="vertical"
-          onFinish={handleProfileUpdate}
           style={{ maxWidth: 400 }}
+          initialValues={{
+            firstName: user?.firstName,
+            lastName: user?.lastName,
+          }}
+          onFinish={handleProfileUpdate}
         >
           <Row gutter={16}>
             <Col span={12}>
@@ -138,10 +171,7 @@ const AccountSettingsPage: React.FC = () => {
                   { required: true, message: "Please input your first name!" },
                 ]}
               >
-                <Input
-                  placeholder="Enter your first name"
-                  defaultValue={user?.firstName}
-                />
+                <Input placeholder="Enter your first name" />
               </Form.Item>
             </Col>
             <Col span={12}>
@@ -152,10 +182,7 @@ const AccountSettingsPage: React.FC = () => {
                   { required: true, message: "Please input your last name!" },
                 ]}
               >
-                <Input
-                  placeholder="Enter your last name"
-                  defaultValue={user?.lastName}
-                />
+                <Input placeholder="Enter your last name" />
               </Form.Item>
             </Col>
           </Row>

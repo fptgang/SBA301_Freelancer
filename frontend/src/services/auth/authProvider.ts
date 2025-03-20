@@ -83,13 +83,7 @@ export const authProvider: AuthProvider = {
     if (refetch || (!store.getState().auth.account && localStorage.getItem(REFRESH_TOKEN_KEY))) {
       console.log("[authProvider.getIdentity] fetching user profile...");
       try {
-        const response = await api.getCurrentUser(
-          {
-            headers: {
-              "Authorization": `Bearer ${store.getState().auth.accessToken}`
-            }
-          }
-        )
+        const response = await api.getCurrentUser()
         console.log(response);
         store.dispatch(setAuthenticatedAccount(response));
       } catch (e) {
