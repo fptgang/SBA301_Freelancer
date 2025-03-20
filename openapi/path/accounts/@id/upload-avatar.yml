@@ -1,0 +1,32 @@
+post:
+  summary: Update account avatar
+  operationId: updateAccountAvatar
+  security:
+    - bearerAuth: [ ]
+  parameters:
+    - name: accountId
+      in: path
+      required: true
+      schema:
+        type: integer
+        format: int64
+  requestBody:
+    description: File to upload
+    required: true
+    content:
+      multipart/form-data:
+        schema:
+          $ref: '../../../model/request/avatar.yml#/AvatarDto'
+  responses:
+    '200':
+      description: The operation was successful
+      content:
+        application/json:
+          schema:
+            $ref: '../../../model/account.yml#/AccountDto'
+    '400':
+      description: The operation failed
+      content:
+        application/json:
+          schema:
+            $ref: '../../../component/error.yml#/ErrorResponse'

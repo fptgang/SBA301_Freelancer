@@ -97,6 +97,8 @@ paths:
     $ref: "path/accounts/index.yml"
   /accounts/{accountId}:
     $ref: "path/accounts/@id/index.yml"
+  /accounts/{accountId}/upload-avatar:
+    $ref: "path/accounts/@id/upload-avatar.yml"
 
   /profiles:
     $ref: "path/profiles/index.yml"
