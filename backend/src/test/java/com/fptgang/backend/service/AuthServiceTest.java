@@ -56,6 +56,7 @@ class AuthServiceTest {
         RegisterRequestDto.setConfirmPassword("password123");
         RegisterRequestDto.setFirstName("John");
         RegisterRequestDto.setLastName("Doe");
+        RegisterRequestDto.setRole(com.fptgang.backend.api.model.RegisterRequestDto.RoleEnum.CLIENT);
 
         // Act
         boolean result = authService.register(RegisterRequestDto);
@@ -84,6 +85,7 @@ class AuthServiceTest {
         RegisterRequestDto.setConfirmPassword("password123");
         RegisterRequestDto.setFirstName("John");
         RegisterRequestDto.setLastName("Doe");
+        RegisterRequestDto.setRole(com.fptgang.backend.api.model.RegisterRequestDto.RoleEnum.CLIENT);
         authService.register(RegisterRequestDto);
 
         RegisterRequestDto duplicateRegisterDTO = new RegisterRequestDto();
@@ -92,6 +94,7 @@ class AuthServiceTest {
         duplicateRegisterDTO.setConfirmPassword("password123");
         duplicateRegisterDTO.setFirstName("Jane");
         duplicateRegisterDTO.setLastName("Smith");
+        duplicateRegisterDTO.setRole(com.fptgang.backend.api.model.RegisterRequestDto.RoleEnum.CLIENT);
 
         // Act & Assert
         assertThrows(InvalidInputException.class, () -> authService.register(duplicateRegisterDTO));

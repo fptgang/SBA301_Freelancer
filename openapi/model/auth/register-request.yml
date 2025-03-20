@@ -1,6 +1,9 @@
 RegisterRequestDto:
   type: object
   properties:
+    role:
+      type: string
+      enum: [CLIENT, FREELANCER]
     email:
       type: string
     password:

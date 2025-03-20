@@ -1,0 +1,22 @@
+post:
+  summary: Register with Google
+  operationId: registerWithGoogle
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            role:
+              type: string
+              enum: [CLIENT, FREELANCER]
+            credential:
+              type: string
+  responses:
+    '200':
+      description: Successful register with Google
+      content:
+        application/json:
+          schema:
+            $ref: '../../model/auth/auth-response.yml#/AuthResponseDto'

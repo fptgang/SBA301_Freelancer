@@ -4,6 +4,7 @@ import com.fptgang.backend.api.controller.AuthApi;
 import com.fptgang.backend.api.model.*;
 import com.fptgang.backend.mapper.AccountMapper;
 import com.fptgang.backend.mapper.DetailLevel;
+import com.fptgang.backend.model.Role;
 import com.fptgang.backend.service.JwtService;
 import com.fptgang.backend.service.AccountService;
 import com.fptgang.backend.service.AuthService;
@@ -62,6 +63,16 @@ public class AuthController implements AuthApi {
         );
         attachSessionIdCookie();
         return ResponseEntity.ok(dto);
+    }
+
+    @Override
+    public ResponseEntity<AuthResponseDto> registerWithGoogle(RegisterWithGoogleRequest req) {
+        if (authService.registerWithGoogle(
+                req.getCredential().replace("\"",""),
+                Role.valueOf(req.getRole().name())
+        ))
+            return ResponseEntity.status(HttpStatus.CREATED).build();
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
     }
 
     @Override
