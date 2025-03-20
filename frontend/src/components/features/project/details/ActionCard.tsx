@@ -6,7 +6,11 @@ import {
   UserOutlined,
 } from "@ant-design/icons";
 import { useNavigate } from "react-router";
-import { AccountDto, ProjectDto, ProjectStatusDto } from "../../../../../generated";
+import {
+  AccountDto,
+  ProjectDto,
+  ProjectStatusDto,
+} from "../../../../../generated";
 import FreelancerCreateProposalButton from "../../../../pages/freelancer/proposal/freelancer-create";
 import { useGetIdentity } from "@refinedev/core";
 
@@ -40,18 +44,26 @@ export const ActionCard: React.FC<ActionCardProps> = ({
         ) : project.status !== ProjectStatusDto.Open ? (
           <></>
         ) : role === "FREELANCER" ? (
-          <>
-            <FreelancerCreateProposalButton
-              project={project}
-              freelancerId={freelancerId}
-            />
-            <Typography.Text
-              type="secondary"
-              style={{ textAlign: "center", display: "block" }}
-            >
-              {project?.proposalCount} proposals received
-            </Typography.Text>
-          </>
+          project?.myProposals?.find((p) => p.status === "PENDING") ? (
+            <>
+              <Button block type="primary" size="large">
+                View Your Proposal
+              </Button>
+            </>
+          ) : (
+            <>
+              <FreelancerCreateProposalButton
+                project={project}
+                freelancerId={freelancerId}
+              />
+              <Typography.Text
+                type="secondary"
+                style={{ textAlign: "center", display: "block" }}
+              >
+                {project?.proposalCount} proposals received
+              </Typography.Text>
+            </>
+          )
         ) : (
           <Button
             block

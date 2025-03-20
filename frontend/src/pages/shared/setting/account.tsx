@@ -22,10 +22,11 @@ import { useForm } from "@refinedev/antd";
 import { AccountDto } from "../../../../generated";
 import { on } from "events";
 import { API_URL } from "../../../utils";
+import api from "../../../services/api/openapi-config";
 
 const { Title } = Typography;
 
-const api = API_URL;
+const apiUrl = API_URL;
 
 const AccountSettingsPage: React.FC = () => {
   const user = store.getState().auth.account;
@@ -36,10 +37,6 @@ const AccountSettingsPage: React.FC = () => {
     resource: "accounts",
     id: user?.accountId,
     action: "edit",
-    onMutationSuccess(data, variables, context, isAutoSave) {
-      message.success("Account info updated successfully");
-      nav("/settings");
-    },
   });
   const [fileList, setFileList] = useState<UploadFile[]>([]);
   const [previewOpen, setPreviewOpen] = useState(false);
@@ -57,7 +54,10 @@ const AccountSettingsPage: React.FC = () => {
       message.error("Last name must be at least 2 characters long");
       return;
     }
-    onFinish(values);
+    api.updateAccount({
+      accountId: user?.accountId || 0,
+      accountDto: values,
+    });
   };
 
   const getBase64 = (file: RcFile): Promise<string> =>
@@ -100,7 +100,7 @@ const AccountSettingsPage: React.FC = () => {
           <Form.Item label="Avatar" style={{ textAlign: "center" }}>
             <ImgCrop rotationSlider aspectSlider showReset>
               <Upload
-                action={api + "/accounts"}
+                action={apiUrl + "/accounts"}
                 method="put"
                 headers={{ Authorization: `Bearer ${token}` }}
                 listType="picture-circle"

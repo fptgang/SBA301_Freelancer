@@ -69,6 +69,10 @@ public class File {
     @JoinColumn(name = "milestone_id")
     private Milestone milestone;
 
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "contract_id")
+    private Contract contract;
+
     @NotNull
     public static File.FileBuilder of(MultipartFile blob) {
         return File.builder()

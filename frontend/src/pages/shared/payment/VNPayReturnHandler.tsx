@@ -362,10 +362,7 @@ export const VNPayReturnHandler: React.FC = () => {
             {renderResult()}
             <div style={{ textAlign: "center", marginTop: 24 }}>
               <Space>
-                <Button
-                  type="primary"
-                  onClick={() => navigate("/account/wallet")}
-                >
+                <Button type="primary" onClick={() => navigate("/wallet")}>
                   Return to Wallet
                 </Button>
                 <Button onClick={() => navigate("/")}>Go to Homepage</Button>

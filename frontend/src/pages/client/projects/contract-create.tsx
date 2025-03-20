@@ -1,15 +1,13 @@
 import React, { useState } from "react";
-import { useGetIdentity, useCreate, HttpError } from "@refinedev/core";
+import { HttpError } from "@refinedev/core";
 import {
   Button,
   Modal,
   Form,
-  Input,
   Upload,
   Steps,
   Card,
   Alert,
-  Space,
   Row,
   Col,
   Divider,
@@ -18,29 +16,16 @@ import {
   Checkbox,
   Statistic,
 } from "antd";
-import {
-  PlusOutlined,
-  UploadOutlined,
-  InboxOutlined,
-  CheckCircleOutlined,
-} from "@ant-design/icons";
-import { useForm, useModal } from "@refinedev/antd";
+import { InboxOutlined, CheckCircleOutlined } from "@ant-design/icons";
+import { useModal } from "@refinedev/antd";
 import type { UploadFile } from "antd/es/upload/interface";
-import { RcFile } from "antd/es/upload";
 import { store } from "../../../store";
 import api from "../../../services/api/openapi-config";
-import { on } from "events";
 import DepositModal from "../../../components/DepositModal";
 
 const { Step } = Steps;
 const { Dragger } = Upload;
-const { Text, Title } = Typography;
-const { TextArea } = Input;
-
-// Define interfaces for better type safety
-interface ContractFormValues {
-  files: UploadFile[];
-}
+const { Text } = Typography;
 
 interface ContractCreateButtonProps {
   projectTitle: string;
@@ -58,8 +43,6 @@ export const ContractCreateButton: React.FC<ContractCreateButtonProps> = ({
   onSubmit,
 }) => {
   const user = store.getState().auth.account;
-  const userId = user?.accountId;
-
   // Modal state
   const { modalProps, show, close } = useModal();
   const [currentStep, setCurrentStep] = useState(0);
@@ -79,13 +62,12 @@ export const ContractCreateButton: React.FC<ContractCreateButtonProps> = ({
         .createContract({
           proposalId: proposalId,
         })
-        .then(async () => {
+        .then(async (data) => {
           fileList.forEach((file) => {
             api
               .uploadFile({
-                uploaderId: userId,
                 blob: file.originFileObj,
-                contractId: 0,
+                contractId: data.contractId,
               })
               .catch((error: HttpError) => {
                 message.error(error.message);
@@ -243,7 +225,6 @@ export const ContractCreateButton: React.FC<ContractCreateButtonProps> = ({
               getValueFromEvent={() => fileList}
             >
               <Dragger
-                multiple
                 beforeUpload={() => false}
                 onChange={handleFileChange}
                 fileList={fileList}
@@ -254,7 +235,7 @@ export const ContractCreateButton: React.FC<ContractCreateButtonProps> = ({
                   <InboxOutlined />
                 </p>
                 <p className="ant-upload-text">
-                  Click or drag files to this area to upload
+                  Click or drag a file to this area to upload
                 </p>
                 <p className="ant-upload-hint">
                   Supported file types: PDF, DOC, DOCX, JPG, PNG (Max: 10MB

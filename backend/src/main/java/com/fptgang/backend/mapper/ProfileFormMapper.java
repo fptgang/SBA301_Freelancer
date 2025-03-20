@@ -13,10 +13,10 @@ import java.util.stream.Collectors;
 @Slf4j
 @Component
 public class ProfileFormMapper extends BaseMapper<ProfileFormDto, Profile> {
-    private final SkillRepos skillRepos;
+    private final ProfileSkillMapper profileSkillMapper;
 
-    public ProfileFormMapper(SkillRepos skillRepos) {
-        this.skillRepos = skillRepos;
+    public ProfileFormMapper(ProfileSkillMapper profileSkillMapper) {
+        this.profileSkillMapper = profileSkillMapper;
     }
 
     @Override
@@ -29,13 +29,8 @@ public class ProfileFormMapper extends BaseMapper<ProfileFormDto, Profile> {
         entity.setLanguage(dto.getLanguage());
         if (dto.getSkills() != null) {
             entity.setSkills(dto.getSkills().stream()
-                    .filter(e -> e.getSkillId() != null && e.getProficiency() != null)
-                    .map(e -> {
-                        return ProfileSkill.builder()
-                                .skill(skillRepos.getReferenceById(e.getSkillId()))
-                                .proficiency(Proficiency.valueOf(e.getProficiency().name()))
-                                .build();
-                    }).collect(Collectors.toList()));
+                    .map(profileSkillMapper::toEntity)
+                    .collect(Collectors.toList()));
         }
 
         return entity;
