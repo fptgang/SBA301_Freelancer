@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -38,6 +39,7 @@ public class ProjectCategoryController implements ProjectCategoriesApi {
     }
 
     @Override
+    @PreAuthorize("hasAnyRole('ADMIN', 'STAFF')")
     public ResponseEntity<ProjectCategoryDto> createProjectCategory(ProjectCategoryDto projectCategoryDto) {
         var projectCategory = projectCategoryService.create(projectCategoryMapper.toEntity(projectCategoryDto));
         messagingTemplate.convertAndSend("resources/projectCategories", projectCategoryMapper.toDTO(projectCategory, DetailLevel.FULL
@@ -46,6 +48,7 @@ public class ProjectCategoryController implements ProjectCategoriesApi {
     }
 
     @Override
+    @PreAuthorize("hasAnyRole('ADMIN', 'STAFF')")
     public ResponseEntity<Void> deleteProjectCategory(Long projectCategoryId) {
         projectCategoryService.deleteById(projectCategoryId);
         messagingTemplate.convertAndSend("resources/projectCategories", "Deleted projectCategory " + projectCategoryId);
@@ -73,6 +76,7 @@ public class ProjectCategoryController implements ProjectCategoriesApi {
     }
 
     @Override
+    @PreAuthorize("hasAnyRole('ADMIN', 'STAFF')")
     public ResponseEntity<ProjectCategoryDto> updateProjectCategory(Long projectCategoryId, ProjectCategoryDto projectCategoryDto) {
         projectCategoryDto.setProjectCategoryId(projectCategoryId); // Override projectCategoryId
         messagingTemplate.convertAndSend("resources/projectCategories", projectCategoryDto);

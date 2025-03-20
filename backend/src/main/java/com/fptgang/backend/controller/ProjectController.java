@@ -43,6 +43,9 @@ public class ProjectController implements ProjectsApi {
         this.projectTimelineMapper = projectTimelineMapper;
     }
 
+    /**
+     * Can access: Client
+     */
     @Override
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ProjectDto> createProject(ProjectCreateDto projectCreateDto) {
@@ -57,6 +60,9 @@ public class ProjectController implements ProjectsApi {
         );
     }
 
+    /**
+     * Can access: Client, Staff+
+     */
     @Override
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Void> deleteProject(Long projectId) {
@@ -64,18 +70,13 @@ public class ProjectController implements ProjectsApi {
         return ResponseEntity.noContent().build();
     }
 
+    /**
+     * Can access: Any
+     */
     @Override
     public ResponseEntity<ProjectDto> getProjectById(Long projectId) {
         Project project = projectService.findByProjectId(projectId);
-        var userId = SecurityUtil.getCurrentUserId();
-        if (SecurityUtil.hasPermission(Role.STAFF) ||
-                Objects.equals(project.getClient().getAccountId(), userId) ||
-                (project.getContract() != null && Objects.equals(project.getContract().getFreelancer().getAccountId(), userId))
-        ) {
-            return ResponseEntity.ok(projectMapper.toDTO(project, DetailLevel.FULL));
-
-        }
-        return ResponseEntity.ok(projectMapper.toDTO(project, DetailLevel.SUMMARY));
+        return ResponseEntity.ok(projectMapper.toDTO(project, DetailLevel.FULL));
     }
 
     @Override
@@ -101,6 +102,9 @@ public class ProjectController implements ProjectsApi {
         return OpenApiHelper.respondPage(res, GetProjects200Response.class);
     }
 
+    /**
+     * Can access: Client
+     */
     @Override
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ProjectDto> updateProject(Long projectId, ProjectUpdateDto projectDto) {
@@ -115,6 +119,9 @@ public class ProjectController implements ProjectsApi {
         );
     }
 
+    /**
+     * Can access: Client
+     */
     @Override
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ProjectDto> extendProjectDeadline(Long projectId, ProjectTimelineDto projectTimelineDto) {
@@ -125,6 +132,9 @@ public class ProjectController implements ProjectsApi {
         );
     }
 
+    /**
+     * Can access: Client
+     */
     @Override
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ProjectDto> terminateProject(Long projectId) {
@@ -136,6 +146,9 @@ public class ProjectController implements ProjectsApi {
         );
     }
 
+    /**
+     * Can access: Client
+     */
     @Override
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ProjectDto> unpauseProject(Long projectId, ProjectTimelineDto projectTimelineDto) {
@@ -148,20 +161,22 @@ public class ProjectController implements ProjectsApi {
         );
     }
 
+    /**
+     * Can access: Staff+
+     */
     @Override
+    @PreAuthorize("hasAnyRole('ADMIN', 'STAFF')")
     public ResponseEntity<ProjectDto> joinProject(Long projectId) {
-        if (!SecurityUtil.hasPermission(Role.STAFF)) {
-            throw new RuntimeException("You are not a staff");
-        }
         Project project = projectService.joinProject(projectId, SecurityUtil.getCurrentUserId());
         return ResponseEntity.ok(projectMapper.toDTO(project, DetailLevel.FULL));
     }
 
+    /**
+     * Can access: Staff+
+     */
     @Override
+    @PreAuthorize("hasAnyRole('ADMIN', 'STAFF')")
     public ResponseEntity<ProjectDto> leaveProject(Long projectId) {
-        if (!SecurityUtil.hasPermission(Role.STAFF)) {
-            throw new RuntimeException("You are not a staff");
-        }
         Project project = projectService.leaveProject(projectId, SecurityUtil.getCurrentUserId());
         return ResponseEntity.ok(projectMapper.toDTO(project, DetailLevel.FULL));
     }

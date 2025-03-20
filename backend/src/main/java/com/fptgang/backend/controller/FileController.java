@@ -31,53 +31,36 @@ public class FileController implements FilesApi {
         this.fileMapper = fileMapper;
     }
 
+    /**
+     * Can access: Who can access related entity
+     */
     @Override
-    public ResponseEntity<FileDto> uploadFile(Long uploaderId,
-                                              MultipartFile blob,
-                                              Boolean isVisible,
+    public ResponseEntity<FileDto> uploadFile(MultipartFile blob,
                                               Long messageId,
                                               Long proposalId,
                                               Long projectId,
                                               Long milestoneId,
                                               Long contractId
     ) {
-        File file = fileService.create(
-                File.builder()
-                    .isVisible(isVisible)
-                    .project(Project.builder()
-                                    .projectId(projectId)
-                                    .build())
-                    .uploader(Account.builder()
-                                     .accountId(uploaderId)
-                                     .build())
-                    .build(),
-                blob
-        );
+        File file;
+        if (messageId != null)
+            file = fileService.createForMessage(messageId, blob);
+        else if (proposalId != null)
+            file = fileService.createForProposal(proposalId, blob);
+        else if (projectId != null)
+            file = fileService.createForProject(projectId, blob);
+        else if (milestoneId != null)
+            file = fileService.createForMilestone(milestoneId, blob);
+        //else if (contractId != null)
+        //    file = fileService.createForContract(contractId, blob);
+        else
+            throw new IllegalArgumentException("Unknown target");
         return new ResponseEntity<>(fileMapper.toDTO(file, DetailLevel.FULL), HttpStatus.OK);
     }
 
-    @Override
-    public ResponseEntity<FileDto> updateFile(Long fileId,
-                                              Long uploaderId,
-                                              MultipartFile blob,
-                                              Boolean isVisible,
-                                              Long messageId,
-                                              Long proposalId,
-                                              Long projectId,
-                                              Long milestoneId,
-                                              Long contractId
-    ) {
-        return FilesApi.super.updateFile(fileId,
-                uploaderId,
-                blob,
-                isVisible,
-                messageId,
-                proposalId,
-                projectId,
-                milestoneId,
-                contractId);
-    }
-
+    /**
+     * Can access: Who can access related entity
+     */
     @Override
     public ResponseEntity<Void> deleteFile(Long fileId) {
         fileService.deleteById(fileId);

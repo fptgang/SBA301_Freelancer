@@ -4,10 +4,13 @@ import com.fptgang.backend.api.model.ProjectDto;
 import com.fptgang.backend.api.model.ProjectStatusDto;
 import com.fptgang.backend.api.model.ProjectTerminationReasonDto;
 import com.fptgang.backend.model.Project;
+import com.fptgang.backend.model.Role;
 import com.fptgang.backend.repository.*;
+import com.fptgang.backend.security.AuthContext;
 import com.fptgang.backend.service.MessageService;
 import com.fptgang.backend.service.ProposalService;
 import com.fptgang.backend.util.DateTimeUtil;
+import com.fptgang.backend.util.SecurityUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -31,6 +34,8 @@ public class ProjectMapper extends BaseMapper<ProjectDto, Project> {
     private final MessageService messageService;
     private final ProposalService proposalService;
     private final ReportMapper reportMapper;
+    private final AuthContext authContext;
+    private final ProposalMapper proposalMapper;
 
     public ProjectMapper(ProjectCategoryRepos projectCategoryRepos,
                          ProjectCategoryMapper projectCategoryMapper,
@@ -45,7 +50,10 @@ public class ProjectMapper extends BaseMapper<ProjectDto, Project> {
                          ProjectSkillMapper projectSkillMapper,
                          MessageMapper messageMapper,
                          MessageService messageService,
-                         ProposalService proposalService, ReportMapper reportMapper) {
+                         ProposalService proposalService,
+                         ReportMapper reportMapper,
+                         AuthContext authContext,
+                         ProposalMapper proposalMapper) {
         this.projectCategoryRepos = projectCategoryRepos;
         this.projectCategoryMapper = projectCategoryMapper;
         this.accountRepos = accountRepos;
@@ -61,6 +69,8 @@ public class ProjectMapper extends BaseMapper<ProjectDto, Project> {
         this.messageService = messageService;
         this.proposalService = proposalService;
         this.reportMapper = reportMapper;
+        this.authContext = authContext;
+        this.proposalMapper = proposalMapper;
     }
 
     @Override
@@ -97,6 +107,8 @@ public class ProjectMapper extends BaseMapper<ProjectDto, Project> {
         if (dto.getContract() != null && dto.getContract().getContractId() != null) {
             entity.setContract(contractRepos.getReferenceById(dto.getContract().getContractId()));
         }
+        if (dto.getActiveMilestone() != null && dto.getActiveMilestone().getMilestoneId() != null)
+            entity.setActiveMilestone(milestoneRepos.getReferenceById(dto.getActiveMilestone().getMilestoneId()));
         if (dto.getMilestones() != null) {
             entity.setMilestones(dto.getMilestones().stream()
                     .filter(e -> e.getMilestoneId() != null)
@@ -130,6 +142,7 @@ public class ProjectMapper extends BaseMapper<ProjectDto, Project> {
             dto.setProjectCategory(projectCategoryMapper.toDTO(entity.getCategory(), DetailLevel.REFERENCE));
             return dto; // Those fields are enough
         }
+
         dto.setProposalCount(proposalService.countByProjectIdAndStatus(entity.getProjectId(), null));
         dto.setProjectCategory(projectCategoryMapper.toDTO(entity.getCategory(), DetailLevel.FULL));
         dto.setClient(accountMapper.toDTO(entity.getClient(), DetailLevel.REFERENCE));
@@ -145,28 +158,49 @@ public class ProjectMapper extends BaseMapper<ProjectDto, Project> {
         dto.setMilestones(entity.getMilestones().stream()
                 .map(milestone -> milestoneMapper.toDTO(milestone, DetailLevel.FULL))
                 .collect(Collectors.toList()));
+        dto.setActiveMilestone(milestoneMapper.toDTO(entity.getActiveMilestone(), DetailLevel.FULL));
         dto.setRequiredSkills(entity.getRequiredSkills().stream()
                 .map(skill -> projectSkillMapper.toDTO(skill, DetailLevel.FULL))
                 .collect(Collectors.toList()));
         dto.setRequiredSkills(entity.getRequiredSkills().stream()
                 .map((s) -> projectSkillMapper.toDTO(s, DetailLevel.FULL))
                 .collect(Collectors.toList()));
+
         if (level == DetailLevel.SUMMARY) {
             return dto; // Those fields are enough
         }
-        dto.setStaff(entity.getStaff()!=null && entity.getStaff().getAccountId()!=0?accountMapper.toDTO(entity.getStaff(), DetailLevel.REFERENCE):null);
+
         dto.setFiles(entity.getFiles().stream()
                 .map(f -> fileMapper.toDTO(f, DetailLevel.FULL))
                 .toList());
-        dto.setContract(entity.getContract()!=null?contractMapper.toDTO(entity.getContract(), DetailLevel.FULL):null);
 
-        dto.setLatestMessage(messageMapper.toDTO(
-                messageService.findLatestVisibleMessageByProject(entity.getProjectId()),
-                DetailLevel.REFERENCE
-        ));
-        dto.setReports(entity.getReports().stream()
-                .map(report -> reportMapper.toDTO(report, DetailLevel.SUMMARY))
-                .collect(Collectors.toList()));
+        // Only staff, the client and freelancer involved in this project can see internal stuff
+        if (authContext.hasInternalAccess(entity)) {
+
+            dto.setStaff(entity.getStaff() != null && entity.getStaff().getAccountId() != 0 ?
+                    accountMapper.toDTO(entity.getStaff(), DetailLevel.REFERENCE) : null);
+            dto.setContract(entity.getContract() != null ?
+                    contractMapper.toDTO(entity.getContract(), DetailLevel.FULL) : null);
+            dto.setLatestMessage(messageMapper.toDTO(
+                    messageService.findLatestVisibleMessageByProject(entity.getProjectId()),
+                    DetailLevel.REFERENCE
+            ));
+            dto.setReports(entity.getReports().stream()
+                    .map(report -> reportMapper.toDTO(report, DetailLevel.SUMMARY))
+                    .collect(Collectors.toList()));
+
+        }
+
+        // Freelancers can view his own proposals to this project
+        // The freelancer is not necessarily the one get contracted
+        if (authContext.getRole() != null && authContext.getRole() == Role.FREELANCER) {
+            dto.setMyProposals(proposalService
+                    .findByProjectAndFreelancer(
+                            entity.getProjectId(),
+                            authContext.requireAccountId()
+                    ).stream().map(e -> proposalMapper.toDTO(e, DetailLevel.FULL)).toList());
+        }
+
         return dto;
     }
 }

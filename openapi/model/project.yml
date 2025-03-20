@@ -47,6 +47,8 @@ ProjectDto:
       type: array
       items:
         $ref: 'milestone.yml#/MilestoneDto'
+    activeMilestone:
+      $ref: 'milestone.yml#/MilestoneDto'
     requiredSkills:
       type: array
       items:
@@ -60,3 +62,7 @@ ProjectDto:
       $ref: 'project-termination-reason.yml#/ProjectTerminationReasonDto'
     toTerminate:
       type: boolean
+    myProposals:
+      type: array
+      items:
+        $ref: 'proposal.yml#/ProposalDto'

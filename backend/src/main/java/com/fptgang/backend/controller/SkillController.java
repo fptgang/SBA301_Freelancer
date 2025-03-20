@@ -12,6 +12,7 @@ import com.fptgang.backend.util.SecurityUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -27,14 +28,21 @@ public class SkillController implements SkillsApi {
         this.skillService = skillService;
     }
 
-
+    /**
+     * Can access: Staff+
+     */
     @Override
+    @PreAuthorize("hasAnyRole('ADMIN', 'STAFF')")
     public ResponseEntity<SkillDto> createSkill(SkillDto skillDto) {
         var skill = skillMapper.toEntity(skillDto);
         return new ResponseEntity<>(skillMapper.toDTO(skillService.create(skill), DetailLevel.FULL), HttpStatus.OK);
     }
 
+    /**
+     * Can access: Staff+
+     */
     @Override
+    @PreAuthorize("hasAnyRole('ADMIN', 'STAFF')")
     public ResponseEntity<Void> deleteSkill(Long skillId) {
         skillService.deleteById(skillId);
         return new ResponseEntity<>(HttpStatus.OK);
@@ -60,10 +68,20 @@ public class SkillController implements SkillsApi {
         return OpenApiHelper.respondPage(res, GetSkills200Response.class);
     }
 
+    /**
+     * Can access: Staff+
+     */
     @Override
+    @PreAuthorize("hasAnyRole('ADMIN', 'STAFF')")
     public ResponseEntity<SkillDto> updateSkill(Long skillId, SkillDto skillDto) {
         skillDto.setSkillId(skillId); // Override skillId
 
-        return new ResponseEntity<>(skillMapper.toDTO(skillService.update(skillMapper.toEntity(skillDto)),DetailLevel.FULL), HttpStatus.OK);
+        return new ResponseEntity<>(
+                skillMapper.toDTO(
+                        skillService.update(skillMapper.toEntity(skillDto)),
+                        DetailLevel.FULL
+                ),
+                HttpStatus.OK
+        );
     }
 }

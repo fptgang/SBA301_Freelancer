@@ -88,7 +88,27 @@ public class TransactionServiceImpl implements TransactionService {
             transaction.setToAccount(to);
         }
 
-        return transactionRepos.save(transaction);
+        log.info("Saving transaction {}; from {} to {}; milestone {}",
+                transaction,
+                from == null ? null : from.getAccountId(),
+                to == null ? null : to.getAccountId(),
+                transaction.getMilestone() == null ? null : transaction.getMilestone().getMilestoneId());
+
+        transaction = transactionRepos.save(transaction);
+
+        if (transaction.getMilestone() != null) {
+            transaction.getMilestone().getTransactions().add(transaction);
+        }
+
+        if (transaction.getFromAccount() != null) {
+            transaction.getFromAccount().getOutgoingTransactions().add(transaction);
+        }
+
+        if (transaction.getToAccount() != null) {
+            transaction.getToAccount().getIncomingTransactions().add(transaction);
+        }
+
+        return transaction;
     }
 
     @Override

@@ -1,15 +1,14 @@
 package com.fptgang.backend.service.impl;
 
 import com.fptgang.backend.model.File;
-import com.fptgang.backend.repository.FileRepos;
+import com.fptgang.backend.repository.*;
+import com.fptgang.backend.security.AuthContext;
 import com.fptgang.backend.service.AzureBlobService;
 import com.fptgang.backend.service.FileService;
 import com.fptgang.backend.service.params.ListParams;
 import com.fptgang.backend.util.OpenApiHelper;
-import com.google.common.io.Files;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
@@ -24,29 +23,69 @@ public class FileServiceImpl implements FileService {
 
     private final AzureBlobService azureBlobService;
     private final FileRepos fileRepos;
+    private final AccountRepos accountRepos;
+    private final ProjectRepos projectRepos;
+    private final MilestoneRepos milestoneRepos;
+    private final MessageRepos messageRepos;
+    private final ProposalRepos proposalRepos;
+    private final AuthContext authContext;
 
     @Autowired
-    public FileServiceImpl(FileRepos fileRepos, AzureBlobService azureBlobService) {
+    public FileServiceImpl(FileRepos fileRepos,
+                           AzureBlobService azureBlobService,
+                           AccountRepos accountRepos,
+                           ProjectRepos projectRepos,
+                           MilestoneRepos milestoneRepos,
+                           MessageRepos messageRepos,
+                           ProposalRepos proposalRepos,
+                           AuthContext authContext) {
         this.fileRepos = fileRepos;
         this.azureBlobService = azureBlobService;
+        this.accountRepos = accountRepos;
+        this.projectRepos = projectRepos;
+        this.milestoneRepos = milestoneRepos;
+        this.messageRepos = messageRepos;
+        this.authContext = authContext;
+        this.proposalRepos = proposalRepos;
     }
 
     @Override
     @Transactional
-    public File create(File file, MultipartFile multipartFile) {
+    public File createForProject(Long projectId, MultipartFile blob) {
+        return create(File.builder().project(projectRepos.getReferenceById(projectId)).build(), blob);
+    }
+
+    @Override
+    @Transactional
+    public File createForMilestone(Long milestoneId, MultipartFile blob) {
+        return create(File.builder().milestone(milestoneRepos.getReferenceById(milestoneId)).build(), blob);
+    }
+
+    @Override
+    @Transactional
+    public File createForProposal(Long proposalId, MultipartFile blob) {
+        return create(File.builder().proposal(proposalRepos.getReferenceById(proposalId)).build(), blob);
+    }
+
+    @Override
+    @Transactional
+    public File createForMessage(Long messageId, MultipartFile blob) {
+        return create(File.builder().message(messageRepos.getReferenceById(messageId)).build(), blob);
+    }
+
+    @Override
+    public File create(MultipartFile blob) {
+        return create(File.builder().build(), blob);
+    }
+
+    private File create(File file, MultipartFile multipartFile) {
+        file.setFileName(multipartFile.getOriginalFilename());
         if (file.getFileName() == null)
-            file.setFileName(multipartFile.getOriginalFilename());
-
-        if (file.getFileName() == null) { // Fallback
-            file.setFileName(UUID.randomUUID().toString());
-        } else { // add a random suffix to avoid duplication
-            file.setFileName(Files.getNameWithoutExtension(file.getFileName()) +
-                    "-" + RandomStringUtils.secure().nextAlphanumeric(6));
-        }
-
-        if (file.getFileType() == null) {
-            file.setFileType(multipartFile.getContentType() == null ? "N/A" : multipartFile.getContentType());
-        }
+            file.setFileName(UUID.randomUUID() + ".txt");
+        file.setFileType(multipartFile.getContentType() == null ? "N/A" : multipartFile.getContentType());
+        file.setSize(multipartFile.getSize());
+        file.setUploader(accountRepos.getReferenceById(authContext.requireAccountId()));
+        file.setIsVisible(true);
 
         try {
             String fileUrl = azureBlobService.upload(multipartFile, file.getFileName());
@@ -61,40 +100,6 @@ public class FileServiceImpl implements FileService {
     @Override
     public File findById(long id) {
         return fileRepos.findById(id).orElse(null);
-    }
-
-    @Override
-    @Transactional
-    public File update(File file, MultipartFile multipartFile) {
-        if (file.getFileId() == null) {
-            throw new IllegalArgumentException("File does not exist");
-        }
-        if (file.getFileName() == null)
-            file.setFileName(multipartFile.getOriginalFilename());
-
-        if (file.getFileName() == null) { // Fallback
-            file.setFileName(UUID.randomUUID().toString());
-        } else { // add a random suffix to avoid duplication
-            file.setFileName(Files.getNameWithoutExtension(file.getFileName()) +
-                    "-" + RandomStringUtils.secure().nextAlphanumeric(6));
-        }
-
-        if (file.getFileType() == null) {
-            file.setFileType(multipartFile.getContentType() == null ? "N/A" : multipartFile.getContentType());
-        }
-
-        if (file.getFileType() == null) {
-            file.setFileType(multipartFile.getContentType() == null ? "N/A" : multipartFile.getContentType());
-        }
-
-        try {
-            String fileUrl = azureBlobService.upload(multipartFile, file.getFileName());
-            file.setFileUrl(fileUrl);
-            return fileRepos.save(file);
-        } catch (IOException e) {
-            log.error(e.getMessage());
-            throw new RuntimeException(e);
-        }
     }
 
     @Override

@@ -152,4 +152,9 @@ public class Project {
         /** Project terminated by staff after conflict resolution */
         STAFF_DECISION
     }
+
+    @Nullable
+    public Account getFreelancer() {
+        return getContract() == null ? null : getContract().getFreelancer();
+    }
 }

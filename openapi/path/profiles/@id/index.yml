@@ -16,7 +16,7 @@ put:
     content:
       application/json:
         schema:
-          $ref: '../../../model/profile.yml#/ProfileDto'
+          $ref: '../../../model/request/profile-form.yml#/ProfileFormDto'
   responses:
     '200':
       description: The operation was successful

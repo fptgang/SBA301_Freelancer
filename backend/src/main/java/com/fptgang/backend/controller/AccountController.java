@@ -41,6 +41,7 @@ public class AccountController implements AccountsApi {
     }
 
     @Override
+    @PreAuthorize("hasAnyRole('ADMIN')")
     public ResponseEntity<AccountDto> createAccount(AccountDto accountDto) {
         log.info("Creating account");
         accountDto = accountMapper
@@ -71,6 +72,7 @@ public class AccountController implements AccountsApi {
     }
 
     @Override
+    @PreAuthorize("hasAnyRole('ADMIN', 'STAFF')")
     public ResponseEntity<GetAccounts200Response> getAccounts(Pageable pageable, String filter, String search) {
         log.info("Getting accounts");
         var includeInvisible = SecurityUtil.hasPermission(Role.ADMIN);
@@ -116,18 +118,13 @@ public class AccountController implements AccountsApi {
         return ResponseEntity.ok(accountMapper.toDTO(accountService.update(accountMapper.toEntity(accountDto)), DetailLevel.FULL));
     }
 
+    /**
+     * Can access: Any
+     */
     @Override
     public ResponseEntity<AccountDto> updateAccountAvatar(MultipartFile blob) {
         log.info("Updating account avatar");
-        File file = fileService.create(
-                File.builder()
-                        .isVisible(true)
-                        .uploader(Account.builder()
-                                .accountId(SecurityUtil.requireCurrentUserId())
-                                .build())
-                        .build(),
-                blob
-        );
+        File file = fileService.create(blob);
         Account account = accountService.update(
                 Account.builder()
                         .accountId(SecurityUtil.requireCurrentUserId())

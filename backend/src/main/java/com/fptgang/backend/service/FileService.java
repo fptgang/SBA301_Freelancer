@@ -7,8 +7,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
 
 public interface FileService {
-    File create(File file, MultipartFile blob);
-    File update(File file, MultipartFile blob);
+    File create(MultipartFile blob);
+    File createForProject(Long projectId, MultipartFile blob);
+    File createForMilestone(Long milestoneId, MultipartFile blob);
+    File createForProposal(Long proposalId, MultipartFile blob);
+    File createForMessage(Long messageId, MultipartFile blob);
     File findById(long id);
     File deleteById(long id);
     Page<File> getAll(ListParams params);

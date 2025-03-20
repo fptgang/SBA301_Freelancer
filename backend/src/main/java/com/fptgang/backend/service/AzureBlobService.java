@@ -5,5 +5,5 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 
 public interface AzureBlobService {
-    String upload(MultipartFile file, String blobName) throws IOException;
+    String upload(MultipartFile file, String filename) throws IOException;
 }

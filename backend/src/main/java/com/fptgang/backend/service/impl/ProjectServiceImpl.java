@@ -5,7 +5,10 @@ import com.fptgang.backend.exception.InvalidInputException;
 import com.fptgang.backend.model.*;
 import com.fptgang.backend.repository.*;
 import com.fptgang.backend.security.AuthContext;
-import com.fptgang.backend.service.*;
+import com.fptgang.backend.service.AccountService;
+import com.fptgang.backend.service.ContractService;
+import com.fptgang.backend.service.MilestoneService;
+import com.fptgang.backend.service.ProjectService;
 import com.fptgang.backend.service.params.ListParams;
 import com.fptgang.backend.util.EntityUtil;
 import com.fptgang.backend.util.OpenApiHelper;
@@ -21,7 +24,10 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -101,10 +107,14 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public Project update(Project project) {
+    public synchronized Project update(Project project) {
         Project existing = projectRepos.findByProjectId(project.getProjectId()).orElseThrow(
                 () -> new InvalidInputException("Project does not exist"));
+        if (!existing.getIsVisible())
+            throw new IllegalStateException("Project was deleted");
+
         authContext.requireAccountId(existing.getClient().getAccountId()); // Client operation
+
         if (existing.getStatus() != Project.ProjectStatus.OPEN)
             throw new IllegalStateException("Only OPEN projects can be updated");
         if (project.getStartDate() != null && project.getStartDate().isBefore(existing.getStartDate()))
@@ -175,9 +185,17 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     @Transactional
-    public Project terminateByClient(Long projectId) {
+    public synchronized Project terminateByClient(Long projectId) {
         Project project = projectRepos.findByProjectId(projectId).orElseThrow(
                 () -> new InvalidInputException("Project does not exist"));
+
+        if (!project.getIsVisible())
+            throw new IllegalStateException("Project was deleted");
+        if (project.getStatus() == Project.ProjectStatus.TERMINATED)
+            throw new IllegalStateException("Project is already terminated");
+        if (project.getStatus() == Project.ProjectStatus.FINISHED)
+            throw new IllegalStateException("Project is already finished");
+
         authContext.requireAccountId(project.getClient().getAccountId()); // Client operation
 
         // Case 1: If the project is OPEN, terminate immediately
@@ -215,23 +233,30 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     @Transactional
-    public Project terminateByStaff(Long projectId, Role transferToRole) {
+    public synchronized Project terminateByStaff(Long projectId, Role transferToRole) {
         authContext.requirePermission(Role.STAFF);
 
         Project project = projectRepos.findByProjectId(projectId).orElseThrow(
                 () -> new InvalidInputException("Project with project id " + projectId + "not found"));
+
+        if (!project.getIsVisible())
+            throw new IllegalStateException("Project was deleted");
         if (project.getStatus() == Project.ProjectStatus.TERMINATED)
             throw new IllegalStateException("Project is already terminated");
+        if (project.getStatus() == Project.ProjectStatus.FINISHED)
+            throw new IllegalStateException("Project is already finished");
 
         for (Milestone milestone : project.getMilestones()) {
-            if (!milestone.getIsVisible()) continue;
+            if (!milestone.getIsVisible() || milestone.getFundStatus() != Milestone.FundStatus.DEPOSITED)
+                continue;
 
             // IF PENDING, return fund to client (if exists)
             if (milestone.getStatus() == Milestone.MilestoneStatus.PENDING) {
                 milestoneService.returnFund(milestone);
             }
             // IF IN PROGRESS, based on staff decision
-            else if (milestone.getStatus() == Milestone.MilestoneStatus.IN_PROGRESS) {
+            else if (milestone.getStatus() == Milestone.MilestoneStatus.IN_PROGRESS
+                    || milestone.getStatus() == Milestone.MilestoneStatus.REVIEWING) {
                 if (transferToRole == Role.CLIENT)
                     milestoneService.returnFund(milestone); // return (if exists)
                 else if (transferToRole == Role.FREELANCER)
@@ -252,16 +277,21 @@ public class ProjectServiceImpl implements ProjectService {
 
         project.setStatus(Project.ProjectStatus.TERMINATED);
         project.setTerminationReason(Project.TerminationReason.STAFF_DECISION);
+        project.setActiveMilestone(null);
 
         return projectRepos.save(project);
     }
 
     @Override
     @Transactional
-    public Project unpause(Long projectId, ProjectTimeline timeline) {
+    public synchronized Project unpause(Long projectId, ProjectTimeline timeline) {
         Project existing = projectRepos.findByProjectId(projectId).orElseThrow(
                 () -> new InvalidInputException("Project does not exist"));
+        if (!existing.getIsVisible())
+            throw new IllegalStateException("Project was deleted");
+
         authContext.requireAccountId(existing.getClient().getAccountId()); // Client operation
+
         if (existing.getStatus() != Project.ProjectStatus.PAUSED)
             throw new IllegalStateException("Only PAUSED projects can be unpaused");
 
@@ -280,10 +310,14 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     @Transactional
-    public Project extendDeadline(Long projectId, ProjectTimeline timeline) {
+    public synchronized Project extendDeadline(Long projectId, ProjectTimeline timeline) {
         Project existing = projectRepos.findByProjectId(projectId).orElseThrow(
                 () -> new InvalidInputException("Project does not exist"));
+        if (!existing.getIsVisible())
+            throw new IllegalStateException("Project was deleted");
+
         authContext.requireAccountId(existing.getClient().getAccountId()); // Client operation
+
         if (existing.getToTerminate() || existing.getActiveMilestone() == null)
             throw new IllegalStateException("Cannot extend deadlines for now");
         if (existing.getActiveMilestone().getDeadline().isAfter(LocalDateTime.now()))
@@ -311,9 +345,11 @@ public class ProjectServiceImpl implements ProjectService {
         }
         if (project.getMilestones() == null)
             return;
+
         int visibleCount = 0;
         for (Milestone milestone : project.getMilestones()) {
             if (!milestone.getIsVisible()) continue;
+
             if (current != null) {
                 if (milestone.getDeadline().isBefore(current)) {
                     throw new InvalidInputException(visibleCount == 0 ?
@@ -330,6 +366,7 @@ public class ProjectServiceImpl implements ProjectService {
             visibleCount++;
             current = milestone.getDeadline();
         }
+
         if (visibleCount < 1) {
             throw new InvalidInputException("Project must have at least 1 visible milestone");
         }
@@ -344,12 +381,17 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public void deleteById(long projectId) {
+    public synchronized void deleteById(long projectId) {
         Project project = projectRepos.findByProjectId(projectId)
                 .orElseThrow(() -> new InvalidInputException("Project with project id " + projectId + "not found"));
+        if (!project.getIsVisible())
+            throw new IllegalStateException("Project was deleted");
+
         authContext.requirePermissionOrAccountIds(Role.STAFF, project.getClient().getAccountId()); // Client operation
+
         if (project.getStatus() != Project.ProjectStatus.TERMINATED)
             throw new IllegalStateException("Can only delete project when it is terminated");
+
         project.setIsVisible(false);
         projectRepos.save(project);
     }
@@ -372,10 +414,15 @@ public class ProjectServiceImpl implements ProjectService {
     public Project joinProject(Long projectId, Long currentUserId) {
         Project project = projectRepos.findByProjectId(projectId).orElseThrow(
                 () -> new InvalidInputException("Project with project id " + projectId + "not found"));
+        if (!project.getIsVisible())
+            throw new IllegalStateException("Project was deleted");
+
         authContext.requirePermission(Role.STAFF);
+
         if (project.getStaff() != null && !Objects.equals(project.getStaff().getAccountId(), currentUserId)) {
             throw new InvalidInputException("Project already has a staff");
         }
+
         project.setStaff(
                 accountService.findById(currentUserId)
         );
@@ -391,12 +438,17 @@ public class ProjectServiceImpl implements ProjectService {
     public Project leaveProject(Long projectId, Long currentUserId) {
         Project project = projectRepos.findByProjectId(projectId).orElseThrow(
                 () -> new InvalidInputException("Project with project id " + projectId + "not found"));
+        if (!project.getIsVisible())
+            throw new IllegalStateException("Project was deleted");
+
         authContext.requirePermission(Role.STAFF);
+
         if (project.getStaff() == null) {
             throw new InvalidInputException("Project does not have a staff");
         } else if (!Objects.equals(project.getStaff().getAccountId(), currentUserId)) {
             throw new InvalidInputException("You are not a staff of this project");
         }
+
         project.getReports().forEach(report -> {
             if (report.getStatus() == Report.ReportStatus.UNSOLVED) {
                 report.setStatus(Report.ReportStatus.SOLVING);
@@ -412,30 +464,33 @@ public class ProjectServiceImpl implements ProjectService {
      */
     @Scheduled(cron = "0 */5 * * * ?")
     @Transactional
-    public void pauseProjectsWithNoProposalChosen() {
-        LocalDateTime oneDayBeforeStartDate = LocalDateTime.now();
-
+    public synchronized void pauseProjectsWithNoProposalChosen() {
+        // CurrentDate >= StartDate - 1d
         List<Project> projectsToPause = projectRepos.findByStatusAndStartDateLessThanEqual(
                 Project.ProjectStatus.OPEN,
-                oneDayBeforeStartDate.plusDays(1)
+                LocalDateTime.now().plusDays(hirableConfig.getProposalApplicationCutoffDuration())
         );
 
+        int count = 0;
         for (Project project : projectsToPause) {
-            // Set project status to PAUSED
-            project.setStatus(Project.ProjectStatus.PAUSED);
+            if (!project.getIsVisible()) continue;
 
-            // Update all PENDING proposals to EXPIRED
             List<Proposal> pendingProposals = proposalRepos.findByProjectAndStatus(
                     project,
                     Proposal.ProposalStatus.PENDING
             );
-
             for (Proposal proposal : pendingProposals) {
                 proposal.setStatus(Proposal.ProposalStatus.EXPIRED);
-                proposalRepos.save(proposal);
             }
+            proposalRepos.saveAll(pendingProposals);
 
+            project.setStatus(Project.ProjectStatus.PAUSED);
             projectRepos.save(project);
+            count++;
+        }
+
+        if (count > 0) {
+            log.info("Paused {} projects due to no proposal chosen by 1 day before startDay", count);
         }
     }
 
@@ -445,42 +500,47 @@ public class ProjectServiceImpl implements ProjectService {
      */
     @Scheduled(cron = "0 */5 * * * ?")
     @Transactional
-    public void terminateProjectsWithUnsignedContract() {
+    public synchronized void terminateProjectsWithUnsignedContract() {
         LocalDateTime currentDate = LocalDateTime.now();
 
+        // CurrentDate >= StartDate
         List<Project> projectsToTerminate = projectRepos.findByStatusAndStartDateLessThanEqual(
                 Project.ProjectStatus.IN_PROGRESS,
                 currentDate
         );
 
+        int count = 0;
         for (Project project : projectsToTerminate) {
+            if (!project.getIsVisible()) continue;
             Contract contract = project.getContract();
 
             if (contract != null && contract.getStatus() == Contract.ContractStatus.UNSIGNED) {
                 // Terminate project with reason CONTRACT_UNSIGNED
                 project.setStatus(Project.ProjectStatus.TERMINATED);
                 project.setTerminationReason(Project.TerminationReason.CONTRACT_UNSIGNED);
+                project = projectRepos.save(project);
 
                 // Update contract status to TERMINATED
                 contract.setStatus(Contract.ContractStatus.TERMINATED);
                 contractRepos.save(contract);
 
                 // Set all milestone status to TERMINATED
-                List<Milestone> milestones = project.getMilestones();
-                for (Milestone milestone : milestones) {
-                    milestone.setStatus(Milestone.MilestoneStatus.TERMINATED);
-                    Transaction completedTransaction = transactionService.createEscrowRefund(milestone);
-                    if (completedTransaction.getStatus() == Transaction.TransactionStatus.SUCCESS) {
-                        milestone.setFundStatus(Milestone.FundStatus.REFUNDED);
-                        milestoneRepos.save(milestone);
-                    } else {
-                        log.error("Failed to refund milestone {} for project {}",
-                                milestone.getMilestoneId(), project.getProjectId());
-                    }
-                    milestoneRepos.save(milestone);
-                }
-                projectRepos.save(project);
+                milestoneRepos.saveAll(project.getMilestones().stream()
+                        .filter(m -> m.getStatus().canBeTerminated())
+                        .map(m -> {
+                            if (m.getFundStatus() == Milestone.FundStatus.DEPOSITED) {
+                                return milestoneService.returnFund(m);
+                            } else {
+                                return m;
+                            }
+                        })
+                        .peek(m -> m.setStatus(Milestone.MilestoneStatus.TERMINATED)).toList());
+                count++;
             }
+        }
+
+        if (count > 0) {
+            log.info("Terminated {} projects due to contract unsigned at startDate", count);
         }
     }
 
@@ -490,7 +550,7 @@ public class ProjectServiceImpl implements ProjectService {
      */
     @Scheduled(cron = "0 */5 * * * ?")
     @Transactional
-    public void terminateProjectsPerClientRequest() {
+    public synchronized void terminateProjectsPerClientRequest() {
         LocalDateTime currentDate = LocalDateTime.now();
 
         List<Project> projectsToTerminate = projectRepos.findByStatusAndToTerminate(
@@ -498,17 +558,18 @@ public class ProjectServiceImpl implements ProjectService {
                 true
         );
 
+        int count = 0;
         for (Project project : projectsToTerminate) {
-            Milestone activeMilestone = milestoneRepos.findByProjectAndStatus(project, Milestone.MilestoneStatus.IN_PROGRESS)
-                    .orElse(null);
+            if (!project.getIsVisible()) continue;
+            Milestone activeMilestone = project.getActiveMilestone();
 
             if (activeMilestone != null && currentDate.isAfter(activeMilestone.getDeadline())) {
-                log.info("Terminating project {} due to client request", project.getProjectId());
 
                 // Terminate project with reason CLIENT_REQUEST_TERMINATION
                 project.setStatus(Project.ProjectStatus.TERMINATED);
                 project.setTerminationReason(Project.TerminationReason.CLIENT_REQUEST_TERMINATION);
                 project.setToTerminate(false); // Reset the flag
+                project = projectRepos.save(project);
 
                 // Update contract status to TERMINATED
                 Contract contract = project.getContract();
@@ -517,57 +578,31 @@ public class ProjectServiceImpl implements ProjectService {
                     contractRepos.save(contract);
                 }
 
-                // Process the current (active) milestone - mark as TERMINATED and release funds
-                activeMilestone.setStatus(Milestone.MilestoneStatus.TERMINATED);
-
-                try {
-                    // Release funds to freelancer for current milestone
-                    Transaction releaseTransaction = transactionService.createEscrowRelease(activeMilestone);
-                    if (releaseTransaction.getStatus() == Transaction.TransactionStatus.SUCCESS) {
-                        activeMilestone.setFundStatus(Milestone.FundStatus.RELEASED);
-                        milestoneRepos.save(activeMilestone);
-                        log.info("Successfully released funds for active milestone {} in project {}",
-                                activeMilestone.getMilestoneId(), project.getProjectId());
-                    }
-                } catch (Exception e) {
-                    log.error("Failed to release funds for active milestone {} in project {}: {}",
-                            activeMilestone.getMilestoneId(), project.getProjectId(), e.getMessage());
-                    // Continue with termination even if fund release fails
-                }
-
-                // Process other milestones
-                List<Milestone> milestones = project.getMilestones();
-                for (Milestone milestone : milestones) {
-                    // Skip the active milestone as we've already processed it
-                    if (milestone.equals(activeMilestone)) continue;
-
-                    // Process PENDING and SUCCESS milestones for refund
-                    if (milestone.getStatus() == Milestone.MilestoneStatus.PENDING ||
-                            milestone.getStatus() == Milestone.MilestoneStatus.FINISHED) {
-
-                        milestone.setStatus(Milestone.MilestoneStatus.TERMINATED);
-
-                        try {
-                            // Refund client for these milestones
-                            Transaction refundTransaction = transactionService.createEscrowRefund(milestone);
-                            if (refundTransaction.getStatus() == Transaction.TransactionStatus.SUCCESS) {
-                                milestone.setFundStatus(Milestone.FundStatus.REFUNDED);
-                                log.info("Successfully refunded milestone {} for project {}",
-                                        milestone.getMilestoneId(), project.getProjectId());
+                // Set all milestone status to TERMINATED
+                Long activeMilestoneId = activeMilestone.getMilestoneId();
+                milestoneRepos.saveAll(project.getMilestones().stream()
+                        .filter(m -> m.getStatus().canBeTerminated())
+                        .map(m -> {
+                            // If current milestone is active, release the fund to the freelancer
+                            // this is the penalty on the client due to termination
+                            if (Objects.equals(m.getMilestoneId(), activeMilestoneId)) {
+                                return milestoneService.releaseFund(m);
                             }
-                        } catch (Exception e) {
-                            log.error("Failed to refund milestone {} for project {}: {}",
-                                    milestone.getMilestoneId(), project.getProjectId(), e.getMessage());
-                            // Continue with termination even if refund fails
-                        }
-                    }
+                            // For future milestones, if client pre-deposited, we refund all to client
+                            else if (m.getFundStatus() == Milestone.FundStatus.DEPOSITED) {
+                                return milestoneService.returnFund(m);
+                            } else {
+                                return m;
+                            }
+                        })
+                        .peek(m -> m.setStatus(Milestone.MilestoneStatus.TERMINATED)).toList());
 
-                    milestoneRepos.save(milestone);
-                }
-
-                projectRepos.save(project);
-                log.info("Project {} terminated successfully due to client request", project.getProjectId());
+                count++;
             }
+        }
+
+        if (count > 0) {
+            log.info("Terminated {} projects due to client requested", count);
         }
     }
 
