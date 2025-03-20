@@ -47,6 +47,7 @@ public class TransactionMapper extends BaseMapper<TransactionDto, Transaction> {
                     .getReferenceById(dto.getMilestone().getMilestoneId()));
         }
 
+        entity.setNotes(dto.getNotes());
         entity.setAmount(dto.getAmount());
         entity.setType(dto.getType() == null ? null :
                 Transaction.TransactionType.valueOf(dto.getType().name()));
@@ -91,6 +92,7 @@ public class TransactionMapper extends BaseMapper<TransactionDto, Transaction> {
         dto.setToAccount(accountMapper.toDTO(entity.getToAccount(), DetailLevel.REFERENCE));
         dto.setMilestone(milestoneMapper.toDTO(entity.getMilestone(), DetailLevel.REFERENCE));
         dto.setAmount(entity.getAmount());
+        dto.setNotes(entity.getNotes());
         dto.setType(entity.getType() == null ? null :
                 TransactionTypeDto.valueOf(entity.getType().name()));
         dto.setStatus(entity.getStatus() == null ? null :

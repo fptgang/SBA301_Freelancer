@@ -4,18 +4,18 @@ import com.fptgang.backend.api.controller.TransactionsApi;
 import com.fptgang.backend.api.model.*;
 import com.fptgang.backend.mapper.DetailLevel;
 import com.fptgang.backend.mapper.TransactionMapper;
-import com.fptgang.backend.model.Account;
 import com.fptgang.backend.model.Role;
 import com.fptgang.backend.model.Transaction;
 import com.fptgang.backend.service.PaymentService;
 import com.fptgang.backend.service.TransactionService;
-import com.fptgang.backend.service.impl.PaymentServiceImpl;
 import com.fptgang.backend.service.params.ListParams;
 import com.fptgang.backend.util.OpenApiHelper;
 import com.fptgang.backend.util.SecurityUtil;
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -93,4 +93,31 @@ public class TransactionController implements TransactionsApi {
         }
         return ResponseEntity.ok(transactionMapper.toDTO(transaction, DetailLevel.FULL));
     }
+
+    @Override
+    public ResponseEntity<TransactionDto> createWithdrawRequest(@Valid @RequestBody TransactionDto transactionDto){
+        Transaction transaction = transactionService.createWithdrawalRequest(transactionMapper.toEntity(transactionDto));
+
+        if(!SecurityUtil.hasPermission(Role.FREELANCER) &&
+                !SecurityUtil.hasPermission(Role.CLIENT)
+        ){
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        return ResponseEntity.ok(transactionMapper.toDTO(transaction, DetailLevel.FULL));
+    }
+
+    @Override
+    public ResponseEntity<TransactionDto> updateWithdrawRequest(@Valid @RequestBody TransactionDto transactionDto){
+        Transaction transaction = transactionService.updateWithdrawalStatus(transactionMapper.toEntity(transactionDto));
+
+        if(!SecurityUtil.hasPermission(Role.STAFF) &&
+                !SecurityUtil.hasPermission(Role.ADMIN)
+        ){
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        return ResponseEntity.ok(transactionMapper.toDTO(transaction, DetailLevel.FULL));
+    }
+
 }
