@@ -44,10 +44,28 @@ public class ProposalController implements ProposalsApi {
                 .pageable(page)
                 .search(search)
                 .filter(filter);
+        if (!SecurityUtil.hasRole(Role.STAFF)&& !SecurityUtil.hasRole(Role.ADMIN)) {
+            params.setFilter("freelancer.accountId", "eq", SecurityUtil.requireCurrentUserId());
+        }
         var res = proposalService
                 .getAll(params.build())
                 .map(proposal -> proposalMapper.toDTO(proposal, DetailLevel.SUMMARY));
         return OpenApiHelper.respondPage(res, GetProposals200Response.class);
+    }
+
+    @Override
+    public ResponseEntity<ProposalDto> getProposalById(Long proposalId) {
+        var res =proposalService.findById(proposalId);
+        if(SecurityUtil.hasRole(Role.STAFF, Role.ADMIN)) {
+            return new ResponseEntity<>(proposalMapper.toDTO(res, DetailLevel.FULL), HttpStatus.OK);
+        }
+        if(!res.getFreelancer().getAccountId().equals(SecurityUtil.requireCurrentUserId())) {
+            if(res.getProject().getClient().getAccountId().equals(SecurityUtil.requireCurrentUserId())) {
+                return new ResponseEntity<>(proposalMapper.toDTO(res, DetailLevel.FULL), HttpStatus.OK);
+            }
+            else throw new AccessDeniedException("You do not have permission to access this resource");
+        }
+        return new ResponseEntity<>(proposalMapper.toDTO(res, DetailLevel.FULL), HttpStatus.OK);
     }
 
     /**

@@ -79,13 +79,6 @@ const ClientDashboard: React.FC = () => {
   // Fetch latest messages
   const { data: messageData, isLoading: messagesLoading } = useList({
     resource: "messages",
-    filters: [
-      {
-        field: "sender.accountId",
-        operator: "eq",
-        value: userId,
-      },
-    ],
     pagination: {
       pageSize: 5,
     },
@@ -370,6 +363,7 @@ const ClientDashboard: React.FC = () => {
             <List
               itemLayout="horizontal"
               dataSource={messageData?.data || []}
+              loading={messagesLoading}
               renderItem={(message) => (
                 <List.Item>
                   <List.Item.Meta

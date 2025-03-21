@@ -137,6 +137,8 @@ paths:
 
   /proposals:
     $ref: "path/proposals/index.yml"
+  /proposals/{proposalId}:
+    $ref: "path/proposals/@id/index.yml"
   /proposals/{proposalId}/reject:
     $ref: "path/proposals/@id/reject.yml"
   /proposals/{proposalId}/withdraw:

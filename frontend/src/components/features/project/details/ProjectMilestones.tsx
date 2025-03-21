@@ -1,14 +1,20 @@
 import React from "react";
-import { Typography, Table, Tag } from "antd";
+import { Typography, Table, Tag, Button, Space } from "antd";
 import { FlagOutlined } from "@ant-design/icons";
 import { MilestoneDto } from "../../../../../generated";
 
 interface ProjectMilestonesProps {
+  budget: number;
   milestones: MilestoneDto[] | undefined;
+  onSubmitClick?: (milestone: MilestoneDto) => void;
+  showSubmitButton?: boolean;
 }
 
 export const ProjectMilestones: React.FC<ProjectMilestonesProps> = ({
+  budget,
   milestones,
+  onSubmitClick,
+  showSubmitButton = false,
 }) => {
   return (
     <>
@@ -30,17 +36,48 @@ export const ProjectMilestones: React.FC<ProjectMilestonesProps> = ({
       >
         <Table.Column title="Milestone" dataIndex="title" key="title" />
         <Table.Column title="Deadline" dataIndex="deadline" key="deadline" />
-        <Table.Column title="Budget" dataIndex="budget" key="budget" />
+        <Table.Column
+          title="Budget"
+          key="budget"
+          render={(_, record: MilestoneDto) => (
+            <p>
+              ${parseFloat("" + (record.budgetRatio || 0) * budget).toFixed(2)}
+            </p>
+          )}
+        />
         <Table.Column
           title="Status"
           dataIndex="status"
           key="status"
           render={(status: string) => (
-            <Tag color={status === "COMPLETED" ? "green" : "red"}>
+            <Tag
+              color={
+                status === "COMPLETED"
+                  ? "green"
+                  : status === "IN_PROGRESS"
+                  ? "blue"
+                  : "red"
+              }
+            >
               {status.replace("_", " ")}
             </Tag>
           )}
         />
+        {showSubmitButton && (
+          <Table.Column
+            title="Action"
+            key="action"
+            render={(_, record: MilestoneDto) => (
+              <Space>
+                {record.status === "IN_PROGRESS" && onSubmitClick && (
+                  <Button type="primary" onClick={() => onSubmitClick(record)}>
+                    Submit Deliverables
+                  </Button>
+                )}
+              </Space>
+            )}
+          />
+        )}
       </Table>
     </>
   );

@@ -1,12 +1,15 @@
 package com.fptgang.backend.controller;
 
 import com.fptgang.backend.api.controller.ContractsApi;
-import com.fptgang.backend.api.model.ContractDto;
-import com.fptgang.backend.api.model.ProposalDto;
+import com.fptgang.backend.api.model.*;
 import com.fptgang.backend.mapper.ContractMapper;
 import com.fptgang.backend.mapper.DetailLevel;
 import com.fptgang.backend.model.Proposal;
+import com.fptgang.backend.model.Role;
 import com.fptgang.backend.service.ContractService;
+import com.fptgang.backend.service.params.ListParams;
+import com.fptgang.backend.util.OpenApiHelper;
+import com.fptgang.backend.util.SecurityUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -45,5 +48,23 @@ public class ContractController implements ContractsApi {
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ContractDto> createContract(Long proposalId) {
         return new ResponseEntity<>(contractMapper.toDTO(contractService.create(proposalId), DetailLevel.FULL), HttpStatus.OK);
+    }
+
+    @Override
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<GetAllContracts200Response> getAllContracts(Pageable pageable, String filter, String search) {
+        log.info("Getting accounts");
+        var params = ListParams.builder()
+                .pageable(OpenApiHelper.toPageable(pageable))
+                .search(search)
+                .filter(filter);
+        // Staff cannot view Admin
+        if (!SecurityUtil.hasRole(Role.STAFF)&& !SecurityUtil.hasRole(Role.ADMIN)) {
+            params.setFilter("freelancer.accountId", "eq", SecurityUtil.requireCurrentUserId());
+        }
+        var res = contractService
+                .getAll(params.build())
+                .map((c) -> contractMapper.toDTO(c, DetailLevel.SUMMARY));
+        return OpenApiHelper.respondPage(res, GetAllContracts200Response.class);
     }
 }

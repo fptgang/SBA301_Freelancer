@@ -1,0 +1,25 @@
+get:
+  summary: Get an proposal by ID
+  operationId: getProposalById
+  security:
+    - bearerAuth: []
+  parameters:
+    - name: proposalId
+      in: path
+      required: true
+      schema:
+        type: integer
+        format: int64
+  responses:
+    '200':
+      description: The operation was success
+      content:
+        application/json:
+          schema:
+            $ref: '../../../model/proposal.yml#/ProposalDto'
+    '400':
+      description: The operation was failed
+      content:
+        application/json:
+          schema:
+            $ref: '../../../component/error.yml#/ErrorResponse'
