@@ -42,11 +42,12 @@ const { Title, Text } = Typography;
 interface FreelancerCreateProposalButtonProps {
   project?: ProjectDto;
   freelancerId?: number;
+  refetch?: () => void;
 }
 
 const FreelancerCreateProposalButton: React.FC<
   FreelancerCreateProposalButtonProps
-> = ({ project, freelancerId }) => {
+> = ({ project, freelancerId, refetch }) => {
   const [visible, setVisible] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
   const [selectedProject, setSelectedProject] = useState<ProjectDto | null>(
@@ -175,12 +176,8 @@ const FreelancerCreateProposalButton: React.FC<
     setFileList([]);
     setCurrentStep(0);
     setSubmitting(false);
+    refetch && refetch();
     formProps.form?.resetFields();
-    open?.({
-      type: "success",
-      message: "Proposal Submitted",
-      description: "Your proposal has been successfully submitted.",
-    });
   };
 
   // Steps configuration
@@ -197,6 +194,7 @@ const FreelancerCreateProposalButton: React.FC<
               <InputNumber prefix={<DollarTwoTone />} className="w-full" />
             </Form.Item>
           </Card>
+          <br />
           <Card className="w-full">
             <Title level={4} className="mb-4 flex items-center">
               <FileTextOutlined className="mr-2" /> Proposal Details

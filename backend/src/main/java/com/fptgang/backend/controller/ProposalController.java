@@ -44,9 +44,6 @@ public class ProposalController implements ProposalsApi {
                 .pageable(page)
                 .search(search)
                 .filter(filter);
-        if (!SecurityUtil.hasRole(Role.STAFF)&& !SecurityUtil.hasRole(Role.ADMIN)) {
-            params.setFilter("freelancer.accountId", "eq", SecurityUtil.requireCurrentUserId());
-        }
         var res = proposalService
                 .getAll(params.build())
                 .map(proposal -> proposalMapper.toDTO(proposal, DetailLevel.SUMMARY));

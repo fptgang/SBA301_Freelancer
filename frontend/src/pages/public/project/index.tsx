@@ -30,6 +30,7 @@ const ProjectDetailsScreen: React.FC = () => {
     data: projectData,
     isLoading: projectLoading,
     isError: projectError,
+    refetch,
   } = query;
 
   const {
@@ -92,6 +93,7 @@ const ProjectDetailsScreen: React.FC = () => {
               project={project}
               role={user?.role?.toString() || null}
               freelancerId={user?.accountId}
+              refetch={refetch}
             />
           )}
         </Col>

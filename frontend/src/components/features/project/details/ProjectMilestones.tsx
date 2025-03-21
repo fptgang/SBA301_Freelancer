@@ -4,7 +4,7 @@ import { FlagOutlined } from "@ant-design/icons";
 import { MilestoneDto } from "../../../../../generated";
 
 interface ProjectMilestonesProps {
-  budget: number;
+  budget?: number;
   milestones: MilestoneDto[] | undefined;
   onSubmitClick?: (milestone: MilestoneDto) => void;
   showSubmitButton?: boolean;
@@ -39,11 +39,11 @@ export const ProjectMilestones: React.FC<ProjectMilestonesProps> = ({
         <Table.Column
           title="Budget"
           key="budget"
-          render={(_, record: MilestoneDto) => (
-            <p>
-              ${parseFloat("" + (record.budgetRatio || 0) * budget).toFixed(2)}
-            </p>
-          )}
+          render={(_, record: MilestoneDto) => {
+            if (budget)
+              return <p>${((record.budgetRatio || 0) * budget).toFixed(2)}</p>;
+            return <p>{((record?.budgetRatio || 0) * 100).toFixed(0)}%</p>;
+          }}
         />
         <Table.Column
           title="Status"

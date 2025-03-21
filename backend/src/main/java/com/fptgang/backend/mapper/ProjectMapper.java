@@ -203,7 +203,9 @@ public class ProjectMapper extends BaseMapper<ProjectDto, Project> {
                             authContext.requireAccountId()
                     ).stream().map(e -> proposalMapper.toDTO(e, DetailLevel.FULL)).toList();
             log.info("get my Proposals: {}",mps.size());
-            dto.setMyProposals(mps);
+            if(!mps.isEmpty()) {
+                dto.setMyProposals(mps);
+            }
         }
 
         return dto;

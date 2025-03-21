@@ -27,6 +27,7 @@ import type { ColumnsType } from "antd/es/table";
 import { ProposalDto } from "../../../../generated";
 import api from "../../../services/api/openapi-config";
 import { useNavigate } from "react-router";
+import { store } from "../../../store";
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -34,10 +35,18 @@ const { Option } = Select;
 const FreelancerMyProposalPage: React.FC = () => {
   const [searchText, setSearchText] = useState("");
   const [statusFilter, setStatusFilter] = useState<string | null>(null);
+  const [sortBy, setSortBy] = useState<string | null>(null);
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+  const user = store.getState().auth.account;
 
-  const { data, isLoading } = useList<ProposalDto>({
+  const { data, isLoading, refetch } = useList<ProposalDto>({
     resource: "proposals",
     filters: [
+      {
+        field: "freelancer",
+        operator: "eq",
+        value: user?.accountId || undefined,
+      },
       {
         field: "status",
         operator: "eq",
@@ -49,6 +58,19 @@ const FreelancerMyProposalPage: React.FC = () => {
         value: searchText || undefined,
       },
     ],
+    sorters: sortBy
+      ? [
+          {
+            field: sortBy,
+            order: sortOrder,
+          },
+        ]
+      : [
+          {
+            field: "proposalId",
+            order: "desc",
+          },
+        ],
   });
 
   const nav = useNavigate();
@@ -79,16 +101,14 @@ const FreelancerMyProposalPage: React.FC = () => {
       dataIndex: "budget",
       key: "budget",
       render: (amount: number) => `$${amount}`,
-      sorter: (a: ProposalDto, b: ProposalDto) =>
-        (a?.budget || 0) - (b?.budget || 0),
+      sorter: true,
     },
     {
       title: "Date Submitted",
       dataIndex: "createdAt",
       key: "createdAt",
       render: (date: string) => new Date(date).toLocaleDateString(),
-      sorter: (a: ProposalDto, b: ProposalDto) =>
-        (a?.createdAt?.getTime() || 0) - (b?.createdAt?.getTime() || 0),
+      sorter: true,
     },
     {
       title: "Status",
@@ -116,9 +136,13 @@ const FreelancerMyProposalPage: React.FC = () => {
                 <Button
                   icon={<DeleteOutlined />}
                   onClick={() =>
-                    api.withdrawProposal({
-                      proposalId: record.proposalId || -1,
-                    })
+                    api
+                      .withdrawProposal({
+                        proposalId: record.proposalId || -1,
+                      })
+                      .then(() => {
+                        refetch();
+                      })
                   }
                   danger
                   type="text"
@@ -178,6 +202,15 @@ const FreelancerMyProposalPage: React.FC = () => {
           locale={{
             emptyText:
               "No proposals found. Start bidding on projects to see them here!",
+          }}
+          onChange={(pagination, filters, sorter: any) => {
+            if (sorter && sorter.field) {
+              setSortBy(sorter.field);
+              setSortOrder(sorter.order === "descend" ? "desc" : "asc");
+            } else {
+              setSortBy(null);
+              setSortOrder("asc");
+            }
           }}
         />
       </Card>
