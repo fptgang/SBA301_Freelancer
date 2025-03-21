@@ -23,3 +23,32 @@ post:
         application/json:
           schema:
             $ref: '../../component/error.yml#/ErrorResponse'
+get:
+  summary: Get all contracts
+  operationId: getAllContracts
+  security:
+    - bearerAuth: [ ]
+  parameters:
+    - $ref: '../../param/pageable.yml#/Pageable'
+    - $ref: '../../param/filter.yml#/Filter'
+    - $ref: '../../param/search.yml#/Search'
+  responses:
+    '200':
+      description: The operation was success
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '../../component/page.yml#/Page'
+              - type: object
+                properties:
+                  content:
+                    type: array
+                    items:
+                      $ref: '../../model/contract.yml#/ContractDto'
+    '400':
+      description: The operation was failed
+      content:
+        application/json:
+          schema:
+            $ref: '../../component/error.yml#/ErrorResponse'

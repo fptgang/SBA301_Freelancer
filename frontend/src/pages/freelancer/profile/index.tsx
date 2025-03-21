@@ -27,11 +27,6 @@ import { useShow } from "@refinedev/core";
 const { TextArea } = Input;
 const { Title } = Typography;
 
-interface ISkillOption {
-  value: number;
-  label: string;
-}
-
 const FreelancerProfilePage: React.FC = () => {
   const user = store.getState().auth.account;
   const [newSkill, setNewSkill] = useState<Partial<ProfileSkillDto>>({});

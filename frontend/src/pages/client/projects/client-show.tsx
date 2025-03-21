@@ -46,6 +46,7 @@ import {
   CloseCircleOutlined,
   ArrowLeftOutlined,
   PlusOutlined,
+  PlayCircleOutlined,
 } from "@ant-design/icons";
 
 import { formatCurrency } from "../../../utils/formatter";
@@ -123,6 +124,12 @@ const ClientProjectShow: React.FC = () => {
       step: 2,
       icon: <CheckCircleOutlined />,
     },
+    PAUSED: {
+      color: "default",
+      text: "Paused",
+      step: 0,
+      icon: <PlayCircleOutlined />,
+    },
   };
 
   // Handle rejecting a proposal
@@ -164,12 +171,12 @@ const ClientProjectShow: React.FC = () => {
           Authorization: `Bearer ${store.getState().auth.accessToken}`,
         },
       });
-      
+
       open?.({
         type: "success",
         message: "Project closed successfully",
       });
-      
+
       projectQueryResult.refetch();
     } catch (error) {
       open?.({
@@ -248,15 +255,15 @@ const ClientProjectShow: React.FC = () => {
               >
                 Back
               </Button>
-              
+
               {/* Add Edit Button Here */}
               {project.status === "OPEN" && (
-                <ClientProjectEditButton 
-                  project={project} 
+                <ClientProjectEditButton
+                  project={project}
                   onSuccess={projectQueryResult.refetch}
                 />
               )}
-              
+
               {project.status === "OPEN" && (
                 <Popconfirm
                   title="Are you sure you want to close this project?"
@@ -265,10 +272,7 @@ const ClientProjectShow: React.FC = () => {
                   cancelText="No"
                   placement="bottomRight"
                 >
-                  <Button
-                    type="primary"
-                    danger
-                  >
+                  <Button type="primary" danger>
                     Close Project
                   </Button>
                 </Popconfirm>
@@ -410,9 +414,9 @@ const ClientProjectShow: React.FC = () => {
                     No specific skills required
                   </Text>
                 )}
-                
+
                 <Divider />
-                
+
                 <Title level={5} className="text-blue-600">
                   Milestones
                 </Title>
@@ -423,16 +427,13 @@ const ClientProjectShow: React.FC = () => {
                     renderItem={(milestone, index) => (
                       <List.Item>
                         <List.Item.Meta
-                          avatar={
-                            <Avatar size="large">
-                              {index + 1}
-                            </Avatar>
-                          }
+                          avatar={<Avatar size="large">{index + 1}</Avatar>}
                           title={
                             <div className="flex justify-between">
                               <span>{milestone.title}</span>
                               <span>
-                                Budget: {(milestone.budgetRatio * 100).toFixed(0)}%
+                                Budget:{" "}
+                                {(milestone.budgetRatio * 100).toFixed(0)}%
                               </span>
                             </div>
                           }
@@ -440,9 +441,10 @@ const ClientProjectShow: React.FC = () => {
                             <div>
                               <div>{milestone.description}</div>
                               <div className="mt-1">
-                                <CalendarOutlined /> Deadline: {
-                                  new Date(milestone.deadline).toLocaleDateString()
-                                }
+                                <CalendarOutlined /> Deadline:{" "}
+                                {new Date(
+                                  milestone.deadline
+                                ).toLocaleDateString()}
                               </div>
                             </div>
                           }
@@ -533,14 +535,12 @@ const ClientProjectShow: React.FC = () => {
                         title={
                           <div className="flex justify-between items-center">
                             <Text strong className="text-lg">
-                              {proposal.freelancer ? 
-                                `${proposal.freelancer.firstName} ${proposal.freelancer.lastName}` : 
-                                `Freelancer #${proposal.freelancerId}`}
+                              {proposal.freelancer
+                                ? `${proposal.freelancer.firstName} ${proposal.freelancer.lastName}`
+                                : `Freelancer #${proposal.freelancerId}`}
                             </Text>
                             <div className="flex items-center">
-                              <Tag color="blue">
-                                Budget: ${proposal.budget}
-                              </Tag>
+                              <Tag color="blue">Budget: ${proposal.budget}</Tag>
                               <Badge
                                 status={
                                   proposal.status === "ACCEPTED"
@@ -595,7 +595,7 @@ const ClientProjectShow: React.FC = () => {
                           {proposal.notes}
                         </Paragraph>
                       </div>
-                      
+
                       {proposal.files && proposal.files.length > 0 && (
                         <div className="mt-4">
                           <Title level={5} className="text-gray-700">
@@ -606,9 +606,9 @@ const ClientProjectShow: React.FC = () => {
                             dataSource={proposal.files}
                             renderItem={(file) => (
                               <List.Item>
-                                <a 
-                                  href={file.fileUrl} 
-                                  target="_blank" 
+                                <a
+                                  href={file.fileUrl}
+                                  target="_blank"
                                   rel="noopener noreferrer"
                                   className="flex items-center text-blue-500 hover:text-blue-700"
                                 >
@@ -637,12 +637,16 @@ const ClientProjectShow: React.FC = () => {
               {project.milestones && project.milestones.length > 0 ? (
                 <Timeline className="mt-4 px-4">
                   {project.milestones.map((milestone, index) => (
-                    <Timeline.Item 
+                    <Timeline.Item
                       key={milestone.milestoneId || index}
                       color={
-                        milestone.status === "FINISHED" ? "green" : 
-                        milestone.status === "IN_PROGRESS" ? "blue" : 
-                        milestone.status === "REVIEWING" ? "orange" : "gray"
+                        milestone.status === "FINISHED"
+                          ? "green"
+                          : milestone.status === "IN_PROGRESS"
+                          ? "blue"
+                          : milestone.status === "REVIEWING"
+                          ? "orange"
+                          : "gray"
                       }
                     >
                       <Card className="mb-4">
@@ -652,18 +656,26 @@ const ClientProjectShow: React.FC = () => {
                             <Paragraph>{milestone.description}</Paragraph>
                             <div className="flex gap-4 mt-2">
                               <Tag color="blue">
-                                Budget: {(milestone.budgetRatio * 100).toFixed(0)}%
+                                Budget:{" "}
+                                {(milestone.budgetRatio * 100).toFixed(0)}%
                               </Tag>
                               <Text type="secondary">
                                 <CalendarOutlined className="mr-1" />
-                                Deadline: {new Date(milestone.deadline).toLocaleDateString()}
+                                Deadline:{" "}
+                                {new Date(
+                                  milestone.deadline
+                                ).toLocaleDateString()}
                               </Text>
                               {milestone.status && (
-                                <Tag 
+                                <Tag
                                   color={
-                                    milestone.status === "FINISHED" ? "green" : 
-                                    milestone.status === "IN_PROGRESS" ? "blue" : 
-                                    milestone.status === "REVIEWING" ? "orange" : "default"
+                                    milestone.status === "FINISHED"
+                                      ? "green"
+                                      : milestone.status === "IN_PROGRESS"
+                                      ? "blue"
+                                      : milestone.status === "REVIEWING"
+                                      ? "orange"
+                                      : "default"
                                   }
                                 >
                                   {milestone.status}
@@ -673,9 +685,7 @@ const ClientProjectShow: React.FC = () => {
                           </Col>
                           <Col span={6} className="flex justify-end">
                             {milestone.status === "REVIEWING" && (
-                              <Button type="primary">
-                                Confirm Completion
-                              </Button>
+                              <Button type="primary">Confirm Completion</Button>
                             )}
                           </Col>
                         </Row>

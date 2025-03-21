@@ -18,12 +18,14 @@ interface ActionCardProps {
   project: ProjectDto;
   freelancerId?: number;
   role: string | null;
+  refetch?: () => void;
 }
 
 export const ActionCard: React.FC<ActionCardProps> = ({
   project,
   role,
   freelancerId,
+  refetch,
 }) => {
   const navigate = useNavigate();
 
@@ -46,7 +48,19 @@ export const ActionCard: React.FC<ActionCardProps> = ({
         ) : role === "FREELANCER" ? (
           project?.myProposals?.find((p) => p.status === "PENDING") ? (
             <>
-              <Button block type="primary" size="large">
+              <Button
+                block
+                type="primary"
+                size="large"
+                onClick={() =>
+                  navigate(
+                    `/freelancer/proposals/${
+                      project?.myProposals?.find((p) => p.status === "PENDING")
+                        ?.proposalId
+                    }`
+                  )
+                }
+              >
                 View Your Proposal
               </Button>
             </>
@@ -55,6 +69,7 @@ export const ActionCard: React.FC<ActionCardProps> = ({
               <FreelancerCreateProposalButton
                 project={project}
                 freelancerId={freelancerId}
+                refetch={refetch}
               />
               <Typography.Text
                 type="secondary"
