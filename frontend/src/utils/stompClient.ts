@@ -1,8 +1,9 @@
 import { Client } from "@stomp/stompjs";
+import {BROKER_URL} from "./constants";
 
 const stompClient = new Client({
   //   brokerURL: `${WS_BACK_END}/hirable-ws`,
-  brokerURL: `ws://localhost:8080/hirable-ws`,
+  brokerURL: BROKER_URL,
   onConnect: () => {
     console.log("Connected ");
   },

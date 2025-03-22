@@ -28,10 +28,12 @@ import { formatCurrency } from "../../../utils/formatter";
 import ClientCreateButton from "../projects/client-create";
 import { MessageDto, ProjectDto } from "../../../../generated";
 import { useNavigate } from "react-router";
+import {useLocalSettings} from "../../../hooks/useLocalSettings";
 
 const { Title, Text } = Typography;
 
 const ClientDashboard: React.FC = () => {
+  const [localSettings] = useLocalSettings()
   // Get current user identity
   const { data: identity } = useGetIdentity<{ id: number }>();
   const userId = identity?.id;
@@ -239,7 +241,7 @@ const ClientDashboard: React.FC = () => {
                       <Space direction="vertical" size="small">
                         <Text type="secondary" className="text-xs">
                           Created:{" "}
-                          {dayjs(project.createdAt).format("MMM D, YYYY")}
+                          {localSettings.formatDate(project.createdAt)}
                         </Text>
                         <Text type="secondary" className="text-xs">
                           Proposals: {project.proposalCount || 0}
@@ -281,7 +283,7 @@ const ClientDashboard: React.FC = () => {
                           {transaction.type}
                         </Tag>
                         <Text>
-                          {dayjs(transaction.createdAt).format("MMM D, YYYY")}
+                          {localSettings.formatDateTime(transaction.createdAt)}
                         </Text>
                       </Space>
                     }
@@ -343,7 +345,7 @@ const ClientDashboard: React.FC = () => {
                     <div className="flex justify-between mt-1">
                       <Text type="secondary" className="text-xs">
                         Deadline:{" "}
-                        {dayjs(milestone?.deadline).format("MMM D, YYYY")}
+                        {localSettings.formatDateTime(milestone?.deadline)}
                       </Text>
                     </div>
                   </a>
@@ -393,7 +395,7 @@ const ClientDashboard: React.FC = () => {
                           {message.content}
                         </Text>
                         <Text type="secondary" className="text-xs block mt-1">
-                          {dayjs(message.createdAt).format("MMM D, YYYY HH:mm")}
+                          {localSettings.formatDateTime(message.createdAt)}
                         </Text>
                       </div>
                     }

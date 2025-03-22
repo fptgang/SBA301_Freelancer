@@ -60,12 +60,14 @@ import api from "../../../services/api/openapi-config";
 import { ReportModal } from "../../../components/message/ReportModal";
 import { AccountDto } from "../../../../generated";
 import DepositModal from "../../../components/DepositModal";
+import {useLocalSettings} from "../../../hooks/useLocalSettings";
 
 const { Title, Text, Paragraph } = Typography;
 const { Step } = Steps;
 const { TabPane } = Tabs;
 
 const ClientProjectShow: React.FC = () => {
+  const [localSettings] = useLocalSettings();
   const { data: user } = useGetIdentity<AccountDto>();
   const { id } = useParams();
   const navigate = useNavigate();
@@ -503,9 +505,9 @@ const ClientProjectShow: React.FC = () => {
                               <div>{milestone.description}</div>
                               <div className="mt-1">
                                 <CalendarOutlined /> Deadline:{" "}
-                                {new Date(
-                                  milestone.deadline
-                                ).toLocaleDateString()}
+                                {localSettings.formatDateTime(
+                                  milestone.deadline!
+                                )}
                               </div>
                             </div>
                           }
@@ -723,9 +725,9 @@ const ClientProjectShow: React.FC = () => {
                               <Text type="secondary">
                                 <CalendarOutlined className="mr-1" />
                                 Deadline:{" "}
-                                {new Date(
-                                  milestone.deadline
-                                ).toLocaleDateString()}
+                                {localSettings.formatDate(
+                                  milestone.deadline!
+                                )}
                               </Text>
                               {milestone.status && (
                                 <Tag

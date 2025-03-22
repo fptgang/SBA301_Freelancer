@@ -2,16 +2,24 @@ import { Table, Tag } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { TransactionDto } from "../../../../../generated/models/TransactionDto";
 import {
+  AccountDto,
   TransactionStatusDto,
   TransactionTypeDto,
 } from "../../../../../generated";
-import { useList } from "@refinedev/core";
+import {useGetIdentity, useList} from "@refinedev/core";
 import { store } from "../../../../store";
+import {useLocalSettings} from "../../../../hooks/useLocalSettings";
+import {useState} from "react";
+import {PaginationPosition} from "antd/es/pagination/Pagination";
 
 const TransactionHistoryTable: React.FC = () => {
-  const CURRENT_USER_ID = store.getState().auth.account?.accountId || 0;
+  const [localSettings] = useLocalSettings();
+  const me = useGetIdentity<AccountDto>();
+  const [current, setCurrent] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
   const { data } = useList<TransactionDto>({
     resource: "transactions",
+    pagination: { current, pageSize },
   });
   const transactions = data?.data || [];
   const columns: ColumnsType<TransactionDto> = [
@@ -19,13 +27,13 @@ const TransactionHistoryTable: React.FC = () => {
       title: "Date",
       dataIndex: "createdAt",
       key: "createdAt",
-      render: (date: string) => new Date(date).toLocaleDateString(),
+      render: (date: string) => localSettings.formatDateTime(date),
     },
     {
-      title: "Type",
+      title: "Direction",
       key: "direction",
       render: (_, record) => {
-        const isOutgoing = record.fromAccount?.accountId === CURRENT_USER_ID;
+        const isOutgoing = record.fromAccount?.accountId === me.data?.accountId;
         return (
           <Tag color={isOutgoing ? "volcano" : "green"}>
             {isOutgoing ? "Outgoing" : "Incoming"}
@@ -43,7 +51,7 @@ const TransactionHistoryTable: React.FC = () => {
           [TransactionTypeDto.Withdrawal]: "orange",
           [TransactionTypeDto.EscrowDeposit]: "purple",
           [TransactionTypeDto.EscrowRelease]: "cyan",
-          [TransactionTypeDto.EscrowRefund]: "red",
+          [TransactionTypeDto.EscrowRefund]: "yellow",
         };
         return <Tag color={typeColors[type]}>{type.replace(/_/g, " ")}</Tag>;
       },
@@ -53,12 +61,28 @@ const TransactionHistoryTable: React.FC = () => {
       dataIndex: "amount",
       key: "amount",
       render: (amount: number, record) => {
-        const isOutgoing = record.fromAccount?.accountId === CURRENT_USER_ID;
+        const isOutgoing = record.fromAccount?.accountId === me.data?.accountId;
         return (
           <span style={{ color: isOutgoing ? "#ff4d4f" : "#52c41a" }}>
             {isOutgoing ? "-" : "+"}${amount.toFixed(2)}
           </span>
         );
+      },
+    },
+    {
+      title: "From",
+      dataIndex: "fromAccount.accountName",
+      key: "fromAccount",
+      render: (amount: number, record) => {
+        return `${record.fromAccount?.firstName} ${record.fromAccount?.lastName || ''}`;
+      },
+    },
+    {
+      title: "To",
+      dataIndex: "toAccount.accountName",
+      key: "toAccount",
+      render: (amount: number, record) => {
+        return `${record.toAccount?.firstName} ${record.toAccount?.lastName || ''}`;
       },
     },
     {
@@ -74,13 +98,28 @@ const TransactionHistoryTable: React.FC = () => {
       ),
     },
   ];
+  const handlePageChange = (page: number, newPageSize: number) => {
+    setCurrent(page);
+    setPageSize(newPageSize);
+  };
 
   return (
     <Table
       columns={columns}
       dataSource={transactions}
       rowKey="transactionId"
-      pagination={{ pageSize: 10 }}
+      pagination={{
+        current: current,
+        pageSize: pageSize,
+        total: data?.total || 10,
+        onChange: handlePageChange,
+        showSizeChanger: true,
+        showQuickJumper: true,
+        showTotal: (total) => `Total ${total} items`,
+        position: ['bottomRight'],
+        responsive: true,
+        pageSizeOptions: ["10", "20", "50"],
+      }}
     />
   );
 };

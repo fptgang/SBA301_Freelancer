@@ -15,6 +15,7 @@ import {
   EyeOutlined,
   ClockCircleOutlined,
 } from "@ant-design/icons";
+import {useLocalSettings} from "../../../hooks/useLocalSettings";
 
 const { Text } = Typography;
 
@@ -27,6 +28,7 @@ interface Skill {
 }
 
 export const SkillsList: React.FC = () => {
+  const [localSettings] = useLocalSettings()
   const { tableProps, searchFormProps } = useTable<Skill>({
     syncWithLocation: true,
     sorters: {
@@ -144,7 +146,7 @@ export const SkillsList: React.FC = () => {
             </Space>
           }
           render={(value: string) => (
-            <DateField value={value} format="MMMM DD, YYYY" />
+            <DateField value={value} format={localSettings.dateFormat} />
           )}
           sorter
           defaultSortOrder="descend"
@@ -159,7 +161,7 @@ export const SkillsList: React.FC = () => {
             </Space>
           }
           render={(value: string) => (
-            <DateField value={value} format="MMMM DD, YYYY" />
+            <DateField value={value} format={localSettings.dateFormat} />
           )}
           sorter
         />

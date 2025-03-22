@@ -19,10 +19,12 @@ import api from "../../../services/api/openapi-config";
 import dayjs from "dayjs";
 import { store } from "../../../store";
 import ContractShowModal from "../../../components/ContractShowModal";
+import {useLocalSettings} from "../../../hooks/useLocalSettings";
 
 const { Title } = Typography;
 
 const SharedProjectShow: React.FC = () => {
+  const [localSettings] = useLocalSettings()
   const { id } = useParams();
   const [selectedMilestone, setSelectedMilestone] = useState<MilestoneDto>();
   const [submissionModalVisible, setSubmissionModalVisible] = useState(false);
@@ -78,7 +80,7 @@ const SharedProjectShow: React.FC = () => {
             </Descriptions.Item>
             <Descriptions.Item label="Start Date">
               {project.startDate
-                ? dayjs(project.startDate).format("MMM D, YYYY")
+                ? localSettings.formatDate(project.startDate)
                 : "N/A"}
             </Descriptions.Item>
           </Descriptions>

@@ -26,10 +26,12 @@ import { ProposalDto, ProposalStatusDto } from "../../../../generated";
 import { useNavigate, useParams } from "react-router";
 import api from "../../../services/api/openapi-config";
 import dayjs from "dayjs";
+import {useLocalSettings} from "../../../hooks/useLocalSettings";
 
 const { Title, Text, Paragraph } = Typography;
 
 const FreelancerProposalShow: React.FC = () => {
+  const [localSettings] = useLocalSettings()
   const { id } = useParams();
   const navigate = useNavigate();
 
@@ -151,7 +153,7 @@ const FreelancerProposalShow: React.FC = () => {
                   }
                 >
                   {proposal.createdAt
-                    ? dayjs(proposal.createdAt).format("MMM D, YYYY")
+                    ? localSettings.formatDate(proposal.createdAt)
                     : "N/A"}
                 </Descriptions.Item>
               </Descriptions>
@@ -168,9 +170,7 @@ const FreelancerProposalShow: React.FC = () => {
                   dot={<ClockCircleOutlined style={{ fontSize: "16px" }} />}
                 >
                   {proposal.createdAt
-                    ? `Submitted on ${dayjs(proposal.createdAt).format(
-                        "MMM D, YYYY"
-                      )}`
+                    ? `Submitted on ${localSettings.formatDate(proposal.createdAt)}`
                     : "Submission date not available"}
                 </Timeline.Item>
                 {proposal.status === "ACCEPTED" && (

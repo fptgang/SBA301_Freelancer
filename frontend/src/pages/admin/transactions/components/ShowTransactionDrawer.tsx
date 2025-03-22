@@ -16,6 +16,7 @@ import {
 } from "../../../../../generated";
 import { DateField, NumberField } from "@refinedev/antd";
 import { Link } from "react-router";
+import {useLocalSettings} from "../../../../hooks/useLocalSettings";
 
 const STATUS_COLOR_MAP: Record<TransactionStatusDto, string> = {
   SUCCESS: "green",
@@ -42,6 +43,7 @@ export const ShowTransactionDrawer: React.FC<ShowTransactionDrawerProps> = ({
   open,
   onClose,
 }) => {
+  const [localSettings] = useLocalSettings()
   const getStatusTag = (status: TransactionStatusDto) => (
     <Tag color={STATUS_COLOR_MAP[status]} className="text-sm">
       {status}
@@ -141,7 +143,7 @@ export const ShowTransactionDrawer: React.FC<ShowTransactionDrawerProps> = ({
             >
               <DateField
                 value={transaction?.createdAt}
-                format="MMMM D, YYYY HH:mm:ss"
+                format={localSettings.dateTimeFormat}
               />
             </Descriptions.Item>
           </Descriptions>

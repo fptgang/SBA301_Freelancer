@@ -23,6 +23,7 @@ import {
   ProjectStatusDto,
 } from "../../../../generated";
 import { stompClient } from "../../../utils/stompClient";
+import {useLocalSettings} from "../../../hooks/useLocalSettings";
 
 const { Text } = Typography;
 
@@ -35,6 +36,7 @@ const STATUS_COLOR_MAP = {
 };
 
 export const ProjectsList: React.FC = () => {
+  const [localSettings] = useLocalSettings()
   const { tableProps, searchFormProps } = useTable<ProjectDto>({
     syncWithLocation: true,
     sorters: {
@@ -223,7 +225,7 @@ export const ProjectsList: React.FC = () => {
             </Space>
           }
           render={(value: string) => (
-            <DateField value={value} format="MMMM DD, YYYY" />
+            <DateField value={value} format={localSettings.dateFormat} />
           )}
           sorter
           defaultSortOrder="descend"
@@ -233,7 +235,7 @@ export const ProjectsList: React.FC = () => {
           dataIndex="updatedAt"
           title="Updated At"
           render={(value: string) => (
-            <DateField value={value} format="MMMM DD, YYYY" />
+            <DateField value={value} format={localSettings.dateFormat} />
           )}
           sorter
         />
