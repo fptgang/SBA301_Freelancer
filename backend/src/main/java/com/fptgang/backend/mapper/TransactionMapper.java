@@ -1,6 +1,7 @@
 package com.fptgang.backend.mapper;
 
 import com.fptgang.backend.api.model.*;
+import com.fptgang.backend.model.Account;
 import com.fptgang.backend.model.Transaction;
 import com.fptgang.backend.repository.AccountRepos;
 import com.fptgang.backend.repository.MilestoneRepos;
@@ -85,12 +86,13 @@ public class TransactionMapper extends BaseMapper<TransactionDto, Transaction> {
             return  null;
         }
         Transaction entity = new Transaction();
-        if(dto.getAccountId() != null){
-            entity.setFromAccount(accountRepos.getReferenceById(dto.getAccountId()));
+        if(dto.getAccountEmail() != null){
+            Account account = accountRepos.findByEmail(dto.getAccountEmail()).orElseThrow(null);
+            entity.setFromAccount(account);
         }
         entity.setAmount(dto.getAmount());
         entity.setPaymentMethod(dto.getPaymentMethod() == null ? null :
-                Transaction.PaymentMethod.valueOf(dto.getPaymentMethod().name()));
+                Transaction.PaymentMethod.valueOf(dto.getPaymentMethod()));
         entity.setNotes(dto.getNotes());
         return entity;
     }

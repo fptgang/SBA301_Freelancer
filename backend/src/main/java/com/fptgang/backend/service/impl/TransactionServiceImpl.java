@@ -268,7 +268,7 @@ public class TransactionServiceImpl implements TransactionService {
             throw new IllegalArgumentException("Insufficient balance for withdrawal");
         }
         account.setBalance(account.getBalance().subtract(amount));
-        accountRepos.save(account);
+
         Transaction transactions = Transaction.builder()
                 .fromAccount(account)
                 .toAccount(null)
@@ -278,7 +278,7 @@ public class TransactionServiceImpl implements TransactionService {
                 .paymentMethod(transaction.getPaymentMethod())
                 .notes(transaction.getNotes())
                 .build();
-
+        accountRepos.save(account);
         return transactionRepos.save(transactions);
     }
 
