@@ -36,7 +36,8 @@ import { ProposalDto, ProposalStatusDto } from "../../../../generated";
 import { useNavigate, useParams } from "react-router";
 import api from "../../../services/api/openapi-config";
 import dayjs from "dayjs";
-import {useLocalSettings} from "../../../hooks/useLocalSettings";
+import { useLocalSettings } from "../../../hooks/useLocalSettings";
+import { ContractSignButton } from "../../../components";
 
 const { Title, Text, Paragraph } = Typography;
 
@@ -310,40 +311,6 @@ const FreelancerProposalShow: React.FC = () => {
                 }
               >
                 <Timeline>
-                  {proposal.createdAt
-                    ? localSettings.formatDate(proposal.createdAt)
-                    : "N/A"}
-                </Descriptions.Item>
-              </Descriptions>
-            </Space>
-          </Card>
-        </Col>
-
-        <Col xs={24} lg={8}>
-          <Space direction="vertical" size={16} style={{ width: "100%" }}>
-            <Card>
-              <Title level={5}>Proposal Timeline</Title>
-              <Timeline>
-                <Timeline.Item
-                  dot={<ClockCircleOutlined style={{ fontSize: "16px" }} />}
-                >
-                  {proposal.createdAt
-                    ? `Submitted on ${localSettings.formatDate(proposal.createdAt)}`
-                    : "Submission date not available"}
-                </Timeline.Item>
-                {proposal.status === "ACCEPTED" && (
-                  <Timeline.Item
-                    dot={
-                      <CheckCircleOutlined
-                        style={{ fontSize: "16px" }}
-                        color="green"
-                      />
-                    }
-                  >
-                    Accepted
-                  </Timeline.Item>
-                )}
-                {proposal.status === "REJECTED" && (
                   <Timeline.Item
                     dot={<CalendarOutlined style={{ fontSize: "16px", color: "#1890ff" }} />}
                     color="blue"
@@ -447,6 +414,17 @@ const FreelancerProposalShow: React.FC = () => {
                     <Paragraph className="text-green-700">
                       Your proposal has been accepted. The client has chosen to work with you on this project.
                     </Paragraph>
+                    
+                    {/* Check if there's a contract for this proposal by navigating to the contract page */}
+                    <div className="mt-4">
+                      <Button
+                        type="primary"
+                        icon={<CheckCircleOutlined />}
+                        onClick={() => proposal.projectId && navigate(`/freelancer/projects/${proposal.projectId}`)}
+                      >
+                        View Project Details & Contract
+                      </Button>
+                    </div>
                   </div>
                 </Card>
               )}
