@@ -65,7 +65,7 @@ axiosInstance.interceptors.response.use(
         } catch (refreshError) {
           localStorage.removeItem(REFRESH_TOKEN_KEY);
           store.dispatch(clearAuth());
-          //window.location.href = '/login';
+          window.location.href = '/login';
           return Promise.reject(refreshError);
         }
       }

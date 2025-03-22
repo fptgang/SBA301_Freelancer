@@ -3,14 +3,14 @@ import { Card, Form, Switch, Typography, message, Select, Space } from 'antd';
 import { useState } from 'react';
 import dayjs from 'dayjs';
 import { ColorModeContext } from '../../../contexts/color-mode';
+import {useLocalSettings} from "../../../hooks/useLocalSettings";
 
 const { Title } = Typography;
 const { Option } = Select;
 
 const LocalSettingsPage: React.FC = () => {
   const { mode, setMode } = useContext(ColorModeContext);
-  const [dateFormat, setDateFormat] = useState('YYYY-MM-DD');
-  const [timeFormat, setTimeFormat] = useState('HH:mm:ss');
+  const [localSettings, updateSettings] = useLocalSettings();
   const currentDate = dayjs();
 
   const dateFormats = [
@@ -34,12 +34,12 @@ const LocalSettingsPage: React.FC = () => {
   };
 
   const handleDateFormatChange = (format: string) => {
-    setDateFormat(format);
+    updateSettings({ dateFormat: format, dateTimeFormat: `${format} ${localSettings.timeFormat}` });
     message.success('Date format updated successfully');
   };
 
   const handleTimeFormatChange = (format: string) => {
-    setTimeFormat(format);
+    updateSettings({ timeFormat: format, dateTimeFormat: `${localSettings.dateFormat} ${format}` });
     message.success('Time format updated successfully');
   };
 
@@ -58,7 +58,7 @@ const LocalSettingsPage: React.FC = () => {
         </Form.Item>
         <Form.Item label="Date Format">
           <Select
-            value={dateFormat}
+            value={localSettings.dateFormat}
             onChange={handleDateFormatChange}
             style={{ width: '100%' }}
           >
@@ -71,7 +71,7 @@ const LocalSettingsPage: React.FC = () => {
         </Form.Item>
         <Form.Item label="Time Format">
           <Select
-            value={timeFormat}
+            value={localSettings.timeFormat}
             onChange={handleTimeFormatChange}
             style={{ width: '100%' }}
           >

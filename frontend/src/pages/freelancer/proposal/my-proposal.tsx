@@ -28,11 +28,13 @@ import { AccountDto, ProposalDto } from "../../../../generated";
 import api from "../../../services/api/openapi-config";
 import { useLocation, useNavigate } from "react-router";
 import { store } from "../../../store";
+import {useLocalSettings} from "../../../hooks/useLocalSettings";
 
 const { Title, Text } = Typography;
 const { Option } = Select;
 
 const FreelancerMyProposalPage: React.FC = () => {
+  const [localSettings] = useLocalSettings();
   const location = useLocation();
   const [projectId, setProjectId] = useState(location.state.projectId);
   const [searchText, setSearchText] = useState("");
@@ -117,7 +119,7 @@ const FreelancerMyProposalPage: React.FC = () => {
       title: "Date Submitted",
       dataIndex: "createdAt",
       key: "createdAt",
-      render: (date: string) => new Date(date).toLocaleDateString(),
+      render: (date: string) => localSettings.formatDate(date),
       sorter: true,
     },
     {

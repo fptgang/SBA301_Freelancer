@@ -32,10 +32,12 @@ import {
   ProjectDto,
   ProjectSkillDto,
 } from "../../../../generated";
+import {useLocalSettings} from "../../../hooks/useLocalSettings";
 
 const { Title } = Typography;
 
 export const ProjectsShow: React.FC = () => {
+  const [localSettings] = useLocalSettings()
   const { queryResult } = useShow<ProjectDto>();
   const { data, isLoading } = queryResult;
   const record = data?.data;
@@ -242,14 +244,14 @@ export const ProjectsShow: React.FC = () => {
             <Descriptions.Item label="Created At">
               <DateField
                 value={record?.createdAt}
-                format="MMMM D, YYYY HH:mm:ss"
+                format={localSettings.dateFormat}
               />
             </Descriptions.Item>
 
             <Descriptions.Item label="Last Updated">
               <DateField
                 value={record?.updatedAt}
-                format="MMMM D, YYYY HH:mm:ss"
+                format={localSettings.dateFormat}
               />
             </Descriptions.Item>
 

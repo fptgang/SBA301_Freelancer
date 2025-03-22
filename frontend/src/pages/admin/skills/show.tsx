@@ -7,10 +7,12 @@ import {
   ClockCircleOutlined,
   CheckCircleOutlined,
 } from "@ant-design/icons";
+import {useLocalSettings} from "../../../hooks/useLocalSettings";
 
 const { Title } = Typography;
 
 export const SkillsShow: React.FC = () => {
+  const [localSettings] = useLocalSettings()
   const { queryResult: showQuery } = useShow();
   const { data, isLoading } = showQuery;
   const record = data?.data;
@@ -80,13 +82,13 @@ export const SkillsShow: React.FC = () => {
             <Descriptions.Item label="Created At">
               <DateField
                 value={record?.createdAt}
-                format="YYYY-MM-DD HH:mm:ss"
+                format={localSettings.dateFormat}
               />
             </Descriptions.Item>
             <Descriptions.Item label="Updated At">
               <DateField
                 value={record?.updatedAt}
-                format="YYYY-MM-DD HH:mm:ss"
+                format={localSettings.dateFormat}
               />
             </Descriptions.Item>
           </Descriptions>

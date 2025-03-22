@@ -29,10 +29,12 @@ import {
 } from "@ant-design/icons";
 import { ROLE_COLOR_MAP } from "../../../utils/constants";
 import { AccountDto } from "../../../../generated";
+import {useLocalSettings} from "../../../hooks/useLocalSettings";
 
 const { Title } = Typography;
 
 export const AccountsShow: React.FC = () => {
+  const [localSettings] = useLocalSettings()
   const { queryResult } = useShow<AccountDto>();
   const { data, isLoading } = queryResult;
   const record = data?.data;
@@ -147,7 +149,7 @@ export const AccountsShow: React.FC = () => {
                     Verified on{" "}
                     <DateField
                       value={record?.verifiedAt}
-                      format="MMMM D, YYYY"
+                      format={localSettings.dateFormat}
                     />
                   </small>
                 )}
@@ -189,14 +191,14 @@ export const AccountsShow: React.FC = () => {
             <Descriptions.Item label="Created At">
               <DateField
                 value={record?.createdAt}
-                format="MMMM D, YYYY HH:mm:ss"
+                format={localSettings.dateFormat}
               />
             </Descriptions.Item>
 
             <Descriptions.Item label="Last Updated">
               <DateField
                 value={record?.updatedAt}
-                format="MMMM D, YYYY HH:mm:ss"
+                format={localSettings.dateFormat}
               />
             </Descriptions.Item>
 

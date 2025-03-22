@@ -33,11 +33,13 @@ import { useGetIdentity } from "@refinedev/core";
 import { AccountDto, ProjectDto } from "../../../../generated";
 import { store } from "../../../store";
 import { useNavigate } from "react-router";
+import {useLocalSettings} from "../../../hooks/useLocalSettings";
 
 const { Text, Title } = Typography;
 const { Option } = Select;
 
 const ClientList = () => {
+  const [localSettings] = useLocalSettings()
   const [searchText, setSearchText] = useState("");
   const me = store?.getState()?.auth?.account;
   const nav = useNavigate();
@@ -227,7 +229,7 @@ const ClientList = () => {
               </Tooltip>
             }
             render={(value) => (
-              <DateField value={value} format="MMM DD, YYYY" />
+              <DateField value={value} format={localSettings.dateFormat} />
             )}
             sorter
             width={150}

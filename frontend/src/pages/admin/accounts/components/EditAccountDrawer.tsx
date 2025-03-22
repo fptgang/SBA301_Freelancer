@@ -29,6 +29,7 @@ import dayjs from "dayjs";
 import { Link } from "react-router";
 import { AccountDto } from "../../../../../generated";
 import { ROLE_OPTIONS } from "../../../../utils/constants";
+import {useLocalSettings} from "../../../../hooks/useLocalSettings";
 
 interface EditAccountsDrawerProps {
   account?: AccountDto;
@@ -41,6 +42,7 @@ export const EditAccountsDrawer: React.FC<EditAccountsDrawerProps> = ({
   open,
   onClose,
 }) => {
+  const [localSettings] = useLocalSettings()
   const { formProps, saveButtonProps, queryResult, onFinish } =
     useForm<AccountDto>({
       resource: "accounts",
@@ -120,9 +122,9 @@ export const EditAccountsDrawer: React.FC<EditAccountsDrawerProps> = ({
             {accountData?.verifiedAt && (
               <Alert
                 message="Verified Account"
-                description={`This Account was verified on ${dayjs(
+                description={`This Account was verified on ${localSettings.formatDateTime(
                   accountData.verifiedAt
-                ).format("MMMM D, YYYY")}`}
+                )}`}
                 type="success"
                 showIcon
                 className="mb-6"

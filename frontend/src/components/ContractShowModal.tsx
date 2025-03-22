@@ -5,6 +5,7 @@ import { ContractStatusDto } from "../../generated/models/ContractStatusDto";
 import api from "../services/api/openapi-config";
 import dayjs from "dayjs";
 import { useOne } from "@refinedev/core";
+import {useLocalSettings} from "../hooks/useLocalSettings";
 
 const { Title, Text } = Typography;
 
@@ -19,6 +20,7 @@ const ContractShowModal: React.FC<ContractShowModalProps> = ({
   onClose,
   contractId,
 }) => {
+  const [localSettings] = useLocalSettings()
   const { data: contractData, isLoading: loading } = useOne<ContractDto>({
     resource: "contracts",
     id: contractId,
@@ -65,7 +67,7 @@ const ContractShowModal: React.FC<ContractShowModalProps> = ({
                 </Text>
               </Descriptions.Item>
               <Descriptions.Item label="Created Date">
-                {dayjs(contract.createdAt).format("MMM D, YYYY")}
+                {localSettings.formatDateTime(contract.createdAt)}
               </Descriptions.Item>
               <Descriptions.Item label="Budget">
                 ${contract.budget}

@@ -22,6 +22,7 @@ import {
   TransactionStatusDto,
   TransactionTypeDto,
 } from "../../../../generated";
+import {useLocalSettings} from "../../../hooks/useLocalSettings";
 
 const { Title } = Typography;
 
@@ -40,6 +41,7 @@ const TYPE_COLOR_MAP: Record<TransactionTypeDto, string> = {
 };
 
 export const TransactionsShow: React.FC = () => {
+  const [localSettings] = useLocalSettings()
   const { queryResult } = useShow<TransactionDto>();
   const { data, isLoading } = queryResult;
   const record = data?.data;
@@ -134,7 +136,7 @@ export const TransactionsShow: React.FC = () => {
             >
               <DateField
                 value={record?.createdAt}
-                format="MMMM D, YYYY HH:mm:ss"
+                format={localSettings.dateTimeFormat}
               />
             </Descriptions.Item>
           </Descriptions>

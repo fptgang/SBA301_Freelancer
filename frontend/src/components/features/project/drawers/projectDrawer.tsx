@@ -10,12 +10,14 @@ import { renderSkillTags } from "../../../../utils/renderSkillTags";
 import { Link, useNavigate } from "react-router";
 import { ArrowsAltOutlined, WindowsFilled } from "@ant-design/icons";
 import { store } from "../../../../store";
+import {useLocalSettings} from "../../../../hooks/useLocalSettings";
 
 const ProjectDrawer: React.FC<{
   project: ProjectDto;
   isDrawerVisible: any;
   onClose: any;
 }> = ({ project, isDrawerVisible, onClose }) => {
+  const [localSettings] = useLocalSettings();
   const navigate = useNavigate();
 
   const role = store.getState().auth.account?.role;
@@ -73,7 +75,7 @@ const ProjectDrawer: React.FC<{
           </Typography.Title>
           <Typography.Text type="secondary">
             member since{" "}
-            {new Date(project.client?.createdAt!).toLocaleDateString()}{" "}
+            {project.client && localSettings.formatDate(project.client.createdAt!)}{" "}
           </Typography.Text>{" "}
           <br />
           <Typography.Text>
@@ -104,14 +106,14 @@ const ProjectDrawer: React.FC<{
         Created At
       </Typography.Title>
       <Typography.Text>
-        {new Date(project.createdAt!).toLocaleDateString()}
+        {localSettings.formatDate(project.createdAt!)}
       </Typography.Text>
 
       <Typography.Title level={5} style={{ marginTop: 16 }}>
         Last Updated
       </Typography.Title>
       <Typography.Text>
-        {new Date(project.updatedAt!).toLocaleDateString()}
+        {localSettings.formatDate(project.updatedAt!)}
       </Typography.Text>
       <br />
       <br />

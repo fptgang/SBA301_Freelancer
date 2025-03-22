@@ -35,10 +35,12 @@ import { AccountDto } from "../../../../generated/models/AccountDto";
 import { stompClient } from "../../../utils/stompClient";
 import { ShowAccountsShowDrawer } from "./components/ShowAccountDrawer";
 import { EditAccountsDrawer } from "./components/EditAccountDrawer";
+import {useLocalSettings} from "../../../hooks/useLocalSettings";
 
 const { Text } = Typography;
 
 export const AccountsList: React.FC = () => {
+  const [localSettings] = useLocalSettings()
   const [showDrawer, setShowDrawer] = useState(false);
   const [editDrawer, setEditDrawer] = useState(false);
   const [selectedAccount, setSelectedAccount] = useState<AccountDto>();
@@ -213,7 +215,7 @@ export const AccountsList: React.FC = () => {
               </Space>
             }
             render={(value: string) => (
-              <DateField value={value} format="MMMM DD, YYYY" />
+              <DateField value={value} format={localSettings.dateFormat} />
             )}
             sorter
             defaultSortOrder="descend"

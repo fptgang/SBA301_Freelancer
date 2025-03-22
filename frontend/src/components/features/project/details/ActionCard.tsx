@@ -14,6 +14,7 @@ import {
 import FreelancerCreateProposalButton from "../../../../pages/freelancer/proposal/freelancer-create";
 import { useGetIdentity } from "@refinedev/core";
 import ContractShowModal from "../../../ContractShowModal";
+import {useLocalSettings} from "../../../../hooks/useLocalSettings";
 
 interface ActionCardProps {
   project: ProjectDto;
@@ -28,6 +29,7 @@ export const ActionCard: React.FC<ActionCardProps> = ({
   freelancerId,
   refetch,
 }) => {
+  const [localSettings] = useLocalSettings();
   const navigate = useNavigate();
   const [showContractModal, setShowContractModal] = useState(false);
   const [selectedContractId, setSelectedContractId] = useState<number>();
@@ -157,7 +159,7 @@ export const ActionCard: React.FC<ActionCardProps> = ({
           </Typography.Text>
           <Typography.Text>
             <CalendarOutlined /> <strong>Posted:</strong>{" "}
-            {new Date(project?.createdAt!).toLocaleDateString()}
+            {localSettings.formatDate(project.createdAt!)}
           </Typography.Text>
           <Typography.Text>
             <UserOutlined /> <strong>Client:</strong>{" "}
