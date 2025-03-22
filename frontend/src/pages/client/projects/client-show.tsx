@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router";
 import {
   useShow,
@@ -90,6 +90,26 @@ const MilestoneDetailModal: React.FC<MilestoneDetailModalProps> = ({
 }) => {
   const [localSettings] = useLocalSettings();
   const [confirmLoading, setConfirmLoading] = useState(false);
+  const [contract, setContract] = useState<any>(null);
+  const { open } = useNotification();
+  
+  // Fetch contract data if available
+  useEffect(() => {
+    const fetchContractData = async () => {
+      if (visible && milestone && project?.contract?.contractId) {
+        try {
+          const contractData = await api.getContractById({
+            contractId: project.contract.contractId
+          });
+          setContract(contractData);
+        } catch (error) {
+          console.error("Error fetching contract data:", error);
+        }
+      }
+    };
+    
+    fetchContractData();
+  }, [visible, milestone, project]);
   
   const handleConfirm = async () => {
     try {
@@ -112,6 +132,9 @@ const MilestoneDetailModal: React.FC<MilestoneDetailModalProps> = ({
     link.click();
     document.body.removeChild(link);
   };
+
+  // Determine if contract is signed
+  const isContractSigned = contract?.status === "SIGNED";
 
   if (!milestone) return null;
 
@@ -162,6 +185,35 @@ const MilestoneDetailModal: React.FC<MilestoneDetailModalProps> = ({
             {milestone.deadline ? localSettings.formatDateTime(milestone.deadline) : "Not set"}
           </Descriptions.Item>
         </Descriptions>
+        
+        {/* Contract Status - Show if there's a contract */}
+        {contract && (
+          <div className="mt-4">
+            <Title level={5} className="mb-3">
+              <FileTextOutlined className="mr-2" /> Contract Status
+            </Title>
+            <div className="bg-gray-50 p-4 rounded-md border border-gray-100">
+              <Descriptions layout="horizontal" bordered size="small">
+                <Descriptions.Item label="Contract ID">
+                  {contract.contractId}
+                </Descriptions.Item>
+                <Descriptions.Item label="Status">
+                  <Tag color={contract.status === "SIGNED" ? "green" : "orange"}>
+                    {contract.status}
+                  </Tag>
+                </Descriptions.Item>
+                <Descriptions.Item label="Created At">
+                  {localSettings.formatDateTime(contract.createdAt)}
+                </Descriptions.Item>
+                {contract.signedAt && (
+                  <Descriptions.Item label="Signed At">
+                    {localSettings.formatDateTime(contract.signedAt)}
+                  </Descriptions.Item>
+                )}
+              </Descriptions>
+            </div>
+          </div>
+        )}
         
         {/* Deliverable Files Section */}
         {milestone.deliverables && milestone.deliverables.length > 0 && (
@@ -313,6 +365,7 @@ const MilestoneDetailModal: React.FC<MilestoneDetailModalProps> = ({
           </div>
         )}
         
+        {/* Only show actions if milestone is in REVIEWING status and contract is not already signed */}
         {milestone.status === "REVIEWING" && (
           <div className="mt-6 flex justify-end space-x-3">
             <Button 
@@ -321,19 +374,26 @@ const MilestoneDetailModal: React.FC<MilestoneDetailModalProps> = ({
             >
               Report Issue
             </Button>
-            <Popconfirm
-              title="Confirm milestone completion"
-              description="Are you sure you want to mark this milestone as complete? This action will release the payment to the freelancer."
-              icon={<ExclamationCircleOutlined style={{ color: 'green' }} />}
-              onConfirm={handleConfirm}
-              okText="Yes, Complete"
-              cancelText="Cancel"
-              okButtonProps={{ loading: confirmLoading }}
-            >
-              <Button type="primary">
-                Confirm Completion
+            {(!contract || contract.status !== "SIGNED") && (
+              <Popconfirm
+                title="Confirm milestone completion"
+                description="Are you sure you want to mark this milestone as complete? This action will release the payment to the freelancer."
+                icon={<ExclamationCircleOutlined style={{ color: 'green' }} />}
+                onConfirm={handleConfirm}
+                okText="Yes, Complete"
+                cancelText="Cancel"
+                okButtonProps={{ loading: confirmLoading }}
+              >
+                <Button type="primary">
+                  Confirm Completion
+                </Button>
+              </Popconfirm>
+            )}
+            {contract && contract.status === "SIGNED" && (
+              <Button type="primary" disabled>
+                Already Completed
               </Button>
-            </Popconfirm>
+            )}
           </div>
         )}
       </Card>

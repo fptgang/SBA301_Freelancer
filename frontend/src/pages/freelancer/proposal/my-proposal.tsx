@@ -20,7 +20,8 @@ import {
   Dropdown,
   Modal,
   Alert,
-  message
+  message,
+  Descriptions
 } from "antd";
 import {
   SearchOutlined,
@@ -91,6 +92,9 @@ const ContractSigningModal: React.FC<{
     fetchData();
   }, [visible, contractId]);
 
+  // Check if the contract is already signed
+  const isContractSigned = contract?.status === "SIGNED";
+
   return (
     <Modal
       title="Sign Contract for Project"
@@ -107,21 +111,51 @@ const ContractSigningModal: React.FC<{
       ) : contract && project ? (
         <div className="space-y-4">
           <Alert
-            message={`Sign Contract for: ${projectTitle}`}
-            description="Review the contract details carefully before signing."
-            type="info"
+            message={`${isContractSigned ? "Contract Details" : "Sign Contract for"}: ${projectTitle}`}
+            description={isContractSigned 
+              ? "This contract has already been signed." 
+              : "Review the contract details carefully before signing."}
+            type={isContractSigned ? "success" : "info"}
             showIcon
             className="mb-4"
           />
           
-          <ContractSignButton 
-            contract={contract} 
-            project={project} 
-            onSuccess={() => {
-              onSuccess();
-              onClose();
-            }}
-          />
+          {/* Show contract details */}
+          <Card className="shadow-sm">
+            <Descriptions layout="vertical" bordered>
+              <Descriptions.Item label="Contract ID">
+                {contract.contractId}
+              </Descriptions.Item>
+              <Descriptions.Item label="Status">
+                <Tag color={contract.status === "SIGNED" ? "green" : "orange"}>
+                  {contract.status}
+                </Tag>
+              </Descriptions.Item>
+              <Descriptions.Item label="Created At">
+                {contract.createdAt ? new Date(contract.createdAt).toLocaleDateString() : 'N/A'}
+              </Descriptions.Item>
+              {contract.signedAt && (
+                <Descriptions.Item label="Signed At">
+                  {new Date(contract.signedAt).toLocaleDateString()}
+                </Descriptions.Item>
+              )}
+              <Descriptions.Item label="Budget" span={3}>
+                ${contract.budget?.toFixed(2)}
+              </Descriptions.Item>
+            </Descriptions>
+          </Card>
+          
+          {/* Only show sign button if not already signed */}
+          {!isContractSigned && (
+            <ContractSignButton 
+              contract={contract} 
+              project={project} 
+              onSuccess={() => {
+                onSuccess();
+                onClose();
+              }}
+            />
+          )}
         </div>
       ) : (
         <div className="text-center py-4">
@@ -156,6 +190,8 @@ const FreelancerMyProposalPage: React.FC = () => {
   const [contractModalVisible, setContractModalVisible] = useState(false);
   const [selectedContractId, setSelectedContractId] = useState<number | null>(null);
   const [selectedProjectTitle, setSelectedProjectTitle] = useState<string>("");
+  // Track contract status for each proposal
+  const [proposalContractStatus, setProposalContractStatus] = useState<Record<number, string>>({});
 
   const { data, isLoading, refetch } = useList<ProposalDto>({
     resource: "proposals",
@@ -202,6 +238,32 @@ const FreelancerMyProposalPage: React.FC = () => {
   const nav = useNavigate();
   const proposals = data?.data || [];
 
+  // Fetch contract statuses for all proposals with contracts
+  useEffect(() => {
+    const fetchContractStatuses = async () => {
+      const statuses: Record<number, string> = {};
+      
+      for (const proposal of proposals) {
+        if (proposal.contractId && proposal.proposalId) {
+          try {
+            const contract = await api.getContractById({
+              contractId: proposal.contractId
+            });
+            statuses[proposal.proposalId] = contract.status || '';
+          } catch (error) {
+            console.error(`Error fetching contract for proposal ${proposal.proposalId}:`, error);
+          }
+        }
+      }
+      
+      setProposalContractStatus(statuses);
+    };
+    
+    if (proposals.length > 0) {
+      fetchContractStatuses();
+    }
+  }, [proposals]);
+
   // Show contract signing modal
   const handleShowContractModal = async (proposalId: number | undefined, projectTitle: string) => {
     if (!proposalId) return;
@@ -220,6 +282,12 @@ const FreelancerMyProposalPage: React.FC = () => {
       console.error("Error fetching contract:", error);
       message.error("Failed to load contract details");
     }
+  };
+
+  // Check if a proposal's contract is already signed
+  const isContractSigned = (proposalId: number | undefined) => {
+    if (!proposalId) return false;
+    return proposalContractStatus[proposalId] === "SIGNED";
   };
 
   // Calculate stats when proposals change
@@ -367,14 +435,21 @@ const FreelancerMyProposalPage: React.FC = () => {
       title: "Status",
       dataIndex: "status",
       key: "status",
-      render: (status: string) => (
-        <Tag 
-          color={statusColors[status] || "default"}
-          icon={statusIcons[status]}
-          className="px-3 py-1 text-sm rounded-full"
-        >
-          {status}
-        </Tag>
+      render: (status: string, record: ProposalDto) => (
+        <Space>
+          <Tag 
+            color={statusColors[status] || "default"}
+            icon={statusIcons[status]}
+            className="px-3 py-1 text-sm rounded-full"
+          >
+            {status}
+          </Tag>
+          {record.contractId && isContractSigned(record.proposalId) && (
+            <Tag color="green" icon={<CheckCircleOutlined />} className="px-3 py-1 text-sm rounded-full">
+              CONTRACT SIGNED
+            </Tag>
+          )}
+        </Space>
       ),
       width: '15%',
     },
@@ -406,7 +481,7 @@ const FreelancerMyProposalPage: React.FC = () => {
               />
             </Tooltip>
           )}
-          {record.status === "ACCEPTED" && (
+          {record.status === "ACCEPTED" && record.contractId && !isContractSigned(record.proposalId) && (
             <Tooltip title="View project details & contract">
               <Button
                 icon={<CheckCircleOutlined />}
@@ -415,6 +490,18 @@ const FreelancerMyProposalPage: React.FC = () => {
                 onClick={() => handleShowContractModal(record.proposalId, record.projectId ? String(record.projectId) : "Project")}
               >
                 Sign Contract
+              </Button>
+            </Tooltip>
+          )}
+          {record.status === "ACCEPTED" && record.contractId && isContractSigned(record.proposalId) && (
+            <Tooltip title="View contract details">
+              <Button
+                icon={<FileTextOutlined />}
+                size="small"
+                type="default"
+                onClick={() => handleShowContractModal(record.proposalId, record.projectId ? String(record.projectId) : "Project")}
+              >
+                View Contract
               </Button>
             </Tooltip>
           )}
@@ -435,13 +522,22 @@ const FreelancerMyProposalPage: React.FC = () => {
                   Withdraw Proposal
                 </Menu.Item>
               )}
-              {record.status === "ACCEPTED" && (
+              {record.status === "ACCEPTED" && record.contractId && !isContractSigned(record.proposalId) && (
                 <Menu.Item 
                   key="sign" 
                   icon={<CheckCircleOutlined />}
                   onClick={() => handleShowContractModal(record.proposalId, record.projectId ? String(record.projectId) : "Project")}
                 >
                   Sign Contract
+                </Menu.Item>
+              )}
+              {record.status === "ACCEPTED" && record.contractId && isContractSigned(record.proposalId) && (
+                <Menu.Item 
+                  key="view" 
+                  icon={<FileTextOutlined />}
+                  onClick={() => handleShowContractModal(record.proposalId, record.projectId ? String(record.projectId) : "Project")}
+                >
+                  View Contract
                 </Menu.Item>
               )}
             </Menu>
