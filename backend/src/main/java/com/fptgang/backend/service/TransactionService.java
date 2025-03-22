@@ -1,5 +1,6 @@
 package com.fptgang.backend.service;
 
+import com.fptgang.backend.api.model.UpdateWithdrawDto;
 import com.fptgang.backend.model.Milestone;
 import com.fptgang.backend.model.Transaction;
 import com.fptgang.backend.service.params.ListParams;
@@ -32,5 +33,5 @@ public interface TransactionService {
 
     Transaction createWithdrawalRequest(Transaction transaction);
 
-    Transaction updateWithdrawalStatus(Transaction transactionId);
+    Transaction updateWithdrawalStatus(UpdateWithdrawDto updateWithdrawDto);
 }

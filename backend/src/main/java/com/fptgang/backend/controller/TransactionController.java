@@ -16,6 +16,7 @@ import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -114,8 +115,8 @@ public class TransactionController implements TransactionsApi {
     }
 
     @Override
-    public ResponseEntity<TransactionDto> createWithdrawRequest(@Valid @RequestBody TransactionDto transactionDto){
-        Transaction transaction = transactionService.createWithdrawalRequest(transactionMapper.toEntity(transactionDto));
+    public ResponseEntity<TransactionDto> createWithdrawRequest(@Valid @RequestBody WithdrawDto withdrawDto){
+        Transaction transaction = transactionService.createWithdrawalRequest(transactionMapper.toEntity(withdrawDto));
 
         if(!SecurityUtil.hasPermission(Role.FREELANCER) &&
                 !SecurityUtil.hasPermission(Role.CLIENT)
@@ -127,8 +128,8 @@ public class TransactionController implements TransactionsApi {
     }
 
     @Override
-    public ResponseEntity<TransactionDto> updateWithdrawRequest(@Valid @RequestBody TransactionDto transactionDto){
-        Transaction transaction = transactionService.updateWithdrawalStatus(transactionMapper.toEntity(transactionDto));
+    public ResponseEntity<TransactionDto> updateWithdrawRequest(@Valid @RequestBody UpdateWithdrawDto updateWithdrawDto){
+        Transaction transaction = transactionService.updateWithdrawalStatus(updateWithdrawDto);
 
         if(!SecurityUtil.hasPermission(Role.STAFF) &&
                 !SecurityUtil.hasPermission(Role.ADMIN)

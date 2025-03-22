@@ -1,0 +1,15 @@
+WithdrawDto:
+  type: object
+  properties:
+    accountId:
+      type: integer
+      format: int64
+    amount:
+      type: number
+      format: double
+    paymentMethod:
+      type: string
+      enum: [ VNPAY ]
+    notes:
+      type: string
+      

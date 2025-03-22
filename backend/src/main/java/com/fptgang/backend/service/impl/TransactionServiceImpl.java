@@ -1,5 +1,6 @@
 package com.fptgang.backend.service.impl;
 
+import com.fptgang.backend.api.model.UpdateWithdrawDto;
 import com.fptgang.backend.exception.InvalidInputException;
 import com.fptgang.backend.model.Account;
 import com.fptgang.backend.model.Milestone;
@@ -283,8 +284,8 @@ public class TransactionServiceImpl implements TransactionService {
 
 
     @Transactional
-    public Transaction updateWithdrawalStatus(Transaction transactionId) {
-        Transaction transaction = transactionRepos.findById(transactionId.getTransactionId())
+    public Transaction updateWithdrawalStatus(UpdateWithdrawDto trans) {
+        Transaction transaction = transactionRepos.findById(trans.getTransactionId())
                 .orElseThrow(() -> new IllegalArgumentException("Transaction not found"));
 
         if (transaction.getType() != Transaction.TransactionType.WITHDRAWAL) {
@@ -295,10 +296,10 @@ public class TransactionServiceImpl implements TransactionService {
             throw new IllegalArgumentException("Only pending transactions can be updated");
         }
 
-        transaction.setStatus(transactionId.getStatus());
+        transaction.setStatus(Transaction.TransactionStatus.valueOf(trans.getTransactionStatus()));
         transaction.setUpdatedAt(LocalDateTime.now());
 
-        if (transactionId.getStatus() == Transaction.TransactionStatus.FAILED) {
+        if (Transaction.TransactionStatus.valueOf(trans.getTransactionStatus()) == Transaction.TransactionStatus.FAILED) {
             Account account = transaction.getFromAccount();
             account.setBalance(account.getBalance().add(transaction.getAmount()));
             accountRepos.save(account);

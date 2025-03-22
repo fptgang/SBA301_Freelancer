@@ -1,0 +1,10 @@
+UpdateWithdrawDto:
+  type: object
+  properties:
+    transactionId:
+      type: integer
+      format: int64
+    transactionStatus:
+      type: string
+
+      

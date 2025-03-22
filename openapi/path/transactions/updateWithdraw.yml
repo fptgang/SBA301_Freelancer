@@ -9,7 +9,7 @@ post:
     content:
       application/json:
         schema:
-          $ref: '../../model/transaction.yml#/TransactionDto'
+          $ref: '../../model/request/update-transaction-withdraw.yml#/UpdateWithdrawDto'
   responses:
     '200':
       description: The operation was success
