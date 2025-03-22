@@ -12,6 +12,7 @@ import {
   Divider,
   Upload,
   message,
+  InputNumber,
 } from "antd";
 import {
   useCreate,
@@ -28,10 +29,12 @@ import {
   CheckCircleOutlined,
   UploadOutlined,
   PaperClipOutlined,
+  DollarTwoTone,
 } from "@ant-design/icons";
 import TextArea from "antd/lib/input/TextArea";
 import { AccountDto, ProjectDto, ProposalDto } from "../../../../generated";
 import { store } from "../../../store";
+import api from "../../../services/api/openapi-config";
 
 const { Step } = Steps;
 const { Title, Text } = Typography;
@@ -39,11 +42,12 @@ const { Title, Text } = Typography;
 interface FreelancerCreateProposalButtonProps {
   project?: ProjectDto;
   freelancerId?: number;
+  refetch?: () => void;
 }
 
 const FreelancerCreateProposalButton: React.FC<
   FreelancerCreateProposalButtonProps
-> = ({ project, freelancerId }) => {
+> = ({ project, freelancerId, refetch }) => {
   const [visible, setVisible] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
   const [selectedProject, setSelectedProject] = useState<ProjectDto | null>(
@@ -95,6 +99,15 @@ const FreelancerCreateProposalButton: React.FC<
     action: "create",
     resource: "proposals",
     redirect: false,
+
+    onMutationError(error, variables, context, isAutoSave) {
+      setSubmitting(false);
+      open?.({
+        type: "error",
+        message: "Proposal Creation Failed",
+        description: error.message,
+      });
+    },
     onMutationSuccess: (data) => {
       // Upload files after proposal is created
       if (fileList.length > 0 && data.data.proposalId) {
@@ -130,34 +143,20 @@ const FreelancerCreateProposalButton: React.FC<
     }
 
     try {
-      // Use entityFiles endpoint for batch upload
-      const formData = new FormData();
-
       // Add files
-      fileList.forEach((file) => {
+      fileList.forEach(async (file) => {
         if (file.originFileObj) {
-          formData.append("files", file.originFileObj);
+          const response = await api.uploadFile({
+            proposalId,
+            blob: file.originFileObj,
+          });
+          if (!response) {
+            throw new Error("Failed to upload files");
+          }
         }
       });
 
-      // Set visibility
-      formData.append("isVisible", "true");
-
       // Upload files to the proposal
-      const response = await fetch(
-        `${apiUrl}/entityFiles/proposal/${proposalId}/batch`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          body: formData,
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to upload files");
-      }
 
       handleSubmitSuccess();
     } catch (error) {
@@ -177,12 +176,8 @@ const FreelancerCreateProposalButton: React.FC<
     setFileList([]);
     setCurrentStep(0);
     setSubmitting(false);
+    refetch && refetch();
     formProps.form?.resetFields();
-    open?.({
-      type: "success",
-      message: "Proposal Submitted",
-      description: "Your proposal has been successfully submitted.",
-    });
   };
 
   // Steps configuration
@@ -190,81 +185,98 @@ const FreelancerCreateProposalButton: React.FC<
     {
       title: "Proposal Details",
       content: (
-        <Card className="w-full">
-          <Title level={4} className="mb-4 flex items-center">
-            <FileTextOutlined className="mr-2" /> Proposal Details
-          </Title>
+        <>
+          <Card className="w-full">
+            <Title level={4} className="mb-4 flex items-center">
+              <FileTextOutlined className="mr-2" /> Define Your Budget (min: $
+              {project?.minBudget}, max: ${project?.maxBudget})
+            </Title>
+            <Form.Item name="budget" label="Your Budget">
+              <InputNumber
+                prefix={<DollarTwoTone />}
+                className="w-full"
+                min={project?.minBudget}
+                max={project?.maxBudget}
+              />
+            </Form.Item>
+          </Card>
+          <br />
+          <Card className="w-full">
+            <Title level={4} className="mb-4 flex items-center">
+              <FileTextOutlined className="mr-2" /> Proposal Details
+            </Title>
 
-          {/* Project ID hidden field */}
-          <Form.Item name="projectId" hidden>
-            <Input />
-          </Form.Item>
+            {/* Project ID hidden field */}
+            <Form.Item name="projectId" hidden>
+              <Input />
+            </Form.Item>
 
-          {/* Freelancer ID hidden field */}
-          <Form.Item name="freelancerId" hidden>
-            <Input />
-          </Form.Item>
+            {/* Freelancer ID hidden field */}
+            <Form.Item name="freelancerId" hidden>
+              <Input />
+            </Form.Item>
 
-          <Form.Item
-            name="notes"
-            label="Proposal Message"
-            rules={[
-              {
-                required: true,
-                message: "Please provide details about your proposal",
-              },
-              {
-                min: 50,
-                message: "Your proposal should be at least 50 characters",
-              },
-            ]}
-          >
-            <TextArea
-              rows={6}
-              placeholder="Describe why you're a good fit for this project, your approach, timeline, and any questions you have."
-              showCount
-              maxLength={2000}
-              className="w-full"
-            />
-          </Form.Item>
-
-          <Divider orientation="left">
-            <Space>
-              <PaperClipOutlined />
-              Attachments
-            </Space>
-          </Divider>
-
-          <Form.Item name="files" label="Supporting Documents (Optional)">
-            <Upload
-              multiple
-              fileList={fileList}
-              onChange={handleFileChange}
-              beforeUpload={() => false} // Prevent auto upload
-              maxCount={5}
+            <Form.Item
+              name="notes"
+              label="Proposal Message"
+              rules={[
+                {
+                  required: true,
+                  message: "Please provide details about your proposal",
+                },
+                {
+                  min: 50,
+                  message: "Your proposal should be at least 50 characters",
+                },
+              ]}
             >
-              <Button icon={<UploadOutlined />}>Select Files (Max 5)</Button>
-            </Upload>
-          </Form.Item>
-          <div className="text-xs text-gray-500 mt-2">
-            Accepted file types: PDF, DOC, DOCX, JPG, PNG (Max 5MB per file)
-          </div>
+              <TextArea
+                rows={6}
+                placeholder="Describe why you're a good fit for this project, your approach, timeline, and any questions you have."
+                showCount
+                maxLength={2000}
+                className="w-full"
+              />
+            </Form.Item>
 
-          <Alert
-            message="Tips for a Great Proposal"
-            description={
-              <ul className="list-disc pl-4 mt-2">
-                <li>Address client requirements specifically</li>
-                <li>Highlight relevant experience and skills</li>
-                <li>Be clear about your timeline and availability</li>
-                <li>Provide examples of similar work if possible</li>
-              </ul>
-            }
-            type="info"
-            showIcon
-            className="mt-4"
-          />
-        </Card>
+            <Divider orientation="left">
+              <Space>
+                <PaperClipOutlined />
+                Attachments
+              </Space>
+            </Divider>
+
+            <Form.Item name="files" label="Supporting Documents (Optional)">
+              <Upload
+                multiple
+                fileList={fileList}
+                onChange={handleFileChange}
+                beforeUpload={() => false} // Prevent auto upload
+                maxCount={5}
+              >
+                <Button icon={<UploadOutlined />}>Select Files (Max 5)</Button>
+              </Upload>
+            </Form.Item>
+            <div className="text-xs text-gray-500 mt-2">
+              Accepted file types: PDF, DOC, DOCX, JPG, PNG (Max 5MB per file)
+            </div>
+
+            <Alert
+              message="Tips for a Great Proposal"
+              description={
+                <ul className="list-disc pl-4 mt-2">
+                  <li>Address client requirements specifically</li>
+                  <li>Highlight relevant experience and skills</li>
+                  <li>Be clear about your timeline and availability</li>
+                  <li>Provide examples of similar work if possible</li>
+                </ul>
+              }
+              type="info"
+              showIcon
+              className="mt-4"
+            />
+          </Card>
+        </>
       ),
     },
     {
@@ -279,7 +291,14 @@ const FreelancerCreateProposalButton: React.FC<
               <Title level={5}>Project</Title>
               <Text>{selectedProject?.title}</Text>
             </div>
-
+            <div className="p-4 rounded-md bg-gray-50">
+              <Title level={5}>Your defined budget</Title>
+              <div className="whitespace-pre-wrap">
+                <Form.Item noStyle shouldUpdate>
+                  {(form) => <Text>{form.getFieldValue("budget")}</Text>}
+                </Form.Item>
+              </div>
+            </div>
             <div className="p-4 rounded-md bg-gray-50">
               <Title level={5}>Your Proposal</Title>
               <div className="whitespace-pre-wrap">
@@ -390,6 +409,8 @@ const FreelancerCreateProposalButton: React.FC<
         onClick={() => setVisible(true)}
         icon={<SendOutlined />}
         className="bg-blue-500 hover:bg-blue-600"
+        block
+        size="large"
       >
         Create Proposal
       </Button>

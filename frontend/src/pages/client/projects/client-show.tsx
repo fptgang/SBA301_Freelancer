@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router";
 import {
   useShow,
@@ -7,6 +7,8 @@ import {
   useApiUrl,
   useNotification,
   useCustomMutation,
+  useGetIdentity,
+  useInvalidate,
 } from "@refinedev/core";
 import {
   Typography,
@@ -28,6 +30,8 @@ import {
   Row,
   Col,
   Statistic,
+  Modal,
+  Progress,
 } from "antd";
 import {
   ProjectOutlined,
@@ -46,6 +50,8 @@ import {
   CloseCircleOutlined,
   ArrowLeftOutlined,
   PlusOutlined,
+  PlayCircleOutlined,
+  ExclamationCircleOutlined,
 } from "@ant-design/icons";
 
 import { formatCurrency } from "../../../utils/formatter";
@@ -54,21 +60,369 @@ import { ProposalDto } from "../../../../generated/models/ProposalDto";
 import { store } from "../../../store";
 import ContractCreateButton from "./contract-create";
 import ClientProjectEditButton from "./client-edit";
+import api from "../../../services/api/openapi-config";
+import { ReportModal } from "../../../components/message/ReportModal";
+import { AccountDto } from "../../../../generated";
+import DepositModal from "../../../components/DepositModal";
+import {useLocalSettings} from "../../../hooks/useLocalSettings";
 
 const { Title, Text, Paragraph } = Typography;
 const { Step } = Steps;
 const { TabPane } = Tabs;
 
+// Define MilestoneDetailModal component
+interface MilestoneDetailModalProps {
+  visible: boolean;
+  milestone: any;
+  project: ProjectDto;
+  onClose: () => void;
+  onConfirmCompletion: (milestone: any) => Promise<void>;
+  onReport: () => void;
+}
+
+const MilestoneDetailModal: React.FC<MilestoneDetailModalProps> = ({
+  visible,
+  milestone,
+  project,
+  onClose,
+  onConfirmCompletion,
+  onReport,
+}) => {
+  const [localSettings] = useLocalSettings();
+  const [confirmLoading, setConfirmLoading] = useState(false);
+  const [contract, setContract] = useState<any>(null);
+  const { open } = useNotification();
+  
+  // Fetch contract data if available
+  useEffect(() => {
+    const fetchContractData = async () => {
+      if (visible && milestone && project?.contract?.contractId) {
+        try {
+          const contractData = await api.getContractById({
+            contractId: project.contract.contractId
+          });
+          setContract(contractData);
+        } catch (error) {
+          console.error("Error fetching contract data:", error);
+        }
+      }
+    };
+    
+    fetchContractData();
+  }, [visible, milestone, project]);
+  
+  const handleConfirm = async () => {
+    try {
+      setConfirmLoading(true);
+      await onConfirmCompletion(milestone);
+      onClose();
+    } catch (error) {
+      console.error("Failed to confirm milestone:", error);
+    } finally {
+      setConfirmLoading(false);
+    }
+  };
+
+  const handleFileDownload = (fileUrl: string, fileName: string) => {
+    const link = document.createElement('a');
+    link.href = fileUrl;
+    link.download = fileName;
+    link.target = '_blank';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  // Determine if contract is signed
+  const isContractSigned = contract?.status === "SIGNED";
+
+  if (!milestone) return null;
+
+  return (
+    <Modal
+      title={
+        <div className="flex items-center">
+          <ClockCircleOutlined className="text-blue-500 mr-2" />
+          <span>Milestone Details</span>
+        </div>
+      }
+      open={visible}
+      onCancel={onClose}
+      footer={null}
+      width={700}
+    >
+      <Card className="mb-4">
+        <Title level={4}>{milestone.title}</Title>
+        <Paragraph className="whitespace-pre-wrap bg-gray-50 p-4 rounded-md border border-gray-100 mt-3">
+          {milestone.description}
+        </Paragraph>
+        
+        <Descriptions layout="vertical" className="mt-4" bordered>
+          <Descriptions.Item label="Status">
+            <Tag
+              color={
+                milestone.status === "FINISHED"
+                  ? "green"
+                  : milestone.status === "IN_PROGRESS"
+                  ? "blue"
+                  : milestone.status === "REVIEWING"
+                  ? "orange"
+                  : "default"
+              }
+            >
+              {milestone.status}
+            </Tag>
+          </Descriptions.Item>
+          <Descriptions.Item label="Budget Allocation">
+            <Progress 
+              percent={milestone.budgetRatio ? (milestone.budgetRatio * 100) : 0} 
+              size="small" 
+              status="active"
+              format={(percent) => `${percent?.toFixed(0)}%`}
+            />
+          </Descriptions.Item>
+          <Descriptions.Item label="Deadline">
+            {milestone.deadline ? localSettings.formatDateTime(milestone.deadline) : "Not set"}
+          </Descriptions.Item>
+        </Descriptions>
+        
+        {/* Contract Status - Show if there's a contract */}
+        {contract && (
+          <div className="mt-4">
+            <Title level={5} className="mb-3">
+              <FileTextOutlined className="mr-2" /> Contract Status
+            </Title>
+            <div className="bg-gray-50 p-4 rounded-md border border-gray-100">
+              <Descriptions layout="horizontal" bordered size="small">
+                <Descriptions.Item label="Contract ID">
+                  {contract.contractId}
+                </Descriptions.Item>
+                <Descriptions.Item label="Status">
+                  <Tag color={contract.status === "SIGNED" ? "green" : "orange"}>
+                    {contract.status}
+                  </Tag>
+                </Descriptions.Item>
+                <Descriptions.Item label="Created At">
+                  {localSettings.formatDateTime(contract.createdAt)}
+                </Descriptions.Item>
+                {contract.signedAt && (
+                  <Descriptions.Item label="Signed At">
+                    {localSettings.formatDateTime(contract.signedAt)}
+                  </Descriptions.Item>
+                )}
+              </Descriptions>
+            </div>
+          </div>
+        )}
+        
+        {/* Deliverable Files Section */}
+        {milestone.deliverables && milestone.deliverables.length > 0 && (
+          <div className="mt-4">
+            <Title level={5} className="mb-3">
+              <FileTextOutlined className="mr-2" /> Deliverable Files
+            </Title>
+            <div className="bg-gray-50 p-4 rounded-md border border-gray-100">
+              <List
+                itemLayout="horizontal"
+                dataSource={milestone.deliverables}
+                renderItem={(file: any, index: number) => (
+                  <List.Item
+                    key={index}
+                    className="border-b border-gray-100 last:border-0 py-3"
+                    actions={[
+                      <Button
+                        key="download"
+                        type="link"
+                        onClick={() => handleFileDownload(file.fileUrl, file.fileName)}
+                        icon={<FileTextOutlined />}
+                      >
+                        Download
+                      </Button>
+                    ]}
+                  >
+                    <List.Item.Meta
+                      avatar={
+                        <Avatar
+                          icon={<FileTextOutlined />}
+                          size="large"
+                          className={`${
+                            file.fileType?.includes("image")
+                              ? "bg-blue-500"
+                              : file.fileType?.includes("pdf")
+                              ? "bg-red-500"
+                              : file.fileType?.includes("word") || file.fileType?.includes("doc")
+                              ? "bg-indigo-500"
+                              : file.fileType?.includes("excel") || file.fileType?.includes("sheet")
+                              ? "bg-green-500"
+                              : "bg-gray-500"
+                          }`}
+                        />
+                      }
+                      title={
+                        <a
+                          href={file.fileUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 hover:text-blue-800 font-medium"
+                        >
+                          {file.fileName}
+                        </a>
+                      }
+                      description={
+                        <div className="text-xs text-gray-500">
+                          <span>
+                            {file.fileSize
+                              ? `${(file.fileSize / 1024).toFixed(2)} KB`
+                              : "Unknown size"}
+                          </span>
+                          {file.uploadDate && (
+                            <span className="ml-3">
+                              Uploaded: {localSettings.formatDate(file.uploadDate)}
+                            </span>
+                          )}
+                        </div>
+                      }
+                    />
+                  </List.Item>
+                )}
+              />
+            </div>
+          </div>
+        )}
+        
+        {/* Files Preview Section - Show if there are files */}
+        {milestone.files && milestone.files.length > 0 && (
+          <div className="mt-4">
+            <Title level={5} className="mb-3">
+              <FileTextOutlined className="mr-2" /> Attachments
+            </Title>
+            <div className="bg-gray-50 p-4 rounded-md border border-gray-100">
+              <List
+                itemLayout="horizontal"
+                dataSource={milestone.files}
+                renderItem={(file: any, index: number) => (
+                  <List.Item
+                    key={index}
+                    className="border-b border-gray-100 last:border-0 py-3"
+                    actions={[
+                      <Button
+                        key="download"
+                        type="link"
+                        onClick={() => handleFileDownload(file.fileUrl, file.fileName)}
+                        icon={<FileTextOutlined />}
+                      >
+                        Download
+                      </Button>
+                    ]}
+                  >
+                    <List.Item.Meta
+                      avatar={
+                        <Avatar
+                          icon={<FileTextOutlined />}
+                          size="large"
+                          className={`${
+                            file.fileType?.includes("image")
+                              ? "bg-blue-500"
+                              : file.fileType?.includes("pdf")
+                              ? "bg-red-500"
+                              : file.fileType?.includes("word") || file.fileType?.includes("doc")
+                              ? "bg-indigo-500"
+                              : file.fileType?.includes("excel") || file.fileType?.includes("sheet")
+                              ? "bg-green-500"
+                              : "bg-gray-500"
+                          }`}
+                        />
+                      }
+                      title={
+                        <a
+                          href={file.fileUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 hover:text-blue-800 font-medium"
+                        >
+                          {file.fileName}
+                        </a>
+                      }
+                      description={
+                        <div className="text-xs text-gray-500">
+                          <span>
+                            {file.fileSize
+                              ? `${(file.fileSize / 1024).toFixed(2)} KB`
+                              : "Unknown size"}
+                          </span>
+                          {file.uploadDate && (
+                            <span className="ml-3">
+                              Uploaded: {localSettings.formatDate(file.uploadDate)}
+                            </span>
+                          )}
+                        </div>
+                      }
+                    />
+                  </List.Item>
+                )}
+              />
+            </div>
+          </div>
+        )}
+        
+        {/* Only show actions if milestone is in REVIEWING status and contract is not already signed */}
+        {milestone.status === "REVIEWING" && (
+          <div className="mt-6 flex justify-end space-x-3">
+            <Button 
+              danger 
+              onClick={onReport}
+            >
+              Report Issue
+            </Button>
+            {(!contract || contract.status !== "SIGNED") && (
+              <Popconfirm
+                title="Confirm milestone completion"
+                description="Are you sure you want to mark this milestone as complete? This action will release the payment to the freelancer."
+                icon={<ExclamationCircleOutlined style={{ color: 'green' }} />}
+                onConfirm={handleConfirm}
+                okText="Yes, Complete"
+                cancelText="Cancel"
+                okButtonProps={{ loading: confirmLoading }}
+              >
+                <Button type="primary">
+                  Confirm Completion
+                </Button>
+              </Popconfirm>
+            )}
+            {contract && contract.status === "SIGNED" && (
+              <Button type="primary" disabled>
+                Already Completed
+              </Button>
+            )}
+          </div>
+        )}
+      </Card>
+    </Modal>
+  );
+};
+
 const ClientProjectShow: React.FC = () => {
+  const [localSettings] = useLocalSettings();
+  const { data: user } = useGetIdentity<AccountDto>();
   const { id } = useParams();
   const navigate = useNavigate();
   const { open } = useNotification();
+  const invalidate = useInvalidate();
   const { mutate: rejectProposal } = useCustomMutation();
+  const { mutate: terminateProject } = useCustomMutation();
+  const { mutate: completeMilestone } = useCustomMutation();
+  const [showReportModal, setShowReportModal] = useState(false);
+  const [showDepositModal, setShowDepositModal] = useState(false);
+  const [selectedMilestone, setSelectedMilestone] = useState<any>(null);
+  const [milestoneDetailVisible, setMilestoneDetailVisible] = useState(false);
 
   // Fetch project data
   const { queryResult: projectQueryResult } = useShow<ProjectDto>({
     resource: "projects",
     id,
+    queryOptions: {
+      enabled: !!user,
+    },
   });
 
   const {
@@ -123,6 +477,18 @@ const ClientProjectShow: React.FC = () => {
       step: 2,
       icon: <CheckCircleOutlined />,
     },
+    PAUSED: {
+      color: "default",
+      text: "Paused",
+      step: 0,
+      icon: <PlayCircleOutlined />,
+    },
+  };
+
+  // Handle opening the milestone detail modal
+  const handleShowMilestoneDetail = (milestone: any) => {
+    setSelectedMilestone(milestone);
+    setMilestoneDetailVisible(true);
   };
 
   // Handle rejecting a proposal
@@ -145,7 +511,17 @@ const ClientProjectShow: React.FC = () => {
           };
         },
       });
-      projectQueryResult.refetch();
+      
+      // Manually invalidate the cache after successful mutation
+      invalidate({
+        resource: "proposals",
+        invalidates: ["list", "many", "detail"],
+      });
+      invalidate({
+        resource: "projects",
+        id,
+        invalidates: ["detail"],
+      });
     } catch (error) {
       open?.({
         type: "error",
@@ -157,25 +533,80 @@ const ClientProjectShow: React.FC = () => {
   // Handle terminating a project
   const handleTerminateProject = async () => {
     try {
-      await fetch(`${useApiUrl()}/projects/${project?.projectId}/terminate`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${store.getState().auth.accessToken}`,
-        },
+      await api.terminateProject({
+        projectId: project?.projectId ?? -1,
       });
-      
+
       open?.({
         type: "success",
         message: "Project closed successfully",
       });
-      
-      projectQueryResult.refetch();
+
+      // Manually invalidate the cache after successful mutation
+      invalidate({
+        resource: "projects",
+        id,
+        invalidates: ["detail", "list"],
+      });
     } catch (error) {
       open?.({
         type: "error",
         message: "Failed to close project",
       });
+    }
+  };
+
+  const confirmComplete = async (milestone: any) => {
+    try {
+      // Check if user has enough balance for next milestone
+      if (!project?.milestones) return;
+
+      const nextMilestone = project.milestones.find(
+        (m) =>
+          (m.milestoneId || 0) > (milestone.milestoneId || 0) &&
+          m.status == "PENDING"
+      );
+
+      if (nextMilestone && project.contract?.budget) {
+        const requiredAmount =
+          (nextMilestone.budgetRatio || 0) * project.contract?.budget;
+        if (user?.balance && user.balance < requiredAmount) {
+          setSelectedMilestone(milestone);
+          setShowDepositModal(true);
+          open?.({
+            type: "error",
+            message: "Not enough balance to complete milestone",
+          });
+          return;
+        }
+      }
+
+      await api.confirmMilestoneWork({
+        milestoneId: milestone.milestoneId,
+      });
+      
+      open?.({
+        type: "success",
+        message: "Milestone completed",
+      });
+
+      // Manually invalidate the cache after successful mutation
+      invalidate({
+        resource: "projects",
+        id,
+        invalidates: ["detail"],
+      });
+      invalidate({
+        resource: "milestones",
+        invalidates: ["list", "many"],
+      });
+    } catch (e) {
+      console.error(e);
+      open?.({
+        type: "error",
+        message: "Failed to accept milestone",
+      });
+      throw e; // Re-throw to handle in the UI
     }
   };
 
@@ -248,15 +679,25 @@ const ClientProjectShow: React.FC = () => {
               >
                 Back
               </Button>
-              
+
               {/* Add Edit Button Here */}
               {project.status === "OPEN" && (
-                <ClientProjectEditButton 
-                  project={project} 
+                <ClientProjectEditButton
+                  project={project}
                   onSuccess={projectQueryResult.refetch}
                 />
               )}
-              
+              {project.status === "IN_PROGRESS" && (
+                <Button
+                  type="primary"
+                  danger
+                  style={{ marginLeft: 8 }}
+                  onClick={() => setShowReportModal(true)}
+                >
+                  Report
+                </Button>
+              )}
+
               {project.status === "OPEN" && (
                 <Popconfirm
                   title="Are you sure you want to close this project?"
@@ -265,10 +706,7 @@ const ClientProjectShow: React.FC = () => {
                   cancelText="No"
                   placement="bottomRight"
                 >
-                  <Button
-                    type="primary"
-                    danger
-                  >
+                  <Button type="primary" danger>
                     Close Project
                   </Button>
                 </Popconfirm>
@@ -410,9 +848,9 @@ const ClientProjectShow: React.FC = () => {
                     No specific skills required
                   </Text>
                 )}
-                
+
                 <Divider />
-                
+
                 <Title level={5} className="text-blue-600">
                   Milestones
                 </Title>
@@ -423,16 +861,13 @@ const ClientProjectShow: React.FC = () => {
                     renderItem={(milestone, index) => (
                       <List.Item>
                         <List.Item.Meta
-                          avatar={
-                            <Avatar size="large">
-                              {index + 1}
-                            </Avatar>
-                          }
+                          avatar={<Avatar size="large">{index + 1}</Avatar>}
                           title={
                             <div className="flex justify-between">
                               <span>{milestone.title}</span>
                               <span>
-                                Budget: {(milestone.budgetRatio * 100).toFixed(0)}%
+                                Budget:{" "}
+                                {milestone.budgetRatio ? (milestone.budgetRatio * 100).toFixed(0) : 0}%
                               </span>
                             </div>
                           }
@@ -440,9 +875,10 @@ const ClientProjectShow: React.FC = () => {
                             <div>
                               <div>{milestone.description}</div>
                               <div className="mt-1">
-                                <CalendarOutlined /> Deadline: {
-                                  new Date(milestone.deadline).toLocaleDateString()
-                                }
+                                <CalendarOutlined /> Deadline:{" "}
+                                {localSettings.formatDateTime(
+                                  milestone.deadline!
+                                )}
                               </div>
                             </div>
                           }
@@ -495,7 +931,9 @@ const ClientProjectShow: React.FC = () => {
                                 <Popconfirm
                                   title="Are you sure you want to reject this proposal?"
                                   onConfirm={() =>
-                                    handleRejectProposal(proposal.proposalId)
+                                    handleRejectProposal(
+                                      proposal.proposalId || -1
+                                    )
                                   }
                                   okText="Yes"
                                   cancelText="No"
@@ -533,14 +971,10 @@ const ClientProjectShow: React.FC = () => {
                         title={
                           <div className="flex justify-between items-center">
                             <Text strong className="text-lg">
-                              {proposal.freelancer ? 
-                                `${proposal.freelancer.firstName} ${proposal.freelancer.lastName}` : 
-                                `Freelancer #${proposal.freelancerId}`}
+                              {`${proposal.freelancer?.firstName} ${proposal.freelancer?.lastName}`}
                             </Text>
                             <div className="flex items-center">
-                              <Tag color="blue">
-                                Budget: ${proposal.budget}
-                              </Tag>
+                              <Tag color="blue">Budget: ${proposal.budget}</Tag>
                               <Badge
                                 status={
                                   proposal.status === "ACCEPTED"
@@ -564,14 +998,14 @@ const ClientProjectShow: React.FC = () => {
                             <div className="flex items-center mb-1">
                               <CalendarOutlined className="mr-2" />
                               Submitted{" "}
-                              {new Date(proposal.createdAt).toLocaleDateString(
+                              {proposal.createdAt ? new Date(proposal.createdAt).toLocaleDateString(
                                 "en-US",
                                 {
                                   year: "numeric",
                                   month: "long",
                                   day: "numeric",
                                 }
-                              )}
+                              ) : "N/A"}
                             </div>
                             <div className="flex items-center">
                               <MessageOutlined className="mr-2" />
@@ -595,7 +1029,7 @@ const ClientProjectShow: React.FC = () => {
                           {proposal.notes}
                         </Paragraph>
                       </div>
-                      
+
                       {proposal.files && proposal.files.length > 0 && (
                         <div className="mt-4">
                           <Title level={5} className="text-gray-700">
@@ -606,9 +1040,9 @@ const ClientProjectShow: React.FC = () => {
                             dataSource={proposal.files}
                             renderItem={(file) => (
                               <List.Item>
-                                <a 
-                                  href={file.fileUrl} 
-                                  target="_blank" 
+                                <a
+                                  href={file.fileUrl}
+                                  target="_blank"
                                   rel="noopener noreferrer"
                                   className="flex items-center text-blue-500 hover:text-blue-700"
                                 >
@@ -637,33 +1071,48 @@ const ClientProjectShow: React.FC = () => {
               {project.milestones && project.milestones.length > 0 ? (
                 <Timeline className="mt-4 px-4">
                   {project.milestones.map((milestone, index) => (
-                    <Timeline.Item 
+                    <Timeline.Item
                       key={milestone.milestoneId || index}
                       color={
-                        milestone.status === "FINISHED" ? "green" : 
-                        milestone.status === "IN_PROGRESS" ? "blue" : 
-                        milestone.status === "REVIEWING" ? "orange" : "gray"
+                        milestone.status === "FINISHED"
+                          ? "green"
+                          : milestone.status === "IN_PROGRESS"
+                          ? "blue"
+                          : milestone.status === "REVIEWING"
+                          ? "orange"
+                          : "gray"
                       }
                     >
-                      <Card className="mb-4">
+                      <Card 
+                        className="mb-4 cursor-pointer hover:shadow-md transition-shadow"
+                        onClick={() => handleShowMilestoneDetail(milestone)}
+                      >
                         <Row>
                           <Col span={18}>
                             <Title level={5}>{milestone.title}</Title>
                             <Paragraph>{milestone.description}</Paragraph>
                             <div className="flex gap-4 mt-2">
                               <Tag color="blue">
-                                Budget: {(milestone.budgetRatio * 100).toFixed(0)}%
+                                Budget:{" "}
+                                {milestone.budgetRatio ? (milestone.budgetRatio * 100).toFixed(0) : 0}%
                               </Tag>
                               <Text type="secondary">
                                 <CalendarOutlined className="mr-1" />
-                                Deadline: {new Date(milestone.deadline).toLocaleDateString()}
+                                Deadline:{" "}
+                                {localSettings.formatDate(
+                                  milestone.deadline!
+                                )}
                               </Text>
                               {milestone.status && (
-                                <Tag 
+                                <Tag
                                   color={
-                                    milestone.status === "FINISHED" ? "green" : 
-                                    milestone.status === "IN_PROGRESS" ? "blue" : 
-                                    milestone.status === "REVIEWING" ? "orange" : "default"
+                                    milestone.status === "FINISHED"
+                                      ? "green"
+                                      : milestone.status === "IN_PROGRESS"
+                                      ? "blue"
+                                      : milestone.status === "REVIEWING"
+                                      ? "orange"
+                                      : "default"
                                   }
                                 >
                                   {milestone.status}
@@ -673,8 +1122,14 @@ const ClientProjectShow: React.FC = () => {
                           </Col>
                           <Col span={6} className="flex justify-end">
                             {milestone.status === "REVIEWING" && (
-                              <Button type="primary">
-                                Confirm Completion
+                              <Button 
+                                type="primary"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleShowMilestoneDetail(milestone);
+                                }}
+                              >
+                                View Details
                               </Button>
                             )}
                           </Col>
@@ -707,6 +1162,36 @@ const ClientProjectShow: React.FC = () => {
           </Tabs>
         </Card>
       </div>
+      {user?.role == "CLIENT" ? (
+        <>
+          <ReportModal
+            showReportModal={showReportModal}
+            setShowReportModal={setShowReportModal}
+            project={project}
+          />
+          <DepositModal
+            visible={showDepositModal}
+            onClose={() => {
+              setShowDepositModal(false);
+              setSelectedMilestone(null);
+            }}
+          />
+          <MilestoneDetailModal 
+            visible={milestoneDetailVisible}
+            milestone={selectedMilestone}
+            project={project}
+            onClose={() => {
+              setMilestoneDetailVisible(false);
+              setSelectedMilestone(null);
+            }}
+            onConfirmCompletion={confirmComplete}
+            onReport={() => {
+              setMilestoneDetailVisible(false);
+              setShowReportModal(true);
+            }}
+          />
+        </>
+      ) : null}
     </div>
   );
 };

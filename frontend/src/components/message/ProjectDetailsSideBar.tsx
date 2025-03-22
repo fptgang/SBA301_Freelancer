@@ -9,10 +9,11 @@ import {
   Button,
   Modal,
 } from "antd";
-import { ProjectDto } from "../../../generated";
+import { AccountDto, ProjectDto } from "../../../generated";
 import { ReportModal } from "./ReportModal";
 import { store } from "../../store";
 import { ResolveModal } from "./ResolveModal";
+import { useGetIdentity } from "@refinedev/core";
 
 interface ProjectDetailsSidebarProps {
   project?: ProjectDto;
@@ -25,7 +26,7 @@ export const ProjectDetailsSidebar: React.FC<ProjectDetailsSidebarProps> = ({
   const [showReportModal, setShowReportModal] = useState(false);
   const [showResolveModal, setShowResolveModal] = useState(false);
   const screens = Grid.useBreakpoint();
-  const user = store.getState().auth.account;
+  const { data: user } = useGetIdentity<AccountDto>();
 
   return (
     <Layout.Sider

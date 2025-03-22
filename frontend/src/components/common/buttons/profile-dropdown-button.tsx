@@ -1,56 +1,134 @@
-import { UserOutlined } from "@ant-design/icons";
+import { UserOutlined, WalletOutlined, SettingOutlined, LogoutOutlined, DashboardOutlined } from "@ant-design/icons";
 import { useGetIdentity, useLogout } from "@refinedev/core";
-import { Button, Dropdown } from "antd";
+import { Button, Dropdown, Avatar, Space, Typography, Divider } from "antd";
 import { useNavigate } from "react-router";
 import { AccountDto, AccountDtoRoleEnum } from "../../../../generated";
-import { store } from "../../../store";
+
+const { Text } = Typography;
 
 export const ProfileDropdownButton = () => {
   const nav = useNavigate();
   const { mutate: logout } = useLogout();
-  const user = store.getState().auth.account;
+  const { data: user } = useGetIdentity<AccountDto>();
 
-  const menuItems = [
-    // Add Dashboard item conditionally for admin users
-    ...(user?.role === AccountDtoRoleEnum.Admin
-      ? [
-          {
-            key: "dashboard",
-            label: "Dashboard",
-            onClick: () => nav("/dashboard"),
-          },
-        ]
-      : []),
-    {
-      key: "profile",
-      label: "Profile",
-      onClick: () => {
-        if (user?.role === AccountDtoRoleEnum.Client) nav("/client");
-        if (user?.role === AccountDtoRoleEnum.Freelancer) nav("/freelancer");
+  // Mock wallet amount - in a real app, get this from user data
+  const walletAmount = user?.role === AccountDtoRoleEnum.Client ? 2500.75 : 1275.50;
+
+  const menuItems = {
+    items: [
+      {
+        key: "profile-info",
+        label: (
+          <div className="p-2">
+            <div className="flex items-center mb-2">
+              <Avatar 
+                size={48} 
+                icon={<UserOutlined />} 
+                className="mr-3 bg-blue-500"
+              />
+              <div>
+                <Text strong className="block">{user?.firstName || ''} {user?.lastName || ''}</Text>
+                <Text type="secondary" className="block">{user?.email}</Text>
+              </div>
+            </div>
+            {(user?.role === AccountDtoRoleEnum.Client || user?.role === AccountDtoRoleEnum.Freelancer) && (
+              <div className="flex items-center bg-gray-50 p-2 rounded mt-2">
+                <WalletOutlined className="text-green-500 mr-2" />
+                <div>
+                  <Text type="secondary" className="block text-xs">Wallet Balance</Text>
+                  <Text strong className="text-green-500">${walletAmount.toFixed(2)}</Text>
+                </div>
+              </div>
+            )}
+            <Divider className="my-2" />
+          </div>
+        ),
+        disabled: true,
+        style: { cursor: 'default' }
       },
-    },
-    {
-      key: "settings",
-      label: "Settings",
-      onClick: () => {
-        nav("/settings");
+      // Add Dashboard item conditionally for admin users
+      ...(user?.role === AccountDtoRoleEnum.Admin
+        ? [
+            {
+              key: "dashboard",
+              label: (
+                <Space>
+                  <DashboardOutlined />
+                  <span>Dashboard</span>
+                </Space>
+              ),
+              onClick: () => nav("/dashboard"),
+            },
+          ]
+        : []),
+      {
+        key: "profile",
+        label: (
+          <Space>
+            <UserOutlined />
+            <span>My Profile</span>
+          </Space>
+        ),
+        onClick: () => {
+          if (user?.role === AccountDtoRoleEnum.Client) nav("/client");
+          if (user?.role === AccountDtoRoleEnum.Freelancer)
+            nav("/freelancer/profile");
+        },
       },
-    },
-    {
-      key: "logout",
-      label: "Logout",
-      onClick: () => logout(),
-    },
-  ];
+      {
+        key: "settings",
+        label: (
+          <Space>
+            <SettingOutlined />
+            <span>Settings</span>
+          </Space>
+        ),
+        onClick: () => {
+          nav("/settings");
+        },
+      },
+      {
+        key: "wallet",
+        label: (
+          <Space>
+            <WalletOutlined />
+            <span>My Wallet</span>
+          </Space>
+        ),
+        onClick: () => {
+          nav("/wallet");
+        },
+      },
+      {
+        key: "logout",
+        label: (
+          <Space>
+            <LogoutOutlined />
+            <span>Logout</span>
+          </Space>
+        ),
+        onClick: () => logout(),
+      },
+    ]
+  };
 
   return (
-    <Dropdown menu={{ items: menuItems }} placement="bottomRight">
+    <Dropdown menu={menuItems} placement="bottomRight" trigger={["click"]}>
       <Button
-        shape="circle"
-        size="large"
-        icon={<UserOutlined />}
-        className="flex items-center justify-center bg-gray-100 hover:bg-gray-200"
-      />
+        type="text"
+        className="flex items-center justify-center hover:bg-gray-100 px-3 h-10 rounded-full"
+      >
+        <Space>
+          <Avatar 
+            size="small" 
+            icon={<UserOutlined />} 
+            className="bg-blue-500"
+          />
+          <span className="hidden sm:inline">
+            {user?.firstName || 'Account'}
+          </span>
+        </Space>
+      </Button>
     </Dropdown>
   );
 };

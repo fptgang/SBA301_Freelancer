@@ -30,17 +30,25 @@ import {
 import { formatCurrency } from "../../../utils/formatter";
 import ClientCreateButton from "./client-create";
 import { useGetIdentity } from "@refinedev/core";
-import { AccountDto } from "../../../../generated";
+import { AccountDto, ProjectDto } from "../../../../generated";
 import { store } from "../../../store";
+import { useNavigate } from "react-router";
+import {useLocalSettings} from "../../../hooks/useLocalSettings";
 
 const { Text, Title } = Typography;
 const { Option } = Select;
 
 const ClientList = () => {
+  const [localSettings] = useLocalSettings()
   const [searchText, setSearchText] = useState("");
   const me = store?.getState()?.auth?.account;
-
-  const { tableProps, filters, setFilters } = useTable({
+  const nav = useNavigate();
+  const {
+    tableProps,
+    filters,
+    setFilters,
+    tableQuery: { refetch },
+  } = useTable({
     resource: "projects",
     filters: {
       initial: [
@@ -143,7 +151,7 @@ const ClientList = () => {
               <Option value="TERMINATED">Terminated</Option>
               <Option value="FINISHED">Finished</Option>
             </FilterDropdown>
-            <ClientCreateButton />
+            <ClientCreateButton refetch={refetch} />
           </Space>
         </div>
 
@@ -180,11 +188,13 @@ const ClientList = () => {
 
           <Table.Column
             title="Budget"
-            dataIndex="estimateBudget"
-            render={(value) => (
+            render={(value, record: ProjectDto) => (
               <Space>
                 <DollarOutlined />
-                <span>{formatCurrency(value)}</span>
+                <span>
+                  {formatCurrency(record.minBudget)}-
+                  {formatCurrency(record.maxBudget)}
+                </span>
               </Space>
             )}
             sorter
@@ -219,7 +229,7 @@ const ClientList = () => {
               </Tooltip>
             }
             render={(value) => (
-              <DateField value={value} format="MMM DD, YYYY" />
+              <DateField value={value} format={localSettings.dateFormat} />
             )}
             sorter
             width={150}
@@ -235,7 +245,9 @@ const ClientList = () => {
                   icon={<EyeOutlined />}
                   color="default"
                   style={{ border: "1px solid #f0f0f0" }}
-                  href={`/client/projects/${record.projectId}`}
+                  onClick={() => {
+                    nav(`/client/projects/${record.projectId}`);
+                  }}
                 />
               </Space>
             )}

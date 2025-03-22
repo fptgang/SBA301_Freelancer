@@ -19,10 +19,12 @@ import {
   EyeOutlined,
 } from "@ant-design/icons";
 import { stompClient } from "../../../utils/stompClient";
+import {useLocalSettings} from "../../../hooks/useLocalSettings";
 
 const { Text } = Typography;
 
 export const ProjectCategoriesList: React.FC = () => {
+  const [localSettings] = useLocalSettings()
   const { tableProps, searchFormProps } = useTable({
     syncWithLocation: true,
     sorters: {
@@ -149,7 +151,7 @@ export const ProjectCategoriesList: React.FC = () => {
             </Space>
           }
           render={(value: string) => (
-            <DateField value={value} format="MMMM DD, YYYY" />
+            <DateField value={value} format={localSettings.dateFormat} />
           )}
           sorter
           defaultSortOrder="descend"
@@ -159,7 +161,7 @@ export const ProjectCategoriesList: React.FC = () => {
           dataIndex="updatedAt"
           title="Updated At"
           render={(value: string) => (
-            <DateField value={value} format="MMMM DD, YYYY" />
+            <DateField value={value} format={localSettings.dateFormat} />
           )}
           sorter
         />

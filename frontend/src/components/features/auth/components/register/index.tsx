@@ -64,10 +64,14 @@ export const RegisterPage: React.FC<RegisterProps> = ({
   });
 
   // Handle social login provider selection
-  const handleProviderLogin = (providerName: string) => {
+  const handleProviderCallback = ({providerName, credential}) => {
+    if (!roleSelected || !credential)
+      return;
     register({
       ...mutationVariables,
       providerName,
+      googleToken: credential,
+      role: roleSelected
     });
   };
 
@@ -96,7 +100,7 @@ export const RegisterPage: React.FC<RegisterProps> = ({
         const completeFormData = { ...formData, role: roleSelected };
         register({ 
           ...mutationVariables, 
-          ...completeFormData 
+          ...completeFormData
         }, {
           onSuccess: () => {
             setRegistrationComplete(true);
@@ -136,7 +140,7 @@ export const RegisterPage: React.FC<RegisterProps> = ({
             />
             <SocialLogin
               providers={providers}
-              onProviderClick={handleProviderLogin}
+              callback={handleProviderCallback}
             />
           </>
         );

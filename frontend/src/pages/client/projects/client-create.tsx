@@ -16,28 +16,35 @@ import {
   Upload,
   Tooltip,
   Alert,
+  Space,
+  notification,
 } from "antd";
-import { 
-  PlusOutlined, 
-  QuestionCircleOutlined, 
+import {
+  PlusOutlined,
+  QuestionCircleOutlined,
   UploadOutlined,
-  InfoCircleOutlined 
+  InfoCircleOutlined,
+  PercentageOutlined,
 } from "@ant-design/icons";
 import { useForm, useModal, useSelect } from "@refinedev/antd";
 import moment, { Moment } from "moment";
 import type { UploadFile, RcFile } from "antd/es/upload/interface";
 import api from "../../../services/api/openapi-config";
 import { store } from "../../../store";
-import { 
-  ProjectCreateDto, 
-  SkillSetDto, 
-  MilestoneCreateDto, 
-  ProficiencyEnum 
+import {
+  ProjectCreateDto,
+  SkillSetDto,
+  MilestoneCreateDto,
+  ProficiencyEnum,
+  ProjectSkillDto,
 } from "../../../../generated/models";
+import dayjs from "dayjs";
 
 const { Step } = Steps;
-
-const ClientCreateButton = () => {
+interface ClientCreateButtonProps {
+  refetch: () => void;
+}
+const ClientCreateButton: React.FC<ClientCreateButtonProps> = ({ refetch }) => {
   // Get current user identity
   const { data: identity } = useGetIdentity<{ id: number }>();
   const userId = identity?.id;
@@ -48,6 +55,8 @@ const ClientCreateButton = () => {
   const [projectData, setProjectData] = useState<any>({});
   const [fileList, setFileList] = useState<UploadFile[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [newSkill, setNewSkill] = useState<Partial<ProjectSkillDto>>({});
+  const [skills, setSkills] = useState<ProjectSkillDto[]>([]);
 
   // Fetch categories for select
   const { selectProps: categorySelectProps } = useSelect({
@@ -57,15 +66,16 @@ const ClientCreateButton = () => {
   });
 
   // Fetch skills for select
-  const { selectProps: skillsSelectProps, queryResult: skillsQueryResult } =
+  const { selectProps: skillSelectProps, queryResult: skillsQueryResult } =
     useSelect({
       resource: "skills",
       optionLabel: "name",
       optionValue: "skillId",
     });
+  const skillOptions = skillsQueryResult?.data?.data;
 
   // Create project form
-  const { formProps, saveButtonProps, onFinish } = useForm({
+  const { formProps, form } = useForm({
     resource: "projects",
     redirect: false,
     onMutationSuccess: () => {
@@ -78,7 +88,11 @@ const ClientCreateButton = () => {
   });
 
   // Handle file change
-  const handleFileChange = ({ fileList: newFileList }: { fileList: UploadFile[] }) => {
+  const handleFileChange = ({
+    fileList: newFileList,
+  }: {
+    fileList: UploadFile[];
+  }) => {
     // Limit to 5 files
     const limitedList = newFileList.slice(-5);
     setFileList(limitedList);
@@ -86,7 +100,7 @@ const ClientCreateButton = () => {
 
   // Date validation rules
   const isDateValid = (date: Moment | null) => {
-    const minDate = moment().add(3, 'days');
+    const minDate = moment().add(3, "days");
     return date && date.isAfter(minDate);
   };
 
@@ -102,30 +116,36 @@ const ClientCreateButton = () => {
     }
 
     // Sort milestones by deadline
-    const sortedMilestones = [...milestones].sort((a, b) => 
-      moment(a.deadline).valueOf() - moment(b.deadline).valueOf()
+    const sortedMilestones = [...milestones].sort(
+      (a, b) => moment(a.deadline).valueOf() - moment(b.deadline).valueOf()
     );
 
     // Check if first milestone is at least 3 days from now
     const firstMilestoneDate = moment(new Date(sortedMilestones[0].deadline));
     if (!isDateValid(firstMilestoneDate)) {
-      message.error("First milestone deadline must be at least 3 days from now");
+      message.error(
+        "First milestone deadline must be at least 3 days from now"
+      );
       return false;
     }
 
     // Check distance between milestones (3-30 days)
     for (let i = 1; i < sortedMilestones.length; i++) {
-      const prevDate = moment(sortedMilestones[i-1].deadline);
-      const currDate = moment(sortedMilestones[i].deadline);
+      const prevDate = dayjs(sortedMilestones[i - 1].deadline);
+      const currDate = dayjs(sortedMilestones[i].deadline);
+
+      // Use dayjs's diff method to get difference in days
+      const daysBetween = currDate.diff(prevDate, 'day', true);
       
-      const daysBetween = currDate.diff(prevDate, 'days');
-      
-      if (daysBetween < 3) {
+      // Round to nearest whole number for better user experience
+      const roundedDaysBetween = Math.round(daysBetween);
+
+      if (roundedDaysBetween < 3) {
         message.error("Milestones must be at least 3 days apart");
         return false;
       }
-      
-      if (daysBetween > 30) {
+
+      if (roundedDaysBetween > 30) {
         message.error("Milestones should not be more than 30 days apart");
         return false;
       }
@@ -143,12 +163,10 @@ const ClientCreateButton = () => {
 
     try {
       const token = store?.getState().auth.accessToken;
-      const uploadPromises = fileList.map(file => {
+      const uploadPromises = fileList.map((file) => {
         return api.uploadFile({
-          uploaderId: userId,
           blob: file.originFileObj,
           projectId: projectId,
-          isVisible: true
         });
       });
 
@@ -168,7 +186,7 @@ const ClientCreateButton = () => {
     setProjectData(updatedProjectData);
 
     if (currentStep === 2) {
-      // Final step - validate milestones 
+      // Final step - validate milestones
       if (!validateMilestoneDates(updatedProjectData.milestones)) {
         return;
       }
@@ -184,7 +202,7 @@ const ClientCreateButton = () => {
         maxBudget: updatedProjectData.maxBudget,
         requiredSkills: [],
         milestones: [],
-        startDate: moment(new Date(updatedProjectData.startDate)).toDate()
+        startDate: moment(new Date(updatedProjectData.startDate)).toDate(),
       };
 
       // Transform the skills to match SkillSetDto format
@@ -193,9 +211,9 @@ const ClientCreateButton = () => {
         Array.isArray(updatedProjectData.requiredSkills)
       ) {
         projectCreateDto.requiredSkills = updatedProjectData.requiredSkills.map(
-          (skillId: number): SkillSetDto => ({
-            skillId: skillId,
-            proficiency: updatedProjectData.skillProficiency || ProficiencyEnum.Beginner
+          (skill: ProjectSkillDto): SkillSetDto => ({
+            skillId: skill.skill?.skillId || 0,
+            proficiency: skill.proficiency || ProficiencyEnum.Beginner,
           })
         );
       }
@@ -210,7 +228,7 @@ const ClientCreateButton = () => {
             title: milestone.title,
             description: milestone.description,
             budgetRatio: milestone.budget,
-            deadline: moment(new Date(milestone.deadline)).toDate()
+            deadline: moment(new Date(milestone.deadline)).toDate(),
           })
         );
       }
@@ -218,7 +236,7 @@ const ClientCreateButton = () => {
       try {
         // Create project
         const response = await api.createProject({
-          projectCreateDto: projectCreateDto
+          projectCreateDto: projectCreateDto,
         });
 
         // After successful project creation, upload files
@@ -233,6 +251,8 @@ const ClientCreateButton = () => {
         setProjectData({});
         setFileList([]);
         setIsSubmitting(false);
+        form.resetFields();
+        refetch();
       } catch (error) {
         console.error("Project creation error:", error);
         message.error("Failed to create project. Please try again.");
@@ -272,7 +292,7 @@ const ClientCreateButton = () => {
               rules={[
                 { required: true, message: "Please enter a project title" },
                 { min: 3, message: "Title must be at least 3 characters" },
-                { max: 100, message: "Title cannot exceed 100 characters" }
+                { max: 100, message: "Title cannot exceed 100 characters" },
               ]}
             >
               <Input placeholder="Enter project title" />
@@ -310,11 +330,13 @@ const ClientCreateButton = () => {
                     {
                       validator: (_, value) => {
                         if (value <= 0) {
-                          return Promise.reject("Budget must be greater than 0");
+                          return Promise.reject(
+                            "Budget must be greater than 0"
+                          );
                         }
                         return Promise.resolve();
-                      }
-                    }
+                      },
+                    },
                   ]}
                 >
                   <InputNumber
@@ -323,7 +345,9 @@ const ClientCreateButton = () => {
                     formatter={(value) =>
                       `$ ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
                     }
-                    parser={(value) => parseFloat(value!.replace(/\$\s?|(,*)/g, "")) as any}
+                    parser={(value) =>
+                      parseFloat(value!.replace(/\$\s?|(,*)/g, "")) as any
+                    }
                     className="w-full"
                   />
                 </Form.Item>
@@ -341,7 +365,6 @@ const ClientCreateButton = () => {
                   }
                   rules={[
                     { required: true, message: "Please enter maximum budget" },
-                 
                   ]}
                 >
                   <InputNumber
@@ -350,7 +373,9 @@ const ClientCreateButton = () => {
                     formatter={(value) =>
                       `$ ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
                     }
-                    parser={(value) => parseFloat(value!.replace(/\$\s?|(,*)/g, "")) as any}
+                    parser={(value) =>
+                      parseFloat(value!.replace(/\$\s?|(,*)/g, "")) as any
+                    }
                     className="w-full"
                   />
                 </Form.Item>
@@ -376,23 +401,28 @@ const ClientCreateButton = () => {
                         if (!value) {
                           return Promise.reject("Start date is required");
                         }
-                        
+
                         const minDate = moment().add(3, "d");
-                        
+
                         if (moment(new Date(value)).isBefore(minDate)) {
-                          return Promise.reject("Start date must be at least 3 days from today");
+                          return Promise.reject(
+                            "Start date must be at least 3 days from today"
+                          );
                         }
-                        
+
                         return Promise.resolve();
-                      }
-                    }
+                      },
+                    },
                   ]}
                 >
-                  <DatePicker 
-                    className="w-full" 
+                  <DatePicker
+                    className="w-full"
                     disabledDate={(current) => {
                       // Can't select days before today + 3 days
-                      return current && current < moment().add(3, 'days').startOf('day');
+                      return (
+                        current &&
+                        current < moment().add(3, "days").startOf("day")
+                      );
                     }}
                   />
                 </Form.Item>
@@ -426,8 +456,14 @@ const ClientCreateButton = () => {
               }
               rules={[
                 { required: true, message: "Please enter a description" },
-                { min: 10, message: "Description must be at least 10 characters" },
-                { max: 1000, message: "Description cannot exceed 1000 characters" }
+                {
+                  min: 10,
+                  message: "Description must be at least 10 characters",
+                },
+                {
+                  max: 1000,
+                  message: "Description cannot exceed 1000 characters",
+                },
               ]}
             >
               <Input.TextArea
@@ -436,51 +472,110 @@ const ClientCreateButton = () => {
               />
             </Form.Item>
 
-            <Form.Item
-              name="requiredSkills"
-              label={
-                <span className="flex items-center">
-                  Required Skills
-                  <Tooltip title="Select skills that are required for this project">
-                    <QuestionCircleOutlined className="ml-1" />
-                  </Tooltip>
-                </span>
-              }
-              rules={[
-                { required: true, message: "Please select at least one skill" },
-              ]}
-            >
-              <Select
-                mode="multiple"
-                placeholder="Select required skills"
-                loading={skillsQueryResult?.isLoading}
-                options={skillsQueryResult?.data?.data?.map((skill: any) => ({
-                  label: skill.name,
-                  value: skill.skillId,
-                }))}
-              />
-            </Form.Item>
+            <Form.List name="requiredSkills">
+              {(fields, { add, remove }) => (
+                <Space direction="vertical" style={{ width: "100%" }}>
+                  <Form.Item label="Required Skills">
+                    <Space>
+                      <Select
+                        {...skillSelectProps}
+                        placeholder="Select skill"
+                        onSelect={(option) => {
+                          setNewSkill((prev) => ({
+                            ...prev,
+                            skill: {
+                              skillId: Number(option),
+                              name:
+                                skillOptions?.find(
+                                  (skill) => skill.skillId === Number(option)
+                                )?.name || "abc",
+                            },
+                          }));
+                        }}
+                        value={newSkill.skill?.skillId}
+                      />
+                      <Select
+                        options={Object.values(ProficiencyEnum).map(
+                          (value) => ({
+                            label: value,
+                            value,
+                          })
+                        )}
+                        placeholder="Select proficiency level"
+                        onSelect={(value) => {
+                          setNewSkill((prev) => ({
+                            ...prev,
+                            proficiency: value as ProficiencyEnum,
+                          }));
+                        }}
+                        value={newSkill?.proficiency}
+                      />
+                      <a
+                        onClick={() => {
+                          if (newSkill?.skill && newSkill?.proficiency) {
+                            const currentSkills = skills;
+                            console.log(skills);
+                            const skillExists = currentSkills.some(
+                              (item: ProjectSkillDto) =>
+                                item.skill?.skillId === newSkill.skill?.skillId
+                            );
 
-            <Form.Item
-              name="skillProficiency"
-              label={
-                <span className="flex items-center">
-                  Skill Proficiency Level
-                  <Tooltip title="Select the minimum proficiency level needed">
-                    <QuestionCircleOutlined className="ml-1" />
-                  </Tooltip>
-                </span>
-              }
-              initialValue="BEGINNER"
-              rules={[{ required: true, message: "Please select proficiency level" }]}
-            >
-              <Select placeholder="Select proficiency level">
-                <Select.Option value="BEGINNER">Beginner</Select.Option>
-                <Select.Option value="INTERMEDIATE">Intermediate</Select.Option>
-                <Select.Option value="ADVANCED">Advanced</Select.Option>
-                <Select.Option value="EXPERT">Expert</Select.Option>
-              </Select>
-            </Form.Item>
+                            if (skillExists) {
+                              notification.warning({
+                                message: "This skill is existed",
+                              });
+                              return;
+                            }
+                            setSkills((prev) => [...prev, newSkill]);
+                            add(newSkill);
+                            setNewSkill({});
+                          }
+                        }}
+                      >
+                        Add skill
+                      </a>
+                    </Space>
+                  </Form.Item>
+                  {fields.map(({ key, name }) => (
+                    <Space key={key} align="baseline">
+                      <Form.Item
+                        name={[name, "skill", "name"]}
+                        rules={[{ required: true }]}
+                      >
+                        <Select
+                          {...skillSelectProps}
+                          placeholder="Select skill"
+                        />
+                      </Form.Item>
+                      <Form.Item
+                        name={[name, "proficiency"]}
+                        rules={[{ required: true }]}
+                      >
+                        <Select
+                          options={Object.values(ProficiencyEnum).map(
+                            (value) => ({
+                              label: value,
+                              value,
+                            })
+                          )}
+                          placeholder="Select proficiency level"
+                        />
+                      </Form.Item>
+                      <a
+                        onClick={() => {
+                          setSkills((prev) =>
+                            prev.filter((_, i) => i !== name)
+                          );
+                          remove(name);
+                        }}
+                      >
+                        Remove
+                      </a>
+                    </Space>
+                  ))}
+                </Space>
+              )}
+            </Form.List>
 
             <Form.Item
               name="files"
@@ -529,7 +624,7 @@ const ClientCreateButton = () => {
               ],
             }}
           >
-            <Alert 
+            <Alert
               message="Milestone Requirements"
               description={
                 <ul className="list-disc pl-4 mt-2">
@@ -543,17 +638,21 @@ const ClientCreateButton = () => {
               showIcon
               className="mb-4"
             />
-            
-            <Form.List 
+
+            <Form.List
               name="milestones"
               rules={[
                 {
                   validator: async (_, milestones) => {
                     if (!milestones || milestones.length < 1) {
-                      return Promise.reject(new Error('At least one milestone is required'));
+                      return Promise.reject(
+                        new Error("At least one milestone is required")
+                      );
                     }
                     if (milestones.length > 10) {
-                      return Promise.reject(new Error('Maximum 10 milestones allowed'));
+                      return Promise.reject(
+                        new Error("Maximum 10 milestones allowed")
+                      );
                     }
                   },
                 },
@@ -569,7 +668,10 @@ const ClientCreateButton = () => {
                         label="Milestone Title"
                         rules={[
                           { required: true, message: "Missing title" },
-                          { max: 100, message: "Title cannot exceed 100 characters" }
+                          {
+                            max: 100,
+                            message: "Title cannot exceed 100 characters",
+                          },
                         ]}
                       >
                         <Input placeholder="Milestone title" />
@@ -580,8 +682,14 @@ const ClientCreateButton = () => {
                         name={[name, "description"]}
                         label="Description"
                         rules={[
-                          { required: true, message: "Description is required" },
-                          { max: 500, message: "Description cannot exceed 500 characters" }
+                          {
+                            required: true,
+                            message: "Description is required",
+                          },
+                          {
+                            max: 500,
+                            message: "Description cannot exceed 500 characters",
+                          },
                         ]}
                       >
                         <Input.TextArea
@@ -593,26 +701,38 @@ const ClientCreateButton = () => {
                       <Row gutter={16}>
                         <Col span={12}>
                           <Form.Item
-                            {...restField}
-                            name={[name, "budget"]}
                             label="Budget Ratio"
+                            name={[name, "budget"]}
                             rules={[
-                              { required: true, message: "Missing budget ratio" },
-                              { 
+                              {
+                                required: true,
+                              },
+                              {
                                 validator: (_, value) => {
                                   if (value <= 0) {
-                                    return Promise.reject("Budget ratio must be greater than 0");
+                                    return Promise.reject(
+                                      "Budget ratio must be greater than 0"
+                                    );
                                   }
                                   return Promise.resolve();
-                                }
-                              }
+                                },
+                              },
                             ]}
+                            getValueProps={(value) => ({
+                              value: value
+                                ? Math.round(value * 100)
+                                : undefined,
+                            })}
+                            normalize={(value) => value / 100}
                           >
                             <InputNumber
+                              placeholder="e.g. 20"
+                              className="w-full"
                               min={1}
                               max={100}
-                              placeholder="Budget ratio"
-                              className="w-full"
+                              formatter={(value) => `${Math.round(value)}`}
+                              parser={(value) => value?.replace("%", "")}
+                              suffix={<PercentageOutlined />}
                             />
                           </Form.Item>
                         </Col>
@@ -635,24 +755,32 @@ const ClientCreateButton = () => {
                                   if (!value) {
                                     return Promise.reject("Date is required");
                                   }
-                                  
-                                  const minDate = moment().add(3,"d");
-                                  
-                                  if (moment(new Date(value)).isBefore(minDate)) {
-                                    return Promise.reject("Date must be at least 3 days from today");
-                                  } 
-                                  
+
+                                  const minDate = moment().add(3, "d");
+
+                                  if (
+                                    moment(new Date(value)).isBefore(minDate)
+                                  ) {
+                                    return Promise.reject(
+                                      "Date must be at least 3 days from today"
+                                    );
+                                  }
+
                                   return Promise.resolve();
-                                }
-                              }
+                                },
+                              },
                             ]}
                           >
-                            <DatePicker 
-                              className="w-full" 
+                            <DatePicker
+                              className="w-full"
                               disabledDate={(current) => {
                                 // Can't select days before today + 3 days
-                                return current && current < moment().add(3, 'days').startOf('day');
-                              }} 
+                                return (
+                                  current &&
+                                  current <
+                                    moment().add(3, "days").startOf("day")
+                                );
+                              }}
                             />
                           </Form.Item>
                         </Col>
@@ -692,9 +820,9 @@ const ClientCreateButton = () => {
 
             <div className="flex justify-between">
               <Button onClick={handlePrevStep}>Previous</Button>
-              <Button 
-                type="primary" 
-                htmlType="submit" 
+              <Button
+                type="primary"
+                htmlType="submit"
                 loading={isSubmitting}
                 disabled={isSubmitting}
               >

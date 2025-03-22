@@ -4,11 +4,15 @@ import {
   DefaultApi,
   Middleware,
   ResponseContext,
-  RequestContext, JwtResponseDto,
+  RequestContext,
+  JwtResponseDto,
+  AuthResponseDtoFromJSON,
+  ErrorResponseFromJSON,
 } from "../../../generated";
 import {store} from "../../store";
 import {clearAuth, setAccessToken} from "../../store/auth";
 import {REFRESH_TOKEN_KEY} from "../auth/authProvider";
+import * as runtime from "../../../generated/runtime";
 
 class TokenRefreshMiddleware implements Middleware {
   private refreshInProgress: Promise<string | undefined> | null = null;
@@ -16,12 +20,19 @@ class TokenRefreshMiddleware implements Middleware {
   async post(context: ResponseContext): Promise<Response | void> {
     if (context.response && context.response.status === 401) {
       if (!this.refreshInProgress) {
-        this.refreshInProgress = this.refreshAccessToken();
+        const refreshToken = localStorage.getItem(REFRESH_TOKEN_KEY);
+        if (!refreshToken) {
+          localStorage.removeItem(REFRESH_TOKEN_KEY);
+          store.dispatch(clearAuth());
+          return context.response;
+        }
+        this.refreshInProgress = this.refreshAccessToken(refreshToken);
         console.log("[OpenAPI client] Refreshing access token...");
       }
 
       try {
         const newAccessToken = await this.refreshInProgress;
+        console.log('newAccessToken ', newAccessToken)
         const newHeaders = new Headers(context.init.headers);
         newHeaders.set('Authorization', `Bearer ${newAccessToken}`);
 
@@ -34,23 +45,23 @@ class TokenRefreshMiddleware implements Middleware {
       } catch (refreshError) {
         localStorage.removeItem(REFRESH_TOKEN_KEY);
         store.dispatch(clearAuth());
-        //  window.location.href = '/login';
+        window.location.href = '/login';
         throw refreshError;
       } finally {
         this.refreshInProgress = null;
       }
     }
 
+    if (context.response.status < 200 || context.response.status >= 300) {
+      const dto = await (new runtime.JSONApiResponse(context.response,
+        (jsonValue) => ErrorResponseFromJSON(jsonValue))).value();
+      throw new Error(dto.error);
+    }
+
     return context.response;
   }
 
-  private async refreshAccessToken(): Promise<string | undefined> {
-    const refreshToken = localStorage.getItem(REFRESH_TOKEN_KEY);
-
-    if (!refreshToken) {
-      throw new Error('No refresh token available');
-    }
-
+  private async refreshAccessToken(refreshToken: string): Promise<string | undefined> {
     const response = await fetch(`${API_URL}/auth/refresh-token`, {
       method: 'POST',
       headers: {

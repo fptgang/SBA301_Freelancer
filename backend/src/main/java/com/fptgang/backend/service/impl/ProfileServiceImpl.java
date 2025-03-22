@@ -46,7 +46,7 @@ public class ProfileServiceImpl implements ProfileService {
                 () -> new InvalidInputException("Profile does not exist"));
         authContext.requirePermissionOrAccountIds(Role.STAFF, existing.getAccount().getAccountId());
 
-        if (profile.getSkills() != null&& !profile.getSkills().equals(existing.getSkills())) {
+        if (profile.getSkills() != null && !profile.getSkills().equals(existing.getSkills())) {
             existing.getSkills().clear();
             for (var ps : profile.getSkills()) {
                 ps.setProfile(existing);

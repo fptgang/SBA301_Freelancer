@@ -1,5 +1,5 @@
 import React from "react";
-import { BaseRecord, useMany } from "@refinedev/core";
+import { BaseRecord, useGetIdentity, useMany } from "@refinedev/core";
 import {
   useTable,
   List,
@@ -8,18 +8,20 @@ import {
   DateField,
 } from "@refinedev/antd";
 import { Table, Space, Tooltip, notification, Button } from "antd";
-import { ProjectDto, ReportDto } from "../../../../generated";
+import { AccountDto, ProjectDto, ReportDto } from "../../../../generated";
 import api from "../../../services/api/openapi-config";
 import { LoginOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router";
 import { store } from "../../../store";
+import {useLocalSettings} from "../../../hooks/useLocalSettings";
 
 export const ReportsList = () => {
+  const [localSettings] = useLocalSettings()
   const { tableProps } = useTable({
     syncWithLocation: true,
   });
   const nav = useNavigate();
-  const user = store.getState().auth.account;
+  const { data: user } = useGetIdentity<AccountDto>();
 
   const { data: reportData, isLoading: reportIsLoading } = useMany<ReportDto>({
     resource: "reports",
@@ -89,12 +91,12 @@ export const ReportsList = () => {
         <Table.Column
           dataIndex={["createdAt"]}
           title="Created At"
-          render={(value: any) => <DateField value={value} />}
+          render={(value: any) => <DateField value={value} format={localSettings.dateFormat} />}
         />
         <Table.Column
           dataIndex={["updatedAt"]}
           title="Updated At"
-          render={(value: any) => <DateField value={value} />}
+          render={(value: any) => <DateField value={value} format={localSettings.dateFormat} />}
         />
         <Table.Column
           title="Actions"

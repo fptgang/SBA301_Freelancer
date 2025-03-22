@@ -26,34 +26,41 @@ import { useTable } from "@refinedev/antd";
 import dayjs from "dayjs";
 import { formatCurrency } from "../../../utils/formatter";
 import ClientCreateButton from "../projects/client-create";
+import { MessageDto, ProjectDto } from "../../../../generated";
+import { useNavigate } from "react-router";
+import {useLocalSettings} from "../../../hooks/useLocalSettings";
 
 const { Title, Text } = Typography;
 
 const ClientDashboard: React.FC = () => {
+  const [localSettings] = useLocalSettings()
   // Get current user identity
   const { data: identity } = useGetIdentity<{ id: number }>();
   const userId = identity?.id;
+  const nav = useNavigate();
 
   // Fetch active projects
-  const { data: projectData, isLoading: projectsLoading } = useList({
-    resource: "projects",
-    filters: [
-      {
-        field: "client.accountId",
-        operator: "eq",
-        value: userId,
+  const { data: projectData, isLoading: projectsLoading } = useList<ProjectDto>(
+    {
+      resource: "projects",
+      filters: [
+        {
+          field: "client.accountId",
+          operator: "eq",
+          value: userId,
+        },
+      ],
+      pagination: {
+        pageSize: 5,
       },
-    ],
-    pagination: {
-      pageSize: 5,
-    },
-    sorters: [
-      {
-        field: "updatedAt",
-        order: "desc",
-      },
-    ],
-  });
+      sorters: [
+        {
+          field: "updatedAt",
+          order: "desc",
+        },
+      ],
+    }
+  );
 
   // Fetch latest transactions
   const { data: transactionData, isLoading: transactionsLoading } = useList({
@@ -77,25 +84,20 @@ const ClientDashboard: React.FC = () => {
   });
 
   // Fetch latest messages
-  const { data: messageData, isLoading: messagesLoading } = useList({
-    resource: "messages",
-    filters: [
-      {
-        field: "sender.accountId",
-        operator: "eq",
-        value: userId,
+  const { data: messageData, isLoading: messagesLoading } = useList<MessageDto>(
+    {
+      resource: "messages",
+      pagination: {
+        pageSize: 5,
       },
-    ],
-    pagination: {
-      pageSize: 5,
-    },
-    sorters: [
-      {
-        field: "createdAt",
-        order: "desc",
-      },
-    ],
-  });
+      sorters: [
+        {
+          field: "createdAt",
+          order: "desc",
+        },
+      ],
+    }
+  );
 
   // Get Project IDs for fetching milestones
   const projectIds = useMemo(() => {
@@ -103,17 +105,9 @@ const ClientDashboard: React.FC = () => {
     return projectData.data.map((project) => project.projectId);
   }, [projectData]);
 
-  // Fetch milestones for active projects
-  const { data: milestoneData, isLoading: milestonesLoading } = useMany({
-    resource: "milestones",
-    ids: projectIds,
-    queryOptions: {
-      enabled: projectIds.length > 0,
-    },
-  });
-
   // Calculate dashboard statistics
   const stats = useMemo(() => {
+    const milestones = projectData?.data?.map((p) => p.milestones).flat();
     return {
       totalProjects: projectData?.total || 0,
       activeProjects:
@@ -123,22 +117,11 @@ const ClientDashboard: React.FC = () => {
         transactionData?.data?.reduce((sum, tx) => sum + (tx.amount || 0), 0) ||
         0,
       pendingMilestones:
-        milestoneData?.data?.filter((m) => m.status === "PENDING").length || 0,
+        milestones?.filter(
+          (m) => m?.status === "IN_PROGRESS" || m?.status === "PENDING"
+        ).length || 0,
     };
-  }, [projectData, transactionData, milestoneData]);
-
-  // Get upcoming milestones sorted by deadline
-  const upcomingMilestones = useMemo(() => {
-    if (!milestoneData?.data) return [];
-
-    return milestoneData.data
-      .filter(
-        (milestone) =>
-          milestone.status === "IN_PROGRESS" || milestone.status === "PENDING"
-      )
-      .sort((a, b) => dayjs(a.deadline).diff(dayjs(b.deadline)))
-      .slice(0, 5);
-  }, [milestoneData]);
+  }, [projectData, transactionData, projectData]);
 
   // Define status colors
   const getStatusColor = (status: string) => {
@@ -162,7 +145,18 @@ const ClientDashboard: React.FC = () => {
     };
     return typeColors[type] || "default";
   };
+  const upcomingMilestones = useMemo(() => {
+    if (!projectData?.data) return [];
+    const milestones = projectData?.data?.map((p) => p.milestones).flat();
 
+    return milestones
+      .filter(
+        (milestone) =>
+          milestone?.status === "IN_PROGRESS" || milestone?.status === "PENDING"
+      )
+      .sort((a, b) => dayjs(a?.deadline).diff(dayjs(b?.deadline)))
+      .slice(0, 5);
+  }, [projectData]);
   return (
     <div className="p-4">
       <div className="flex justify-between items-center mb-6">
@@ -235,7 +229,11 @@ const ClientDashboard: React.FC = () => {
                 >
                   <List.Item.Meta
                     title={
-                      <a href={`/client/projects/${project.projectId}`}>
+                      <a
+                        onClick={(e) => {
+                          nav(`/client/projects/${project.projectId}`);
+                        }}
+                      >
                         {project.title}
                       </a>
                     }
@@ -243,7 +241,7 @@ const ClientDashboard: React.FC = () => {
                       <Space direction="vertical" size="small">
                         <Text type="secondary" className="text-xs">
                           Created:{" "}
-                          {dayjs(project.createdAt).format("MMM D, YYYY")}
+                          {localSettings.formatDate(project.createdAt)}
                         </Text>
                         <Text type="secondary" className="text-xs">
                           Proposals: {project.proposalCount || 0}
@@ -253,7 +251,8 @@ const ClientDashboard: React.FC = () => {
                   />
                   <div className="text-right">
                     <Text strong>
-                      {formatCurrency(project.estimateBudget || 0)}
+                      {formatCurrency(project.minBudget || 0)}-
+                      {formatCurrency(project.maxBudget || 0)}
                     </Text>
                   </div>
                 </List.Item>
@@ -284,7 +283,7 @@ const ClientDashboard: React.FC = () => {
                           {transaction.type}
                         </Tag>
                         <Text>
-                          {dayjs(transaction.createdAt).format("MMM D, YYYY")}
+                          {localSettings.formatDateTime(transaction.createdAt)}
                         </Text>
                       </Space>
                     }
@@ -320,38 +319,38 @@ const ClientDashboard: React.FC = () => {
           >
             <Timeline
               items={upcomingMilestones.map((milestone) => ({
-                color: dayjs(milestone.deadline).isBefore(dayjs())
+                color: dayjs(milestone?.deadline).isBefore(dayjs())
                   ? "red"
                   : "blue",
                 children: (
-                  <div>
+                  <a
+                    onClick={() => {
+                      nav(`/client/projects/${milestone?.projectId}`);
+                    }}
+                  >
                     <div className="flex justify-between">
-                      <Text strong>{milestone.title}</Text>
-                      <Tag color={getStatusColor(milestone.status)}>
-                        {milestone.status}
+                      <Text strong>{milestone?.title}</Text>
+                      <Tag color={getStatusColor(milestone?.status)}>
+                        {milestone?.status}
                       </Tag>
                     </div>
                     <div className="mt-1">
                       <Text type="secondary" className="text-xs">
                         Project:{" "}
                         {projectData?.data?.find(
-                          (p) => p.projectId === milestone.projectId
+                          (p) => p.projectId === milestone?.projectId
                         )?.title || "Unknown Project"}
                       </Text>
                     </div>
                     <div className="flex justify-between mt-1">
                       <Text type="secondary" className="text-xs">
                         Deadline:{" "}
-                        {dayjs(milestone.deadline).format("MMM D, YYYY")}
-                      </Text>
-                      <Text strong>
-                        {formatCurrency(milestone.budget || 0)}
+                        {localSettings.formatDateTime(milestone?.deadline)}
                       </Text>
                     </div>
-                  </div>
+                  </a>
                 ),
               }))}
-              locale={{ emptyText: "No upcoming milestones" }}
             />
             {upcomingMilestones.length === 0 && (
               <div className="text-center py-4">No upcoming milestones</div>
@@ -370,12 +369,21 @@ const ClientDashboard: React.FC = () => {
             <List
               itemLayout="horizontal"
               dataSource={messageData?.data || []}
-              renderItem={(message) => (
+              loading={messagesLoading}
+              renderItem={(message: MessageDto) => (
                 <List.Item>
                   <List.Item.Meta
                     avatar={<Avatar icon={<MessageOutlined />} />}
                     title={
-                      <a href={`/client/projects/${message.projectId}`}>
+                      <a
+                        onClick={() =>
+                          nav("/message", {
+                            state: {
+                              projectId: message.projectId,
+                            },
+                          })
+                        }
+                      >
                         {projectData?.data?.find(
                           (p) => p.projectId === message.projectId
                         )?.title || "Unknown Project"}
@@ -387,7 +395,7 @@ const ClientDashboard: React.FC = () => {
                           {message.content}
                         </Text>
                         <Text type="secondary" className="text-xs block mt-1">
-                          {dayjs(message.createdAt).format("MMM D, YYYY HH:mm")}
+                          {localSettings.formatDateTime(message.createdAt)}
                         </Text>
                       </div>
                     }

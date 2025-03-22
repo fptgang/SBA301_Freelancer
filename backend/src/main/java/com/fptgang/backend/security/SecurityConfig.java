@@ -31,9 +31,15 @@ import org.springframework.security.oauth2.server.resource.web.BearerTokenAuthen
 import org.springframework.security.oauth2.server.resource.web.access.BearerTokenAccessDeniedHandler;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -63,14 +69,10 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http,
                                                    JWTAuthenticationFilter jwtAuthenticationFilter
     ) throws Exception {
-        http.cors(Customizer.withDefaults())
-                .authorizeHttpRequests((authorize) -> {
-                //if (disableAuthorization) {
-                //    authorize.anyRequest()
-                //             .permitAll();
-                //} else {
+        http
+            .cors(AbstractHttpConfigurer::disable)
+            .authorizeHttpRequests((authorize) -> {
                     authorize.anyRequest().permitAll(); // Check in controller and service, not here
-                //}
             })
             .csrf(AbstractHttpConfigurer::disable)
             .authenticationProvider(daoAuthenticationProvider())
@@ -125,5 +127,17 @@ public class SecurityConfig {
                                               .build();
         JWKSource<SecurityContext> jwks = new ImmutableJWKSet<>(new JWKSet(jwk));
         return new NimbusJwtEncoder(jwks);
+    }
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(Collections.singletonList("http://localhost:5173"));
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(List.of("*"));
+        configuration.setAllowCredentials(true);
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
     }
 }

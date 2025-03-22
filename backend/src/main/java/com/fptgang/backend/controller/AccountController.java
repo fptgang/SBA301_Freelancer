@@ -122,12 +122,16 @@ public class AccountController implements AccountsApi {
      * Can access: Any
      */
     @Override
-    public ResponseEntity<AccountDto> updateAccountAvatar(MultipartFile blob) {
+    public ResponseEntity<AccountDto> updateAccountAvatar(Long accountId, MultipartFile blob) {
         log.info("Updating account avatar");
+
+        if (!SecurityUtil.hasRole(Role.STAFF))
+            accountId = SecurityUtil.requireCurrentUserId();
+
         File file = fileService.create(blob);
         Account account = accountService.update(
                 Account.builder()
-                        .accountId(SecurityUtil.requireCurrentUserId())
+                        .accountId(accountId)
                         .avatarUrl(file.getFileUrl())
                         .build()
         );

@@ -4,7 +4,7 @@ import { toast } from "react-toastify";
 import { UndoableNotification } from "../components/common/ui/undoable-notification";
 
 export const notificationProvider: NotificationProvider = {
-  open: ({ key, message, type, undoableTimeout, cancelMutation }) => {
+  open: ({ key, message, description, type, undoableTimeout, cancelMutation }) => {
     if (type === "progress") {
       if (toast.isActive(key as React.ReactText)) {
         toast.update(key as React.ReactText, {
@@ -34,15 +34,16 @@ export const notificationProvider: NotificationProvider = {
         );
       }
     } else {
+      console.log(description, message)
       if (toast.isActive(key as React.ReactText)) {
         toast.update(key as React.ReactText, {
-          render: message,
+          render: description || message,
           closeButton: true,
           autoClose: 5000,
           type,
         });
       } else {
-        toast(message, {
+        toast(description || message, {
           toastId: key,
           type,
         });

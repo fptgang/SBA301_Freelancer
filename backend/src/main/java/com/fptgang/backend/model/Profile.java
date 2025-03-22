@@ -4,10 +4,7 @@ package com.fptgang.backend.model;
 import com.fptgang.backend.util.Searchable;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.jetbrains.annotations.NotNull;
@@ -60,6 +57,8 @@ public class Profile {
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "account_id")
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private Account account;
 
     // Cascading profile skills with profile

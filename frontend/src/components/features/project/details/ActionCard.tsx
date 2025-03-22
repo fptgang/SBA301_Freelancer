@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Card, Button, Space, Divider, Typography } from "antd";
 import {
   DollarOutlined,
@@ -6,22 +6,34 @@ import {
   UserOutlined,
 } from "@ant-design/icons";
 import { useNavigate } from "react-router";
-import { AccountDto, ProjectDto, ProjectStatusDto } from "../../../../../generated";
+import {
+  AccountDto,
+  ProjectDto,
+  ProjectStatusDto,
+} from "../../../../../generated";
 import FreelancerCreateProposalButton from "../../../../pages/freelancer/proposal/freelancer-create";
 import { useGetIdentity } from "@refinedev/core";
+import ContractShowModal from "../../../ContractShowModal";
+import {useLocalSettings} from "../../../../hooks/useLocalSettings";
 
 interface ActionCardProps {
   project: ProjectDto;
   freelancerId?: number;
   role: string | null;
+  refetch?: () => void;
 }
 
 export const ActionCard: React.FC<ActionCardProps> = ({
   project,
   role,
   freelancerId,
+  refetch,
 }) => {
+  const [localSettings] = useLocalSettings();
   const navigate = useNavigate();
+  const [showContractModal, setShowContractModal] = useState(false);
+  const [selectedContractId, setSelectedContractId] = useState<number>();
+  const { data: user } = useGetIdentity<AccountDto>();
 
   return (
     <Card style={{ borderRadius: 8 }} bodyStyle={{ padding: 16 }}>
@@ -40,18 +52,39 @@ export const ActionCard: React.FC<ActionCardProps> = ({
         ) : project.status !== ProjectStatusDto.Open ? (
           <></>
         ) : role === "FREELANCER" ? (
-          <>
-            <FreelancerCreateProposalButton
-              project={project}
-              freelancerId={freelancerId}
-            />
-            <Typography.Text
-              type="secondary"
-              style={{ textAlign: "center", display: "block" }}
-            >
-              {project?.proposalCount} proposals received
-            </Typography.Text>
-          </>
+          project?.myProposals?.find((p) => p.status === "PENDING") ? (
+            <>
+              <Button
+                block
+                type="primary"
+                size="large"
+                onClick={() =>
+                  navigate(
+                    `/freelancer/proposals/${
+                      project?.myProposals?.find((p) => p.status === "PENDING")
+                        ?.proposalId
+                    }`
+                  )
+                }
+              >
+                View Your Proposal
+              </Button>
+            </>
+          ) : (
+            <>
+              <FreelancerCreateProposalButton
+                project={project}
+                freelancerId={freelancerId}
+                refetch={refetch}
+              />
+              <Typography.Text
+                type="secondary"
+                style={{ textAlign: "center", display: "block" }}
+              >
+                {project?.proposalCount} proposals received
+              </Typography.Text>
+            </>
+          )
         ) : (
           <Button
             block
@@ -62,6 +95,51 @@ export const ActionCard: React.FC<ActionCardProps> = ({
             Log in to Apply
           </Button>
         )}
+
+        {project?.contract &&
+          (user?.accountId === project.contract.freelancer?.accountId ||
+            user?.accountId === project.client?.accountId) && (
+            <>
+              <Button
+                block
+                type="primary"
+                size="large"
+                onClick={() => {
+                  setSelectedContractId(project.contract?.contractId);
+                  setShowContractModal(true);
+                }}
+              >
+                View Contract
+              </Button>
+              <ContractShowModal
+                visible={showContractModal}
+                onClose={() => {
+                  setShowContractModal(false);
+                  setSelectedContractId(undefined);
+                }}
+                contractId={selectedContractId || 0}
+              />
+            </>
+          )}
+
+        {role === "FREELANCER" &&
+          project?.myProposals &&
+          project?.myProposals?.length > 0 && (
+            <>
+              <Button
+                block
+                type="primary"
+                size="large"
+                onClick={() =>
+                  navigate(`/freelancer/proposals`, {
+                    state: { projectId: project.projectId },
+                  })
+                }
+              >
+                View Submited Proposals
+              </Button>
+            </>
+          )}
 
         {role === "CLIENT" ||
           (project.status === ProjectStatusDto.Open && (
@@ -81,7 +159,7 @@ export const ActionCard: React.FC<ActionCardProps> = ({
           </Typography.Text>
           <Typography.Text>
             <CalendarOutlined /> <strong>Posted:</strong>{" "}
-            {new Date(project?.createdAt!).toLocaleDateString()}
+            {localSettings.formatDate(project.createdAt!)}
           </Typography.Text>
           <Typography.Text>
             <UserOutlined /> <strong>Client:</strong>{" "}

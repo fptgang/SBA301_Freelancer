@@ -14,6 +14,7 @@ import {
   CheckCircleOutlined,
   EyeOutlined,
 } from "@ant-design/icons";
+import {useLocalSettings} from "../../../hooks/useLocalSettings";
 
 interface ProjectCategoryDto {
   projectCategoryId: number;
@@ -24,6 +25,7 @@ interface ProjectCategoryDto {
 }
 
 export const ProjectCategoriesShow: React.FC = () => {
+  const [localSettings] = useLocalSettings()
   const { queryResult } = useShow<ProjectCategoryDto>();
   const { data, isLoading } = queryResult;
   const record = data?.data;
@@ -99,14 +101,14 @@ export const ProjectCategoriesShow: React.FC = () => {
             <Descriptions.Item label="Created At">
               <DateField
                 value={record?.createdAt}
-                format="MMMM D, YYYY HH:mm:ss"
+                format={localSettings.dateFormat}
               />
             </Descriptions.Item>
 
             <Descriptions.Item label="Last Updated">
               <DateField
                 value={record?.updatedAt}
-                format="MMMM D, YYYY HH:mm:ss"
+                format={localSettings.dateFormat}
               />
             </Descriptions.Item>
 

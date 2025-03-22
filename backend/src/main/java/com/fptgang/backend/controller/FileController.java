@@ -51,8 +51,8 @@ public class FileController implements FilesApi {
             file = fileService.createForProject(projectId, blob);
         else if (milestoneId != null)
             file = fileService.createForMilestone(milestoneId, blob);
-        //else if (contractId != null)
-        //    file = fileService.createForContract(contractId, blob);
+        else if (contractId != null)
+            file = fileService.createForContract(contractId, blob);
         else
             throw new IllegalArgumentException("Unknown target");
         return new ResponseEntity<>(fileMapper.toDTO(file, DetailLevel.FULL), HttpStatus.OK);

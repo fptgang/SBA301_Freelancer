@@ -90,5 +90,7 @@ public class Account {
 
     // Cascading profile with account
     @OneToOne(mappedBy = "account", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private Profile profile;
 }

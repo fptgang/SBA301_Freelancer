@@ -51,19 +51,19 @@ const LandingPage = () => {
         </div>
       </div>
 
-      {/* Social Proof */}
-      <div className="py-16 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <Text className="text-gray-500">TRUSTED BY</Text>
-            <div className="flex justify-center gap-12 mt-4">
-              <img src="/api/placeholder/120/40" alt="Microsoft" />
-              <img src="/api/placeholder/120/40" alt="Airbnb" />
-              <img src="/api/placeholder/120/40" alt="Bissell" />
-            </div>
-          </div>
-        </div>
-      </div>
+      {/*/!* Social Proof *!/*/}
+      {/*<div className="py-16 bg-white">*/}
+      {/*  <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">*/}
+      {/*    <div className="text-center mb-12">*/}
+      {/*      <Text className="text-gray-500">TRUSTED BY</Text>*/}
+      {/*      <div className="flex justify-center gap-12 mt-4">*/}
+      {/*        <img src="/api/placeholder/120/40" alt="Microsoft" />*/}
+      {/*        <img src="/api/placeholder/120/40" alt="Airbnb" />*/}
+      {/*        <img src="/api/placeholder/120/40" alt="Bissell" />*/}
+      {/*      </div>*/}
+      {/*    </div>*/}
+      {/*  </div>*/}
+      {/*</div>*/}
 
       {/* Categories Grid */}
       <div className="bg-gray-50 py-16">

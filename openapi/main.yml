@@ -76,6 +76,8 @@ paths:
     $ref: "path/auth/me.yml"
   /auth/login-with-google:
     $ref: "path/auth/login-with-google.yml"
+  /auth/register-with-google:
+    $ref: "path/auth/register-with-google.yml"
   /auth/refresh-token:
     $ref: "path/auth/refresh-token.yml"
   /auth/login:
@@ -95,6 +97,8 @@ paths:
     $ref: "path/accounts/index.yml"
   /accounts/{accountId}:
     $ref: "path/accounts/@id/index.yml"
+  /accounts/{accountId}/upload-avatar:
+    $ref: "path/accounts/@id/upload-avatar.yml"
 
   /profiles:
     $ref: "path/profiles/index.yml"
@@ -133,11 +137,15 @@ paths:
 
   /proposals:
     $ref: "path/proposals/index.yml"
+  /proposals/{proposalId}:
+    $ref: "path/proposals/@id/index.yml"
   /proposals/{proposalId}/reject:
     $ref: "path/proposals/@id/reject.yml"
   /proposals/{proposalId}/withdraw:
     $ref: "path/proposals/@id/withdraw.yml"
 
+  /contracts/{contractId}:
+    $ref: "path/contracts/@id/index.yml"
   /contracts/{contractId}/sign:
     $ref: "path/contracts/@id/sign.yml"
   /contracts:

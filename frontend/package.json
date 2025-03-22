@@ -55,6 +55,9 @@
     "vite": "6.0.9"
   },
   "scripts": {
+    "predev": "npm run generate-api",
+    "prebuild": "npm run generate-api",
+    "prestart": "npm run generate-api",
     "dev": "refine dev",
     "build": "tsc && refine build",
     "start": "refine start",
