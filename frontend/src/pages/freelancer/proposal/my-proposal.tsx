@@ -18,7 +18,9 @@ import {
   Empty,
   Menu,
   Dropdown,
-  Modal
+  Modal,
+  Alert,
+  message
 } from "antd";
 import {
   SearchOutlined,
@@ -35,17 +37,105 @@ import {
   ExportOutlined,
   ReloadOutlined,
   MoreOutlined,
+  EditOutlined,
 } from "@ant-design/icons";
-import { useGetIdentity, useList } from "@refinedev/core";
+import { useGetIdentity, useList, useOne } from "@refinedev/core";
 import type { ColumnsType } from "antd/es/table";
-import { AccountDto, ProposalDto } from "../../../../generated";
+import { AccountDto, ProposalDto, ProjectDto, ContractDto } from "../../../../generated";
 import api from "../../../services/api/openapi-config";
 import { useLocation, useNavigate } from "react-router";
 import { store } from "../../../store";
 import {useLocalSettings} from "../../../hooks/useLocalSettings";
+import { ContractSignButton } from "../../../components";
 
 const { Title, Text } = Typography;
 const { Option } = Select;
+
+// Contract Signing Modal Component
+const ContractSigningModal: React.FC<{
+  visible: boolean;
+  contractId: number | null;
+  projectTitle: string;
+  onClose: () => void;
+  onSuccess: () => void;
+}> = ({ visible, contractId, projectTitle, onClose, onSuccess }) => {
+  const [contract, setContract] = useState<ContractDto | null>(null);
+  const [project, setProject] = useState<ProjectDto | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  // Fetch contract and project data when modal becomes visible
+  useEffect(() => {
+    const fetchData = async () => {
+      if (visible && contractId) {
+        setLoading(true);
+        try {
+          const contractData = await api.getContractById({
+            contractId: contractId
+          });
+          setContract(contractData);
+          
+          if (contractData.projectId) {
+            const projectData = await api.getProjectById({
+              projectId: contractData.projectId
+            });
+            setProject(projectData);
+          }
+        } catch (error) {
+          console.error("Error fetching contract data:", error);
+        } finally {
+          setLoading(false);
+        }
+      }
+    };
+    
+    fetchData();
+  }, [visible, contractId]);
+
+  return (
+    <Modal
+      title="Sign Contract for Project"
+      open={visible}
+      onCancel={onClose}
+      footer={null}
+      width={700}
+      destroyOnClose
+    >
+      {loading ? (
+        <div className="flex justify-center py-8">
+          <span>Loading contract details...</span>
+        </div>
+      ) : contract && project ? (
+        <div className="space-y-4">
+          <Alert
+            message={`Sign Contract for: ${projectTitle}`}
+            description="Review the contract details carefully before signing."
+            type="info"
+            showIcon
+            className="mb-4"
+          />
+          
+          <ContractSignButton 
+            contract={contract} 
+            project={project} 
+            onSuccess={() => {
+              onSuccess();
+              onClose();
+            }}
+          />
+        </div>
+      ) : (
+        <div className="text-center py-4">
+          <Alert
+            message="Contract Not Found"
+            description="Unable to load contract details. Please try again later."
+            type="error"
+            showIcon
+          />
+        </div>
+      )}
+    </Modal>
+  );
+};
 
 const FreelancerMyProposalPage: React.FC = () => {
   const [localSettings] = useLocalSettings();
@@ -63,6 +153,9 @@ const FreelancerMyProposalPage: React.FC = () => {
     accepted: 0,
     rejected: 0
   });
+  const [contractModalVisible, setContractModalVisible] = useState(false);
+  const [selectedContractId, setSelectedContractId] = useState<number | null>(null);
+  const [selectedProjectTitle, setSelectedProjectTitle] = useState<string>("");
 
   const { data, isLoading, refetch } = useList<ProposalDto>({
     resource: "proposals",
@@ -108,6 +201,26 @@ const FreelancerMyProposalPage: React.FC = () => {
 
   const nav = useNavigate();
   const proposals = data?.data || [];
+
+  // Show contract signing modal
+  const handleShowContractModal = async (proposalId: number | undefined, projectTitle: string) => {
+    if (!proposalId) return;
+    
+    try {
+      // Fetch the contract ID associated with this proposal
+      const proposal = await api.getProposalById({ proposalId });
+      if (proposal.contractId) {
+        setSelectedContractId(proposal.contractId);
+        setSelectedProjectTitle(projectTitle || "Project");
+        setContractModalVisible(true);
+      } else {
+        message.error("No contract found for this proposal");
+      }
+    } catch (error) {
+      console.error("Error fetching contract:", error);
+      message.error("Failed to load contract details");
+    }
+  };
 
   // Calculate stats when proposals change
   useEffect(() => {
@@ -244,14 +357,9 @@ const FreelancerMyProposalPage: React.FC = () => {
       render: (date: string) => (
         <div className="flex items-center space-x-2">
           <CalendarOutlined style={{ color: '#722ed1' }} />
-          <span>{new Date(date).toLocaleDateString(undefined, {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric'
-          })}</span>
+          <span>{localSettings.formatDate(date)}</span>
         </div>
       ),
-      render: (date: string) => localSettings.formatDate(date),
       sorter: true,
       width: '20%',
     },
@@ -298,6 +406,18 @@ const FreelancerMyProposalPage: React.FC = () => {
               />
             </Tooltip>
           )}
+          {record.status === "ACCEPTED" && (
+            <Tooltip title="View project details & contract">
+              <Button
+                icon={<CheckCircleOutlined />}
+                size="small"
+                type="primary"
+                onClick={() => handleShowContractModal(record.proposalId, record.projectId ? String(record.projectId) : "Project")}
+              >
+                Sign Contract
+              </Button>
+            </Tooltip>
+          )}
           <Dropdown overlay={
             <Menu>
               <Menu.Item key="details" icon={<EyeOutlined />} onClick={() => 
@@ -313,6 +433,15 @@ const FreelancerMyProposalPage: React.FC = () => {
                   onClick={() => record.proposalId && handleWithdrawProposal(record.proposalId)}
                 >
                   Withdraw Proposal
+                </Menu.Item>
+              )}
+              {record.status === "ACCEPTED" && (
+                <Menu.Item 
+                  key="sign" 
+                  icon={<CheckCircleOutlined />}
+                  onClick={() => handleShowContractModal(record.proposalId, record.projectId ? String(record.projectId) : "Project")}
+                >
+                  Sign Contract
                 </Menu.Item>
               )}
             </Menu>
@@ -493,6 +622,18 @@ const FreelancerMyProposalPage: React.FC = () => {
           />
         </Card>
       </div>
+
+      {/* Contract Signing Modal */}
+      <ContractSigningModal
+        visible={contractModalVisible}
+        contractId={selectedContractId}
+        projectTitle={selectedProjectTitle}
+        onClose={() => setContractModalVisible(false)}
+        onSuccess={() => {
+          message.success("Contract signed successfully!");
+          refetch();
+        }}
+      />
     </div>
   );
 };

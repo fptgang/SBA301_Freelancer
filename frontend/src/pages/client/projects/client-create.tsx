@@ -38,6 +38,7 @@ import {
   ProficiencyEnum,
   ProjectSkillDto,
 } from "../../../../generated/models";
+import dayjs from "dayjs";
 
 const { Step } = Steps;
 interface ClientCreateButtonProps {
@@ -130,17 +131,21 @@ const ClientCreateButton: React.FC<ClientCreateButtonProps> = ({ refetch }) => {
 
     // Check distance between milestones (3-30 days)
     for (let i = 1; i < sortedMilestones.length; i++) {
-      const prevDate = moment(sortedMilestones[i - 1].deadline);
-      const currDate = moment(sortedMilestones[i].deadline);
+      const prevDate = dayjs(sortedMilestones[i - 1].deadline);
+      const currDate = dayjs(sortedMilestones[i].deadline);
 
-      const daysBetween = currDate.diff(prevDate, "days");
+      // Use dayjs's diff method to get difference in days
+      const daysBetween = currDate.diff(prevDate, 'day', true);
+      
+      // Round to nearest whole number for better user experience
+      const roundedDaysBetween = Math.round(daysBetween);
 
-      if (daysBetween < 3) {
+      if (roundedDaysBetween < 3) {
         message.error("Milestones must be at least 3 days apart");
         return false;
       }
 
-      if (daysBetween > 30) {
+      if (roundedDaysBetween > 30) {
         message.error("Milestones should not be more than 30 days apart");
         return false;
       }
