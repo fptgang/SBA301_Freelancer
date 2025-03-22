@@ -43,6 +43,7 @@ import {
 import { store } from "../../../store";
 import { useNavigate } from "react-router";
 import ContractShowModal from "../../../components/ContractShowModal";
+import { ContractSignButton } from "../../../components";
 import {useLocalSettings} from "../../../hooks/useLocalSettings";
 
 const { Title, Text } = Typography;
@@ -392,14 +393,19 @@ const FreelancerDashboardPage: React.FC = () => {
                   />
                   <div className="text-right">
                     {contract?.status === "UNSIGNED" ? (
-                      <Button
-                        type="primary"
-                        onClick={() => {
-                          nav(`/freelancer/contracts/${contract.contractId}`);
+                      <ContractSignButton 
+                        contract={contract}
+                        project={contractProjectData?.data?.find(
+                          (p) => p.projectId === contract.projectId
+                        ) as ProjectDto || { status: "IN_PROGRESS" as any, projectId: contract.projectId }}
+                        onSuccess={() => {
+                          // Refresh data when contract is signed
+                          if (contractData) {
+                            // Trigger refetch on parent components
+                            contractData?.refetch?.();
+                          }
                         }}
-                      >
-                        Sign Contract
-                      </Button>
+                      />
                     ) : (
                       <>
                         <Button
