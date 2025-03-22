@@ -266,7 +266,8 @@ public class TransactionServiceImpl implements TransactionService {
         if (account.getBalance().compareTo(amount) < 0) {
             throw new IllegalArgumentException("Insufficient balance for withdrawal");
         }
-
+        account.setBalance(account.getBalance().subtract(amount));
+        accountRepos.save(account);
         Transaction transactions = Transaction.builder()
                 .fromAccount(account)
                 .toAccount(null)
@@ -297,9 +298,9 @@ public class TransactionServiceImpl implements TransactionService {
         transaction.setStatus(transactionId.getStatus());
         transaction.setUpdatedAt(LocalDateTime.now());
 
-        if (transactionId.getStatus() == Transaction.TransactionStatus.SUCCESS) {
+        if (transactionId.getStatus() == Transaction.TransactionStatus.FAILED) {
             Account account = transaction.getFromAccount();
-            account.setBalance(account.getBalance().subtract(transaction.getAmount()));
+            account.setBalance(account.getBalance().add(transaction.getAmount()));
             accountRepos.save(account);
         }
 
