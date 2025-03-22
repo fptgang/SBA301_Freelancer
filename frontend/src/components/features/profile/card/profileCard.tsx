@@ -3,9 +3,11 @@ import { Card, Col, Row, Typography, Drawer, Avatar, Tag, Tabs } from "antd";
 import { ProfileDto } from "../../../../../generated";
 import ProfileDrawer from "../drawer/profileDrawer";
 import { renderSkillTags } from "../../../../utils/renderSkillTags";
+import {useLocalSettings} from "../../../../hooks/useLocalSettings";
 
 const ProfileCard: React.FC<{ profile: ProfileDto }> = ({ profile }) => {
   const [isDrawerVisible, setIsDrawerVisible] = useState(false);
+  const [localSettings] = useLocalSettings();
 
   const showDrawer = () => {
     setIsDrawerVisible(true);
@@ -23,7 +25,7 @@ const ProfileCard: React.FC<{ profile: ProfileDto }> = ({ profile }) => {
             <Avatar src={profile.account?.avatarUrl} size={64} /> <br />
             <Typography.Text type="secondary" className="my-2 block">
               Member since{" "}
-              {new Date(profile.account?.createdAt!).toLocaleDateString()}
+              {profile.account?.createdAt && localSettings.formatDate(profile.account.createdAt)}
             </Typography.Text>
           </Col>
           <Col>

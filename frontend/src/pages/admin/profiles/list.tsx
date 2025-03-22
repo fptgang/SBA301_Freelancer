@@ -18,6 +18,7 @@ import {
   ClockCircleOutlined,
 } from "@ant-design/icons";
 import { ProfileDto } from "../../../../generated";
+import {useLocalSettings} from "../../../hooks/useLocalSettings";
 
 const { Text } = Typography;
 
@@ -31,6 +32,7 @@ const LANGUAGE_NAMES: Record<string, string> = {
 };
 
 export const ProfilesList: React.FC = () => {
+  const [localSettings] = useLocalSettings()
   const { tableProps, searchFormProps } = useTable<ProfileDto>({
     syncWithLocation: true,
     sorters: {
@@ -179,7 +181,7 @@ export const ProfilesList: React.FC = () => {
             </Space>
           }
           render={(value: string) => (
-            <DateField value={value} format="MMMM DD, YYYY" />
+            <DateField value={value} format={localSettings.dateFormat} />
           )}
           sorter
           defaultSortOrder="descend"

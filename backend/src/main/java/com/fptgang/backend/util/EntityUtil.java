@@ -48,11 +48,13 @@ public class EntityUtil {
                 set(existing, field.getName(), newValue);
                 fieldChanged.add(field.getName());
             } catch (Exception e) {
+                if (e instanceof org.joor.ReflectException)
+                    continue;
                 throw new RuntimeException("Error merging entities", e);
             }
         }
 
-        LOGGER.info("Merged fields {} into {}", String.join(",", fieldChanged), clazz.getName());
+        //LOGGER.info("Merged fields {} into {}", String.join(",", fieldChanged), clazz.getName());
         return existing;
     }
 

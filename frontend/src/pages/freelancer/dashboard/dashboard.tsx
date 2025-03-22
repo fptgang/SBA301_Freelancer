@@ -44,10 +44,12 @@ import { store } from "../../../store";
 import { useNavigate } from "react-router";
 import ContractShowModal from "../../../components/ContractShowModal";
 import { ContractSignButton } from "../../../components";
+import {useLocalSettings} from "../../../hooks/useLocalSettings";
 
 const { Title, Text } = Typography;
 
 const FreelancerDashboardPage: React.FC = () => {
+  const [localSettings] = useLocalSettings()
   // Get current user identity
   const { data: user } = useGetIdentity<AccountDto>();
   const userId = user?.accountId;
@@ -315,7 +317,7 @@ const FreelancerDashboardPage: React.FC = () => {
                       <Space direction="vertical" size="small">
                         <Text type="secondary" className="text-xs">
                           Submitted:{" "}
-                          {dayjs(proposal.createdAt).format("MMM D, YYYY")}
+                          {localSettings.formatDateTime(proposal.createdAt)}
                         </Text>
                         <Text type="secondary" className="text-xs">
                           Client:{" "}
@@ -378,7 +380,7 @@ const FreelancerDashboardPage: React.FC = () => {
                         </Tag>
                         <Text type="secondary" className="text-xs">
                           Started:{" "}
-                          {dayjs(contract.signedAt).format("MMM D, YYYY")}
+                          {localSettings.formatDateTime(contract.signedAt)}
                         </Text>
                         <Text type="secondary" className="text-xs">
                           Client:{" "}
@@ -451,7 +453,7 @@ const FreelancerDashboardPage: React.FC = () => {
                           {transaction.type}
                         </Tag>
                         <Text>
-                          {dayjs(transaction.createdAt).format("MMM D, YYYY")}
+                          {localSettings.formatDateTime(transaction.createdAt)}
                         </Text>
                       </Space>
                     }
@@ -524,7 +526,7 @@ const FreelancerDashboardPage: React.FC = () => {
                     <div className="flex justify-between mt-1">
                       <Text type="secondary" className="text-xs">
                         Deadline:{" "}
-                        {dayjs(milestone?.deadline).format("MMM D, YYYY")}
+                        {localSettings.formatDateTime(milestone?.deadline)}
                       </Text>
                       <Text strong>
                         {formatCurrency(milestone?.contractualBudget || 0)}
@@ -578,7 +580,7 @@ const FreelancerDashboardPage: React.FC = () => {
                           {message.content}
                         </Text>
                         <Text type="secondary" className="text-xs block mt-1">
-                          {dayjs(message.createdAt).format("MMM D, YYYY HH:mm")}
+                          {localSettings.formatDateTime(message.createdAt)}
                         </Text>
                       </div>
                     }

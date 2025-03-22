@@ -3,8 +3,10 @@ import { Card, Col, Row, Tag, Typography, Drawer } from "antd";
 import { ProjectDto } from "../../../../../generated";
 import { renderSkillTags } from "../../../../utils/renderSkillTags";
 import ProjectDrawer from "../drawers/projectDrawer";
+import {useLocalSettings} from "../../../../hooks/useLocalSettings";
 
 const ProjectCard: React.FC<{ project: ProjectDto }> = ({ project }) => {
+  const [localSettings] = useLocalSettings();
   const [isDrawerVisible, setIsDrawerVisible] = useState(false);
 
   const showDrawer = () => {
@@ -22,7 +24,7 @@ const ProjectCard: React.FC<{ project: ProjectDto }> = ({ project }) => {
           <Col span={24}>
             <Typography.Title level={4}>{project.title}</Typography.Title>
             <Typography.Text type="secondary" className="mb-2 block">
-              Posted: {new Date(project.createdAt!).toLocaleDateString()}
+              Posted: {localSettings.formatDate(project.createdAt!)}
             </Typography.Text>
             <Typography.Text className="mb-3 block">
               {project.description}

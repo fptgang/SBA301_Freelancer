@@ -24,6 +24,7 @@ import {
   TransactionTypeDto,
 } from "../../../../generated";
 import { ShowTransactionDrawer } from "./components/ShowTransactionDrawer";
+import {useLocalSettings} from "../../../hooks/useLocalSettings";
 
 const { Text } = Typography;
 
@@ -39,6 +40,7 @@ const TYPE_CONFIG: Record<
 };
 
 export const TransactionsList: React.FC = () => {
+  const [localSettings] = useLocalSettings()
   const [showDrawer, setShowDrawer] = useState(false);
   const [selectedTransaction, setSelectedTransaction] =
     useState<TransactionDto>();
@@ -216,7 +218,7 @@ export const TransactionsList: React.FC = () => {
               </Space>
             }
             render={(value: string) => (
-              <DateField value={value} format="MMM DD, YYYY HH:mm" />
+              <DateField value={value} format={localSettings.dateTimeFormat} />
             )}
             sorter
             defaultSortOrder="descend"

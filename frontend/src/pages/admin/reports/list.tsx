@@ -13,8 +13,10 @@ import api from "../../../services/api/openapi-config";
 import { LoginOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router";
 import { store } from "../../../store";
+import {useLocalSettings} from "../../../hooks/useLocalSettings";
 
 export const ReportsList = () => {
+  const [localSettings] = useLocalSettings()
   const { tableProps } = useTable({
     syncWithLocation: true,
   });
@@ -89,12 +91,12 @@ export const ReportsList = () => {
         <Table.Column
           dataIndex={["createdAt"]}
           title="Created At"
-          render={(value: any) => <DateField value={value} />}
+          render={(value: any) => <DateField value={value} format={localSettings.dateFormat} />}
         />
         <Table.Column
           dataIndex={["updatedAt"]}
           title="Updated At"
-          render={(value: any) => <DateField value={value} />}
+          render={(value: any) => <DateField value={value} format={localSettings.dateFormat} />}
         />
         <Table.Column
           title="Actions"

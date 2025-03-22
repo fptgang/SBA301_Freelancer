@@ -2,12 +2,14 @@ import React from "react";
 import { Typography, Tag, Space, Divider } from "antd";
 import { CalendarOutlined, EyeInvisibleOutlined } from "@ant-design/icons";
 import { ProjectDto } from "../../../../../generated";
+import {useLocalSettings} from "../../../../hooks/useLocalSettings";
 
 interface ProjectHeaderProps {
   project: ProjectDto;
 }
 
 export const ProjectHeader: React.FC<ProjectHeaderProps> = ({ project }) => {
+  const [localSettings] = useLocalSettings();
   return (
     <>
       <Space direction="vertical" size="middle" style={{ width: "100%" }}>
@@ -29,7 +31,7 @@ export const ProjectHeader: React.FC<ProjectHeaderProps> = ({ project }) => {
         <Space size="middle">
           <Typography.Text type="secondary">
             <CalendarOutlined /> Posted{" "}
-            {new Date(project?.createdAt!).toLocaleDateString()}
+            {localSettings.formatDate(project.createdAt!)}
           </Typography.Text>
           <Typography.Text type="secondary">
             <EyeInvisibleOutlined /> {project?.isVisible ? "Public" : "Private"}

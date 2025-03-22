@@ -36,10 +36,12 @@ import { ProposalDto, ProposalStatusDto } from "../../../../generated";
 import { useNavigate, useParams } from "react-router";
 import api from "../../../services/api/openapi-config";
 import dayjs from "dayjs";
+import {useLocalSettings} from "../../../hooks/useLocalSettings";
 
 const { Title, Text, Paragraph } = Typography;
 
 const FreelancerProposalShow: React.FC = () => {
+  const [localSettings] = useLocalSettings()
   const { id } = useParams();
   const navigate = useNavigate();
 
@@ -308,6 +310,40 @@ const FreelancerProposalShow: React.FC = () => {
                 }
               >
                 <Timeline>
+                  {proposal.createdAt
+                    ? localSettings.formatDate(proposal.createdAt)
+                    : "N/A"}
+                </Descriptions.Item>
+              </Descriptions>
+            </Space>
+          </Card>
+        </Col>
+
+        <Col xs={24} lg={8}>
+          <Space direction="vertical" size={16} style={{ width: "100%" }}>
+            <Card>
+              <Title level={5}>Proposal Timeline</Title>
+              <Timeline>
+                <Timeline.Item
+                  dot={<ClockCircleOutlined style={{ fontSize: "16px" }} />}
+                >
+                  {proposal.createdAt
+                    ? `Submitted on ${localSettings.formatDate(proposal.createdAt)}`
+                    : "Submission date not available"}
+                </Timeline.Item>
+                {proposal.status === "ACCEPTED" && (
+                  <Timeline.Item
+                    dot={
+                      <CheckCircleOutlined
+                        style={{ fontSize: "16px" }}
+                        color="green"
+                      />
+                    }
+                  >
+                    Accepted
+                  </Timeline.Item>
+                )}
+                {proposal.status === "REJECTED" && (
                   <Timeline.Item
                     dot={<CalendarOutlined style={{ fontSize: "16px", color: "#1890ff" }} />}
                     color="blue"

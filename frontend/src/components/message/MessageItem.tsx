@@ -3,6 +3,7 @@ import { Card, Space, Avatar, Typography, Button, Tooltip } from "antd";
 import { UserOutlined, PaperClipOutlined } from "@ant-design/icons";
 import { MessageDto } from "../../../generated";
 import { formatDistanceToNow, format } from "date-fns";
+import {useLocalSettings} from "../../hooks/useLocalSettings";
 
 interface MessageItemProps {
   msg: MessageDto;
@@ -13,6 +14,7 @@ export const MessageItem: React.FC<MessageItemProps> = ({
   msg,
   isCurrentUser,
 }) => {
+  const [localSettings] = useLocalSettings()
   return (
     <div
       style={{
@@ -41,7 +43,7 @@ export const MessageItem: React.FC<MessageItemProps> = ({
         <Tooltip
           title={
             msg.createdAt &&
-            format(new Date(msg.createdAt), "yyyy-MM-dd HH:mm:ss")
+            localSettings.formatDateTime(new Date(msg.createdAt))
           }
           placement={isCurrentUser ? "left" : "right"}
         >

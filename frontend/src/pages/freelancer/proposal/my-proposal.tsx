@@ -41,11 +41,14 @@ import type { ColumnsType } from "antd/es/table";
 import { AccountDto, ProposalDto } from "../../../../generated";
 import api from "../../../services/api/openapi-config";
 import { useLocation, useNavigate } from "react-router";
+import { store } from "../../../store";
+import {useLocalSettings} from "../../../hooks/useLocalSettings";
 
 const { Title, Text } = Typography;
 const { Option } = Select;
 
 const FreelancerMyProposalPage: React.FC = () => {
+  const [localSettings] = useLocalSettings();
   const location = useLocation();
   const [projectId, setProjectId] = useState(location.state?.projectId || null);
   const [searchText, setSearchText] = useState("");
@@ -248,6 +251,7 @@ const FreelancerMyProposalPage: React.FC = () => {
           })}</span>
         </div>
       ),
+      render: (date: string) => localSettings.formatDate(date),
       sorter: true,
       width: '20%',
     },

@@ -32,6 +32,7 @@ import {
 import { Link } from "react-router";
 import { AccountDto } from "../../../../../generated";
 import { ROLE_COLOR_MAP } from "../../../../utils/constants";
+import {useLocalSettings} from "../../../../hooks/useLocalSettings";
 
 const { Title } = Typography;
 
@@ -46,6 +47,7 @@ export const ShowAccountsShowDrawer: React.FC<ShowAccountsShowDrawerProps> = ({
   open,
   onClose,
 }) => {
+  const [localSettings] = useLocalSettings()
   const { edit } = useNavigation();
   const { mutate: deleteMutation } = useDelete();
 
@@ -183,7 +185,7 @@ export const ShowAccountsShowDrawer: React.FC<ShowAccountsShowDrawerProps> = ({
                     Verified on{" "}
                     <DateField
                       value={account?.verifiedAt}
-                      format="MMMM D, YYYY"
+                      format={localSettings.dateFormat}
                     />
                   </small>
                 )}
@@ -225,14 +227,14 @@ export const ShowAccountsShowDrawer: React.FC<ShowAccountsShowDrawerProps> = ({
             <Descriptions.Item label="Created At">
               <DateField
                 value={account?.createdAt}
-                format="MMMM D, YYYY HH:mm:ss"
+                format={localSettings.dateFormat}
               />
             </Descriptions.Item>
 
             <Descriptions.Item label="Last Updated">
               <DateField
                 value={account?.updatedAt}
-                format="MMMM D, YYYY HH:mm:ss"
+                format={localSettings.dateFormat}
               />
             </Descriptions.Item>
 
