@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useShow, useOne, useGetIdentity } from "@refinedev/core";
 import { HttpError } from "@refinedev/core";
 import { Col, Row, Spin, Typography } from "antd";
@@ -24,7 +24,7 @@ const ProjectDetailsScreen: React.FC = () => {
     resource: "projects",
     id,
   });
-  const user = store.getState().auth.account;
+  const { data: user } = useGetIdentity<AccountDto>();
 
   const {
     data: projectData,
@@ -43,6 +43,10 @@ const ProjectDetailsScreen: React.FC = () => {
   });
 
   const project = projectData?.data;
+
+  useEffect(() => {
+    refetch();
+  }, [user]);
 
   if (projectLoading || categoryLoading) {
     return (

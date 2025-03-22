@@ -144,6 +144,8 @@ paths:
   /proposals/{proposalId}/withdraw:
     $ref: "path/proposals/@id/withdraw.yml"
 
+  /contracts/{contractId}:
+    $ref: "path/contracts/@id/index.yml"
   /contracts/{contractId}/sign:
     $ref: "path/contracts/@id/sign.yml"
   /contracts:

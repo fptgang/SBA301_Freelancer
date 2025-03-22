@@ -1,10 +1,12 @@
 import React, { useState } from "react";
-import { Modal, Form, Input, Select, Button, notification } from "antd";
+import { Modal, Form, Input, Select, Button, notification, Card } from "antd";
 import {
   DepositDto,
   DepositDtoPaymentMethodEnum,
 } from "../../generated/models/DepositDto";
 import api from "../services/api/openapi-config";
+import { useGetIdentity } from "@refinedev/core";
+import { AccountDto } from "../../generated";
 
 interface DepositModalProps {
   visible: boolean;
@@ -13,6 +15,7 @@ interface DepositModalProps {
 
 const DepositModal: React.FC<DepositModalProps> = ({ visible, onClose }) => {
   const [form] = Form.useForm();
+  const { data: user } = useGetIdentity<AccountDto>();
 
   const handleFinish = async (values: any) => {
     const deposit: DepositDto = {
@@ -49,6 +52,10 @@ const DepositModal: React.FC<DepositModalProps> = ({ visible, onClose }) => {
         </Button>,
       ]}
     >
+      <p>
+        Your current balance is:{" "}
+        <strong>${user?.balance ? user.balance : 0}</strong>
+      </p>
       <Form form={form} layout="vertical" onFinish={handleFinish}>
         <Form.Item
           name="amount"

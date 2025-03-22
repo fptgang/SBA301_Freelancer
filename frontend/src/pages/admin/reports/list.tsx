@@ -1,5 +1,5 @@
 import React from "react";
-import { BaseRecord, useMany } from "@refinedev/core";
+import { BaseRecord, useGetIdentity, useMany } from "@refinedev/core";
 import {
   useTable,
   List,
@@ -8,7 +8,7 @@ import {
   DateField,
 } from "@refinedev/antd";
 import { Table, Space, Tooltip, notification, Button } from "antd";
-import { ProjectDto, ReportDto } from "../../../../generated";
+import { AccountDto, ProjectDto, ReportDto } from "../../../../generated";
 import api from "../../../services/api/openapi-config";
 import { LoginOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router";
@@ -19,7 +19,7 @@ export const ReportsList = () => {
     syncWithLocation: true,
   });
   const nav = useNavigate();
-  const user = store.getState().auth.account;
+  const { data: user } = useGetIdentity<AccountDto>();
 
   const { data: reportData, isLoading: reportIsLoading } = useMany<ReportDto>({
     resource: "reports",

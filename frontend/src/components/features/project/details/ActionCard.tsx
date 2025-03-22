@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Card, Button, Space, Divider, Typography } from "antd";
 import {
   DollarOutlined,
@@ -13,6 +13,7 @@ import {
 } from "../../../../../generated";
 import FreelancerCreateProposalButton from "../../../../pages/freelancer/proposal/freelancer-create";
 import { useGetIdentity } from "@refinedev/core";
+import ContractShowModal from "../../../ContractShowModal";
 
 interface ActionCardProps {
   project: ProjectDto;
@@ -28,6 +29,9 @@ export const ActionCard: React.FC<ActionCardProps> = ({
   refetch,
 }) => {
   const navigate = useNavigate();
+  const [showContractModal, setShowContractModal] = useState(false);
+  const [selectedContractId, setSelectedContractId] = useState<number>();
+  const { data: user } = useGetIdentity<AccountDto>();
 
   return (
     <Card style={{ borderRadius: 8 }} bodyStyle={{ padding: 16 }}>
@@ -89,6 +93,51 @@ export const ActionCard: React.FC<ActionCardProps> = ({
             Log in to Apply
           </Button>
         )}
+
+        {project?.contract &&
+          (user?.accountId === project.contract.freelancer?.accountId ||
+            user?.accountId === project.client?.accountId) && (
+            <>
+              <Button
+                block
+                type="primary"
+                size="large"
+                onClick={() => {
+                  setSelectedContractId(project.contract?.contractId);
+                  setShowContractModal(true);
+                }}
+              >
+                View Contract
+              </Button>
+              <ContractShowModal
+                visible={showContractModal}
+                onClose={() => {
+                  setShowContractModal(false);
+                  setSelectedContractId(undefined);
+                }}
+                contractId={selectedContractId || 0}
+              />
+            </>
+          )}
+
+        {role === "FREELANCER" &&
+          project?.myProposals &&
+          project?.myProposals?.length > 0 && (
+            <>
+              <Button
+                block
+                type="primary"
+                size="large"
+                onClick={() =>
+                  navigate(`/freelancer/proposals`, {
+                    state: { projectId: project.projectId },
+                  })
+                }
+              >
+                View Submited Proposals
+              </Button>
+            </>
+          )}
 
         {role === "CLIENT" ||
           (project.status === ProjectStatusDto.Open && (

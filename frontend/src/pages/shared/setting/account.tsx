@@ -23,14 +23,14 @@ import { AccountDto } from "../../../../generated";
 import { on } from "events";
 import { API_URL } from "../../../utils";
 import api from "../../../services/api/openapi-config";
-import {useNotification} from "@refinedev/core";
+import { useGetIdentity, useNotification } from "@refinedev/core";
 
 const { Title } = Typography;
 
 const apiUrl = API_URL;
 
 const AccountSettingsPage: React.FC = () => {
-  const user = store.getState().auth.account;
+  const { data: user } = useGetIdentity<AccountDto>();
   const token = store.getState().auth.accessToken;
   const { open } = useNotification();
 
@@ -39,12 +39,14 @@ const AccountSettingsPage: React.FC = () => {
   // Initialize fileList when component mounts and user is available
   React.useEffect(() => {
     if (user?.avatarUrl) {
-      setFileList([{
-        uid: '-1',
-        name: 'avatar',
-        status: 'done',
-        url: user.avatarUrl,
-      }]);
+      setFileList([
+        {
+          uid: "-1",
+          name: "avatar",
+          status: "done",
+          url: user.avatarUrl,
+        },
+      ]);
     }
   }, [user?.avatarUrl]);
 
@@ -128,7 +130,9 @@ const AccountSettingsPage: React.FC = () => {
           <Form.Item label="Avatar" style={{ textAlign: "center" }}>
             <ImgCrop rotationSlider aspectSlider showReset>
               <Upload
-                action={apiUrl + "/accounts/" + user?.accountId + "/upload-avatar"}
+                action={
+                  apiUrl + "/accounts/" + user?.accountId + "/upload-avatar"
+                }
                 method="post"
                 name="blob"
                 headers={{ Authorization: `Bearer ${token}` }}

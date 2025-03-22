@@ -7,6 +7,7 @@ import {
   useApiUrl,
   useNotification,
   useCustomMutation,
+  useGetIdentity,
 } from "@refinedev/core";
 import {
   Typography,
@@ -55,21 +56,32 @@ import { ProposalDto } from "../../../../generated/models/ProposalDto";
 import { store } from "../../../store";
 import ContractCreateButton from "./contract-create";
 import ClientProjectEditButton from "./client-edit";
+import api from "../../../services/api/openapi-config";
+import { ReportModal } from "../../../components/message/ReportModal";
+import { AccountDto } from "../../../../generated";
+import DepositModal from "../../../components/DepositModal";
 
 const { Title, Text, Paragraph } = Typography;
 const { Step } = Steps;
 const { TabPane } = Tabs;
 
 const ClientProjectShow: React.FC = () => {
+  const { data: user } = useGetIdentity<AccountDto>();
   const { id } = useParams();
   const navigate = useNavigate();
   const { open } = useNotification();
   const { mutate: rejectProposal } = useCustomMutation();
+  const [showReportModal, setShowReportModal] = useState(false);
+  const [showDepositModal, setShowDepositModal] = useState(false);
+  const [selectedMilestone, setSelectedMilestone] = useState<any>(null);
 
   // Fetch project data
   const { queryResult: projectQueryResult } = useShow<ProjectDto>({
     resource: "projects",
     id,
+    queryOptions: {
+      enabled: !!user,
+    },
   });
 
   const {
@@ -164,12 +176,8 @@ const ClientProjectShow: React.FC = () => {
   // Handle terminating a project
   const handleTerminateProject = async () => {
     try {
-      await fetch(`${useApiUrl()}/projects/${project?.projectId}/terminate`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${store.getState().auth.accessToken}`,
-        },
+      await api.terminateProject({
+        projectId: project?.projectId ?? -1,
       });
 
       open?.({
@@ -182,6 +190,49 @@ const ClientProjectShow: React.FC = () => {
       open?.({
         type: "error",
         message: "Failed to close project",
+      });
+    }
+  };
+
+  const confirmComplete = async (milestone: any) => {
+    try {
+      // Check if user has enough balance for next milestone
+      if (!project?.milestones) return;
+
+      const nextMilestone = project.milestones.find(
+        (m) =>
+          (m.milestoneId || 0) > (milestone.milestoneId || 0) &&
+          m.status == "PENDING"
+      );
+      console.log(nextMilestone);
+
+      if (nextMilestone && project.contract?.budget) {
+        const requiredAmount =
+          (nextMilestone.budgetRatio || 0) * project.contract?.budget;
+        if (user?.balance && user.balance < requiredAmount) {
+          setSelectedMilestone(milestone);
+          setShowDepositModal(true);
+          open?.({
+            type: "error",
+            message: "Not enough balance to complete milestone",
+          });
+          return;
+        }
+      }
+
+      await api.confirmMilestoneWork({
+        milestoneId: milestone.milestoneId,
+      });
+      projectQueryResult.refetch();
+      open?.({
+        type: "success",
+        message: "Milestone completed",
+      });
+    } catch (e) {
+      console.error(e);
+      open?.({
+        type: "error",
+        message: "Failed to accept milestone",
       });
     }
   };
@@ -262,6 +313,16 @@ const ClientProjectShow: React.FC = () => {
                   project={project}
                   onSuccess={projectQueryResult.refetch}
                 />
+              )}
+              {project.status === "IN_PROGRESS" && (
+                <Button
+                  type="primary"
+                  danger
+                  style={{ marginLeft: 8 }}
+                  onClick={() => setShowReportModal(true)}
+                >
+                  Report
+                </Button>
               )}
 
               {project.status === "OPEN" && (
@@ -497,7 +558,9 @@ const ClientProjectShow: React.FC = () => {
                                 <Popconfirm
                                   title="Are you sure you want to reject this proposal?"
                                   onConfirm={() =>
-                                    handleRejectProposal(proposal.proposalId)
+                                    handleRejectProposal(
+                                      proposal.proposalId || -1
+                                    )
                                   }
                                   okText="Yes"
                                   cancelText="No"
@@ -535,9 +598,7 @@ const ClientProjectShow: React.FC = () => {
                         title={
                           <div className="flex justify-between items-center">
                             <Text strong className="text-lg">
-                              {proposal.freelancer
-                                ? `${proposal.freelancer.firstName} ${proposal.freelancer.lastName}`
-                                : `Freelancer #${proposal.freelancerId}`}
+                              {`${proposal.freelancer?.firstName} ${proposal.freelancer?.lastName}`}
                             </Text>
                             <div className="flex items-center">
                               <Tag color="blue">Budget: ${proposal.budget}</Tag>
@@ -685,7 +746,22 @@ const ClientProjectShow: React.FC = () => {
                           </Col>
                           <Col span={6} className="flex justify-end">
                             {milestone.status === "REVIEWING" && (
-                              <Button type="primary">Confirm Completion</Button>
+                              <Popconfirm
+                                title="Accept the milestone"
+                                description="Are you sure to accept this milestone?"
+                                onConfirm={() => {
+                                  confirmComplete(milestone);
+                                }}
+                                onCancel={() => {
+                                  setShowReportModal(true);
+                                }}
+                                okText="Yes"
+                                cancelText="Report"
+                              >
+                                <Button type="primary">
+                                  Confirm Completion
+                                </Button>
+                              </Popconfirm>
                             )}
                           </Col>
                         </Row>
@@ -717,6 +793,22 @@ const ClientProjectShow: React.FC = () => {
           </Tabs>
         </Card>
       </div>
+      {user?.role == "CLIENT" ? (
+        <>
+          <ReportModal
+            showReportModal={showReportModal}
+            setShowReportModal={setShowReportModal}
+            project={project}
+          />
+          <DepositModal
+            visible={showDepositModal}
+            onClose={() => {
+              setShowDepositModal(false);
+              setSelectedMilestone(null);
+            }}
+          />
+        </>
+      ) : null}
     </div>
   );
 };
