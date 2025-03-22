@@ -21,14 +21,13 @@ export class transactionPool {
   }
 
   deposit(date: Date, account: Account, amount: number) {
-    const status = this.getRandomStatus();
     const transaction = new Transaction(
       this.getNextId(),
       amount,
       date,
       date,
       faker.helpers.arrayElement([PaymentMethod.VNPAY]),
-      status,
+      TransactionStatus.SUCCESS,
       TransactionType.DEPOSIT,
       undefined,
       undefined,
@@ -37,9 +36,7 @@ export class transactionPool {
 
     this.transactions.push(transaction);
 
-    if (status === TransactionStatus.SUCCESS) {
-      account.balance += amount;
-    }
+    account.balance += amount;
 
     return transaction;
   }

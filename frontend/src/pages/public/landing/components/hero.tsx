@@ -97,7 +97,7 @@ const Hero: React.FC = () => {
           </div>
           <div className="hidden md:block">
             <img
-              src="/public/icon.svg"
+              src="/public/homepage-banner.jpg"
               alt="Freelancing Platform"
               className="w-full h-auto"
             />

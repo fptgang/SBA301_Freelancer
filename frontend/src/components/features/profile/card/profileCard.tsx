@@ -25,7 +25,7 @@ const ProfileCard: React.FC<{ profile: ProfileDto }> = ({ profile }) => {
             <Avatar src={profile.account?.avatarUrl} size={64} /> <br />
             <Typography.Text type="secondary" className="my-2 block">
               Member since{" "}
-              {profile.account?.createdAt && localSettings.formatDate(profile.account.createdAt)}
+              {profile.createdAt && localSettings.formatDate(profile.createdAt)}
             </Typography.Text>
           </Col>
           <Col>

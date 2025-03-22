@@ -28,9 +28,9 @@ export const ClientInformation: React.FC<ClientInformationProps> = ({
               {project?.client?.firstName} {project?.client?.lastName}
             </Typography.Text>
             <br />
-            <Typography.Text type="secondary">
-              Member since {new Date(project?.client?.createdAt!).getFullYear()}
-            </Typography.Text>
+            {/*<Typography.Text type="secondary">*/}
+            {/*  Member since {new Date(project?.client?.createdAt!).getFullYear()}*/}
+            {/*</Typography.Text>*/}
           </div>
         </Space>
 
