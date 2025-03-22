@@ -8,6 +8,7 @@ import {
   useNotification,
   useCustomMutation,
   useGetIdentity,
+  useInvalidate,
 } from "@refinedev/core";
 import {
   Typography,
@@ -70,7 +71,10 @@ const ClientProjectShow: React.FC = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { open } = useNotification();
+  const invalidate = useInvalidate();
   const { mutate: rejectProposal } = useCustomMutation();
+  const { mutate: terminateProject } = useCustomMutation();
+  const { mutate: completeMilestone } = useCustomMutation();
   const [showReportModal, setShowReportModal] = useState(false);
   const [showDepositModal, setShowDepositModal] = useState(false);
   const [selectedMilestone, setSelectedMilestone] = useState<any>(null);
@@ -164,7 +168,17 @@ const ClientProjectShow: React.FC = () => {
           };
         },
       });
-      projectQueryResult.refetch();
+      
+      // Manually invalidate the cache after successful mutation
+      invalidate({
+        resource: "proposals",
+        invalidates: ["list", "many", "detail"],
+      });
+      invalidate({
+        resource: "projects",
+        id,
+        invalidates: ["detail"],
+      });
     } catch (error) {
       open?.({
         type: "error",
@@ -185,7 +199,12 @@ const ClientProjectShow: React.FC = () => {
         message: "Project closed successfully",
       });
 
-      projectQueryResult.refetch();
+      // Manually invalidate the cache after successful mutation
+      invalidate({
+        resource: "projects",
+        id,
+        invalidates: ["detail", "list"],
+      });
     } catch (error) {
       open?.({
         type: "error",
@@ -204,7 +223,6 @@ const ClientProjectShow: React.FC = () => {
           (m.milestoneId || 0) > (milestone.milestoneId || 0) &&
           m.status == "PENDING"
       );
-      console.log(nextMilestone);
 
       if (nextMilestone && project.contract?.budget) {
         const requiredAmount =
@@ -223,10 +241,21 @@ const ClientProjectShow: React.FC = () => {
       await api.confirmMilestoneWork({
         milestoneId: milestone.milestoneId,
       });
-      projectQueryResult.refetch();
+      
       open?.({
         type: "success",
         message: "Milestone completed",
+      });
+
+      // Manually invalidate the cache after successful mutation
+      invalidate({
+        resource: "projects",
+        id,
+        invalidates: ["detail"],
+      });
+      invalidate({
+        resource: "milestones",
+        invalidates: ["list", "many"],
       });
     } catch (e) {
       console.error(e);
