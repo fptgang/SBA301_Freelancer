@@ -40,6 +40,7 @@ class TokenRefreshMiddleware implements Middleware {
         console.error(refreshError);
         localStorage.removeItem(REFRESH_TOKEN_KEY);
         store.dispatch(clearAuth());
+        window.location.href = '/login';
         throw refreshError;
       } finally {
         this.refreshInProgress = null;
@@ -59,7 +60,6 @@ class TokenRefreshMiddleware implements Middleware {
     const refreshToken = localStorage.getItem(REFRESH_TOKEN_KEY);
 
     if (!refreshToken) {
-      window.location.href = '/login';
       throw new Error('No refresh token available');
     }
 
