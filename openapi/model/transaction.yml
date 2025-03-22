@@ -19,6 +19,8 @@ TransactionDto:
       $ref: 'transaction-status.yml#/TransactionStatusDto'
     paymentMethod:
       $ref: 'payment-method.yml#/PaymentMethodDto'
+    notes:
+      type: string
     createdAt:
       type: string
       format: date-time

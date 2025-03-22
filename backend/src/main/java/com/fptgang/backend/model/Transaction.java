@@ -37,6 +37,8 @@ public class Transaction {
     @Nullable
     private Milestone milestone;
 
+    private String notes;
+
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal amount;
 

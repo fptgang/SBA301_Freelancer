@@ -1,8 +1,11 @@
 package com.fptgang.backend.service.impl;
 
+import com.fptgang.backend.api.model.UpdateWithdrawDto;
 import com.fptgang.backend.exception.InvalidInputException;
+import com.fptgang.backend.model.Account;
 import com.fptgang.backend.model.Milestone;
 import com.fptgang.backend.model.Transaction;
+import com.fptgang.backend.repository.AccountRepos;
 import com.fptgang.backend.repository.TransactionRepos;
 import com.fptgang.backend.service.AccountService;
 import com.fptgang.backend.service.TransactionService;
@@ -17,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Slf4j
@@ -25,11 +29,12 @@ public class TransactionServiceImpl implements TransactionService {
 
     private final TransactionRepos transactionRepos;
     private final AccountService accountService;
-
+    private  final AccountRepos accountRepos;
     @Autowired
-    public TransactionServiceImpl(TransactionRepos transactionRepos, AccountService accountService) {
+    public TransactionServiceImpl(TransactionRepos transactionRepos, AccountService accountService, AccountRepos accountRepos) {
         this.transactionRepos = transactionRepos;
         this.accountService = accountService;
+        this.accountRepos = accountRepos;
     }
 
     @Override
@@ -251,4 +256,56 @@ public class TransactionServiceImpl implements TransactionService {
         });
         return transactionRepos.findAll(spec, params.getPageable());
     }
+
+    @Transactional
+    public Transaction createWithdrawalRequest(Transaction transaction) {
+        BigDecimal amount = transaction.getAmount();
+        if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("Withdrawal amount must be greater than zero");
+        }
+        Account account = transaction.getFromAccount();
+        if (account.getBalance().compareTo(amount) < 0) {
+            throw new IllegalArgumentException("Insufficient balance for withdrawal");
+        }
+        account.setBalance(account.getBalance().subtract(amount));
+        accountRepos.save(account);
+        Transaction transactions = Transaction.builder()
+                .fromAccount(account)
+                .toAccount(null)
+                .amount(amount)
+                .type(Transaction.TransactionType.WITHDRAWAL)
+                .status(Transaction.TransactionStatus.PENDING)
+                .paymentMethod(transaction.getPaymentMethod())
+                .notes(transaction.getNotes())
+                .build();
+
+        return transactionRepos.save(transactions);
+    }
+
+
+    @Transactional
+    public Transaction updateWithdrawalStatus(UpdateWithdrawDto trans) {
+        Transaction transaction = transactionRepos.findById(trans.getTransactionId())
+                .orElseThrow(() -> new IllegalArgumentException("Transaction not found"));
+
+        if (transaction.getType() != Transaction.TransactionType.WITHDRAWAL) {
+            throw new IllegalArgumentException("Transaction is not a withdrawal");
+        }
+
+        if (transaction.getStatus() != Transaction.TransactionStatus.PENDING) {
+            throw new IllegalArgumentException("Only pending transactions can be updated");
+        }
+
+        transaction.setStatus(Transaction.TransactionStatus.valueOf(trans.getTransactionStatus()));
+        transaction.setUpdatedAt(LocalDateTime.now());
+
+        if (Transaction.TransactionStatus.valueOf(trans.getTransactionStatus()) == Transaction.TransactionStatus.FAILED) {
+            Account account = transaction.getFromAccount();
+            account.setBalance(account.getBalance().add(transaction.getAmount()));
+            accountRepos.save(account);
+        }
+
+        return transactionRepos.save(transaction);
+    }
+
 }

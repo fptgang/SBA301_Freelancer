@@ -1,5 +1,6 @@
 package com.fptgang.backend.service;
 
+import com.fptgang.backend.api.model.UpdateWithdrawDto;
 import com.fptgang.backend.model.Milestone;
 import com.fptgang.backend.model.Transaction;
 import com.fptgang.backend.service.params.ListParams;
@@ -11,13 +12,26 @@ import java.math.BigDecimal;
 
 public interface TransactionService {
     Transaction create(Transaction transaction);
+
     Transaction createEscrowDeposit(Milestone milestone);
+
     Transaction createEscrowRelease(Milestone milestone);
+
     Transaction createEscrowRefund(Milestone milestone);
+
     Transaction findById(long id);
+
     Transaction findByMilestone(Transaction.TransactionType type, Transaction.TransactionStatus status, Long milestoneId);
+
     boolean existByMilestone(Transaction.TransactionType type, Transaction.TransactionStatus status, Long milestoneId);
+
     Transaction update(Transaction transaction);
+
     Page<Transaction> getAll(ListParams params);
+
     Page<Transaction> getAllInvolvingAccount(ListParams params, Long accountId);
+
+    Transaction createWithdrawalRequest(Transaction transaction);
+
+    Transaction updateWithdrawalStatus(UpdateWithdrawDto updateWithdrawDto);
 }

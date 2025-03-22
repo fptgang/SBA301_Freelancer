@@ -155,7 +155,10 @@ paths:
     $ref: "path/transactions/@id/index.yml"
   /transactions/deposit:
     $ref: "path/transactions/deposit.yml"
-
+  /transactions/withdraw:
+    $ref: "path/transactions/withdraw.yml"
+  /transactions/update-withdraw:
+    $ref: "path/transactions/updateWithdraw.yml"
   /messages:
     $ref: "path/messages/index.yml"
   /messages/{messageId}:

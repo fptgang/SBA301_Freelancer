@@ -1,0 +1,25 @@
+post:
+  summary: withdraw Request
+  operationId: createWithdrawRequest
+  security:
+    - bearerAuth: []
+  requestBody:
+    description: Withdraw details
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../../model/request/transaction.yml#/WithdrawDto'
+  responses:
+    '200':
+      description: The operation was success
+      content:
+        application/json:
+          schema:
+            $ref: '../../model/transaction.yml#/TransactionDto'
+    '400':
+      description: The operation failed
+      content:
+        application/json:
+          schema:
+            $ref: '../../component/error.yml#/ErrorResponse'
