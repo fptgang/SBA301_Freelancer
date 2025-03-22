@@ -30,7 +30,7 @@ import {
 import { formatCurrency } from "../../../utils/formatter";
 import ClientCreateButton from "./client-create";
 import { useGetIdentity } from "@refinedev/core";
-import { AccountDto } from "../../../../generated";
+import { AccountDto, ProjectDto } from "../../../../generated";
 import { store } from "../../../store";
 import { useNavigate } from "react-router";
 
@@ -186,11 +186,13 @@ const ClientList = () => {
 
           <Table.Column
             title="Budget"
-            dataIndex="estimateBudget"
-            render={(value) => (
+            render={(value, record: ProjectDto) => (
               <Space>
                 <DollarOutlined />
-                <span>{formatCurrency(value)}</span>
+                <span>
+                  {formatCurrency(record.minBudget)}-
+                  {formatCurrency(record.maxBudget)}
+                </span>
               </Space>
             )}
             sorter

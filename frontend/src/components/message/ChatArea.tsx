@@ -1,5 +1,11 @@
 // src/pages/components/ChatArea.tsx
-import { useList, useCreate, usePublish, HttpError } from "@refinedev/core";
+import {
+  useList,
+  useCreate,
+  usePublish,
+  HttpError,
+  useGetIdentity,
+} from "@refinedev/core";
 import {
   Card,
   Layout,
@@ -44,7 +50,7 @@ export const ChatArea: React.FC<ChatAreaProps> = ({
   const [showEmoji, setShowEmoji] = useState(false);
   const [files, setFiles] = useState<FileDto[]>([]);
   const [inputFiles, setInputFiles] = useState<FileList | null>(null);
-  const user = store.getState().auth.account;
+  const { data: user } = useGetIdentity<AccountDto>();
 
   const {
     data: messages,

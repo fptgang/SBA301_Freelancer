@@ -188,10 +188,16 @@ const FreelancerCreateProposalButton: React.FC<
         <>
           <Card className="w-full">
             <Title level={4} className="mb-4 flex items-center">
-              <FileTextOutlined className="mr-2" /> Define Your Budget
+              <FileTextOutlined className="mr-2" /> Define Your Budget (min: $
+              {project?.minBudget}, max: ${project?.maxBudget})
             </Title>
             <Form.Item name="budget" label="Your Budget">
-              <InputNumber prefix={<DollarTwoTone />} className="w-full" />
+              <InputNumber
+                prefix={<DollarTwoTone />}
+                className="w-full"
+                min={project?.minBudget}
+                max={project?.maxBudget}
+              />
             </Form.Item>
           </Card>
           <br />
@@ -285,7 +291,14 @@ const FreelancerCreateProposalButton: React.FC<
               <Title level={5}>Project</Title>
               <Text>{selectedProject?.title}</Text>
             </div>
-
+            <div className="p-4 rounded-md bg-gray-50">
+              <Title level={5}>Your defined budget</Title>
+              <div className="whitespace-pre-wrap">
+                <Form.Item noStyle shouldUpdate>
+                  {(form) => <Text>{form.getFieldValue("budget")}</Text>}
+                </Form.Item>
+              </div>
+            </div>
             <div className="p-4 rounded-md bg-gray-50">
               <Title level={5}>Your Proposal</Title>
               <div className="whitespace-pre-wrap">

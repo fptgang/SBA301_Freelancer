@@ -15,6 +15,7 @@ import {
 } from "antd";
 import type { SelectProps } from "antd/es/select";
 import {
+  AccountDto,
   ProficiencyEnum,
   ProfileDto,
   ProfileFormDto,
@@ -22,13 +23,13 @@ import {
   SkillDto,
 } from "../../../../generated";
 import { store } from "../../../store";
-import { useShow } from "@refinedev/core";
+import { useGetIdentity, useShow } from "@refinedev/core";
 
 const { TextArea } = Input;
 const { Title } = Typography;
 
 const FreelancerProfilePage: React.FC = () => {
-  const user = store.getState().auth.account;
+  const { data: user } = useGetIdentity<AccountDto>();
   const [newSkill, setNewSkill] = useState<Partial<ProfileSkillDto>>({});
 
   const { formProps, saveButtonProps, queryResult } = useForm<ProfileFormDto>({

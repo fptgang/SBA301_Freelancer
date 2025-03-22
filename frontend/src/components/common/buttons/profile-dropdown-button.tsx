@@ -8,7 +8,7 @@ import { store } from "../../../store";
 export const ProfileDropdownButton = () => {
   const nav = useNavigate();
   const { mutate: logout } = useLogout();
-  const user = store.getState().auth.account;
+  const { data: user } = useGetIdentity<AccountDto>();
 
   const menuItems = [
     // Add Dashboard item conditionally for admin users

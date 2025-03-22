@@ -1,4 +1,4 @@
-import { useCreate } from "@refinedev/core";
+import { useCreate, useGetIdentity } from "@refinedev/core";
 import {
   Alert,
   Button,
@@ -9,7 +9,7 @@ import {
   Typography,
 } from "antd";
 import React from "react";
-import { ProjectDto, ReportDto } from "../../../generated";
+import { AccountDto, ProjectDto, ReportDto } from "../../../generated";
 import { store } from "../../store";
 interface ReportModalProps {
   showReportModal: boolean;
@@ -21,7 +21,8 @@ export const ReportModal: React.FC<ReportModalProps> = ({
   setShowReportModal,
   project,
 }) => {
-  const reporterId = store.getState().auth.account?.accountId;
+  const { data: user } = useGetIdentity<AccountDto>();
+  const reporterId = user?.accountId;
   const [reason, setReason] = React.useState("");
   const { mutate } = useCreate<ReportDto>({
     resource: "reports",
@@ -44,7 +45,7 @@ export const ReportModal: React.FC<ReportModalProps> = ({
   return (
     <Modal
       title={`Report ${project.title}`}
-      visible={showReportModal}
+      open={showReportModal}
       onOk={() => {
         handleReport();
         setShowReportModal(false);

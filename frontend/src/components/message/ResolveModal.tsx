@@ -1,4 +1,4 @@
-import { useCreate } from "@refinedev/core";
+import { useCreate, useGetIdentity } from "@refinedev/core";
 import {
   Alert,
   Button,
@@ -16,6 +16,7 @@ import {
 } from "antd";
 import React from "react";
 import {
+  AccountDto,
   ProjectDto,
   SolutionDto,
   SolutionDtoProjectStatusEnum,
@@ -41,7 +42,7 @@ export const ResolveModal: React.FC<ResolveModalProps> = ({
   setShowResolveModal,
   project,
 }) => {
-  const user = store.getState().auth.account;
+  const { data: user } = useGetIdentity<AccountDto>();
   const [form] = Form.useForm();
   const transferToRoleOptions = Object.values(SolutionDtoTransferDepositToEnum);
   const projectStatusOptions = Object.values(SolutionDtoProjectStatusEnum);

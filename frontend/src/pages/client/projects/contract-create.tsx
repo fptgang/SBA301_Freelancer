@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { HttpError } from "@refinedev/core";
+import { HttpError, useGetIdentity } from "@refinedev/core";
 import {
   Button,
   Modal,
@@ -22,6 +22,7 @@ import type { UploadFile } from "antd/es/upload/interface";
 import { store } from "../../../store";
 import api from "../../../services/api/openapi-config";
 import DepositModal from "../../../components/DepositModal";
+import { AccountDto } from "../../../../generated";
 
 const { Step } = Steps;
 const { Dragger } = Upload;
@@ -42,7 +43,7 @@ export const ContractCreateButton: React.FC<ContractCreateButtonProps> = ({
   proposalId,
   onSubmit,
 }) => {
-  const user = store.getState().auth.account;
+  const { data: user } = useGetIdentity<AccountDto>();
   // Modal state
   const { modalProps, show, close } = useModal();
   const [currentStep, setCurrentStep] = useState(0);

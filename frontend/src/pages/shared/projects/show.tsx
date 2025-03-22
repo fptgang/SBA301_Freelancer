@@ -10,20 +10,24 @@ import {
   message,
 } from "antd";
 import { useParams } from "react-router";
-import { ProjectDto, MilestoneDto } from "../../../../generated";
+import { ProjectDto, MilestoneDto, AccountDto } from "../../../../generated";
 import { ProjectMilestones } from "../../../components/features/project/details/ProjectMilestones";
 import { MilestoneSubmissionModal } from "../../../components/features/project/milestones/MilestoneSubmissionModal";
 import type { UploadFile } from "antd/es/upload/interface";
-import { useOne } from "@refinedev/core";
+import { useGetIdentity, useOne } from "@refinedev/core";
 import api from "../../../services/api/openapi-config";
 import dayjs from "dayjs";
 import { store } from "../../../store";
+import ContractShowModal from "../../../components/ContractShowModal";
 
 const { Title } = Typography;
 
 const SharedProjectShow: React.FC = () => {
+  const { id } = useParams();
   const [selectedMilestone, setSelectedMilestone] = useState<MilestoneDto>();
   const [submissionModalVisible, setSubmissionModalVisible] = useState(false);
+  const [showContractModal, setShowContractModal] = useState(false);
+  const { data: user } = useGetIdentity<AccountDto>();
 
   const {
     data,
@@ -31,7 +35,10 @@ const SharedProjectShow: React.FC = () => {
     refetch,
   } = useOne<ProjectDto>({
     resource: "projects",
-    id: 109,
+    id: id,
+    queryOptions: {
+      enabled: !!user,
+    },
   });
   const project = data?.data;
 
@@ -52,7 +59,16 @@ const SharedProjectShow: React.FC = () => {
     <div style={{ padding: "24px" }}>
       <Space direction="vertical" size="large" style={{ width: "100%" }}>
         <Card>
-          <Title level={2}>{project.title}</Title>
+          <Row justify="space-between">
+            <Col>
+              <Title level={2}>{project.title}</Title>
+            </Col>
+            <Col>
+              <Button type="primary" onClick={() => setShowContractModal(true)}>
+                View Contract
+              </Button>
+            </Col>
+          </Row>
           <Descriptions column={2}>
             <Descriptions.Item label="Status">
               {project.status}
@@ -81,11 +97,17 @@ const SharedProjectShow: React.FC = () => {
             const imageTypes = ["png", "jpg", "jpeg", "gif", "webp", "svg"];
             const fileExt = f.fileName?.split(".").pop()?.toLowerCase() || "";
             return imageTypes.includes(fileExt) ? (
-              <img src={f.fileUrl} alt={f.fileName} />
+              <>
+                <img src={f.fileUrl} alt={f.fileName} />
+                <br />
+              </>
             ) : (
-              <a href={f.fileUrl} target="_blank" rel="noopener noreferrer">
-                {f.fileName}
-              </a>
+              <>
+                <a href={f.fileUrl} target="_blank" rel="noopener noreferrer">
+                  {f.fileName}
+                </a>
+                <br />
+              </>
             );
           })}
         </Card>
@@ -105,6 +127,13 @@ const SharedProjectShow: React.FC = () => {
           visible={submissionModalVisible}
           onCancel={() => setSubmissionModalVisible(false)}
           refetch={refetch}
+        />
+      )}
+      {project.contract?.status === "SIGNED" && (
+        <ContractShowModal
+          contractId={project.contract.contractId}
+          visible={showContractModal}
+          onClose={() => setShowContractModal(false)}
         />
       )}
     </div>

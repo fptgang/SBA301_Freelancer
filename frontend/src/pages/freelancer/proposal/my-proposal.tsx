@@ -22,28 +22,35 @@ import {
   SortAscendingOutlined,
   CalendarOutlined,
 } from "@ant-design/icons";
-import { useList } from "@refinedev/core";
+import { useGetIdentity, useList } from "@refinedev/core";
 import type { ColumnsType } from "antd/es/table";
-import { ProposalDto } from "../../../../generated";
+import { AccountDto, ProposalDto } from "../../../../generated";
 import api from "../../../services/api/openapi-config";
-import { useNavigate } from "react-router";
+import { useLocation, useNavigate } from "react-router";
 import { store } from "../../../store";
 
 const { Title, Text } = Typography;
 const { Option } = Select;
 
 const FreelancerMyProposalPage: React.FC = () => {
+  const location = useLocation();
+  const [projectId, setProjectId] = useState(location.state.projectId);
   const [searchText, setSearchText] = useState("");
   const [statusFilter, setStatusFilter] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<string | null>(null);
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
-  const user = store.getState().auth.account;
+  const { data: user } = useGetIdentity<AccountDto>();
 
   const { data, isLoading, refetch } = useList<ProposalDto>({
     resource: "proposals",
     filters: [
       {
-        field: "freelancer",
+        field: "project.projectId",
+        operator: "eq",
+        value: projectId || undefined,
+      },
+      {
+        field: "freelancer.accountId",
         operator: "eq",
         value: user?.accountId || undefined,
       },
@@ -71,6 +78,9 @@ const FreelancerMyProposalPage: React.FC = () => {
             order: "desc",
           },
         ],
+    queryOptions: {
+      enabled: !!user,
+    },
   });
 
   const nav = useNavigate();
@@ -204,6 +214,7 @@ const FreelancerMyProposalPage: React.FC = () => {
               "No proposals found. Start bidding on projects to see them here!",
           }}
           onChange={(pagination, filters, sorter: any) => {
+            setProjectId(undefined);
             if (sorter && sorter.field) {
               setSortBy(sorter.field);
               setSortOrder(sorter.order === "descend" ? "desc" : "asc");

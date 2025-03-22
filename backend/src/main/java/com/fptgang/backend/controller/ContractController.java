@@ -53,7 +53,7 @@ public class ContractController implements ContractsApi {
     @Override
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<GetAllContracts200Response> getAllContracts(Pageable pageable, String filter, String search) {
-        log.info("Getting accounts");
+        log.info("Getting contracts");
         var params = ListParams.builder()
                 .pageable(OpenApiHelper.toPageable(pageable))
                 .search(search)
@@ -66,5 +66,18 @@ public class ContractController implements ContractsApi {
                 .getAll(params.build())
                 .map((c) -> contractMapper.toDTO(c, DetailLevel.SUMMARY));
         return OpenApiHelper.respondPage(res, GetAllContracts200Response.class);
+    }
+
+    @Override
+    public ResponseEntity<ContractDto> getContractById(Long contractId) {
+        var res = contractService.findById(contractId);
+        if(SecurityUtil.hasRole(Role.STAFF, Role.ADMIN)) {
+            return new ResponseEntity<>(contractMapper.toDTO(res, DetailLevel.FULL), HttpStatus.OK);
+        }
+        if(res.getFreelancer().getAccountId().equals(SecurityUtil.requireCurrentUserId())
+        || res.getProject().getClient().getAccountId().equals(SecurityUtil.requireCurrentUserId())) {
+            return new ResponseEntity<>(contractMapper.toDTO(res, DetailLevel.FULL), HttpStatus.OK);
+        }
+        return new ResponseEntity<>(HttpStatus.FORBIDDEN);
     }
 }
