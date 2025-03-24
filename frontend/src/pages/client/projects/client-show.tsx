@@ -64,7 +64,7 @@ import api from "../../../services/api/openapi-config";
 import { ReportModal } from "../../../components/message/ReportModal";
 import { AccountDto } from "../../../../generated";
 import DepositModal from "../../../components/DepositModal";
-import {useLocalSettings} from "../../../hooks/useLocalSettings";
+import { useLocalSettings } from "../../../hooks/useLocalSettings";
 
 const { Title, Text, Paragraph } = Typography;
 const { Step } = Steps;
@@ -90,27 +90,8 @@ const MilestoneDetailModal: React.FC<MilestoneDetailModalProps> = ({
 }) => {
   const [localSettings] = useLocalSettings();
   const [confirmLoading, setConfirmLoading] = useState(false);
-  const [contract, setContract] = useState<any>(null);
   const { open } = useNotification();
-  
-  // Fetch contract data if available
-  useEffect(() => {
-    const fetchContractData = async () => {
-      if (visible && milestone && project?.contract?.contractId) {
-        try {
-          const contractData = await api.getContractById({
-            contractId: project.contract.contractId
-          });
-          setContract(contractData);
-        } catch (error) {
-          console.error("Error fetching contract data:", error);
-        }
-      }
-    };
-    
-    fetchContractData();
-  }, [visible, milestone, project]);
-  
+
   const handleConfirm = async () => {
     try {
       setConfirmLoading(true);
@@ -124,17 +105,14 @@ const MilestoneDetailModal: React.FC<MilestoneDetailModalProps> = ({
   };
 
   const handleFileDownload = (fileUrl: string, fileName: string) => {
-    const link = document.createElement('a');
+    const link = document.createElement("a");
     link.href = fileUrl;
     link.download = fileName;
-    link.target = '_blank';
+    link.target = "_blank";
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
   };
-
-  // Determine if contract is signed
-  const isContractSigned = contract?.status === "SIGNED";
 
   if (!milestone) return null;
 
@@ -156,7 +134,7 @@ const MilestoneDetailModal: React.FC<MilestoneDetailModalProps> = ({
         <Paragraph className="whitespace-pre-wrap bg-gray-50 p-4 rounded-md border border-gray-100 mt-3">
           {milestone.description}
         </Paragraph>
-        
+
         <Descriptions layout="vertical" className="mt-4" bordered>
           <Descriptions.Item label="Status">
             <Tag
@@ -174,47 +152,20 @@ const MilestoneDetailModal: React.FC<MilestoneDetailModalProps> = ({
             </Tag>
           </Descriptions.Item>
           <Descriptions.Item label="Budget Allocation">
-            <Progress 
-              percent={milestone.budgetRatio ? (milestone.budgetRatio * 100) : 0} 
-              size="small" 
+            <Progress
+              percent={milestone.budgetRatio ? milestone.budgetRatio * 100 : 0}
+              size="small"
               status="active"
               format={(percent) => `${percent?.toFixed(0)}%`}
             />
           </Descriptions.Item>
           <Descriptions.Item label="Deadline">
-            {milestone.deadline ? localSettings.formatDateTime(milestone.deadline) : "Not set"}
+            {milestone.deadline
+              ? localSettings.formatDateTime(milestone.deadline)
+              : "Not set"}
           </Descriptions.Item>
         </Descriptions>
-        
-        {/* Contract Status - Show if there's a contract */}
-        {contract && (
-          <div className="mt-4">
-            <Title level={5} className="mb-3">
-              <FileTextOutlined className="mr-2" /> Contract Status
-            </Title>
-            <div className="bg-gray-50 p-4 rounded-md border border-gray-100">
-              <Descriptions layout="horizontal" bordered size="small">
-                <Descriptions.Item label="Contract ID">
-                  {contract.contractId}
-                </Descriptions.Item>
-                <Descriptions.Item label="Status">
-                  <Tag color={contract.status === "SIGNED" ? "green" : "orange"}>
-                    {contract.status}
-                  </Tag>
-                </Descriptions.Item>
-                <Descriptions.Item label="Created At">
-                  {localSettings.formatDateTime(contract.createdAt)}
-                </Descriptions.Item>
-                {contract.signedAt && (
-                  <Descriptions.Item label="Signed At">
-                    {localSettings.formatDateTime(contract.signedAt)}
-                  </Descriptions.Item>
-                )}
-              </Descriptions>
-            </div>
-          </div>
-        )}
-        
+
         {/* Deliverable Files Section */}
         {milestone.deliverables && milestone.deliverables.length > 0 && (
           <div className="mt-4">
@@ -233,11 +184,13 @@ const MilestoneDetailModal: React.FC<MilestoneDetailModalProps> = ({
                       <Button
                         key="download"
                         type="link"
-                        onClick={() => handleFileDownload(file.fileUrl, file.fileName)}
+                        onClick={() =>
+                          handleFileDownload(file.fileUrl, file.fileName)
+                        }
                         icon={<FileTextOutlined />}
                       >
                         Download
-                      </Button>
+                      </Button>,
                     ]}
                   >
                     <List.Item.Meta
@@ -250,9 +203,11 @@ const MilestoneDetailModal: React.FC<MilestoneDetailModalProps> = ({
                               ? "bg-blue-500"
                               : file.fileType?.includes("pdf")
                               ? "bg-red-500"
-                              : file.fileType?.includes("word") || file.fileType?.includes("doc")
+                              : file.fileType?.includes("word") ||
+                                file.fileType?.includes("doc")
                               ? "bg-indigo-500"
-                              : file.fileType?.includes("excel") || file.fileType?.includes("sheet")
+                              : file.fileType?.includes("excel") ||
+                                file.fileType?.includes("sheet")
                               ? "bg-green-500"
                               : "bg-gray-500"
                           }`}
@@ -277,7 +232,8 @@ const MilestoneDetailModal: React.FC<MilestoneDetailModalProps> = ({
                           </span>
                           {file.uploadDate && (
                             <span className="ml-3">
-                              Uploaded: {localSettings.formatDate(file.uploadDate)}
+                              Uploaded:{" "}
+                              {localSettings.formatDate(file.uploadDate)}
                             </span>
                           )}
                         </div>
@@ -289,7 +245,7 @@ const MilestoneDetailModal: React.FC<MilestoneDetailModalProps> = ({
             </div>
           </div>
         )}
-        
+
         {/* Files Preview Section - Show if there are files */}
         {milestone.files && milestone.files.length > 0 && (
           <div className="mt-4">
@@ -308,11 +264,13 @@ const MilestoneDetailModal: React.FC<MilestoneDetailModalProps> = ({
                       <Button
                         key="download"
                         type="link"
-                        onClick={() => handleFileDownload(file.fileUrl, file.fileName)}
+                        onClick={() =>
+                          handleFileDownload(file.fileUrl, file.fileName)
+                        }
                         icon={<FileTextOutlined />}
                       >
                         Download
-                      </Button>
+                      </Button>,
                     ]}
                   >
                     <List.Item.Meta
@@ -325,9 +283,11 @@ const MilestoneDetailModal: React.FC<MilestoneDetailModalProps> = ({
                               ? "bg-blue-500"
                               : file.fileType?.includes("pdf")
                               ? "bg-red-500"
-                              : file.fileType?.includes("word") || file.fileType?.includes("doc")
+                              : file.fileType?.includes("word") ||
+                                file.fileType?.includes("doc")
                               ? "bg-indigo-500"
-                              : file.fileType?.includes("excel") || file.fileType?.includes("sheet")
+                              : file.fileType?.includes("excel") ||
+                                file.fileType?.includes("sheet")
                               ? "bg-green-500"
                               : "bg-gray-500"
                           }`}
@@ -352,7 +312,8 @@ const MilestoneDetailModal: React.FC<MilestoneDetailModalProps> = ({
                           </span>
                           {file.uploadDate && (
                             <span className="ml-3">
-                              Uploaded: {localSettings.formatDate(file.uploadDate)}
+                              Uploaded:{" "}
+                              {localSettings.formatDate(file.uploadDate)}
                             </span>
                           )}
                         </div>
@@ -364,36 +325,24 @@ const MilestoneDetailModal: React.FC<MilestoneDetailModalProps> = ({
             </div>
           </div>
         )}
-        
+
         {/* Only show actions if milestone is in REVIEWING status and contract is not already signed */}
         {milestone.status === "REVIEWING" && (
           <div className="mt-6 flex justify-end space-x-3">
-            <Button 
-              danger 
-              onClick={onReport}
-            >
+            <Button danger onClick={onReport}>
               Report Issue
             </Button>
-            {(!contract || contract.status !== "SIGNED") && (
-              <Popconfirm
-                title="Confirm milestone completion"
-                description="Are you sure you want to mark this milestone as complete? This action will release the payment to the freelancer."
-                icon={<ExclamationCircleOutlined style={{ color: 'green' }} />}
-                onConfirm={handleConfirm}
-                okText="Yes, Complete"
-                cancelText="Cancel"
-                okButtonProps={{ loading: confirmLoading }}
-              >
-                <Button type="primary">
-                  Confirm Completion
-                </Button>
-              </Popconfirm>
-            )}
-            {contract && contract.status === "SIGNED" && (
-              <Button type="primary" disabled>
-                Already Completed
-              </Button>
-            )}
+            <Popconfirm
+              title="Confirm milestone completion"
+              description="This action will release the payment to the freelancer."
+              icon={<ExclamationCircleOutlined style={{ color: "green" }} />}
+              onConfirm={handleConfirm}
+              okText="Yes, Complete"
+              cancelText="Cancel"
+              okButtonProps={{ loading: confirmLoading }}
+            >
+              <Button type="primary">Confirm Completion</Button>
+            </Popconfirm>
           </div>
         )}
       </Card>
@@ -511,7 +460,7 @@ const ClientProjectShow: React.FC = () => {
           };
         },
       });
-      
+
       // Manually invalidate the cache after successful mutation
       invalidate({
         resource: "proposals",
@@ -566,16 +515,16 @@ const ClientProjectShow: React.FC = () => {
           (m.milestoneId || 0) > (milestone.milestoneId || 0) &&
           m.status == "PENDING"
       );
-
       if (nextMilestone && project.contract?.budget) {
         const requiredAmount =
           (nextMilestone.budgetRatio || 0) * project.contract?.budget;
-        if (user?.balance && user.balance < requiredAmount) {
+
+        if ((user?.balance || 0) < requiredAmount) {
           setSelectedMilestone(milestone);
           setShowDepositModal(true);
           open?.({
             type: "error",
-            message: "Not enough balance to complete milestone",
+            message: "Not enough balance for next milestone",
           });
           return;
         }
@@ -584,7 +533,7 @@ const ClientProjectShow: React.FC = () => {
       await api.confirmMilestoneWork({
         milestoneId: milestone.milestoneId,
       });
-      
+
       open?.({
         type: "success",
         message: "Milestone completed",
@@ -867,7 +816,10 @@ const ClientProjectShow: React.FC = () => {
                               <span>{milestone.title}</span>
                               <span>
                                 Budget:{" "}
-                                {milestone.budgetRatio ? (milestone.budgetRatio * 100).toFixed(0) : 0}%
+                                {milestone.budgetRatio
+                                  ? (milestone.budgetRatio * 100).toFixed(0)
+                                  : 0}
+                                %
                               </span>
                             </div>
                           }
@@ -998,14 +950,15 @@ const ClientProjectShow: React.FC = () => {
                             <div className="flex items-center mb-1">
                               <CalendarOutlined className="mr-2" />
                               Submitted{" "}
-                              {proposal.createdAt ? new Date(proposal.createdAt).toLocaleDateString(
-                                "en-US",
-                                {
-                                  year: "numeric",
-                                  month: "long",
-                                  day: "numeric",
-                                }
-                              ) : "N/A"}
+                              {proposal.createdAt
+                                ? new Date(
+                                    proposal.createdAt
+                                  ).toLocaleDateString("en-US", {
+                                    year: "numeric",
+                                    month: "long",
+                                    day: "numeric",
+                                  })
+                                : "N/A"}
                             </div>
                             <div className="flex items-center">
                               <MessageOutlined className="mr-2" />
@@ -1083,7 +1036,7 @@ const ClientProjectShow: React.FC = () => {
                           : "gray"
                       }
                     >
-                      <Card 
+                      <Card
                         className="mb-4 cursor-pointer hover:shadow-md transition-shadow"
                         onClick={() => handleShowMilestoneDetail(milestone)}
                       >
@@ -1094,14 +1047,20 @@ const ClientProjectShow: React.FC = () => {
                             <div className="flex gap-4 mt-2">
                               <Tag color="blue">
                                 Budget:{" "}
-                                {milestone.budgetRatio ? (milestone.budgetRatio * 100).toFixed(0) : 0}%
+                                {project.contract
+                                  ? formatCurrency(
+                                      project.contract.budget! *
+                                        milestone.budgetRatio!
+                                    )
+                                  : milestone.budgetRatio
+                                  ? (milestone.budgetRatio * 100).toFixed(0) +
+                                    "%"
+                                  : 0}
                               </Tag>
                               <Text type="secondary">
                                 <CalendarOutlined className="mr-1" />
                                 Deadline:{" "}
-                                {localSettings.formatDate(
-                                  milestone.deadline!
-                                )}
+                                {localSettings.formatDate(milestone.deadline!)}
                               </Text>
                               {milestone.status && (
                                 <Tag
@@ -1122,7 +1081,7 @@ const ClientProjectShow: React.FC = () => {
                           </Col>
                           <Col span={6} className="flex justify-end">
                             {milestone.status === "REVIEWING" && (
-                              <Button 
+                              <Button
                                 type="primary"
                                 onClick={(e) => {
                                   e.stopPropagation();
@@ -1176,7 +1135,7 @@ const ClientProjectShow: React.FC = () => {
               setSelectedMilestone(null);
             }}
           />
-          <MilestoneDetailModal 
+          <MilestoneDetailModal
             visible={milestoneDetailVisible}
             milestone={selectedMilestone}
             project={project}

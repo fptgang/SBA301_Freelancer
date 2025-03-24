@@ -4,15 +4,19 @@ import com.fptgang.backend.api.controller.ProjectCategoriesApi;
 import com.fptgang.backend.api.model.GetProjectCategories200Response;
 import com.fptgang.backend.api.model.Pageable;
 import com.fptgang.backend.api.model.ProjectCategoryDto;
+import com.fptgang.backend.api.model.ProjectInCategoryDto;
 import com.fptgang.backend.mapper.DetailLevel;
 import com.fptgang.backend.mapper.ProjectCategoryMapper;
+import com.fptgang.backend.model.Project;
 import com.fptgang.backend.model.Role;
 import com.fptgang.backend.service.ProjectCategoryService;
+import com.fptgang.backend.service.ProjectService;
 import com.fptgang.backend.service.params.ListParams;
 import com.fptgang.backend.util.OpenApiHelper;
 import com.fptgang.backend.util.SecurityUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -28,14 +32,16 @@ public class ProjectCategoryController implements ProjectCategoriesApi {
     private final ProjectCategoryService projectCategoryService;
     private final ProjectCategoryMapper projectCategoryMapper;
     private final SimpMessagingTemplate messagingTemplate;
+    private final ProjectService projectService;
 
     @Autowired
     public ProjectCategoryController(ProjectCategoryService projectCategoryService,
                                      ProjectCategoryMapper projectCategoryMapper,
-                                     SimpMessagingTemplate messagingTemplate) {
+                                     SimpMessagingTemplate messagingTemplate, ProjectService projectService) {
         this.projectCategoryService = projectCategoryService;
         this.projectCategoryMapper = projectCategoryMapper;
         this.messagingTemplate = messagingTemplate;
+        this.projectService = projectService;
     }
 
     @Override
@@ -44,7 +50,7 @@ public class ProjectCategoryController implements ProjectCategoriesApi {
         var projectCategory = projectCategoryService.create(projectCategoryMapper.toEntity(projectCategoryDto));
         messagingTemplate.convertAndSend("resources/projectCategories", projectCategoryMapper.toDTO(projectCategory, DetailLevel.FULL
         ));
-        return new ResponseEntity<>(projectCategoryMapper.toDTO(projectCategory,DetailLevel.FULL), HttpStatus.OK);
+        return new ResponseEntity<>(projectCategoryMapper.toDTO(projectCategory, DetailLevel.FULL), HttpStatus.OK);
     }
 
     @Override
@@ -56,7 +62,12 @@ public class ProjectCategoryController implements ProjectCategoriesApi {
     }
 
     @Override
-    public ResponseEntity<GetProjectCategories200Response> getProjectCategories(Pageable pageable, String filter, String search) {
+    public ResponseEntity<GetProjectCategories200Response> getProjectCategories(Pageable pageable, String filter, String search, Boolean findTop) {
+        if (findTop!=null && findTop) {
+            var topCategories = projectCategoryService.findTopCategories();
+            var res = new PageImpl<>(topCategories, OpenApiHelper.toPageable(pageable), topCategories.size());
+            return OpenApiHelper.respondPage(res, GetProjectCategories200Response.class);
+        }
         var page = OpenApiHelper.toPageable(pageable);
         var includeInvisible = SecurityUtil.hasPermission(Role.ADMIN);
         var params = ListParams.builder()
@@ -72,7 +83,7 @@ public class ProjectCategoryController implements ProjectCategoriesApi {
 
     @Override
     public ResponseEntity<ProjectCategoryDto> getProjectCategoryById(Long projectCategoryId) {
-        return new ResponseEntity<>(projectCategoryMapper.toDTO(projectCategoryService.findByProjectCategoryId(projectCategoryId),DetailLevel.FULL), HttpStatus.OK);
+        return new ResponseEntity<>(projectCategoryMapper.toDTO(projectCategoryService.findByProjectCategoryId(projectCategoryId), DetailLevel.FULL), HttpStatus.OK);
     }
 
     @Override
@@ -80,6 +91,16 @@ public class ProjectCategoryController implements ProjectCategoriesApi {
     public ResponseEntity<ProjectCategoryDto> updateProjectCategory(Long projectCategoryId, ProjectCategoryDto projectCategoryDto) {
         projectCategoryDto.setProjectCategoryId(projectCategoryId); // Override projectCategoryId
         messagingTemplate.convertAndSend("resources/projectCategories", projectCategoryDto);
-        return new ResponseEntity<>(projectCategoryMapper.toDTO(projectCategoryService.update(projectCategoryMapper.toEntity(projectCategoryDto)),DetailLevel.FULL), HttpStatus.OK);
+        return new ResponseEntity<>(projectCategoryMapper.toDTO(projectCategoryService.update(projectCategoryMapper.toEntity(projectCategoryDto)), DetailLevel.FULL), HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<ProjectInCategoryDto> countProjectInCategoryById(Long projectCategoryId) {
+        ProjectInCategoryDto projectInCategoryDto = new ProjectInCategoryDto();
+        projectInCategoryDto.setCategoryId(projectCategoryId);
+        projectInCategoryDto.setSuccess(projectService.countProjectsByCategoryIdAndStatus(projectCategoryId, Project.ProjectStatus.FINISHED));
+        projectInCategoryDto.setTotal(projectService.countProjectsByCategoryId(projectCategoryId));
+        return new ResponseEntity<>(projectInCategoryDto, HttpStatus.OK);
+
     }
 }

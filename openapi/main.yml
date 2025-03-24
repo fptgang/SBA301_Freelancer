@@ -109,6 +109,8 @@ paths:
     $ref: "path/project-categories/index.yml"
   /project-categories/{projectCategoryId}:
     $ref: "path/project-categories/@id/index.yml"
+  /project-categories/project-in-category/{projectCategoryId}:
+    $ref: "path/project-categories/@id/project-in-category.yml"
 
   /projects:
     $ref: "path/projects/index.yml"

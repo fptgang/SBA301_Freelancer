@@ -458,6 +458,16 @@ public class ProjectServiceImpl implements ProjectService {
         return projectRepos.save(project);
     }
 
+    @Override
+    public Long countProjectsByCategoryId(Long categoryId) {
+        return projectRepos.countAllByCategory_ProjectCategoryId(categoryId);
+    }
+
+    @Override
+    public Long countProjectsByCategoryIdAndStatus(Long categoryId, Project.ProjectStatus status) {
+        return projectRepos.countAllByCategory_ProjectCategoryIdAndStatus(categoryId, status);
+    }
+
     /**
      * Task 1: Pause project due to no proposal chosen at 1 day before startDate
      * Runs daily
@@ -603,6 +613,25 @@ public class ProjectServiceImpl implements ProjectService {
 
         if (count > 0) {
             log.info("Terminated {} projects due to client requested", count);
+        }
+    }
+
+    @Scheduled(cron = "0 */5 * * * ?")
+    @Transactional
+    public synchronized void verifyAccounts() {
+        List<Account> accounts = accountRepos.findByIsVerified(false);
+
+        int count = 0;
+        for( Account a: accounts){
+            Long successProjects= projectRepos.countByStatusAndClient_AccountId(Project.ProjectStatus.FINISHED, a.getAccountId());
+            if(successProjects>0){
+                a.setIsVerified(true);
+                accountRepos.save(a);
+                count++;
+            }
+        }
+        if (count > 0) {
+            log.info("Verify {} accounts", count);
         }
     }
 

@@ -44,12 +44,12 @@ import { store } from "../../../store";
 import { useNavigate } from "react-router";
 import ContractShowModal from "../../../components/ContractShowModal";
 import { ContractSignButton } from "../../../components";
-import {useLocalSettings} from "../../../hooks/useLocalSettings";
+import { useLocalSettings } from "../../../hooks/useLocalSettings";
 
 const { Title, Text } = Typography;
 
 const FreelancerDashboardPage: React.FC = () => {
-  const [localSettings] = useLocalSettings()
+  const [localSettings] = useLocalSettings();
   // Get current user identity
   const { data: user } = useGetIdentity<AccountDto>();
   const userId = user?.accountId;
@@ -128,6 +128,22 @@ const FreelancerDashboardPage: React.FC = () => {
       ],
     }
   );
+
+  // Get Project IDs for fetching milestones
+  const messageProjectIds = useMemo(() => {
+    if (!messageData?.data) return [];
+    return messageData.data.map((contract) => contract.projectId);
+  }, [messageData]);
+
+  // Fetch milestones for active projects
+  const { data: messageProjectData, isLoading: messageProjectLoading } =
+    useMany<ProjectDto>({
+      resource: "projects",
+      ids: messageProjectIds.filter((id) => id !== undefined),
+      queryOptions: {
+        enabled: messageProjectIds.length > 0,
+      },
+    });
 
   // Get Project IDs for fetching milestones
   const contractProjectIds = useMemo(() => {
@@ -393,11 +409,16 @@ const FreelancerDashboardPage: React.FC = () => {
                   />
                   <div className="text-right">
                     {contract?.status === "UNSIGNED" ? (
-                      <ContractSignButton 
+                      <ContractSignButton
                         contract={contract}
-                        project={contractProjectData?.data?.find(
-                          (p) => p.projectId === contract.projectId
-                        ) as ProjectDto || { status: "IN_PROGRESS" as any, projectId: contract.projectId }}
+                        project={
+                          (contractProjectData?.data?.find(
+                            (p) => p.projectId === contract.projectId
+                          ) as ProjectDto) || {
+                            status: "IN_PROGRESS" as any,
+                            projectId: contract.projectId,
+                          }
+                        }
                         onSuccess={() => {
                           // Refresh data when contract is signed
                           if (contractData) {
@@ -425,57 +446,6 @@ const FreelancerDashboardPage: React.FC = () => {
                 </List.Item>
               )}
               locale={{ emptyText: "No active contracts yet" }}
-            />
-          </Card>
-          {/* Recent Transactions */}
-          <Card
-            title={
-              <Space>
-                <DollarOutlined className="text-green-500" />
-                <span>Recent Earnings</span>
-              </Space>
-            }
-            className="mb-6"
-          >
-            <List
-              itemLayout="horizontal"
-              dataSource={transactionData?.data || []}
-              renderItem={(transaction) => (
-                <List.Item>
-                  <List.Item.Meta
-                    title={
-                      <Space>
-                        <Tag
-                          color={getTransactionTypeColor(
-                            transaction?.type || "DEPOSIT"
-                          )}
-                        >
-                          {transaction.type}
-                        </Tag>
-                        <Text>
-                          {localSettings.formatDateTime(transaction.createdAt)}
-                        </Text>
-                      </Space>
-                    }
-                    description={
-                      <Text type="secondary" className="text-xs">
-                        {transaction.milestone?.title || "Platform Transaction"}
-                      </Text>
-                    }
-                  />
-                  <div className="text-right">
-                    <Text
-                      type={
-                        transaction.status === "SUCCESS" ? "success" : "warning"
-                      }
-                      strong
-                    >
-                      {formatCurrency(transaction.amount || 0)}
-                    </Text>
-                  </div>
-                </List.Item>
-              )}
-              locale={{ emptyText: "No earnings yet" }}
             />
           </Card>
         </Col>
@@ -540,7 +510,57 @@ const FreelancerDashboardPage: React.FC = () => {
               <div className="text-center py-4">No upcoming milestones</div>
             )}
           </Card>
-
+          {/* Recent Transactions */}
+          <Card
+            title={
+              <Space>
+                <DollarOutlined className="text-green-500" />
+                <span>Recent Earnings</span>
+              </Space>
+            }
+            className="mb-6"
+          >
+            <List
+              itemLayout="horizontal"
+              dataSource={transactionData?.data || []}
+              renderItem={(transaction) => (
+                <List.Item>
+                  <List.Item.Meta
+                    title={
+                      <Space>
+                        <Tag
+                          color={getTransactionTypeColor(
+                            transaction?.type || "DEPOSIT"
+                          )}
+                        >
+                          {transaction.type}
+                        </Tag>
+                        <Text>
+                          {localSettings.formatDateTime(transaction.createdAt)}
+                        </Text>
+                      </Space>
+                    }
+                    description={
+                      <Text type="secondary" className="text-xs">
+                        {transaction.milestone?.title || "Platform Transaction"}
+                      </Text>
+                    }
+                  />
+                  <div className="text-right">
+                    <Text
+                      type={
+                        transaction.status === "SUCCESS" ? "success" : "warning"
+                      }
+                      strong
+                    >
+                      {formatCurrency(transaction.amount || 0)}
+                    </Text>
+                  </div>
+                </List.Item>
+              )}
+              locale={{ emptyText: "No earnings yet" }}
+            />
+          </Card>
           <Card
             title={
               <Space>
@@ -569,7 +589,7 @@ const FreelancerDashboardPage: React.FC = () => {
                           });
                         }}
                       >
-                        {contractProjectData?.data?.find(
+                        {messageProjectData?.data?.find(
                           (p) => p.projectId === message.projectId
                         )?.title || "Unknown Project"}
                       </a>

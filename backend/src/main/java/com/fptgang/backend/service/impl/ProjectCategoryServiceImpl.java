@@ -13,6 +13,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Slf4j
 @Service
 public class ProjectCategoryServiceImpl implements ProjectCategoryService {
@@ -61,5 +63,10 @@ public class ProjectCategoryServiceImpl implements ProjectCategoryService {
     public Page<ProjectCategory> getAll(ListParams params) {
         var spec = OpenApiHelper.groupBy( params.<ProjectCategory>toSpec(), "projectCategoryId");
         return projectCategoryRepos.findAll(spec, params.getPageable());
+    }
+
+    @Override
+    public List<ProjectCategory> findTopCategories() {
+        return projectCategoryRepos.findTop8Categories();
     }
 }
