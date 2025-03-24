@@ -22,7 +22,7 @@ const { Content, Sider } = Layout;
 
 const SearchPage = () => {
   const location = useLocation();
-  const categoryId = location.state.categoryId;
+  const categoryId = location?.state?.categoryId || undefined;
   const [selectedSkills, setSelectedSkills] = useState<SkillDto[]>([]);
   const [selectedLevel, setSelectedLevel] = useState<ProficiencyEnum[]>([]);
   const [selectedCategories, setSelectedCategories] = useState<

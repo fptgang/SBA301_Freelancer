@@ -109,23 +109,25 @@ public class ReportServiceImpl implements ReportService {
             projectService.terminateByStaff(project.getProjectId(), Role.valueOf(solution.getTransferDepositTo().name()));
         } else {
             if (SolutionDto.TransferDepositToEnum.CLIENT == solution.getTransferDepositTo()) {
-                // Refund client
+                // Refund client for a milestone in progress
                 log.info("Refunding client for project {}", project.getProjectId());
-                project.getMilestones().forEach(milestone -> {
-                    if (milestone.getStatus() != Milestone.MilestoneStatus.FINISHED &&
-                            milestone.getStatus() != Milestone.MilestoneStatus.TERMINATED
-                    && milestone.getFundStatus() == Milestone.FundStatus.DEPOSITED) {
-                        Transaction refundTransaction = transactionService.createEscrowRefund(milestone);
-                        if (refundTransaction.getStatus() == Transaction.TransactionStatus.SUCCESS) {
-                            log.info("Refunded client for milestone {}", milestone.getMilestoneId());
-                            milestone.setFundStatus(Milestone.FundStatus.REFUNDED);
+                for(Milestone milestone: project.getMilestones()){
+                        if (milestone.getStatus() == Milestone.MilestoneStatus.IN_PROGRESS
+                                && milestone.getFundStatus() == Milestone.FundStatus.DEPOSITED) {
+                            Transaction refundTransaction = transactionService.createEscrowRefund(milestone);
+                            if (refundTransaction.getStatus() == Transaction.TransactionStatus.SUCCESS) {
+                                log.info("Refunded client for milestone {}", milestone.getMilestoneId());
+                                milestone.setFundStatus(Milestone.FundStatus.REFUNDED);
+                                break;
+                            }
                         }
-                    }
-                });
+                }
             } else if (SolutionDto.TransferDepositToEnum.FREELANCER == solution.getTransferDepositTo()) {
+                // Refund freelancer for a milestone in progress
                 log.info("Release deposit  for freelancer {}", project.getProjectId());
                 project.getMilestones().forEach(milestone -> {
-                    if (milestone.getStatus() == Milestone.MilestoneStatus.IN_PROGRESS) {
+                    if (milestone.getStatus() == Milestone.MilestoneStatus.IN_PROGRESS
+                            && milestone.getFundStatus() == Milestone.FundStatus.DEPOSITED) {
                         Transaction refundTransaction = transactionService.createEscrowRelease(milestone);
                         if (refundTransaction.getStatus() == Transaction.TransactionStatus.SUCCESS) {
                             log.info("Refunded freelancer for milestone {}", milestone.getMilestoneId());

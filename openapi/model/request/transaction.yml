@@ -7,9 +7,6 @@ WithdrawDto:
     amount:
       type: number
       format: double
-    paymentMethod:
-      type: string
-      enum: [ VNPAY ]
     notes:
       type: string
       

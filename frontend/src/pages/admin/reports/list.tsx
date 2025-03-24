@@ -13,10 +13,10 @@ import api from "../../../services/api/openapi-config";
 import { LoginOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router";
 import { store } from "../../../store";
-import {useLocalSettings} from "../../../hooks/useLocalSettings";
+import { useLocalSettings } from "../../../hooks/useLocalSettings";
 
 export const ReportsList = () => {
-  const [localSettings] = useLocalSettings()
+  const [localSettings] = useLocalSettings();
   const { tableProps } = useTable({
     syncWithLocation: true,
   });
@@ -91,26 +91,22 @@ export const ReportsList = () => {
         <Table.Column
           dataIndex={["createdAt"]}
           title="Created At"
-          render={(value: any) => <DateField value={value} format={localSettings.dateFormat} />}
+          render={(value: any) => (
+            <DateField value={value} format={localSettings.dateFormat} />
+          )}
         />
         <Table.Column
           dataIndex={["updatedAt"]}
           title="Updated At"
-          render={(value: any) => <DateField value={value} format={localSettings.dateFormat} />}
+          render={(value: any) => (
+            <DateField value={value} format={localSettings.dateFormat} />
+          )}
         />
         <Table.Column
           title="Actions"
           dataIndex="actions"
           render={(_, record: ReportDto) => (
             <Space size="middle">
-              <Tooltip title="Edit Project">
-                <EditButton
-                  hideText
-                  size="small"
-                  recordItemId={record.reportId}
-                  disabled={record.status !== "UNSOLVED"}
-                />
-              </Tooltip>
               <Tooltip title="View Details">
                 <ShowButton
                   hideText

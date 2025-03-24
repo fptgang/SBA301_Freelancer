@@ -6,11 +6,11 @@ import {
   TransactionStatusDto,
   TransactionTypeDto,
 } from "../../../../../generated";
-import {useGetIdentity, useList} from "@refinedev/core";
+import { useGetIdentity, useList } from "@refinedev/core";
 import { store } from "../../../../store";
-import {useLocalSettings} from "../../../../hooks/useLocalSettings";
-import {useState} from "react";
-import {PaginationPosition} from "antd/es/pagination/Pagination";
+import { useLocalSettings } from "../../../../hooks/useLocalSettings";
+import { useState } from "react";
+import { PaginationPosition } from "antd/es/pagination/Pagination";
 
 const TransactionHistoryTable: React.FC = () => {
   const [localSettings] = useLocalSettings();
@@ -19,6 +19,7 @@ const TransactionHistoryTable: React.FC = () => {
   const [pageSize, setPageSize] = useState(10);
   const { data } = useList<TransactionDto>({
     resource: "transactions",
+    sorters: [{ field: "createdAt", order: "desc" }],
     pagination: { current, pageSize },
   });
   const transactions = data?.data || [];
@@ -74,7 +75,9 @@ const TransactionHistoryTable: React.FC = () => {
       dataIndex: "fromAccount.accountName",
       key: "fromAccount",
       render: (amount: number, record) => {
-        return `${record.fromAccount?.firstName} ${record.fromAccount?.lastName || ''}`;
+        return `${record.fromAccount?.firstName || ""} ${
+          record.fromAccount?.lastName || ""
+        }`;
       },
     },
     {
@@ -82,7 +85,9 @@ const TransactionHistoryTable: React.FC = () => {
       dataIndex: "toAccount.accountName",
       key: "toAccount",
       render: (amount: number, record) => {
-        return `${record.toAccount?.firstName} ${record.toAccount?.lastName || ''}`;
+        return `${record.toAccount?.firstName || ""} ${
+          record.toAccount?.lastName || ""
+        }`;
       },
     },
     {
@@ -116,7 +121,7 @@ const TransactionHistoryTable: React.FC = () => {
         showSizeChanger: true,
         showQuickJumper: true,
         showTotal: (total) => `Total ${total} items`,
-        position: ['bottomRight'],
+        position: ["bottomRight"],
         responsive: true,
         pageSizeOptions: ["10", "20", "50"],
       }}

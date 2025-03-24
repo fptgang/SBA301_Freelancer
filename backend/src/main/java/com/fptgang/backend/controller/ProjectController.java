@@ -165,8 +165,10 @@ public class ProjectController implements ProjectsApi {
      * Can access: Staff+
      */
     @Override
-    @PreAuthorize("hasAnyRole('ADMIN', 'STAFF')")
     public ResponseEntity<ProjectDto> joinProject(Long projectId) {
+        if(!SecurityUtil.hasRole(Role.ADMIN, Role.STAFF)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
         Project project = projectService.joinProject(projectId, SecurityUtil.getCurrentUserId());
         return ResponseEntity.ok(projectMapper.toDTO(project, DetailLevel.FULL));
     }
@@ -175,8 +177,10 @@ public class ProjectController implements ProjectsApi {
      * Can access: Staff+
      */
     @Override
-    @PreAuthorize("hasAnyRole('ADMIN', 'STAFF')")
     public ResponseEntity<ProjectDto> leaveProject(Long projectId) {
+        if(!SecurityUtil.hasRole(Role.ADMIN, Role.STAFF)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
         Project project = projectService.leaveProject(projectId, SecurityUtil.getCurrentUserId());
         return ResponseEntity.ok(projectMapper.toDTO(project, DetailLevel.FULL));
     }
