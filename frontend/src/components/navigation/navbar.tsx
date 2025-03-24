@@ -308,14 +308,13 @@ const ClientNavBar: React.FC = () => {
 
   const messagingItems = [
     { key: "chat", label: "Messages", path: "/message", icon: <MessageOutlined /> },
-    { key: "notifications", label: "Notifications", path: "/notifications", icon: <BankOutlined /> },
   ];
 
-  const financeItems = [
-    { key: "wallet", label: "Wallet", path: "/wallet", icon: <WalletOutlined /> },
-    { key: "payments", label: "Payment Methods", path: "/payment-methods", icon: <BankOutlined /> },
-    { key: "transactions", label: "Transactions", path: "/transactions", icon: <FileTextOutlined /> },
-  ];
+  // const financeItems = [
+  //   { key: "wallet", label: "Wallet", path: "/wallet", icon: <WalletOutlined /> },
+  //   { key: "payments", label: "Payment Methods", path: "/payment-methods", icon: <BankOutlined /> },
+  //   { key: "transactions", label: "Transactions", path: "/transactions", icon: <FileTextOutlined /> },
+  // ];
 
   const isActive = (path: string) => {
     return location.pathname === path || location.pathname.startsWith(`${path}/`);
@@ -351,12 +350,12 @@ const ClientNavBar: React.FC = () => {
             <NavDropdown label="Dashboard" items={dashboardItems} />
             <NavDropdown label="Projects" items={projectItems} />
             <NavDropdown label="Messages" items={messagingItems} />
-            <NavDropdown 
+            {/* <NavDropdown 
               label="Finance" 
               items={financeItems} 
               walletAmount={walletAmount}
               userName={user?.firstName || 'Client'}
-            />
+            /> */}
           </div>
         </div>
 
@@ -497,7 +496,7 @@ const ClientNavBar: React.FC = () => {
             ))}
           </div>
 
-          <div className="flex flex-col space-y-2">
+          {/* <div className="flex flex-col space-y-2">
             <Text strong className="pb-1 border-b">Finance</Text>
             {financeItems.map((item) => (
               <Button
@@ -514,7 +513,7 @@ const ClientNavBar: React.FC = () => {
                 {item.label}
               </Button>
             ))}
-          </div>
+          </div> */}
 
           <div
             className="pt-4 border-t"
@@ -572,14 +571,13 @@ const FreelancerNavBar: React.FC = () => {
 
   const messagingItems = [
     { key: "chat", label: "Messages", path: "/message", icon: <MessageOutlined /> },
-    { key: "notifications", label: "Notifications", path: "/notifications", icon: <BankOutlined /> },
   ];
 
-  const financeItems = [
-    { key: "wallet", label: "Wallet", path: "/wallet", icon: <WalletOutlined /> },
-    { key: "payments", label: "Payment Methods", path: "/payment-methods", icon: <BankOutlined /> },
-    { key: "earnings", label: "Earnings", path: "/earnings", icon: <FileTextOutlined /> },
-  ];
+  // const financeItems = [
+  //   { key: "wallet", label: "Wallet", path: "/wallet", icon: <WalletOutlined /> },
+  //   { key: "payments", label: "Payment Methods", path: "/payment-methods", icon: <BankOutlined /> },
+  //   { key: "earnings", label: "Earnings", path: "/earnings", icon: <FileTextOutlined /> },
+  // ];
 
   const isActive = (path: string) => {
     return location.pathname === path || location.pathname.startsWith(`${path}/`);
@@ -616,12 +614,12 @@ const FreelancerNavBar: React.FC = () => {
             <NavDropdown label="Work" items={workItems} />
             <NavDropdown label="Profile" items={profileItems} />
             <NavDropdown label="Messages" items={messagingItems} />
-            <NavDropdown 
+            {/* <NavDropdown 
               label="Finance" 
               items={financeItems} 
               walletAmount={walletAmount}
               userName={user?.firstName || 'Freelancer'}
-            />
+            /> */}
           </div>
         </div>
 
@@ -781,7 +779,7 @@ const FreelancerNavBar: React.FC = () => {
             ))}
           </div>
 
-          <div className="flex flex-col space-y-2">
+          {/* <div className="flex flex-col space-y-2">
             <Text strong className="pb-1 border-b">Finance</Text>
             {financeItems.map((item) => (
               <Button
@@ -798,7 +796,7 @@ const FreelancerNavBar: React.FC = () => {
                 {item.label}
               </Button>
             ))}
-          </div>
+          </div> */}
 
           <div
             className="pt-4 border-t"

@@ -27,4 +27,10 @@ export default defineConfig({
       plugins: [rollupNodePolyFill()],
     },
   },
+  server:{
+    allowedHosts: true,
+  },
+  preview:{
+    allowedHosts: true,
+  },
 });

@@ -1,16 +1,17 @@
-import { Table, Tag } from "antd";
+import { Button, Table, Tag, Modal } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { TransactionDto } from "../../../../../generated/models/TransactionDto";
 import {
   AccountDto,
+  PaymentMethodDto,
   TransactionStatusDto,
   TransactionTypeDto,
 } from "../../../../../generated";
 import {useGetIdentity, useList} from "@refinedev/core";
-import { store } from "../../../../store";
 import {useLocalSettings} from "../../../../hooks/useLocalSettings";
 import {useState} from "react";
-import {PaginationPosition} from "antd/es/pagination/Pagination";
+import { InfoCircleOutlined, ArrowRightOutlined } from "@ant-design/icons";
+import { useNavigate } from "react-router";
 
 const TransactionHistoryTable: React.FC = () => {
   const [localSettings] = useLocalSettings();
@@ -70,11 +71,23 @@ const TransactionHistoryTable: React.FC = () => {
       },
     },
     {
+      title: "Payment Method",
+      dataIndex: "paymentMethod",
+      key: "paymentMethod",
+      render: (paymentMethod: PaymentMethodDto) => {
+        const typeColors = {
+          [PaymentMethodDto.Vnpay]: "blue",
+          [PaymentMethodDto.InternalWallet]: "orange",
+        };
+        return <Tag color={typeColors[paymentMethod]}>{paymentMethod.replace(/_/g, " ")}</Tag>;
+      },
+    },
+    {
       title: "From",
       dataIndex: "fromAccount.accountName",
       key: "fromAccount",
       render: (amount: number, record) => {
-        return `${record.fromAccount?.firstName} ${record.fromAccount?.lastName || ''}`;
+        return record.fromAccount && `${record.fromAccount?.firstName} ${record.fromAccount?.lastName || ''}`;
       },
     },
     {
@@ -82,7 +95,7 @@ const TransactionHistoryTable: React.FC = () => {
       dataIndex: "toAccount.accountName",
       key: "toAccount",
       render: (amount: number, record) => {
-        return `${record.toAccount?.firstName} ${record.toAccount?.lastName || ''}`;
+        return record.toAccount && `${record.toAccount?.firstName} ${record.toAccount?.lastName || ''}`;
       },
     },
     {
@@ -97,30 +110,81 @@ const TransactionHistoryTable: React.FC = () => {
         </Tag>
       ),
     },
+    {
+      title: "Action",
+      key: "action",
+      render: (_, record) => 
+        (!!record.notes || !!record.milestone) && <Button
+          type="text"
+          icon={<InfoCircleOutlined />}
+          onClick={() => viewInfo(record)}
+        />,
+    },
   ];
   const handlePageChange = (page: number, newPageSize: number) => {
     setCurrent(page);
     setPageSize(newPageSize);
   };
+  const navigate = useNavigate();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedTransaction, setSelectedTransaction] = useState<TransactionDto | null>(null);
+
+  const viewInfo = (record: TransactionDto) => {
+    setSelectedTransaction(record);
+    setIsModalOpen(true);
+  };
+
+  const handleModalClose = () => {
+    setIsModalOpen(false);
+    setSelectedTransaction(null);
+  };
 
   return (
-    <Table
-      columns={columns}
-      dataSource={transactions}
-      rowKey="transactionId"
-      pagination={{
-        current: current,
-        pageSize: pageSize,
-        total: data?.total || 10,
-        onChange: handlePageChange,
-        showSizeChanger: true,
-        showQuickJumper: true,
-        showTotal: (total) => `Total ${total} items`,
-        position: ['bottomRight'],
-        responsive: true,
-        pageSizeOptions: ["10", "20", "50"],
-      }}
-    />
+    <>
+      <Table
+        columns={columns}
+        dataSource={transactions}
+        rowKey="transactionId"
+        pagination={{
+          current: current,
+          pageSize: pageSize,
+          total: data?.total || 10,
+          onChange: handlePageChange,
+          showSizeChanger: true,
+          showQuickJumper: true,
+          showTotal: (total) => `Total ${total} items`,
+          position: ['bottomRight'],
+          responsive: true,
+          pageSizeOptions: ["10", "20", "50"],
+        }}
+      />
+      <Modal
+        title="Transaction Info"
+        open={isModalOpen}
+        onCancel={handleModalClose}
+        footer={null}
+      >
+        {selectedTransaction?.notes && (
+          <div style={{ marginBottom: 16 }}>
+            <h4>Notes:</h4>
+            <p>{selectedTransaction.notes}</p>
+          </div>
+        )}
+        {selectedTransaction?.milestone && (
+          <div>
+            <h4>Milestone Information:</h4>
+            <p><strong>Title:</strong> {selectedTransaction.milestone.title}</p>
+            <Button 
+              type="primary"
+              icon={<ArrowRightOutlined />}
+              onClick={() => navigate(`/client/projects/${selectedTransaction.milestone?.projectId}`)}
+            >
+              View Project Details
+            </Button>
+          </div>
+        )}
+      </Modal>
+    </>
   );
 };
 
