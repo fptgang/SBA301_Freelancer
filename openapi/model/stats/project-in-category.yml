@@ -1,0 +1,12 @@
+ProjectInCategoryDto:
+  type: object
+  properties:
+    categoryId:
+      type: integer
+      format: int64
+    success:
+      type: integer
+      format: int64
+    total:
+      type: integer
+      format: int64

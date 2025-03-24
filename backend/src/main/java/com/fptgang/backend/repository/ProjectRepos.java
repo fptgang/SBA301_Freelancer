@@ -25,4 +25,11 @@ public interface ProjectRepos extends JpaRepository<Project,Long>, JpaSpecificat
 
     List<Project> findByStatusAndStartDateLessThanEqual(Project.ProjectStatus status, LocalDateTime date);
     List<Project> findByStatusAndToTerminate(Project.ProjectStatus status, Boolean toTerminate);
+
+    Long countByStatusAndClient_AccountId(Project.ProjectStatus status, Long clientAccountId);
+
+    Long countAllByCategory_ProjectCategoryId(Long categoryProjectCategoryId);
+
+    Long countAllByCategory_ProjectCategoryIdAndStatus(Long categoryProjectCategoryId, Project.ProjectStatus status);
+
 }

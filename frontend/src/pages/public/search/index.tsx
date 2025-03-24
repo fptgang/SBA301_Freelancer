@@ -13,7 +13,7 @@ import {
   ProjectCategoryDto,
 } from "../../../../generated";
 import { HttpError, useList } from "@refinedev/core";
-import { useSearchParams } from "react-router";
+import { useLocation, useSearchParams } from "react-router";
 import ProjectCard from "../../../components/features/project/cards/projectCard";
 import ProfileCard from "../../../components/features/profile/card/profileCard";
 import RenderFilter from "../../../components/features/project/filters/renderFilter";
@@ -21,6 +21,8 @@ import RenderFilter from "../../../components/features/project/filters/renderFil
 const { Content, Sider } = Layout;
 
 const SearchPage = () => {
+  const location = useLocation();
+  const categoryId = location.state.categoryId;
   const [selectedSkills, setSelectedSkills] = useState<SkillDto[]>([]);
   const [selectedLevel, setSelectedLevel] = useState<ProficiencyEnum[]>([]);
   const [selectedCategories, setSelectedCategories] = useState<
@@ -73,10 +75,20 @@ const SearchPage = () => {
     data: categoriesData,
     isLoading: isCategoriesLoading,
     isError: isCategoriesError,
+    isSuccess: isCategoriesSuccess,
   } = useList<ProjectCategoryDto, HttpError>({
     resource: "project-categories",
     pagination: { pageSize: 100 },
   });
+
+  useEffect(() => {
+    if (isCategoriesSuccess && selectedCategories.length === 0 && categoryId) {
+      const selectedCategory = categoriesData?.data.find(
+        (category) => category.projectCategoryId === categoryId
+      );
+      if (selectedCategory) setSelectedCategories([selectedCategory]);
+    }
+  }, [categoriesData]);
 
   const {
     data: filteredItem,
