@@ -11,10 +11,12 @@ import com.fptgang.backend.service.*;
 import com.fptgang.backend.service.params.ListParams;
 import com.fptgang.backend.util.OpenApiHelper;
 import jakarta.transaction.Transactional;
+import jakarta.validation.constraints.Email;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
@@ -28,19 +30,20 @@ public class ContractServiceImpl implements ContractService {
     private final ProposalService proposalService;
     private final MilestoneService milestoneService;
     private final AuthContext authContext;
-
+    private final EmailService emailService;
     public ContractServiceImpl(ContractRepos contractRepos,
                                MilestoneRepos milestoneRepos,
                                ProjectRepos projectRepos,
                                ProposalService proposalService,
                                MilestoneService milestoneService,
-                               AuthContext authContext) {
+                               AuthContext authContext, EmailService emailService) {
         this.contractRepos = contractRepos;
         this.milestoneRepos = milestoneRepos;
         this.projectRepos = projectRepos;
         this.proposalService = proposalService;
         this.milestoneService = milestoneService;
         this.authContext = authContext;
+        this.emailService = emailService;
     }
 
     @Override
@@ -67,6 +70,11 @@ public class ContractServiceImpl implements ContractService {
         project.setContract(contract);
         contract.setProject(projectRepos.save(project));
         milestoneService.depositFund(firstMilestone);
+        try {
+            emailService.sendContractCreatedToFreelancer(contract.getContractId());
+        } catch (IOException ignored) {
+
+        }
         return contract;
     }
 
@@ -120,7 +128,12 @@ public class ContractServiceImpl implements ContractService {
         project.setContract(contract);
         projectRepos.save(project);
         log.info("Milestone {} started", firstMilestone.getMilestoneId());
+        try {
+            emailService.sendContractSignedToFreelancer(contract.getContractId());
+            emailService.sendContractSignedToClient(contract.getContractId());
+        } catch (IOException ignored) {
 
+        }
         return contract;
     }
 

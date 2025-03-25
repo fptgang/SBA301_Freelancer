@@ -298,9 +298,10 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
-    public void sendProjectEmailTemplateToBoth(Long id) throws IOException {
-        Project project = projectRepos.findByProjectId(id)
-                .orElseThrow(() -> new IllegalArgumentException("Cannot find Project Id"));
+    public void sendProjectEmailTemplateToBoth(Project project) throws IOException {
+       if (project == null){
+           throw new IllegalArgumentException("Cannot find project");
+       }
 
         log.info("Preparing to send project completed both to client,freelancer: {}", project.getClient().getEmail());
 
@@ -314,9 +315,8 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
-    public void sendReportEmailTemplateToBoth(Long id) throws IOException {
-        Report report = reportRepos.findByReportId(id)
-                .orElseThrow(() -> new IllegalArgumentException("Cannot find Report Id"));
+    public void sendReportEmailTemplateToBoth(Report report) throws IOException {
+
         log.info("Preparing to send Report completed both to client,freelancer: {} ,{}", report.getProject().getClient().getEmail(),report.requireFreelancer().getEmail());
 
         var template = reportEmailTemplate.getContentAsString(StandardCharsets.UTF_8);
@@ -330,10 +330,7 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
-    public void sendTransactionEmailTemplateToBoth(Long id) throws IOException {
-        Transaction transaction = transactionRepos.findByTransactionId(id)
-                .orElseThrow(() -> new IllegalArgumentException("Cannot find Transaction Id"));
-
+    public void sendTransactionEmailTemplateToBoth(Transaction transaction) throws IOException {
         log.info("Preparing to send transaction completed to client: {}",transaction.getToAccount().getEmail());
         if (transaction.getToAccount().getEmail() == null){
             throw new IOException("Recipient email is missing.");
