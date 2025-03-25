@@ -91,100 +91,110 @@ export const FreelancerProfile: React.FC<FreelancerProfileProps> = ({
 
       {/* Skills form list */}
       <Form.List name="profileSkills">
-        {(fields, { add, remove }) => (
-          <Space direction="vertical" style={{ width: "100%" }}>
-            <Form.Item label="Your Skills">
-              <Button
-                type="dashed"
-                onClick={() =>
-                  add({
-                    skill: undefined,
-                    proficiency: ProficiencyEnum.Beginner,
-                  })
-                }
-                block
-                icon={<PlusOutlined />}
-              >
-                Add Skill
-              </Button>
-            </Form.Item>
+        {(fields, { add, remove }) => {
+          const currentSkills = form.getFieldValue("profileSkills") || [];
+          const usedSkillIds = currentSkills
+            .map((s: any) => s?.skill?.skillId)
+            .filter((id: number) => id !== undefined);
 
-            {fields.map(({ key, name, ...restField }) => {
-              // Get current field's skill ID to filter out from options
-              const currentSkills = form.getFieldValue("profileSkills") || [];
-              const usedSkillIds = currentSkills
-                .map((s: any) => s?.skill?.skillId)
-                .filter((id: number) => id !== undefined);
+          // Filter out already selected skills
+          const availableSkills = skillOptions?.filter(
+            (skill) =>
+              !usedSkillIds.includes(skill.skillId) ||
+              currentSkills[name]?.skill?.skillId === skill.skillId
+          );
 
-              // Filter out already selected skills
-              const availableSkills = skillOptions?.filter(
-                (skill) =>
-                  !usedSkillIds.includes(skill.skillId) ||
-                  currentSkills[name]?.skill?.skillId === skill.skillId
-              );
-
-              console.log("Available skills:", availableSkills);
-              console.log("Used skill IDs:", usedSkillIds);
-              console.log("Current skills:", currentSkills);
-
-              return (
-                <Space
-                  key={key}
-                  style={{ display: "flex", marginBottom: 8 }}
-                  align="baseline"
+          console.log("Available skills:", availableSkills);
+          console.log("Used skill IDs:", usedSkillIds);
+          console.log("Current skills:", currentSkills);
+          return (
+            <Space direction="vertical" style={{ width: "100%" }}>
+              <Form.Item label="Your Skills">
+                <Button
+                  type="dashed"
+                  onClick={() =>
+                    add({
+                      skill: {
+                        skillId: availableSkills?.[0]?.skillId,
+                        name: availableSkills?.[0]?.name,
+                      },
+                      proficiency: ProficiencyEnum.Beginner,
+                    })
+                  }
+                  block
+                  icon={<PlusOutlined />}
                 >
-                  <Form.Item
-                    {...restField}
-                    name={[name, "name"]}
-                    rules={[
-                      { required: true, message: "Please select a skill" },
-                    ]}
-                  >
-                    <Select
-                      style={{ width: 200 }}
-                      placeholder="Select skill"
-                      options={availableSkills?.map((skill) => ({
-                        value: skill.skillId,
-                        label: skill.name,
-                      }))}
-                      onChange={(value) => {
-                        const skill = skillOptions?.find(
-                          (s) => s.skillId === value
-                        );
-                        form.setFieldValue(["profileSkills", name, "skill"], {
-                          skillId: value,
-                          name: skill?.name,
-                        });
-                      }}
-                    />
-                  </Form.Item>
+                  Add Skill
+                </Button>
+              </Form.Item>
 
-                  <Form.Item
-                    {...restField}
-                    name={[name, "proficiency"]}
-                    rules={[
-                      { required: true, message: "Please select proficiency" },
-                    ]}
-                  >
-                    <Select
-                      style={{ width: 150 }}
-                      placeholder="Select proficiency"
-                      options={Object.values(ProficiencyEnum).map((p) => ({
-                        value: p,
-                        label:
-                          p.charAt(0).toUpperCase() + p.slice(1).toLowerCase(),
-                      }))}
-                    />
-                  </Form.Item>
+              {fields.map(({ key, name, ...restField }) => {
+                // Get current field's skill ID to filter out from options
 
-                  <Button type="text" danger onClick={() => remove(name)}>
-                    <DeleteOutlined />
-                  </Button>
-                </Space>
-              );
-            })}
-          </Space>
-        )}
+                return (
+                  <Space
+                    key={key}
+                    style={{ display: "flex", marginBottom: 8 }}
+                    align="baseline"
+                  >
+                    <Form.Item
+                      {...restField}
+                      name={[name, "skill", "name"]}
+                      rules={[
+                        { required: true, message: "Please select a skill" },
+                      ]}
+                    >
+                      <Select
+                        style={{ width: 200 }}
+                        placeholder="Select skill"
+                        options={availableSkills?.map((skill) => ({
+                          value: skill.skillId,
+                          label: skill.name,
+                        }))}
+                        onChange={(value) => {
+                          const skill = skillOptions?.find(
+                            (s) => s.skillId === value
+                          );
+                          form.setFieldValue(["profileSkills", name, "skill"], {
+                            skillId: value,
+                            name: skill?.name,
+                          });
+                        }}
+                        defaultValue={availableSkills?.[0]?.skillId}
+                      />
+                    </Form.Item>
+
+                    <Form.Item
+                      {...restField}
+                      name={[name, "proficiency"]}
+                      rules={[
+                        {
+                          required: true,
+                          message: "Please select proficiency",
+                        },
+                      ]}
+                    >
+                      <Select
+                        style={{ width: 150 }}
+                        placeholder="Select proficiency"
+                        options={Object.values(ProficiencyEnum).map((p) => ({
+                          value: p,
+                          label:
+                            p.charAt(0).toUpperCase() +
+                            p.slice(1).toLowerCase(),
+                        }))}
+                      />
+                    </Form.Item>
+
+                    <Button type="text" danger onClick={() => remove(name)}>
+                      <DeleteOutlined />
+                    </Button>
+                  </Space>
+                );
+              })}
+            </Space>
+          );
+        }}
       </Form.List>
 
       <Form.Item

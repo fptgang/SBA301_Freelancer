@@ -231,7 +231,7 @@ export const RegisterPage: React.FC<RegisterProps> = ({
   const mainContent = (
     <div className="flex flex-col items-center justify-center min-h-screen  p-4">
       {/* Steps indicator */}
-      <div className="w-full max-w-xl mb-8">
+      <div className="w-full max-w-3xl mb-8">
         <StepProgress
           currentStep={currentStep}
           totalSteps={getTotalSteps()}
