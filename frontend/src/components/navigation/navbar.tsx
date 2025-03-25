@@ -61,7 +61,6 @@ const PublicNavBar: React.FC = () => {
       path: "/search?type=work",
       icon: <SearchOutlined />,
     },
-
   ];
 
   const findTalentItems = [
@@ -93,7 +92,6 @@ const PublicNavBar: React.FC = () => {
   //     icon: <MessageOutlined />,
   //   },
   // ];
- 
 
   const isActive = (path: string) => {
     return (
@@ -116,14 +114,11 @@ const PublicNavBar: React.FC = () => {
             className="flex items-center cursor-pointer mr-8"
             onClick={handleLogoClick}
           >
-            <img src="/public/icon.svg" alt="Logo" className="h-8 w-auto" />
-            <Title
-              level={5}
-              className="!m-0 ml-2"
-              style={{ color: token.colorTextHeading }}
-            >
-              Hirable
-            </Title>
+            <img
+              src="https://raw.githubusercontent.com/fptgang/SBA301_Freelancer/develop/images/logo.svg"
+              alt="Logo"
+              className="h-8 w-auto"
+            />
           </div>
 
           {/* Desktop Navigation - Grouped by related features */}
@@ -213,13 +208,10 @@ const PublicNavBar: React.FC = () => {
         title={
           <div className="flex items-center">
             <img
-              src="/public/icon.svg"
+              src="https://raw.githubusercontent.com/fptgang/SBA301_Freelancer/develop/images/logo.svg"
               alt="Logo"
               className="h-6 w-auto mr-2"
             />
-            <Title level={5} className="!m-0">
-              Hirable
-            </Title>
           </div>
         }
       >
@@ -352,12 +344,6 @@ const ClientNavBar: React.FC = () => {
       path: "/client/projects",
       icon: <ProjectOutlined />,
     },
-    {
-      key: "post-project",
-      label: "Post New Project",
-      path: "/client/projects?modal=create",
-      icon: <FileTextOutlined />,
-    }
   ];
 
   const messagingItems = [
@@ -368,12 +354,6 @@ const ClientNavBar: React.FC = () => {
       icon: <MessageOutlined />,
     },
   ];
-
-  // const financeItems = [
-  //   { key: "wallet", label: "Wallet", path: "/wallet", icon: <WalletOutlined /> },
-  //   { key: "payments", label: "Payment Methods", path: "/payment-methods", icon: <BankOutlined /> },
-  //   { key: "transactions", label: "Transactions", path: "/transactions", icon: <FileTextOutlined /> },
-  // ];
 
   const isActive = (path: string) => {
     return (
@@ -396,14 +376,11 @@ const ClientNavBar: React.FC = () => {
             className="flex items-center cursor-pointer mr-8"
             onClick={handleLogoClick}
           >
-            <img src="/public/icon.svg" alt="Logo" className="h-8 w-auto" />
-            <Title
-              level={5}
-              className="!m-0 ml-2"
-              style={{ color: token.colorTextHeading }}
-            >
-              Hirable
-            </Title>
+            <img
+              src="https://raw.githubusercontent.com/fptgang/SBA301_Freelancer/develop/images/logo.svg"
+              alt="Logo"
+              className="h-8 w-auto"
+            />
           </div>
 
           {/* Desktop Navigation - Grouped by related features */}
@@ -493,13 +470,10 @@ const ClientNavBar: React.FC = () => {
           <div className="flex items-center justify-between">
             <div className="flex items-center">
               <img
-                src="/public/icon.svg"
+                src="https://raw.githubusercontent.com/fptgang/SBA301_Freelancer/develop/images/logo.svg"
                 alt="Logo"
                 className="h-6 w-auto mr-2"
               />
-              <Title level={5} className="!m-0">
-                Hirable
-              </Title>
             </div>
             <Text className="text-green-500">${walletAmount.toFixed(2)}</Text>
           </div>
@@ -705,14 +679,11 @@ const FreelancerNavBar: React.FC = () => {
             className="flex items-center cursor-pointer mr-8"
             onClick={handleLogoClick}
           >
-            <img src="/public/icon.svg" alt="Logo" className="h-8 w-auto" />
-            <Title
-              level={5}
-              className="!m-0 ml-2"
-              style={{ color: token.colorTextHeading }}
-            >
-              Hirable
-            </Title>
+            <img
+              src="https://raw.githubusercontent.com/fptgang/SBA301_Freelancer/develop/images/logo.svg"
+              alt="Logo"
+              className="h-8 w-auto"
+            />
           </div>
 
           {/* Desktop Navigation - Grouped by related features */}
@@ -803,13 +774,10 @@ const FreelancerNavBar: React.FC = () => {
           <div className="flex items-center justify-between">
             <div className="flex items-center">
               <img
-                src="/public/icon.svg"
+                src="https://raw.githubusercontent.com/fptgang/SBA301_Freelancer/develop/images/logo.svg"
                 alt="Logo"
                 className="h-6 w-auto mr-2"
               />
-              <Title level={5} className="!m-0">
-                Hirable
-              </Title>
             </div>
             <Text className="text-green-500">${walletAmount.toFixed(2)}</Text>
           </div>
@@ -962,7 +930,11 @@ const NavBar: React.FC = () => {
                 className="flex items-center cursor-pointer mr-12"
                 onClick={() => (window.location.href = "/")}
               >
-                <img src="/public/icon.svg" alt="Logo" className="h-8 w-auto" />
+                <img
+                  src="https://raw.githubusercontent.com/fptgang/SBA301_Freelancer/develop/images/logo.svg"
+                  alt="Logo"
+                  className="h-8 w-auto"
+                />
                 <Title level={5} className="!m-0 ml-2">
                   Hirable Admin
                 </Title>
