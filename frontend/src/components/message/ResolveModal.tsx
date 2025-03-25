@@ -141,7 +141,6 @@ export const ResolveModal: React.FC<ResolveModalProps> = ({
             </span>
           }
           name="haveAction"
-          rules={[{ required: true, message: "You have to choose" }]}
         >
           <Select
             placeholder="Will you have action on this report:"
