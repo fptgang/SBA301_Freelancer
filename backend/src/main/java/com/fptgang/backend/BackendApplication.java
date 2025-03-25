@@ -11,6 +11,7 @@ public class BackendApplication {
 
 	public static void main(String[] args) {
 //		DateTimeUtil.validateTimeZone();
+		TimeZone.setDefault(TimeZone.getTimeZone(ZoneOffset.of("+7")));
 		SpringApplication.run(BackendApplication.class, args);
 	}
 
