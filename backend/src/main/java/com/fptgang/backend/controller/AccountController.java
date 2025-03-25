@@ -76,7 +76,7 @@ public class AccountController implements AccountsApi {
     @Override
     public ResponseEntity<GetAccounts200Response> getAccounts(Pageable pageable, String filter, String search) {
         if(!SecurityUtil.hasRole(Role.ADMIN, Role.STAFF)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
         log.info("Getting accounts");
         var includeInvisible = SecurityUtil.hasPermission(Role.ADMIN);
