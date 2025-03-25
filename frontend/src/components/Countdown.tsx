@@ -1,13 +1,16 @@
-import React, { useEffect, useState } from 'react';
-import { DateInput, useLocalSettings } from '../hooks/useLocalSettings';
+import React, {useEffect, useState} from 'react';
+import {DateInput, useLocalSettings} from '../hooks/useLocalSettings';
 
 interface CountdownProps {
   targetDate: DateInput;
   as?: React.ElementType;
 }
 
-const Countdown: React.FC<CountdownProps> = ({ targetDate, as: Component = 'span' }) => {
-  const [{ formatCountdown }] = useLocalSettings();
+const Countdown: React.FC<CountdownProps> = ({
+                                               targetDate,
+                                               as: Component = 'span'
+                                             }) => {
+  const [{formatCountdown}] = useLocalSettings();
   const [timeLeft, setTimeLeft] = useState(formatCountdown(targetDate));
 
   useEffect(() => {

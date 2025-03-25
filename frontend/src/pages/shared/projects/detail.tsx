@@ -7,8 +7,8 @@ import ProjectPublicDetail from "./public";
 import {Spin, Typography} from "antd";
 
 const ProjectDetail: React.FC = () => {
-  const { id } = useParams<{ id: string }>();
-  const { data: user } = useGetIdentity<AccountDto>();
+  const {id} = useParams<{ id: string }>();
+  const {data: user} = useGetIdentity<AccountDto>();
   const {
     data,
     isLoading,
@@ -27,7 +27,7 @@ const ProjectDetail: React.FC = () => {
   useEffect(() => {
     const project = data?.data;
     if (user && project && (project.client?.accountId === user.accountId ||
-        project.contract?.freelancer?.accountId === user.accountId)) {
+      project.contract?.freelancer?.accountId === user.accountId)) {
       setInternalVersion(true)
     }
   }, [data, user]);
@@ -35,7 +35,7 @@ const ProjectDetail: React.FC = () => {
   ////////////////////////////////
 
   if (isLoading) {
-    return <Spin size="large" style={{ margin: "100px auto", display: "block" }} />
+    return <Spin size="large" style={{margin: "100px auto", display: "block"}}/>
   }
 
   if (isError || !data?.data) {
@@ -54,8 +54,8 @@ const ProjectDetail: React.FC = () => {
     );
   }
 
-  return internalVersion ? <ProjectInternalDetail project={data.data} /> :
-    <ProjectPublicDetail project={data.data} />
+  return internalVersion ? <ProjectInternalDetail project={data.data}/> :
+    <ProjectPublicDetail project={data.data}/>
 };
 
 export default ProjectDetail;

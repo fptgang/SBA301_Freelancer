@@ -178,7 +178,7 @@ const TransactionHistoryTable: React.FC = () => {
             <Button
               type="primary"
               icon={<ArrowRightOutlined />}
-              onClick={() => navigate(`/client/projects/${selectedTransaction.milestone?.projectId}`)}
+              onClick={() => navigate(`/projects/${selectedTransaction.milestone?.projectId}`)}
             >
               View Project Details
             </Button>

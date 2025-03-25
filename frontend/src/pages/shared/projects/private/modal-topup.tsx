@@ -1,7 +1,11 @@
-import React, { useState } from "react";
-import { Modal, Form, Input, Select, Button, notification, Card } from "antd";
-import { useGetIdentity } from "@refinedev/core";
-import { AccountDto, DepositDto, DepositDtoPaymentMethodEnum } from "../../../../../generated";
+import React from "react";
+import {Button, Form, Input, Modal, notification, Select} from "antd";
+import {useGetIdentity} from "@refinedev/core";
+import {
+  AccountDto,
+  DepositDto,
+  DepositDtoPaymentMethodEnum
+} from "../../../../../generated";
 import api from "../../../../services/api/openapi-config";
 
 interface ModalTopupProps {
@@ -10,9 +14,13 @@ interface ModalTopupProps {
   onClose: () => void;
 }
 
-const ModalTopup: React.FC<ModalTopupProps> = ({ visible, onClose, suggestedAmount }) => {
+const ModalTopup: React.FC<ModalTopupProps> = ({
+                                                 visible,
+                                                 onClose,
+                                                 suggestedAmount
+                                               }) => {
   const [form] = Form.useForm();
-  const { data: user } = useGetIdentity<AccountDto>();
+  const {data: user} = useGetIdentity<AccountDto>();
 
   const handleFinish = async (values: any) => {
     const deposit: DepositDto = {
@@ -20,7 +28,7 @@ const ModalTopup: React.FC<ModalTopupProps> = ({ visible, onClose, suggestedAmou
       paymentMethod: values.paymentMethod,
     };
     const response = await api
-      .createDeposit({ depositDto: deposit })
+      .createDeposit({depositDto: deposit})
       .then((data) => {
         console.log("Deposit successful:", data);
         if (data.paymentRedirectUrl)
@@ -58,15 +66,15 @@ const ModalTopup: React.FC<ModalTopupProps> = ({ visible, onClose, suggestedAmou
           name="amount"
           label="Amount"
           initialValue={suggestedAmount || 0}
-          rules={[{ required: true, message: "Please input the amount!" }]}
+          rules={[{required: true, message: "Please input the amount!"}]}
         >
-          <Input type="number" />
+          <Input type="number"/>
         </Form.Item>
         <Form.Item
           name="paymentMethod"
           label="Payment Method"
           rules={[
-            { required: true, message: "Please select a payment method!" },
+            {required: true, message: "Please select a payment method!"},
           ]}
         >
           <Select>

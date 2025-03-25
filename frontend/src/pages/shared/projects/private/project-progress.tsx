@@ -1,4 +1,4 @@
-import { Card, Steps } from "antd";
+import {Card, Steps} from "antd";
 import {
   BuildOutlined,
   BulbOutlined,
@@ -8,37 +8,41 @@ import {
   TeamOutlined,
 } from "@ant-design/icons";
 import React from "react";
-import { ContractStatusDto, ProjectDto, ProjectStatusDto } from "../../../../../generated";
+import {
+  ContractStatusDto,
+  ProjectDto,
+  ProjectStatusDto
+} from "../../../../../generated";
 
-const { Step } = Steps;
+const {Step} = Steps;
 
-const ProjectProgress: React.FC<{ project: ProjectDto }> = ({ project }) => {
+const ProjectProgress: React.FC<{ project: ProjectDto }> = ({project}) => {
   // Define all possible step configurations
   const stepConfigs = [
     {
       title: "Open",
       description: "Project Posted",
-      icon: <BulbOutlined />,
+      icon: <BulbOutlined/>,
     },
     {
       title: "Contracting",
       description: "Contract Made",
-      icon: <TeamOutlined />,
+      icon: <TeamOutlined/>,
     },
     {
       title: "Working",
       description: "Work-in-progress",
-      icon: <BuildOutlined />,
+      icon: <BuildOutlined/>,
     },
     {
       title: "Completed",
       description: "Project Finished",
-      icon: <CheckCircleOutlined />,
+      icon: <CheckCircleOutlined/>,
     },
     {
       title: "Terminated",
       description: "Project Terminated",
-      icon: <CloseCircleOutlined />,
+      icon: <CloseCircleOutlined/>,
     },
   ];
 
@@ -51,7 +55,8 @@ const ProjectProgress: React.FC<{ project: ProjectDto }> = ({ project }) => {
       {
         title: "Open",
         description: project.status === ProjectStatusDto.Paused ? "Project Paused" : "Project Posted",
-        icon: project.status === ProjectStatusDto.Paused ? <PauseCircleOutlined /> : <BulbOutlined />,
+        icon: project.status === ProjectStatusDto.Paused ?
+          <PauseCircleOutlined/> : <BulbOutlined/>,
       },
       stepConfigs[1], // Contracting
       stepConfigs[2], // Working

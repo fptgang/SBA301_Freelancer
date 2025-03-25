@@ -1,4 +1,3 @@
-
 // Define MilestoneDetailModal component
 import {ProjectDto} from "../../../../../generated";
 import React, {useEffect, useState} from "react";
@@ -11,7 +10,8 @@ import {
   Card,
   Descriptions,
   List,
-  Modal, Popconfirm,
+  Modal,
+  Popconfirm,
   Progress,
   Tag
 } from "antd";
@@ -41,7 +41,7 @@ const MilestoneDetailModal: React.FC<MilestoneDetailModalProps> = ({
   const [localSettings] = useLocalSettings();
   const [confirmLoading, setConfirmLoading] = useState(false);
   const [contract, setContract] = useState<any>(null);
-  const { open } = useNotification();
+  const {open} = useNotification();
 
   // Fetch contract data if available
   useEffect(() => {
@@ -92,7 +92,7 @@ const MilestoneDetailModal: React.FC<MilestoneDetailModalProps> = ({
     <Modal
       title={
         <div className="flex items-center">
-          <ClockCircleOutlined className="text-blue-500 mr-2" />
+          <ClockCircleOutlined className="text-blue-500 mr-2"/>
           <span>Milestone Details</span>
         </div>
       }
@@ -103,7 +103,8 @@ const MilestoneDetailModal: React.FC<MilestoneDetailModalProps> = ({
     >
       <Card className="mb-4">
         <Title level={4}>{milestone.title}</Title>
-        <Paragraph className="whitespace-pre-wrap bg-gray-50 p-4 rounded-md border border-gray-100 mt-3">
+        <Paragraph
+          className="whitespace-pre-wrap bg-gray-50 p-4 rounded-md border border-gray-100 mt-3">
           {milestone.description}
         </Paragraph>
 
@@ -140,7 +141,7 @@ const MilestoneDetailModal: React.FC<MilestoneDetailModalProps> = ({
         {contract && (
           <div className="mt-4">
             <Title level={5} className="mb-3">
-              <FileTextOutlined className="mr-2" /> Contract Status
+              <FileTextOutlined className="mr-2"/> Contract Status
             </Title>
             <div className="bg-gray-50 p-4 rounded-md border border-gray-100">
               <Descriptions layout="horizontal" bordered size="small">
@@ -148,7 +149,8 @@ const MilestoneDetailModal: React.FC<MilestoneDetailModalProps> = ({
                   {contract.contractId}
                 </Descriptions.Item>
                 <Descriptions.Item label="Status">
-                  <Tag color={contract.status === "SIGNED" ? "green" : "orange"}>
+                  <Tag
+                    color={contract.status === "SIGNED" ? "green" : "orange"}>
                     {contract.status}
                   </Tag>
                 </Descriptions.Item>
@@ -169,7 +171,7 @@ const MilestoneDetailModal: React.FC<MilestoneDetailModalProps> = ({
         {milestone.deliverables && milestone.deliverables.length > 0 && (
           <div className="mt-4">
             <Title level={5} className="mb-3">
-              <FileTextOutlined className="mr-2" /> Deliverable Files
+              <FileTextOutlined className="mr-2"/> Deliverable Files
             </Title>
             <div className="bg-gray-50 p-4 rounded-md border border-gray-100">
               <List
@@ -184,7 +186,7 @@ const MilestoneDetailModal: React.FC<MilestoneDetailModalProps> = ({
                         key="download"
                         type="link"
                         onClick={() => handleFileDownload(file.fileUrl, file.fileName)}
-                        icon={<FileTextOutlined />}
+                        icon={<FileTextOutlined/>}
                       >
                         Download
                       </Button>
@@ -193,7 +195,7 @@ const MilestoneDetailModal: React.FC<MilestoneDetailModalProps> = ({
                     <List.Item.Meta
                       avatar={
                         <Avatar
-                          icon={<FileTextOutlined />}
+                          icon={<FileTextOutlined/>}
                           size="large"
                           className={`${
                             file.fileType?.includes("image")
@@ -244,7 +246,7 @@ const MilestoneDetailModal: React.FC<MilestoneDetailModalProps> = ({
         {milestone.files && milestone.files.length > 0 && (
           <div className="mt-4">
             <Title level={5} className="mb-3">
-              <FileTextOutlined className="mr-2" /> Attachments
+              <FileTextOutlined className="mr-2"/> Attachments
             </Title>
             <div className="bg-gray-50 p-4 rounded-md border border-gray-100">
               <List
@@ -259,7 +261,7 @@ const MilestoneDetailModal: React.FC<MilestoneDetailModalProps> = ({
                         key="download"
                         type="link"
                         onClick={() => handleFileDownload(file.fileUrl, file.fileName)}
-                        icon={<FileTextOutlined />}
+                        icon={<FileTextOutlined/>}
                       >
                         Download
                       </Button>
@@ -268,7 +270,7 @@ const MilestoneDetailModal: React.FC<MilestoneDetailModalProps> = ({
                     <List.Item.Meta
                       avatar={
                         <Avatar
-                          icon={<FileTextOutlined />}
+                          icon={<FileTextOutlined/>}
                           size="large"
                           className={`${
                             file.fileType?.includes("image")
@@ -328,11 +330,11 @@ const MilestoneDetailModal: React.FC<MilestoneDetailModalProps> = ({
               <Popconfirm
                 title="Confirm milestone completion"
                 description="Are you sure you want to mark this milestone as complete? This action will release the payment to the freelancer."
-                icon={<ExclamationCircleOutlined style={{ color: 'green' }} />}
+                icon={<ExclamationCircleOutlined style={{color: 'green'}}/>}
                 onConfirm={handleConfirm}
                 okText="Yes, Complete"
                 cancelText="Cancel"
-                okButtonProps={{ loading: confirmLoading }}
+                okButtonProps={{loading: confirmLoading}}
               >
                 <Button type="primary">
                   Confirm Completion

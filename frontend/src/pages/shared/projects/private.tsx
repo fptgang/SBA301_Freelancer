@@ -1,88 +1,75 @@
-import React, {useEffect, useState} from "react";
+import React, {useState} from "react";
 import {AccountDto, ProjectDto, ProposalDto} from "../../../../generated";
 import {
-  Avatar, Badge,
   Button,
-  Card, Col,
-  Descriptions, Divider, Empty, List,
-  Modal, Popconfirm,
-  Progress, Row, Skeleton, Space, Statistic,
-  Steps,
+  Card,
+  Empty,
+  Popconfirm,
+  Skeleton,
+  Space,
   Tabs,
-  Tag, Timeline,
+  Tag,
   Typography
 } from "antd";
-import {useLocalSettings} from "../../../hooks/useLocalSettings";
 import {
-  useCustomMutation,
   useGetIdentity,
-  useInvalidate, useList,
-  useNotification, useOne, useShow
+  useInvalidate,
+  useList,
+  useNotification,
+  useOne,
+  useShow
 } from "@refinedev/core";
 import api from "../../../services/api/openapi-config";
 import {
   ArrowLeftOutlined,
   BarChartOutlined,
   BulbOutlined,
-  CalendarOutlined,
   CheckCircleOutlined,
   ClockCircleOutlined,
   CloseCircleOutlined,
-  DollarOutlined,
-  ExclamationCircleOutlined,
-  FileTextOutlined, MessageOutlined,
-  PlayCircleOutlined, PlusOutlined,
+  FileTextOutlined,
+  PlayCircleOutlined,
   ProjectOutlined,
-  TeamOutlined,
-  ToolOutlined, UserOutlined
+  TeamOutlined
 } from "@ant-design/icons";
 import {useNavigate, useParams} from "react-router";
 import ClientProjectEditButton from "../../client/projects/client-edit";
 import {ReportModal} from "../../../components/message/ReportModal";
 import ProjectProgress from "./private/project-progress";
 import ProjectStats from "./private/project-stats";
-import ProjectToTerminate from "./private/project-alerts";
+import ProjectAlerts from "./private/project-alerts";
 import TabProjectDetail from "./private/tab-project-detail";
 import TabMilestones from "./private/tab-milestones";
 import TabProposals from "./private/tab-proposals";
 import ModalProfile from "./private/modal-profile";
 import ModalTopup from "./private/modal-topup";
-import ProjectAlerts from "./private/project-alerts";
 import TabContract from "./private/tab-contract";
 import TabReports from "./private/tab-reports";
 
-const { Title, Text, Paragraph } = Typography;
-const { Step } = Steps;
-const { TabPane } = Tabs;
+const {Title, Text, Paragraph} = Typography;
+const {TabPane} = Tabs;
 
-const ProjectInternalDetail: React.FC<{ project: ProjectDto }> = ({ project }) => {
-  
-  
-  
+const ProjectInternalDetail: React.FC<{
+  project: ProjectDto
+}> = ({project}) => {
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [profileIdModal, setProfileIdModal] = useState(0);
-  
-  
-  
-  
-  
-  
-  
-  
-  const [localSettings] = useLocalSettings();
-  const { data: user } = useGetIdentity<AccountDto>();
-  const { id } = useParams();
+
+  const {data: user} = useGetIdentity<AccountDto>();
+  const {id} = useParams();
   const navigate = useNavigate();
-  const { open } = useNotification();
+  const {open} = useNotification();
   const invalidate = useInvalidate();
-  const { mutate: rejectProposal } = useCustomMutation();
-  const { mutate: terminateProject } = useCustomMutation();
-  const { mutate: completeMilestone } = useCustomMutation();
   const [showReportModal, setShowReportModal] = useState(false);
   const [showDepositModal, setShowDepositModal] = useState(false);
 
+  // Get the current search params
+  const searchParams = new URLSearchParams(window.location.search);
+  // Get the active tab from URL or default to 'details'
+  const defaultActiveTab = searchParams.get('tab') || 'details';
+
   // Fetch project data
-  const { queryResult: projectQueryResult } = useShow<ProjectDto>({
+  const {queryResult: projectQueryResult} = useShow<ProjectDto>({
     resource: "projects",
     id,
     queryOptions: {
@@ -97,7 +84,7 @@ const ProjectInternalDetail: React.FC<{ project: ProjectDto }> = ({ project }) =
   } = projectQueryResult;
 
   // Fetch project category
-  const { data: categoryData, isLoading: isCategoryLoading } = useOne({
+  const {data: categoryData, isLoading: isCategoryLoading} = useOne({
     resource: "project-categories",
     id: project?.projectCategory?.projectCategoryId || "",
     queryOptions: {
@@ -106,7 +93,7 @@ const ProjectInternalDetail: React.FC<{ project: ProjectDto }> = ({ project }) =
   });
 
   // Fetch proposals for this project
-  const { data: proposalsData, isLoading: isProposalsLoading } =
+  const {data: proposalsData, isLoading: isProposalsLoading} =
     useList<ProposalDto>({
       resource: "proposals",
       filters: [
@@ -122,73 +109,33 @@ const ProjectInternalDetail: React.FC<{ project: ProjectDto }> = ({ project }) =
 
   // Project status mapping for visual elements
   const statusMap = {
-    OPEN: { color: "blue", text: "Open", step: 0, icon: <BulbOutlined /> },
+    OPEN: {color: "blue", text: "Open", step: 0, icon: <BulbOutlined/>},
     IN_PROGRESS: {
       color: "orange",
       text: "In Progress",
       step: 1,
-      icon: <ClockCircleOutlined />,
+      icon: <ClockCircleOutlined/>,
     },
     TERMINATED: {
       color: "red",
       text: "Terminated",
       step: 2,
-      icon: <CloseCircleOutlined />,
+      icon: <CloseCircleOutlined/>,
     },
     FINISHED: {
       color: "green",
       text: "Finished",
       step: 2,
-      icon: <CheckCircleOutlined />,
+      icon: <CheckCircleOutlined/>,
     },
     PAUSED: {
       color: "default",
       text: "Paused",
       step: 0,
-      icon: <PlayCircleOutlined />,
+      icon: <PlayCircleOutlined/>,
     },
   };
 
-  // Handle rejecting a proposal
-  const handleRejectProposal = async (proposalId: number) => {
-    try {
-      rejectProposal({
-        url: `proposals/${proposalId}/reject`,
-        method: "put",
-        values: {},
-        successNotification: () => {
-          return {
-            type: "success",
-            message: "Proposal rejected",
-          };
-        },
-        errorNotification: () => {
-          return {
-            type: "error",
-            message: "Failed to reject proposal",
-          };
-        },
-      });
-
-      // Manually invalidate the cache after successful mutation
-      invalidate({
-        resource: "proposals",
-        invalidates: ["list", "many", "detail"],
-      });
-      invalidate({
-        resource: "projects",
-        id,
-        invalidates: ["detail"],
-      });
-    } catch (error) {
-      open?.({
-        type: "error",
-        message: "Failed to reject proposal",
-      });
-    }
-  };
-
-  // Handle terminating a project
   const handleTerminateProject = async () => {
     try {
       await api.terminateProject({
@@ -214,58 +161,11 @@ const ProjectInternalDetail: React.FC<{ project: ProjectDto }> = ({ project }) =
     }
   };
 
-  const confirmComplete = async (milestone: any) => {
-    try {
-      // Check if user has enough balance for next milestone
-      if (!project?.milestones) return;
-
-      const nextMilestone = project.milestones.find(
-        (m) =>
-          (m.milestoneId || 0) > (milestone.milestoneId || 0) &&
-          m.status == "PENDING"
-      );
-
-      if (nextMilestone && project.contract?.budget) {
-        const requiredAmount =
-          (nextMilestone.budgetRatio || 0) * project.contract?.budget;
-        if (user?.balance && user.balance < requiredAmount) {
-          // setSelectedMilestone(milestone);
-          setShowDepositModal(true);
-          open?.({
-            type: "error",
-            message: "Not enough balance to complete milestone",
-          });
-          return;
-        }
-      }
-
-      await api.confirmMilestoneWork({
-        milestoneId: milestone.milestoneId,
-      });
-
-      open?.({
-        type: "success",
-        message: "Milestone completed",
-      });
-
-      // Manually invalidate the cache after successful mutation
-      invalidate({
-        resource: "projects",
-        id,
-        invalidates: ["detail"],
-      });
-      invalidate({
-        resource: "milestones",
-        invalidates: ["list", "many"],
-      });
-    } catch (e) {
-      console.error(e);
-      open?.({
-        type: "error",
-        message: "Failed to accept milestone",
-      });
-      throw e; // Re-throw to handle in the UI
-    }
+  const handleTabChange = (activeKey: string) => {
+    // Update the URL when tab changes
+    const newSearchParams = new URLSearchParams(window.location.search);
+    newSearchParams.set('tab', activeKey);
+    navigate(`${window.location.pathname}?${newSearchParams.toString()}`, { replace: true });
   };
 
   // Render loading state
@@ -273,7 +173,7 @@ const ProjectInternalDetail: React.FC<{ project: ProjectDto }> = ({ project }) =
     return (
       <div className="bg-gray-50 min-h-screen">
         <div className="max-w-6xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-          <Skeleton active paragraph={{ rows: 12 }} />
+          <Skeleton active paragraph={{rows: 12}}/>
         </div>
       </div>
     );
@@ -283,7 +183,8 @@ const ProjectInternalDetail: React.FC<{ project: ProjectDto }> = ({ project }) =
   if (isProjectError || !project) {
     return (
       <div className="bg-gray-50 min-h-screen">
-        <div className="max-w-6xl mx-auto py-12 px-4 sm:px-6 lg:px-8 text-center">
+        <div
+          className="max-w-6xl mx-auto py-12 px-4 sm:px-6 lg:px-8 text-center">
           <Empty
             description="Project not found or you don't have permission to view it"
             image={Empty.PRESENTED_IMAGE_SIMPLE}
@@ -312,9 +213,10 @@ const ProjectInternalDetail: React.FC<{ project: ProjectDto }> = ({ project }) =
       {/* Project Header - Full width with accent color */}
       <div className="bg-white shadow-md border-b border-gray-200">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between">
+          <div
+            className="flex flex-col md:flex-row md:items-center md:justify-between">
             <div className="flex items-center">
-              <ProjectOutlined className="text-blue-500 text-2xl mr-3" />
+              <ProjectOutlined className="text-blue-500 text-2xl mr-3"/>
               <div>
                 <Title level={3} className="mb-0 text-gray-800">
                   {project.title}
@@ -338,7 +240,7 @@ const ProjectInternalDetail: React.FC<{ project: ProjectDto }> = ({ project }) =
               <Button
                 type="default"
                 onClick={() => navigate("/client/projects")}
-                icon={<ArrowLeftOutlined />}
+                icon={<ArrowLeftOutlined/>}
               >
                 Back
               </Button>
@@ -354,7 +256,7 @@ const ProjectInternalDetail: React.FC<{ project: ProjectDto }> = ({ project }) =
                 <Button
                   type="primary"
                   danger
-                  style={{ marginLeft: 8 }}
+                  style={{marginLeft: 8}}
                   onClick={() => setShowReportModal(true)}
                 >
                   Report
@@ -382,53 +284,54 @@ const ProjectInternalDetail: React.FC<{ project: ProjectDto }> = ({ project }) =
       {/* Main Content - Centered */}
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
         {/* ProjectAlerts */}
-        <ProjectAlerts project={project} />
+        <ProjectAlerts project={project}/>
 
         {/* Project Progress */}
-        <ProjectProgress project={project} />
+        <ProjectProgress project={project}/>
 
         {/* Project Stats */}
-        <ProjectStats project={project} />
+        <ProjectStats project={project}/>
 
         {/* Project Details & Proposals Tabs */}
         <Card className="shadow-sm">
           <Tabs
-            defaultActiveKey="details"
+            defaultActiveKey={defaultActiveTab}
             className="custom-tabs"
             animated={true}
+            onChange={handleTabChange}
           >
-            <TabPane
-            tab={
-              <span className="px-1">
-                  <FileTextOutlined /> Details
-                </span>
-            }
-            key="details"
-          >
-            <TabProjectDetail project={project} />
-          </TabPane>
-
             <TabPane
               tab={
                 <span className="px-1">
-                  <ClockCircleOutlined /> Milestones
+                  <FileTextOutlined/> Details
                 </span>
               }
-              key="milestones"
+              key="details"
             >
-              <TabMilestones project={project} />
+              <TabProjectDetail project={project}/>
             </TabPane>
 
             <TabPane
               tab={
                 <span className="px-1">
-                  <TeamOutlined /> Proposals ({proposals.length})
+                  <ClockCircleOutlined/> Milestones
+                </span>
+              }
+              key="milestones"
+            >
+              <TabMilestones project={project}/>
+            </TabPane>
+
+            <TabPane
+              tab={
+                <span className="px-1">
+                  <TeamOutlined/> Proposals ({proposals.length})
                 </span>
               }
               key="proposals"
             >
               {isProposalsLoading ? (
-                <Skeleton active paragraph={{ rows: 5 }} />
+                <Skeleton active paragraph={{rows: 5}}/>
               ) : proposals.length === 0 ? (
                 <div className="py-12 text-center">
                   <Empty
@@ -441,31 +344,32 @@ const ProjectInternalDetail: React.FC<{ project: ProjectDto }> = ({ project }) =
                   />
                 </div>
               ) : (
-                <TabProposals project={project} openProfile={openProfile} onContractMade={() => window.location.reload()} />
+                <TabProposals project={project} openProfile={openProfile}
+                              onContractMade={() => window.location.reload()}/>
               )}
             </TabPane>
 
-<TabPane
-  tab={
-    <span className="px-1">
-      <FileTextOutlined /> Contract
-    </span>
-  }
-  key="contract"
->
-  <TabContract project={project} />
-</TabPane>
+            <TabPane
+              tab={
+                <span className="px-1">
+                  <FileTextOutlined/> Contract
+                </span>
+              }
+              key="contract"
+            >
+              <TabContract project={project}/>
+            </TabPane>
 
-<TabPane
-  tab={
-    <span className="px-1">
-      <BarChartOutlined /> Reports
-    </span>
-  }
-  key="reports"
->
-  <TabReports project={project} />
-</TabPane>
+            <TabPane
+              tab={
+                <span className="px-1">
+                  <BarChartOutlined/> Reports
+                </span>
+              }
+              key="reports"
+            >
+              <TabReports project={project}/>
+            </TabPane>
 
 
           </Tabs>
@@ -474,10 +378,10 @@ const ProjectInternalDetail: React.FC<{ project: ProjectDto }> = ({ project }) =
 
 
       <ModalProfile
-            profileId={profileIdModal}
-            visible={showProfileModal}
-            onClose={() => setShowProfileModal(false)}
-          />
+        profileId={profileIdModal}
+        visible={showProfileModal}
+        onClose={() => setShowProfileModal(false)}
+      />
 
       {user?.role == "CLIENT" ? (
         <>
@@ -494,20 +398,6 @@ const ProjectInternalDetail: React.FC<{ project: ProjectDto }> = ({ project }) =
               // setSelectedMilestone(null);
             }}
           />
-          {/*<MilestoneDetailModal*/}
-          {/*  visible={milestoneDetailVisible}*/}
-          {/*  milestone={selectedMilestone}*/}
-          {/*  project={project}*/}
-          {/*  onClose={() => {*/}
-          {/*    setMilestoneDetailVisible(false);*/}
-          {/*    setSelectedMilestone(null);*/}
-          {/*  }}*/}
-          {/*  onConfirmCompletion={confirmComplete}*/}
-          {/*  onReport={() => {*/}
-          {/*    setMilestoneDetailVisible(false);*/}
-          {/*    setShowReportModal(true);*/}
-          {/*  }}*/}
-          {/*/>*/}
         </>
       ) : null}
     </div>

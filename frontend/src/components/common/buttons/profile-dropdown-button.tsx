@@ -18,8 +18,7 @@ export const ProfileDropdownButton = () => {
   const { data: user } = useGetIdentity<AccountDto>();
 
   // Mock wallet amount - in a real app, get this from user data
-  const walletAmount =
-    user?.role === AccountDtoRoleEnum.Client ? user.balance : 0;
+  const walletAmount = user?.balance || 0;
 
   const menuItems = {
     items: [

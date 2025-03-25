@@ -1,34 +1,34 @@
-import React, { useState } from "react";
-import { HttpError, useGetIdentity } from "@refinedev/core";
+import React, {useState} from "react";
+import {HttpError, useGetIdentity} from "@refinedev/core";
 import {
-  Button,
-  Modal,
-  Form,
-  Upload,
-  Steps,
-  Card,
   Alert,
-  Row,
+  Button,
+  Card,
+  Checkbox,
   Col,
   Divider,
-  Typography,
+  Form,
   message,
-  Checkbox,
+  Modal,
+  Row,
   Statistic,
+  Steps,
   Table,
+  Typography,
+  Upload,
 } from "antd";
-import { InboxOutlined, CheckCircleOutlined } from "@ant-design/icons";
-import { useModal } from "@refinedev/antd";
-import type { UploadFile } from "antd/es/upload/interface";
-import { AccountDto, ProjectDto, ProposalDto } from "../../../../../generated";
+import {CheckCircleOutlined, InboxOutlined} from "@ant-design/icons";
+import {useModal} from "@refinedev/antd";
+import type {UploadFile} from "antd/es/upload/interface";
+import {AccountDto, ProjectDto, ProposalDto} from "../../../../../generated";
 import api from "../../../../services/api/openapi-config";
 import ModalTopup from "./modal-topup";
-import { useLocalSettings } from "../../../../hooks/useLocalSettings";
+import {useLocalSettings} from "../../../../hooks/useLocalSettings";
 
 
-const { Step } = Steps;
-const { Dragger } = Upload;
-const { Text } = Typography;
+const {Step} = Steps;
+const {Dragger} = Upload;
+const {Text} = Typography;
 
 interface ContractCreateButtonProps {
   project: ProjectDto;
@@ -37,18 +37,18 @@ interface ContractCreateButtonProps {
 }
 
 export const ContractCreateButton: React.FC<ContractCreateButtonProps> = ({
-  project,
-  proposal,
-  onSubmit,
-}) => {
+                                                                            project,
+                                                                            proposal,
+                                                                            onSubmit,
+                                                                          }) => {
   const [localSettings] = useLocalSettings()
   const milestoneAmount = (project.milestones?.filter(m => m.isVisible)[0]?.budgetRatio || 0) * (proposal.budget || 0);
-  const { data: user } = useGetIdentity<AccountDto>();
-  const { modalProps, show, close } = useModal();
+  const {data: user} = useGetIdentity<AccountDto>();
+  const {modalProps, show, close} = useModal();
   const [currentStep, setCurrentStep] = useState(0);
   const [fileList, setFileList] = useState<UploadFile[]>([]);
   const [showTopUpModal, setShowTopUpModal] = useState(false);
-  const handleFileChange = ({ fileList }: { fileList: UploadFile[] }) => {
+  const handleFileChange = ({fileList}: { fileList: UploadFile[] }) => {
     setFileList([...fileList]);
   };
 
@@ -96,45 +96,56 @@ export const ContractCreateButton: React.FC<ContractCreateButtonProps> = ({
           <Form
             layout="vertical"
             onFinish={handleStepSubmit}
-            initialValues={{ terms: false }}
+            initialValues={{terms: false}}
           >
             <Card
               title="Contract Details"
               bordered={false}
-              style={{ marginBottom: 24 }}
+              style={{marginBottom: 24}}
             >
               <Row gutter={[16, 16]}>
                 <Col span={24}>
                   <Text strong>Project:</Text> <Text>{project.title}</Text>
                 </Col>
                 <Col span={12}>
-                  <Text strong>Client:</Text> <Text>{`${project.client?.firstName} ${project.client?.lastName || ''}`}</Text>
+                  <Text strong>Client:</Text>
+                  <Text>{`${project.client?.firstName} ${project.client?.lastName || ''}`}</Text>
                 </Col>
                 <Col span={12}>
-                  <Text strong>Freelancer:</Text> <Text>{`${proposal.freelancer?.firstName} ${proposal.freelancer?.lastName || ''}`}</Text>
+                  <Text strong>Freelancer:</Text>
+                  <Text>{`${proposal.freelancer?.firstName} ${proposal.freelancer?.lastName || ''}`}</Text>
                 </Col>
               </Row>
-              <Divider />
+              <Divider/>
               <Row gutter={[16, 16]}>
                 <Col span={12}>
-                <Text strong>Start Date:</Text> <Text>{localSettings.formatDateTime(project.startDate!)}</Text>
+                  <Text strong>Start Date:</Text>
+                  <Text>{localSettings.formatDateTime(project.startDate!)}</Text>
                 </Col>
                 <Col span={12}>
-                  <Text strong>Total Budget:</Text> <Text>${proposal.budget}</Text>
+                  <Text strong>Total Budget:</Text>
+                  <Text>${proposal.budget}</Text>
                 </Col>
 
                 <Col span={24}>
                   <Text strong>Milestones:</Text>
                   <Table
                     dataSource={visibleMilestones}
-                    style={{ width: '100%', marginTop: '16px' }}
+                    style={{width: '100%', marginTop: '16px'}}
                     pagination={false}
                     rowKey="milestoneId"
                   >
-                    <Table.Column title="Title" dataIndex="title" key="title" />
-                    <Table.Column title="Budget Ratio" dataIndex="budgetRatio" key="budgetRatio" render={(text) => `${(text * 100).toFixed(0)}%`} />
-                    <Table.Column title="Absolute Budget" dataIndex="contractualBudget" key="contractualBudget" render={(text) => `$${text.toFixed(2)}`} />
-                    <Table.Column title="Deadline" dataIndex="deadline" key="deadline" render={(text) => localSettings.formatDateTime(text)} />
+                    <Table.Column title="Title" dataIndex="title" key="title"/>
+                    <Table.Column title="Budget Ratio" dataIndex="budgetRatio"
+                                  key="budgetRatio"
+                                  render={(text) => `${(text * 100).toFixed(0)}%`}/>
+                    <Table.Column title="Absolute Budget"
+                                  dataIndex="contractualBudget"
+                                  key="contractualBudget"
+                                  render={(text) => `$${text.toFixed(2)}`}/>
+                    <Table.Column title="Deadline" dataIndex="deadline"
+                                  key="deadline"
+                                  render={(text) => localSettings.formatDateTime(text)}/>
                   </Table>
                 </Col>
               </Row>
@@ -145,7 +156,7 @@ export const ContractCreateButton: React.FC<ContractCreateButtonProps> = ({
               description="By creating this contract, you agree to deposit the first milestone amount into escrow. This amount will only be released to the freelancer upon your approval of the completed work."
               type="warning"
               showIcon
-              style={{ marginBottom: 24 }}
+              style={{marginBottom: 24}}
             />
 
             <Form.Item
@@ -157,8 +168,8 @@ export const ContractCreateButton: React.FC<ContractCreateButtonProps> = ({
                     value
                       ? Promise.resolve()
                       : Promise.reject(
-                          new Error("You must accept the terms to proceed")
-                        ),
+                        new Error("You must accept the terms to proceed")
+                      ),
                 },
               ]}
             >
@@ -167,9 +178,9 @@ export const ContractCreateButton: React.FC<ContractCreateButtonProps> = ({
               </Checkbox>
             </Form.Item>
 
-            <div style={{ display: "flex", justifyContent: "flex-end" }}>
-              <Button 
-                type="primary" 
+            <div style={{display: "flex", justifyContent: "flex-end"}}>
+              <Button
+                type="primary"
                 htmlType="submit"
               >
                 Next
@@ -178,19 +189,19 @@ export const ContractCreateButton: React.FC<ContractCreateButtonProps> = ({
           </Form>
         );
 
-        case 1:
-          return (
-            <Form layout="vertical" onFinish={handleStepSubmit}>
-              
+      case 1:
+        return (
+          <Form layout="vertical" onFinish={handleStepSubmit}>
+
             <Card
               title="Contract Details"
               bordered={false}
-              style={{ marginBottom: 24 }}
+              style={{marginBottom: 24}}
             >
               <Row gutter={[16, 16]}>
                 <Col span={24}>
                   <div
-                    style={{ display: "flex", justifyContent: "space-between" }}
+                    style={{display: "flex", justifyContent: "space-between"}}
                   >
                     <div>
                       <Statistic
@@ -198,9 +209,9 @@ export const ContractCreateButton: React.FC<ContractCreateButtonProps> = ({
                         value={milestoneAmount}
                         precision={2}
                         prefix="$"
-                        valueStyle={{ color: "#3f8600" }}
+                        valueStyle={{color: "#3f8600"}}
                       />
-                      <Text type="secondary" style={{ fontSize: "12px" }}>
+                      <Text type="secondary" style={{fontSize: "12px"}}>
                         This amount will be held in escrow until the milestone
                         is completed
                       </Text>
@@ -222,7 +233,7 @@ export const ContractCreateButton: React.FC<ContractCreateButtonProps> = ({
                         <>
                           <Text
                             type="danger"
-                            style={{ display: "block", marginBottom: "8px" }}
+                            style={{display: "block", marginBottom: "8px"}}
                           >
                             Insufficient balance for milestone payment
                           </Text>
@@ -242,18 +253,18 @@ export const ContractCreateButton: React.FC<ContractCreateButtonProps> = ({
             </Card>
 
 
-            <div style={{ display: "flex", justifyContent: "space-between" }}>
+            <div style={{display: "flex", justifyContent: "space-between"}}>
               <Button onClick={handlePrevStep}>Previous</Button>
-                <Button 
-                  type="primary" 
-                  htmlType="submit"
-                  disabled={(user?.balance || 0) < milestoneAmount}
-                >
-                  Next
-                </Button>
-              </div>
-            </Form>
-          );
+              <Button
+                type="primary"
+                htmlType="submit"
+                disabled={(user?.balance || 0) < milestoneAmount}
+              >
+                Next
+              </Button>
+            </div>
+          </Form>
+        );
 
       case 2:
         return (
@@ -272,7 +283,7 @@ export const ContractCreateButton: React.FC<ContractCreateButtonProps> = ({
                 maxCount={5}
               >
                 <p className="ant-upload-drag-icon">
-                  <InboxOutlined />
+                  <InboxOutlined/>
                 </p>
                 <p className="ant-upload-text">
                   Click or drag a file to this area to upload
@@ -289,10 +300,10 @@ export const ContractCreateButton: React.FC<ContractCreateButtonProps> = ({
               description="Please review all details carefully before creating the contract. Once created, the first milestone amount will be reserved from your account."
               type="info"
               showIcon
-              style={{ marginBottom: 24 }}
+              style={{marginBottom: 24}}
             />
 
-            <div style={{ display: "flex", justifyContent: "space-between" }}>
+            <div style={{display: "flex", justifyContent: "space-between"}}>
               <Button onClick={handlePrevStep}>Previous</Button>
               <Button type="primary" htmlType="submit">
                 Create Contract
@@ -310,7 +321,7 @@ export const ContractCreateButton: React.FC<ContractCreateButtonProps> = ({
     <>
       <Button
         type="primary"
-        icon={<CheckCircleOutlined />}
+        icon={<CheckCircleOutlined/>}
         onClick={() => {
           show();
           setCurrentStep(0);
@@ -328,9 +339,9 @@ export const ContractCreateButton: React.FC<ContractCreateButtonProps> = ({
         maskClosable={false}
       >
         <Steps current={currentStep} className="mb-8">
-          <Step title="Reviews" description="Review terms" />
-          <Step title="Deposit" description="Review deposit" />
-          <Step title="Documents" description="Upload files" />
+          <Step title="Reviews" description="Review terms"/>
+          <Step title="Deposit" description="Review deposit"/>
+          <Step title="Documents" description="Upload files"/>
         </Steps>
         {renderStepContent()}
       </Modal>

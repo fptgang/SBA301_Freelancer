@@ -1,9 +1,17 @@
-import {Avatar, Badge, Button, List, Popconfirm, Tag, Typography, Select} from "antd";
+import {
+  Avatar,
+  Badge,
+  Button,
+  List,
+  Popconfirm,
+  Select,
+  Tag,
+  Typography
+} from "antd";
 import ContractCreateButton from "./contract-create";
 import {
   CalendarOutlined,
   CheckCircleOutlined,
-  FileTextOutlined,
   MessageOutlined,
   UserOutlined
 } from "@ant-design/icons";
@@ -20,17 +28,17 @@ import FileList from "../../../../components/common/file-list";
 
 const {Title, Text, Paragraph} = Typography;
 
-const TabProposals: React.FC<{ 
-  project: ProjectDto, 
+const TabProposals: React.FC<{
+  project: ProjectDto,
   openProfile: (profileId: number) => void,
   onContractMade: () => void,
- }> 
+}>
   = ({project, openProfile, onContractMade}) => {
   const [localSettings] = useLocalSettings()
   const [statusFilter, setStatusFilter] = useState<string | null>(
-    project.status === ProjectStatusDto.InProgress ? null :
-      "PENDING");
-  
+    (project.status === ProjectStatusDto.Open || project.status === ProjectStatusDto.Paused) ? "PENDING" :
+      null);
+
   const {mutate: rejectProposal} = useCustomMutation();
   const {data: proposalsData, isLoading: isProposalsLoading} =
     useList<ProposalDto>({
@@ -94,17 +102,17 @@ const TabProposals: React.FC<{
   return <>
     <div className="mb-4">
       <Select
-        style={{ width: 200 }}
+        style={{width: 200}}
         value={statusFilter}
         onChange={(value) => setStatusFilter(value)}
         allowClear
         placeholder="Filter by status"
         options={[
-          { value: "PENDING", label: "Pending" },
-          { value: "ACCEPTED", label: "Accepted" },
-          { value: "REJECTED", label: "Rejected" },
-          { value: "EXPIRED", label: "Expired" },
-          { value: "WITHDRAWN", label: "Withdrawn" },
+          {value: "PENDING", label: "Pending"},
+          {value: "ACCEPTED", label: "Accepted"},
+          {value: "REJECTED", label: "Rejected"},
+          {value: "EXPIRED", label: "Expired"},
+          {value: "WITHDRAWN", label: "Withdrawn"},
         ]}
         onClear={() => setStatusFilter("")}
       />
@@ -155,10 +163,12 @@ const TabProposals: React.FC<{
             }
             title={
               <div className="flex justify-between items-center">
-                <Text strong className="text-lg cursor-pointer hover:text-blue-500" 
-                    onClick={() => openProfile(proposal.freelancer?.profileId || 0)}>
+                <Text strong
+                      className="text-lg cursor-pointer hover:text-blue-500"
+                      onClick={() => openProfile(proposal.freelancer?.profileId || 0)}>
                   {`${proposal.freelancer?.firstName} ${proposal.freelancer?.lastName || ''}`}
-                  {proposal.freelancer?.isVerified && <CheckCircleOutlined className="ml-1 text-blue-500" />}
+                  {proposal.freelancer?.isVerified &&
+                    <CheckCircleOutlined className="ml-1 text-blue-500"/>}
                 </Text>
                 <div className="flex items-center">
                   <Tag color="blue">Budget: ${proposal.budget}</Tag>
@@ -167,12 +177,12 @@ const TabProposals: React.FC<{
                       proposal.status === ProposalStatusDto.Accepted
                         ? "success"
                         : proposal.status === ProposalStatusDto.Rejected
-                        ? "error"
-                        : proposal.status === ProposalStatusDto.Withdrawn
-                        ? "default"
-                        : proposal.status === ProposalStatusDto.Expired
-                        ? "warning"
-                        : "processing"
+                          ? "error"
+                          : proposal.status === ProposalStatusDto.Withdrawn
+                            ? "default"
+                            : proposal.status === ProposalStatusDto.Expired
+                              ? "warning"
+                              : "processing"
                     }
                     text={
                       <span className="font-medium">
@@ -201,20 +211,21 @@ const TabProposals: React.FC<{
 
           {proposal.notes && (
             <>
-            <Title level={5}>
-              Proposal Notes
-            </Title>
-            <Paragraph className="text-gray-700 whitespace-pre-wrap bg-gray-50 p-6 rounded-md border border-gray-100">
-              {proposal.notes}
-            </Paragraph>
-          </>)}
+              <Title level={5}>
+                Proposal Notes
+              </Title>
+              <Paragraph
+                className="text-gray-700 whitespace-pre-wrap bg-gray-50 p-6 rounded-md border border-gray-100">
+                {proposal.notes}
+              </Paragraph>
+            </>)}
 
           {proposal.files && proposal.files.length > 0 && (
             <>
               <Title level={5} className="text-gray-700">
                 Attachments
               </Title>
-              <FileList files={proposal.files} />
+              <FileList files={proposal.files}/>
             </>
           )}
         </List.Item>

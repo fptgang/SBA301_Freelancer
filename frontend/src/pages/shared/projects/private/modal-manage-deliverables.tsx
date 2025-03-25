@@ -1,13 +1,31 @@
-import React, { useState, useEffect } from 'react';
-import { Modal, Button, Table, Upload, Typography, Alert, Popconfirm, message } from 'antd';
-import { InboxOutlined, DeleteOutlined, DownloadOutlined } from '@ant-design/icons';
-import { MilestoneDto, FileDto } from '../../../../../generated';
+import React, {useEffect, useState} from 'react';
+import {
+  Alert,
+  Button,
+  message,
+  Modal,
+  Popconfirm,
+  Table,
+  Typography,
+  Upload
+} from 'antd';
+import {
+  DeleteOutlined,
+  DownloadOutlined,
+  InboxOutlined
+} from '@ant-design/icons';
+import {
+  FileDto,
+  MilestoneDto,
+  MilestoneStatusDto
+} from '../../../../../generated';
 import api from '../../../../services/api/openapi-config';
-import { handleFileDownload } from '../../../../components/common/file-list';
-import { useInvalidate } from '@refinedev/core';
+import {handleFileDownload} from '../../../../components/common/file-list';
+import {useInvalidate} from '@refinedev/core';
+import {useLocalSettings} from '../../../../hooks/useLocalSettings';
 
-const { Dragger } = Upload;
-const { Title} = Typography;
+const {Dragger} = Upload;
+const {Title, Text, Paragraph} = Typography;
 
 interface ManageDeliverablesProps {
   visible: boolean;
@@ -16,10 +34,11 @@ interface ManageDeliverablesProps {
 }
 
 const ManageDeliverables: React.FC<ManageDeliverablesProps> = ({
-  visible,
-  milestone,
-  onClose,
-}) => {
+                                                                 visible,
+                                                                 milestone,
+                                                                 onClose,
+                                                               }) => {
+  const [localSettings] = useLocalSettings();
   const [deliverables, setDeliverables] = useState<FileDto[]>([]);
   const invalidate = useInvalidate();
 
@@ -104,14 +123,15 @@ const ManageDeliverables: React.FC<ManageDeliverablesProps> = ({
       key: 'fileName',
     },
     {
-      title: 'Type',
-      dataIndex: 'fileType',
-      key: 'fileType',
+      title: 'Upload Date ',
+      dataIndex: 'createdAt',
+      key: 'createdAt',
+      render: (date: string) => date ? localSettings.formatDateTime(date) : 'N/A ',
     },
     {
       title: 'Size',
-      dataIndex: 'fileSize',
-      key: 'fileSize',
+      dataIndex: 'size',
+      key: 'size',
       render: (size: number) => size ? `${(size / 1024).toFixed(2)} KB` : 'N/A',
     },
     {
@@ -119,23 +139,24 @@ const ManageDeliverables: React.FC<ManageDeliverablesProps> = ({
       key: 'actions',
       render: (_: any, record: FileDto) => (
         <>
-          <Popconfirm
-            title="Are you sure you want to delete this file?"
-            onConfirm={() => handleDelete(record.fileId!)}
-            okText="Yes"
-            cancelText="No"
-          >
-            <Button
-              danger
-              icon={<DeleteOutlined />}
+          {(milestone && milestone.status === MilestoneStatusDto.InProgress) &&
+            <Popconfirm
+              title="Are you sure you want to delete this file?"
+              onConfirm={() => handleDelete(record.fileId!)}
+              okText="Yes"
+              cancelText="No"
             >
-              Delete
-            </Button>
-          </Popconfirm>
+              <Button
+                danger
+                icon={<DeleteOutlined/>}
+              >
+                Delete
+              </Button>
+            </Popconfirm>}
           <Button
-            icon={<DownloadOutlined />}
+            icon={<DownloadOutlined/>}
             onClick={() => handleFileDownload(record.fileUrl!, record.fileName!)}
-            style={{ marginLeft: 8 }}
+            style={{marginLeft: 8}}
           >
             Download
           </Button>
@@ -154,42 +175,66 @@ const ManageDeliverables: React.FC<ManageDeliverablesProps> = ({
         <Button key="close" onClick={onClose}>
           Close
         </Button>,
-        <Popconfirm
-          key="done"
-          title="Mark as Done"
-          description={
-            <>
-              Are you sure you want to mark this milestone as done? <br />
-              This will notify the client for review.
-            </>
-          }
-          onConfirm={handleMarkAsDone}
-          okText="Yes"
-          cancelText="No"
-        >
-          <Button type="primary">
-            Mark as Done
-          </Button>
-        </Popconfirm>,
+        (milestone && milestone.status === MilestoneStatusDto.InProgress) ?
+          <Popconfirm
+            key="done"
+            title="Mark as Done"
+            description={
+              <>
+                Are you sure you want to mark this milestone as done? <br/>
+                This will notify the client for review.
+              </>
+            }
+            onConfirm={handleMarkAsDone}
+            okText="Yes"
+            cancelText="No"
+          >
+            <Button type="primary">
+              Mark as Done
+            </Button>
+          </Popconfirm> : <></>,
       ]}
     >
       <Alert
         message="Deliverable Management"
-        description="You can upload your work files here or remove existing ones. Once you've uploaded all necessary deliverables, mark the work as done for the client to review."
+        description={
+          <ul>
+            <li>
+              <Text>• Upload and manage your work files through this
+                interface</Text>
+            </li>
+            <li>
+              <Text>• After uploading all required deliverables, submit for
+                client review using "Mark as Done"</Text>
+            </li>
+            <li>
+              <Text>• During review phase: file deletion is disabled, but you
+                can still upload additional files per client feedback</Text>
+            </li>
+            <li>
+              <Text>• Payment will be processed upon client approval of
+                deliverables</Text>
+            </li>
+            <li>
+              <Text>• Contact support staff for any client-related
+                concerns</Text>
+            </li>
+          </ul>
+        }
         type="info"
         className="mb-4"
       />
 
       <Title level={5}>Upload Files</Title>
       <Dragger
-        customRequest={({ file }) => handleUpload(file as File)}
+        customRequest={({file}) => handleUpload(file as File)}
         beforeUpload={confirmUpload}
         multiple={true}
         showUploadList={false}
         className="mb-4"
       >
         <p className="ant-upload-drag-icon">
-          <InboxOutlined />
+          <InboxOutlined/>
         </p>
         <p className="ant-upload-text">Click or drag files to upload</p>
       </Dragger>
