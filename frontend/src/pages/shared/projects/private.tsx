@@ -1,5 +1,10 @@
 import React, { useState } from "react";
-import { AccountDto, ProjectDto, ProjectStatusDto, ProposalDto } from "../../../../generated";
+import {
+  AccountDto,
+  ProjectDto,
+  ProjectStatusDto,
+  ProposalDto,
+} from "../../../../generated";
 import {
   Button,
   Card,
@@ -263,7 +268,8 @@ const ProjectInternalDetail: React.FC<{
                 </Button>
               )}
 
-              {(project.status === ProjectStatusDto.Open || !!project.contract) && (
+              {(project.status === ProjectStatusDto.Open ||
+                !!project.contract) && (
                 <Popconfirm
                   title="Are you sure you want to close this project?"
                   onConfirm={handleTerminateProject}
@@ -350,7 +356,7 @@ const ProjectInternalDetail: React.FC<{
                 <TabProposals
                   project={project}
                   openProfile={openProfile}
-                  onContractMade={() => projectQueryResult.refetch()}
+                  refetch={projectQueryResult.refetch}
                 />
               )}
             </TabPane>
