@@ -61,6 +61,7 @@ const PublicNavBar: React.FC = () => {
       path: "/search?type=work",
       icon: <SearchOutlined />,
     },
+
   ];
 
   const findTalentItems = [
@@ -92,6 +93,7 @@ const PublicNavBar: React.FC = () => {
   //     icon: <MessageOutlined />,
   //   },
   // ];
+ 
 
   const isActive = (path: string) => {
     return (
