@@ -2,6 +2,7 @@ package com.fptgang.backend.service.impl;
 
 import com.fptgang.backend.mapper.template.*;
 import com.fptgang.backend.model.*;
+import com.fptgang.backend.repository.*;
 import com.fptgang.backend.service.EmailService;
 import com.fptgang.backend.util.TemplateUtil;
 import com.resend.Resend;
@@ -15,6 +16,8 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.List;
 
 @Service
 @Slf4j
@@ -62,7 +65,15 @@ public class EmailServiceImpl implements EmailService {
     private final TransactionDepositEmailTemplateMapper transactionDepositEmailTemplateMapper;
     private final MilestoneReleasedEmailTemplateMapper milestoneReleasedEmailTemplateMapper;
 
-    public EmailServiceImpl(ContractCreatedEmailTemplateMapper contractCreatedEmailTemplateMapper, ProposalRejectedEmailTemplateMapper proposalRejectedEmailTemplateMapper, ResetPasswordEmailTemplateMapper resetPasswordEmailTemplateMapper, ContractSignedEmailTemplateMapper contractSignedEmailTemplateMapper, MilestoneStartedEmailTemplateMapper milestoneStartedEmailTemplateMapper, MilestoneCompletedEmailTemplateMapper milestoneCompletedEmailTemplateMapper, MilestoneFundEmailTemplateMapper milestoneFundEmailTemplateMapper, ProjectEmailTemplateMapper projectEmailTemplateMapper, ReportEmailTemplateMapper reportEmailTemplateMapper, TransactionDepositEmailTemplateMapper transactionDepositEmailTemplateMapper, MilestoneReleasedEmailTemplateMapper milestoneReleasedEmailTemplateMapper) {
+    private final MilestoneRepos milestoneRepos;
+    private final ContractRepos contractRepos;
+    private final AccountRepos accountRepos;
+    private final TransactionRepos transactionRepos;
+    private final ProposalRepos proposalRepos;
+    private final ProjectRepos projectRepos;
+    private final ReportRepos reportRepos;
+
+    public EmailServiceImpl(ContractCreatedEmailTemplateMapper contractCreatedEmailTemplateMapper, ProposalRejectedEmailTemplateMapper proposalRejectedEmailTemplateMapper, ResetPasswordEmailTemplateMapper resetPasswordEmailTemplateMapper, ContractSignedEmailTemplateMapper contractSignedEmailTemplateMapper, MilestoneStartedEmailTemplateMapper milestoneStartedEmailTemplateMapper, MilestoneCompletedEmailTemplateMapper milestoneCompletedEmailTemplateMapper, MilestoneFundEmailTemplateMapper milestoneFundEmailTemplateMapper, ProjectEmailTemplateMapper projectEmailTemplateMapper, ReportEmailTemplateMapper reportEmailTemplateMapper, TransactionDepositEmailTemplateMapper transactionDepositEmailTemplateMapper, MilestoneReleasedEmailTemplateMapper milestoneReleasedEmailTemplateMapper, MilestoneRepos milestoneRepos, ContractRepos contractRepos, AccountRepos accountRepos, TransactionRepos transactionRepos, ProposalRepos proposalRepos, ProjectRepos projectRepos, ReportRepos reportRepos) {
         this.contractCreatedEmailTemplateMapper = contractCreatedEmailTemplateMapper;
         this.proposalRejectedEmailTemplateMapper = proposalRejectedEmailTemplateMapper;
         this.resetPasswordEmailTemplateMapper = resetPasswordEmailTemplateMapper;
@@ -74,6 +85,13 @@ public class EmailServiceImpl implements EmailService {
         this.reportEmailTemplateMapper = reportEmailTemplateMapper;
         this.transactionDepositEmailTemplateMapper = transactionDepositEmailTemplateMapper;
         this.milestoneReleasedEmailTemplateMapper = milestoneReleasedEmailTemplateMapper;
+        this.milestoneRepos = milestoneRepos;
+        this.contractRepos = contractRepos;
+        this.accountRepos = accountRepos;
+        this.transactionRepos = transactionRepos;
+        this.proposalRepos = proposalRepos;
+        this.projectRepos = projectRepos;
+        this.reportRepos = reportRepos;
     }
 
     @Override
@@ -117,10 +135,9 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
-    public void sendProposalRejectToFreelancer(Proposal proposal) throws IOException {
-        if (proposal.getProposalId() == null) {
-            throw new IllegalArgumentException("Proposal is missing.");
-        }
+    public void sendProposalRejectToFreelancer(Long id) throws IOException {
+       Proposal proposal = proposalRepos.findByProposalId(id)
+               .orElseThrow(() -> new IllegalArgumentException("Cannot find Proposal Id"));
 
         log.info("Preparing send proposal reject for: {}", proposal.getFreelancer().getEmail());
 
@@ -133,10 +150,9 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
-    public void sendContractCreatedToFreelancer(Contract contract) throws IOException {
-        if (contract.getContractId() == null) {
-            throw new IllegalArgumentException("Contract is missing.");
-        }
+    public void sendContractCreatedToFreelancer(Long id) throws IOException {
+        Contract contract = contractRepos.findByContractId(id)
+                .orElseThrow(() -> new IllegalArgumentException("Cannot find Contract Id"));
 
         log.info("Preparing send contract create for: {}", contract.getFreelancer().getEmail());
 
@@ -149,10 +165,9 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
-    public void sendContractSignedToFreelancer(Contract contract) throws IOException {
-        if (contract.getContractId() == null) {
-            throw new IllegalArgumentException("Contract is missing.");
-        }
+    public void sendContractSignedToFreelancer(Long id) throws IOException {
+        Contract contract = contractRepos.findByContractId(id)
+                .orElseThrow(() -> new IllegalArgumentException("Cannot find Contract Id"));
 
         log.info("Preparing send contract sign for: {}", contract.getFreelancer().getEmail());
 
@@ -165,10 +180,9 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
-    public void sendContractSignedToClient(Contract contract) throws IOException {
-        if (contract.getContractId() == null) {
-            throw new IllegalArgumentException("Contract is missing.");
-        }
+    public void sendContractSignedToClient(Long id) throws IOException {
+        Contract contract = contractRepos.findByContractId(id)
+                .orElseThrow(() -> new IllegalArgumentException("Cannot find Contract Id"));
 
         log.info("Preparing send contract sign for: {}", contract.getProject().getClient().getEmail());
 
@@ -181,10 +195,9 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
-    public void sendMilestoneStartedToFreelancer(Milestone milestone) throws IOException {
-        if (milestone.getMilestoneId() == null) {
-            throw new IllegalArgumentException("Milestone is missing.");
-        }
+    public void sendMilestoneStartedToFreelancer(Long milestoneId) throws IOException {
+        Milestone milestone = milestoneRepos.findByMilestoneId(milestoneId)
+                .orElseThrow(() -> new IllegalArgumentException("Cannot find Milestone id"));
 
         log.info("Preparing send milestone started for: {}", milestone.requireFreelancer().getEmail());
 
@@ -197,10 +210,9 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
-    public void sendMilestoneStartedToClient(Milestone milestone) throws IOException {
-        if (milestone.getMilestoneId() == null) {
-            throw new IllegalArgumentException("Milestone is missing.");
-        }
+    public void sendMilestoneStartedToClient(Long milestoneId) throws IOException {
+        Milestone milestone = milestoneRepos.findByMilestoneId(milestoneId)
+                .orElseThrow(() -> new IllegalArgumentException("Cannot find Milestone id"));
 
         log.info("Preparing send milestone started for: {}", milestone.getProject().getClient().getEmail());
 
@@ -213,10 +225,9 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
-    public void sendMilestoneCompletedToClient(Milestone milestone) throws IOException {
-        if (milestone.getMilestoneId() == null) {
-            throw new IllegalArgumentException("Milestone is missing.");
-        }
+    public void sendMilestoneCompletedToClient(Long milestoneId) throws IOException {
+        Milestone milestone = milestoneRepos.findByMilestoneId(milestoneId)
+                .orElseThrow(() -> new IllegalArgumentException("Cannot find Milestone id"));
 
         log.info("Preparing send milestone completed for: {}", milestone.getProject().getClient().getEmail());
 
@@ -229,10 +240,9 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
-    public void sendMilestoneCompletedToFreelancer(Milestone milestone) throws IOException {
-        if (milestone.getMilestoneId() == null) {
-            throw new IllegalArgumentException("Milestone is missing.");
-        }
+    public void sendMilestoneCompletedToFreelancer(Long milestoneId) throws IOException {
+        Milestone milestone = milestoneRepos.findByMilestoneId(milestoneId)
+                .orElseThrow(() -> new IllegalArgumentException("Cannot find Milestone id"));
 
         log.info("Preparing send milestone completed for: {}", milestone.requireFreelancer().getEmail());
 
@@ -245,10 +255,9 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
-    public void sendMilestoneFundStatusReleaseToFreelancer(Milestone milestone) throws IOException {
-        if (milestone.getMilestoneId() == null) {
-            throw new IllegalArgumentException("Milestone is missing.");
-        }
+    public void sendMilestoneFundStatusReleaseToFreelancer(Long milestoneId) throws IOException {
+        Milestone milestone = milestoneRepos.findByMilestoneId(milestoneId)
+                .orElseThrow(() -> new IllegalArgumentException("Cannot find Milestone id"));
         if (milestone.getFundStatus() != Milestone.FundStatus.RELEASED){
             log.info("Milestone fund status is not valid for client notification: {}", milestone.getFundStatus());
             return;
@@ -264,10 +273,9 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
-    public void sendMilestoneFundStatusDepositOrRefundToClient(Milestone milestone) throws IOException {
-        if (milestone.getMilestoneId() == null) {
-            throw new IllegalArgumentException("Milestone is missing.");
-        }
+    public void sendMilestoneFundStatusDepositOrRefundToClient(Long milestoneId) throws IOException {
+        Milestone milestone = milestoneRepos.findByMilestoneId(milestoneId)
+                .orElseThrow(() -> new IllegalArgumentException("Cannot find Milestone id"));
 
         if (milestone.getFundStatus() != Milestone.FundStatus.DEPOSITED &&
                 milestone.getFundStatus() != Milestone.FundStatus.REFUNDED) {
@@ -290,15 +298,14 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
-    public void sendProjectEmailTemplateToBoth(Project project) throws IOException {
-        if (project.getProjectId() == null) {
-            throw new IllegalArgumentException("Project is missing.");
-        }
+    public void sendProjectEmailTemplateToBoth(Long id) throws IOException {
+        Project project = projectRepos.findByProjectId(id)
+                .orElseThrow(() -> new IllegalArgumentException("Cannot find Project Id"));
         if (project.getStatus() != Project.ProjectStatus.FINISHED && project.getStatus() != Project.ProjectStatus.TERMINATED){
             log.info("Project status is not valid for client notification: {}", project.getStatus());
             return;
         }
-        else if(Boolean.FALSE.equals(project.getToTerminate())){
+        else if(Boolean.TRUE.equals(project.getToTerminate())){
             log.info("Project to be terminate is not valid for client notification: {}", project.getToTerminate());
             return;
         }
@@ -316,27 +323,25 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
-    public void sendReportEmailTemplateToBoth(Report report) throws IOException {
-        if (report.getReportId() == null) {
-            throw new IllegalArgumentException("Project is missing.");
-        }
+    public void sendReportEmailTemplateToBoth(Long id) throws IOException {
+        Report report = reportRepos.findByReportId(id)
+                .orElseThrow(() -> new IllegalArgumentException("Cannot find Report Id"));
         log.info("Preparing to send Report completed both to client,freelancer: {} ,{}", report.getProject().getClient().getEmail(),report.requireFreelancer().getEmail());
 
         var template = reportEmailTemplate.getContentAsString(StandardCharsets.UTF_8);
         var data = reportEmailTemplateMapper.create(report);
 
         String subject = "Project Completed Notification";
-        String content = TemplateUtil.render(projectCompletedTemplate.getFilename(), template, data);
+        String content = TemplateUtil.render(reportEmailTemplate.getFilename(), template, data);
 
         sendMail(emailFrom, report.getProject().getClient().getEmail(), subject, content);
         sendMail(emailFrom, report.requireFreelancer().getEmail(), subject, content);
     }
 
     @Override
-    public void sendTransactionEmailTemplateToBoth(Transaction transaction) throws IOException {
-        if (transaction.getTransactionId() == null) {
-            throw new IllegalArgumentException("Transaction is missing.");
-        }
+    public void sendTransactionEmailTemplateToBoth(Long id) throws IOException {
+        Transaction transaction = transactionRepos.findByTransactionId(id)
+                .orElseThrow(() -> new IllegalArgumentException("Cannot find Transaction Id"));
 
         log.info("Preparing to send transaction completed to client: {}",transaction.getToAccount().getEmail());
         if (transaction.getToAccount().getEmail() == null){
