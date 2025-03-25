@@ -74,6 +74,13 @@ public class ReportController implements ReportsApi {
         if(!SecurityUtil.hasPermission(Role.STAFF)){
             throw new IllegalArgumentException("Only staff can resolve report");
         }
+        if(!solutionDto.getHaveAction()){
+            Report report = reportService.findById(reportId);
+            report.setSolution(solutionDto.getSolution());
+            report.setStatus(Report.ReportStatus.SOLVED);
+            report=reportService.update(report);
+            return new ResponseEntity<>(reportMapper.toDTO(report, DetailLevel.FULL), HttpStatus.OK);
+        }
         solutionDto.setStaffId(SecurityUtil.getCurrentUserId());
         Report report = reportService.resolve(reportId, solutionDto);
         return new ResponseEntity<>(reportMapper.toDTO(report, DetailLevel.FULL), HttpStatus.OK);
