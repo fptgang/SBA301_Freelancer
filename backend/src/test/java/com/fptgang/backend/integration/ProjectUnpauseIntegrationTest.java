@@ -184,11 +184,11 @@ public class ProjectUnpauseIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(
                                 new ProjectTimelineDto()
-                                        .newStartDate(OffsetDateTime.now().plusDays(3))
+                                        .newStartDate(OffsetDateTime.now().plusDays(4))
                                         .milestones(List.of(
                                                 new ProjectTimelineDtoMilestonesInner()
                                                         .milestoneId(milestoneId)
-                                                        .newDeadline(OffsetDateTime.now().plusDays(6))
+                                                        .newDeadline(OffsetDateTime.now().plusDays(7))
                                         ))
                         ))
                 )
