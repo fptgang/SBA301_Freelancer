@@ -21,7 +21,7 @@ import java.time.LocalDateTime;
 @TestConfiguration(proxyBeanMethods = false)
 @Testcontainers
 @Import(TestcontainersConfiguration.class)
-//@Disabled
+@Disabled
 public class TestEmailTemplate {
     @Autowired
     private EmailService emailService;
@@ -29,7 +29,7 @@ public class TestEmailTemplate {
     @Test
     public void testProjectPlacedEmail() throws IOException {
         Project project =createExampleProject();
-        emailService.sendProjectEmailTemplateToBoth(project);
+        emailService.sendProjectEmailTemplateToBoth(project.getProjectId());
     }
     
     private static Account createExampleAccount(int i) {
