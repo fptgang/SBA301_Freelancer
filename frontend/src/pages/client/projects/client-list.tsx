@@ -22,7 +22,7 @@ import { formatCurrency } from "../../../utils/formatter";
 import ClientCreateButton from "./client-create";
 import { ProjectDto } from "../../../../generated";
 import { store } from "../../../store";
-import { useNavigate } from "react-router";
+import { useNavigate, useSearchParams } from "react-router";
 import { useLocalSettings } from "../../../hooks/useLocalSettings";
 
 const { Text } = Typography;
@@ -69,6 +69,9 @@ const ClientList = () => {
     },
   });
 
+  const [searchParams, setSearchParams] = useSearchParams();
+  const showCreateModal = searchParams.get("modal") === "create";
+
   const handleSearch = (value) => {
     setSearchText(value);
     setFilters([
@@ -95,6 +98,11 @@ const ClientList = () => {
     );
   };
 
+  const handleCloseModal = () => {
+    searchParams.delete("modal");
+    setSearchParams(searchParams);
+  };
+
   return (
     <div className="p-4">
       <List
@@ -115,7 +123,11 @@ const ClientList = () => {
               className="max-w-md"
             />
             <Space>
-              <ClientCreateButton refetch={refetch} />
+              <ClientCreateButton 
+                refetch={refetch} 
+                showModal={showCreateModal}
+                onClose={handleCloseModal}
+              />
             </Space>
           </div>
 

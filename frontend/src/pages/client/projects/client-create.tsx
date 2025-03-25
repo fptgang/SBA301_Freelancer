@@ -43,8 +43,14 @@ import {
 const { Step } = Steps;
 interface ClientCreateButtonProps {
   refetch: () => void;
+  showModal?: boolean;
+  onClose?: () => void;
 }
-const ClientCreateButton: React.FC<ClientCreateButtonProps> = ({ refetch }) => {
+const ClientCreateButton: React.FC<ClientCreateButtonProps> = ({ 
+  refetch, 
+  showModal = false,
+  onClose 
+}) => {
   // Get current user identity
   const { data: identity } = useGetIdentity<{ id: number }>();
   const userId = identity?.id;
@@ -420,10 +426,7 @@ const ClientCreateButton: React.FC<ClientCreateButtonProps> = ({ refetch }) => {
               </Col>
             </Row>
 
-            <div className="flex justify-between">
-              {currentStep > 0 && (
-                <Button onClick={() => setCurrentStep(currentStep - 1)}>Previous</Button>
-              )}
+            <div className="flex justify-end">
               <Button type="primary" htmlType="submit">
                 Next
               </Button>
@@ -804,6 +807,27 @@ const ClientCreateButton: React.FC<ClientCreateButtonProps> = ({ refetch }) => {
     }
   };
 
+  // Update close handler to call onClose prop
+  const handleClose = () => {
+    if (!isSubmitting) {
+      close();
+      setCurrentStep(0);
+      setProjectData({});
+      setFileList([]);
+      onClose?.();
+    }
+  };
+
+  // Show modal when showModal prop changes
+  React.useEffect(() => {
+    if (showModal) {
+      show();
+      setCurrentStep(0);
+      setProjectData({});
+      setFileList([]);
+    }
+  }, [showModal]);
+
   return (
     <div>
       <Button
@@ -827,14 +851,7 @@ const ClientCreateButton: React.FC<ClientCreateButtonProps> = ({ refetch }) => {
         footer={null}
         maskClosable={false}
         closable={!isSubmitting}
-        onCancel={() => {
-          if (!isSubmitting) {
-            close();
-            setCurrentStep(0);
-            setProjectData({});
-            setFileList([]);
-          }
-        }}
+        onCancel={handleClose}
       >
         <Steps current={currentStep} className="mb-8">
           <Step title="Basic Info" description="Project details" />

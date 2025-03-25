@@ -30,6 +30,7 @@ export const ProfileDropdownButton = () => {
             <div className="flex items-center mb-2">
               <Avatar
                 size={48}
+                src={user?.avatarUrl}
                 icon={<UserOutlined />}
                 className="mr-3 bg-blue-500"
               />
@@ -145,6 +146,7 @@ export const ProfileDropdownButton = () => {
             size="small"
             icon={<UserOutlined />}
             className="bg-blue-500"
+                src={user?.avatarUrl}
           />
           <span className="hidden sm:inline">
             {user?.firstName || "Account"}

@@ -355,15 +355,9 @@ const ClientNavBar: React.FC = () => {
     {
       key: "post-project",
       label: "Post New Project",
-      path: "/client/post-project",
+      path: "/client/projects?modal=create",
       icon: <FileTextOutlined />,
-    },
-    {
-      key: "drafts",
-      label: "Project Drafts",
-      path: "/client/drafts",
-      icon: <FileTextOutlined />,
-    },
+    }
   ];
 
   const messagingItems = [

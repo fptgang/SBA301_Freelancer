@@ -47,11 +47,17 @@ const ProfileCard: React.FC<{ profile: ProfileDto }> = ({ profile }) => {
             <Typography.Text className="mb-3 block">
               {profile.overview}
             </Typography.Text>
+          </Row>
+          <Row>
             {profile.skills && renderSkillTags(profile.skills)}
+          </Row>
+          <Row>
             <div className="mt-3">
               <Typography.Text strong>Education: </Typography.Text>
               <Typography.Text>{profile.education}</Typography.Text>
             </div>
+          </Row>
+          <Row>
             <div className="mt-2">
               <Typography.Text strong>Languages: </Typography.Text>
               <Typography.Text>{profile.language}</Typography.Text>
