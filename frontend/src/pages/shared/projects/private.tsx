@@ -1,10 +1,5 @@
 import React, { useState } from "react";
-import {
-  AccountDto,
-  ProjectDto,
-  ProjectStatusDto,
-  ProposalDto,
-} from "../../../../generated";
+import { AccountDto, ProjectDto, ProjectStatusDto, ProposalDto } from "../../../../generated";
 import {
   Button,
   Card,
@@ -147,10 +142,17 @@ const ProjectInternalDetail: React.FC<{
         projectId: project?.projectId ?? -1,
       });
 
-      open?.({
-        type: "success",
-        message: "Project closed successfully",
-      });
+      if (project?.status === ProjectStatusDto.InProgress) {
+        open?.({
+          type: "success",
+          message: "Project has been scheduled for termination",
+        });
+      } else {
+        open?.({
+          type: "success",
+          message: "Project closed successfully",
+        });
+      }
 
       // Manually invalidate the cache after successful mutation
       invalidate({
@@ -161,7 +163,7 @@ const ProjectInternalDetail: React.FC<{
     } catch (error) {
       open?.({
         type: "error",
-        message: "Failed to close project",
+        message: (error as Error).toString(),
       });
     }
   };
@@ -196,7 +198,8 @@ const ProjectInternalDetail: React.FC<{
             image={Empty.PRESENTED_IMAGE_SIMPLE}
           />
           <div className="mt-4">
-            <Button type="primary" onClick={() => navigate("/client/projects")}>
+            <Button type="primary" onClick={() => navigate(
+              user?.role === "CLIENT" ? "/client/projects" : "/freelancer/projects")}>
               Back to Projects
             </Button>
           </div>
@@ -244,7 +247,8 @@ const ProjectInternalDetail: React.FC<{
             <div className="mt-4 md:mt-0 flex space-x-3">
               <Button
                 type="default"
-                onClick={() => navigate("/client/projects")}
+                onClick={() => navigate(
+                  user?.role === "CLIENT" ? "/client/projects" : "/freelancer/projects")}
                 icon={<ArrowLeftOutlined />}
               >
                 Back
@@ -268,8 +272,7 @@ const ProjectInternalDetail: React.FC<{
                 </Button>
               )}
 
-              {(project.status === ProjectStatusDto.Open ||
-                !!project.contract) && (
+              {((project.status === ProjectStatusDto.Open || (project.contract && !project.toTerminate))) && (
                 <Popconfirm
                   title="Are you sure you want to close this project?"
                   onConfirm={handleTerminateProject}

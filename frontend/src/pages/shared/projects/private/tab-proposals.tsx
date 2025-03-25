@@ -43,7 +43,7 @@ const TabProposals: React.FC<{
   const [localSettings] = useLocalSettings();
   const [statusFilter, setStatusFilter] = useState<string | null>(
     project.status === ProjectStatusDto.Open ||
-      project.status === ProjectStatusDto.Paused
+    project.status === ProjectStatusDto.Paused
       ? "PENDING"
       : null
   );
@@ -64,13 +64,19 @@ const TabProposals: React.FC<{
       },
       ...(statusFilter
         ? [
-            {
-              field: "status",
-              operator: "eq" as const,
-              value: statusFilter,
-            },
-          ]
+          {
+            field: "status",
+            operator: "eq" as const,
+            value: statusFilter,
+          },
+        ]
         : []),
+    ],
+    sorters: [
+      {
+        field: "updatedAt",
+        order: "desc",
+      },
     ],
   });
 
@@ -148,24 +154,24 @@ const TabProposals: React.FC<{
             actions={
               proposal.status === ProposalStatusDto.Pending
                 ? [
-                    <div className="flex justify-end space-x-3 mt-4">
-                      <Popconfirm
-                        title="Are you sure you want to reject this proposal?"
-                        onConfirm={() =>
-                          handleRejectProposal(proposal.proposalId || -1)
-                        }
-                        okText="Yes"
-                        cancelText="No"
-                      >
-                        <Button danger>Reject Proposal</Button>
-                      </Popconfirm>
-                      <ContractCreateButton
-                        proposal={proposal}
-                        project={project}
-                        onSubmit={refetch}
-                      />
-                    </div>,
-                  ]
+                  <div className="flex justify-end space-x-3 mt-4">
+                    <Popconfirm
+                      title="Are you sure you want to reject this proposal?"
+                      onConfirm={() =>
+                        handleRejectProposal(proposal.proposalId || -1)
+                      }
+                      okText="Yes"
+                      cancelText="No"
+                    >
+                      <Button danger>Reject Proposal</Button>
+                    </Popconfirm>
+                    <ContractCreateButton
+                      proposal={proposal}
+                      project={project}
+                      onSubmit={refetch}
+                    />
+                  </div>,
+                ]
                 : []
             }
           >
@@ -201,12 +207,12 @@ const TabProposals: React.FC<{
                         proposal.status === ProposalStatusDto.Accepted
                           ? "success"
                           : proposal.status === ProposalStatusDto.Rejected
-                          ? "error"
-                          : proposal.status === ProposalStatusDto.Withdrawn
-                          ? "default"
-                          : proposal.status === ProposalStatusDto.Expired
-                          ? "warning"
-                          : "processing"
+                            ? "error"
+                            : proposal.status === ProposalStatusDto.Withdrawn
+                              ? "default"
+                              : proposal.status === ProposalStatusDto.Expired
+                                ? "warning"
+                                : "processing"
                       }
                       text={
                         <span className="font-medium">{proposal.status}</span>

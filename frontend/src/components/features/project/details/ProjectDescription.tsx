@@ -1,5 +1,5 @@
 import React from "react";
-import { Typography } from "antd";
+import { Tag, Typography } from "antd";
 import { UserOutlined, SafetyCertificateOutlined } from "@ant-design/icons";
 import { ProjectDto } from "../../../../../generated";
 import { renderSkillTags } from "../../../../utils/renderSkillTags";
@@ -13,6 +13,7 @@ export const ProjectDescription: React.FC<ProjectDescriptionProps> = ({
 }) => {
   return (
     <>
+
       <Typography.Title level={5} style={{ marginBottom: 16 }}>
         <UserOutlined style={{ marginRight: 8 }} />
         Project Description

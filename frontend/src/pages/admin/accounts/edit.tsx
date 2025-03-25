@@ -114,6 +114,7 @@ export const AccountsEdit: React.FC = () => {
                   placeholder="Enter email address"
                   className="w-full"
                   allowClear
+                  disabled
                 />
               </Form.Item>
             </Col>

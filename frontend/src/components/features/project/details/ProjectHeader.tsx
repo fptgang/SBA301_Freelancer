@@ -26,6 +26,12 @@ export const ProjectHeader: React.FC<ProjectHeaderProps> = ({ project }) => {
           >
             {project?.status?.replace("_", " ")}
           </Tag>
+
+{project.projectCategory &&
+  <Tag color="blue" className="px-3 py-1 rounded-full">
+    {project.projectCategory.name}
+  </Tag>
+}
         </Typography.Title>
 
         <Space size="middle">

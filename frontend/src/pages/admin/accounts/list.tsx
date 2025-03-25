@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { BaseRecord, useMany } from "@refinedev/core";
+import {BaseRecord, useGetIdentity, useMany} from "@refinedev/core";
 import {
   useTable,
   List,
@@ -41,6 +41,7 @@ const { Text } = Typography;
 
 export const AccountsList: React.FC = () => {
   const [localSettings] = useLocalSettings()
+  const {data: user} = useGetIdentity<AccountDto>();
   const [showDrawer, setShowDrawer] = useState(false);
   const [editDrawer, setEditDrawer] = useState(false);
   const [selectedAccount, setSelectedAccount] = useState<AccountDto>();
@@ -238,7 +239,7 @@ export const AccountsList: React.FC = () => {
                     style={{
                       border: "1px solid #e8e8e8",
                     }}
-                    disabled={record.role === "ADMIN" || record.isVerified}
+                    disabled={user?.role !== "ADMIN" || !record.isVisible}
                   />
                 </Tooltip>
                 <Tooltip title="View Details">
@@ -265,7 +266,7 @@ export const AccountsList: React.FC = () => {
                     confirmOkText="Delete"
                     confirmCancelText="Cancel"
                     about="Are you sure you want to delete this account? This action cannot be undone."
-                    disabled={record.role === "ADMIN"}
+                    disabled={user?.role !== "ADMIN" || !record.isVisible}
                   />
                 </Tooltip>
               </Space>
