@@ -18,21 +18,52 @@ m = g(r.sub, p.sub) && keyMatch(r.obj, p.obj) && regexMatch(r.act, p.act)
 `);
 
 export const adapter = new StringAdapter(`
-p, ADMIN, accounts, (list)|(create)
-p, ADMIN, accounts/*, (edit)|(show)|(delete)
-p, ADMIN, accounts/*, field
-p, ADMIN, projects, (list)|(create)
-p, ADMIN, projects/*, (edit)|(show)|(delete)
-p, ADMIN, projects/*, field
-p, ADMIN, projectCategories, (list)|(create)
-p, ADMIN, projectCategories/*, (edit)|(show)|(delete)
+# Admin permissions
+p, admin, accounts, (list)|(create)
+p, admin, accounts/*, (edit)|(show)|(delete)
+p, admin, accounts/*, field
+p, admin, projects, (list)|(create)
+p, admin, projects/*, (edit)|(show)|(delete)
+p, admin, projects/*, field
+p, admin, project-categories, (list)|(create)
+p, admin, project-categories/*, (edit)|(show)|(delete)
+p, admin, project-categories/*, field
+p, admin, skills, (list)|(create)
+p, admin, skills/*, (edit)|(show)|(delete)
+p, admin, skills/*, field
+p, admin, transactions, (list)
+p, admin, transactions/*, (show)
+p, admin, transactions/*, field
+p, admin, reports, (list)
+p, admin, reports/*, (show)
+p, admin, reports/*, field
 
-p, ADMIN, categories, (list)|(create)
-p, ADMIN, categories/*, (edit)|(show)|(delete)
+# Client permissions
+p, client, projects, (list)|(create)
+p, client, projects/*, (edit)|(show)|(delete), allow
+p, client, proposals, (list)
+p, client, proposals/*, (show)
+p, client, messages, (list)
+p, client, messages/*, (show)|(create)
+p, client, wallet, (list)|(show)|(create)
 
-p, editor, posts, (list)|(create)
-p, editor, posts/*, (edit)|(show)
-p, editor, posts/hit, field, deny
-p, editor, categories, list
+# Freelancer permissions
+p, freelancer, projects, (list)
+p, freelancer, projects/*, (show)
+p, freelancer, proposals, (list)|(create)
+p, freelancer, proposals/*, (edit)|(show)|(delete)
+p, freelancer, proposals/*, field
+p, freelancer, profile, (list)|(edit)|(show)
+p, freelancer, messages, (list)
+p, freelancer, messages/*, (show)|(create)
+p, freelancer, wallet, (list)|(show)|(create)
 
+# Shared permissions for all authenticated users
+p, admin, settings, (list)|(edit)|(show)
+p, client, settings, (list)|(edit)|(show)
+p, freelancer, settings, (list)|(edit)|(show)
+
+p, admin, wallet, (list)|(show)|(create)
+p, client, wallet, (list)|(show)|(create)
+p, freelancer, wallet, (list)|(show)|(create)
 `);
