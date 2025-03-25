@@ -196,7 +196,7 @@ const TabMilestones: React.FC<{ project: ProjectDto }> = ({project}) => {
                 {(!isFinished || isExpanded) &&
                   <Col span={6} className="flex justify-end">
                     <div className="flex flex-col gap-2">
-                      {(user && user.role == AccountDtoRoleEnum.Freelancer) && (
+                      {(user && user.role == AccountDtoRoleEnum.Freelancer && !!project.contract) && (
                         <>
                           {(milestone.status === MilestoneStatusDto.InProgress ||
                               milestone.status === MilestoneStatusDto.Reviewing) &&
@@ -209,7 +209,7 @@ const TabMilestones: React.FC<{ project: ProjectDto }> = ({project}) => {
                         </>
                       )}
 
-                      {(user && user.role == AccountDtoRoleEnum.Client) && (
+                      {(user && user.role == AccountDtoRoleEnum.Client && !!project.contract) && (
                         <>
                           {(milestone.status === MilestoneStatusDto.Reviewing) &&
                             <WorkAcceptButton

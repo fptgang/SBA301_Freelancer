@@ -350,6 +350,9 @@ public class ProjectServiceImpl implements ProjectService {
         for (Milestone milestone : project.getMilestones()) {
             if (!milestone.getIsVisible()) continue;
 
+            boolean isActive = project.getActiveMilestone() != null &&
+                    Objects.equals(project.getActiveMilestone().getMilestoneId(), milestone.getMilestoneId());
+
             if (current != null) {
                 if (milestone.getDeadline().isBefore(current)) {
                     throw new InvalidInputException(visibleCount == 0 ?
@@ -359,7 +362,8 @@ public class ProjectServiceImpl implements ProjectService {
                 if (milestone.getDeadline().isBefore(current.plusDays(hirableConfig.getMinMilestoneDurationBetween()))) {
                     throw new InvalidInputException("Milestone must have at least " + hirableConfig.getMinMilestoneDurationBetween() + " days in duration");
                 }
-                if (milestone.getDeadline().isAfter(current.plusDays(hirableConfig.getMaxMilestoneDurationBetween()))) {
+                // active milestone is an exception to this rule
+                if (!isActive && milestone.getDeadline().isAfter(current.plusDays(hirableConfig.getMaxMilestoneDurationBetween()))) {
                     throw new InvalidInputException("Milestone cannot exceed " + hirableConfig.getMaxMilestoneDurationBetween() + " days in duration");
                 }
             }

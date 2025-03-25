@@ -13,6 +13,7 @@ import Countdown from "../../../../components/Countdown";
 import ContractSignButton
   from "../../../../components/contract/contract-sign-button";
 import {useGetIdentity} from "@refinedev/core";
+import MilestoneDeadlineAdjustButton from "./milestone-deadline-adjust";
 
 const ProjectAlerts: React.FC<{ project: ProjectDto }> = ({project}) => {
   const [localSettings] = useLocalSettings()
@@ -69,7 +70,7 @@ const ProjectAlerts: React.FC<{ project: ProjectDto }> = ({project}) => {
   if (project.status === ProjectStatusDto.InProgress &&
     project.contract &&
     project.contract.status === ContractStatusDto.Signed &&
-    project.startDate! > new Date()) {
+    new Date(project.startDate!) > new Date()) {
     alerts.push(
       <Alert
         key="signed"
@@ -78,6 +79,32 @@ const ProjectAlerts: React.FC<{ project: ProjectDto }> = ({project}) => {
           targetDate={project.startDate!}/>
           {user?.role == AccountDtoRoleEnum.Freelancer &&
             ". You can start working on the first milestone now"}
+        </>}
+        type="info"
+        showIcon
+        className="mb-6 shadow-sm"
+      />
+    );
+  }
+
+  if (project.status === ProjectStatusDto.InProgress &&
+    !!project.activeMilestone &&
+    new Date(project.activeMilestone?.deadline!) < new Date()) {
+    alerts.push(
+      <Alert
+        key="signed"
+        message={<>
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center'
+          }}>
+            <span>
+            The deadline for the current milestone has passed.
+            </span>
+            {user?.role == AccountDtoRoleEnum.Client &&
+              <MilestoneDeadlineAdjustButton project={project} callback={() => window.location.reload()}/>}
+          </div>
         </>}
         type="info"
         showIcon

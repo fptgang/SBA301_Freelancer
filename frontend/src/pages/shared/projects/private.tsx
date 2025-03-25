@@ -314,7 +314,7 @@ const ProjectInternalDetail: React.FC<{
             <TabPane
               tab={
                 <span className="px-1">
-                  <ClockCircleOutlined/> Milestones
+                  <ClockCircleOutlined/> Milestones ({project.milestones?.length})
                 </span>
               }
               key="milestones"
