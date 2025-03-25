@@ -190,7 +190,7 @@ const TabProposals: React.FC<{
                     strong
                     className="text-lg cursor-pointer hover:text-blue-500"
                     onClick={() =>
-                      openProfile(proposal.freelancer?.profileId || 0)
+                      proposal.freelancer?.profileId && openProfile(proposal.freelancer?.profileId || 0)
                     }
                   >
                     {`${proposal.freelancer?.firstName} ${

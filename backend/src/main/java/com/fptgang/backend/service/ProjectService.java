@@ -34,4 +34,9 @@ public interface ProjectService {
     Long countProjectsByCategoryId(Long categoryId);
     Long countProjectsByCategoryIdAndStatus(Long categoryId, Project.ProjectStatus status);
 
+    void pauseProjectsWithNoProposalChosen();
+    void terminateProjectsWithUnsignedContract();
+    void terminateProjectsPerClientRequest();
+    void verifyAccounts();
+
 }
