@@ -146,8 +146,11 @@ const FreelancerActiveProject = () => {
               <Space>
                 <DollarOutlined />
                 <span>
-                  {formatCurrency(record.minBudget || 0)}-
-                  {formatCurrency(record.maxBudget || 0)}
+                  {record?.contract
+                    ? formatCurrency(record.contract?.budget || 0)
+                    : `${formatCurrency(
+                        record.minBudget || 0
+                      )}-${formatCurrency(record.maxBudget || 0)}`}
                 </span>
               </Space>
             )}

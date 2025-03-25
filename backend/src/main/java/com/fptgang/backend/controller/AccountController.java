@@ -58,6 +58,9 @@ public class AccountController implements AccountsApi {
     @Override
     public ResponseEntity<Void> deleteAccount(Long accountId) {
         log.info("Deleting account" + accountId);
+        if(!SecurityUtil.hasRole(Role.ADMIN, Role.STAFF)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
         accountService.deleteById(accountId);
         messagingTemplate.convertAndSend("resources/accounts", "Deleted account " + accountId);
         return new ResponseEntity<>(HttpStatus.OK);

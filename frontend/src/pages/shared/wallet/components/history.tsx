@@ -7,9 +7,9 @@ import {
   TransactionStatusDto,
   TransactionTypeDto,
 } from "../../../../../generated";
-import {useGetIdentity, useList} from "@refinedev/core";
-import {useLocalSettings} from "../../../../hooks/useLocalSettings";
-import {useState} from "react";
+import { useGetIdentity, useList } from "@refinedev/core";
+import { useLocalSettings } from "../../../../hooks/useLocalSettings";
+import { useState } from "react";
 import { InfoCircleOutlined, ArrowRightOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router";
 
@@ -80,7 +80,11 @@ const TransactionHistoryTable: React.FC = () => {
           [PaymentMethodDto.Vnpay]: "blue",
           [PaymentMethodDto.InternalWallet]: "orange",
         };
-        return <Tag color={typeColors[paymentMethod]}>{paymentMethod.replace(/_/g, " ")}</Tag>;
+        return (
+          <Tag color={typeColors[paymentMethod]}>
+            {paymentMethod.replace(/_/g, " ")}
+          </Tag>
+        );
       },
     },
     {
@@ -88,7 +92,12 @@ const TransactionHistoryTable: React.FC = () => {
       dataIndex: "fromAccount.accountName",
       key: "fromAccount",
       render: (amount: number, record) => {
-        return record.fromAccount && `${record.fromAccount?.firstName} ${record.fromAccount?.lastName || ''}`;
+        return (
+          record.fromAccount &&
+          `${record.fromAccount?.firstName} ${
+            record.fromAccount?.lastName || ""
+          }`
+        );
       },
     },
     {
@@ -96,7 +105,10 @@ const TransactionHistoryTable: React.FC = () => {
       dataIndex: "toAccount.accountName",
       key: "toAccount",
       render: (amount: number, record) => {
-        return record.toAccount && `${record.toAccount?.firstName} ${record.toAccount?.lastName || ''}`;
+        return (
+          record.toAccount &&
+          `${record.toAccount?.firstName} ${record.toAccount?.lastName || ""}`
+        );
       },
     },
     {
@@ -115,11 +127,13 @@ const TransactionHistoryTable: React.FC = () => {
       title: "Action",
       key: "action",
       render: (_, record) =>
-        (!!record.notes || !!record.milestone) && <Button
-          type="text"
-          icon={<InfoCircleOutlined />}
-          onClick={() => viewInfo(record)}
-        />,
+        (!!record.notes || !!record.milestone) && (
+          <Button
+            type="text"
+            icon={<InfoCircleOutlined />}
+            onClick={() => viewInfo(record)}
+          />
+        ),
     },
   ];
   const handlePageChange = (page: number, newPageSize: number) => {
@@ -128,7 +142,8 @@ const TransactionHistoryTable: React.FC = () => {
   };
   const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedTransaction, setSelectedTransaction] = useState<TransactionDto | null>(null);
+  const [selectedTransaction, setSelectedTransaction] =
+    useState<TransactionDto | null>(null);
 
   const viewInfo = (record: TransactionDto) => {
     setSelectedTransaction(record);
@@ -154,10 +169,11 @@ const TransactionHistoryTable: React.FC = () => {
           showSizeChanger: true,
           showQuickJumper: true,
           showTotal: (total) => `Total ${total} items`,
-          position: ['bottomRight'],
+          position: ["bottomRight"],
           responsive: true,
           pageSizeOptions: ["10", "20", "50"],
         }}
+        className="overflow-x-auto"
       />
       <Modal
         title="Transaction Info"
@@ -174,11 +190,17 @@ const TransactionHistoryTable: React.FC = () => {
         {selectedTransaction?.milestone && (
           <div>
             <h4>Milestone Information:</h4>
-            <p><strong>Title:</strong> {selectedTransaction.milestone.title}</p>
+            <p>
+              <strong>Title:</strong> {selectedTransaction.milestone.title}
+            </p>
             <Button
               type="primary"
               icon={<ArrowRightOutlined />}
-              onClick={() => navigate(`/projects/${selectedTransaction.milestone?.projectId}`)}
+              onClick={() =>
+                navigate(
+                  `/projects/${selectedTransaction.milestone?.projectId}`
+                )
+              }
             >
               View Project Details
             </Button>

@@ -1,24 +1,19 @@
-import React, {useEffect, useState} from "react";
-import {HttpError, useGetIdentity, useShow} from "@refinedev/core";
-import {AccountDto, ProjectDto} from "../../../../generated";
-import {useParams} from "react-router";
+import React, { useEffect, useState } from "react";
+import { HttpError, useGetIdentity, useShow } from "@refinedev/core";
+import { AccountDto, ProjectDto } from "../../../../generated";
+import { useParams } from "react-router";
 import ProjectInternalDetail from "./private";
 import ProjectPublicDetail from "./public";
-import {Spin, Typography} from "antd";
+import { Spin, Typography } from "antd";
 
 const ProjectDetail: React.FC = () => {
-  const {id} = useParams<{ id: string }>();
-  const {data: user} = useGetIdentity<AccountDto>();
-  const {
-    data,
-    isLoading,
-    isError,
-    refetch
-  } = useShow<ProjectDto, HttpError>({
+  const { id } = useParams<{ id: string }>();
+  const { data: user } = useGetIdentity<AccountDto>();
+  const { data, isLoading, isError, refetch } = useShow<ProjectDto, HttpError>({
     resource: "projects",
     id,
   }).query;
-  const [internalVersion, setInternalVersion] = useState(false)
+  const [internalVersion, setInternalVersion] = useState(false);
 
   useEffect(() => {
     refetch();
@@ -26,16 +21,22 @@ const ProjectDetail: React.FC = () => {
 
   useEffect(() => {
     const project = data?.data;
-    if (user && project && (project.client?.accountId === user.accountId ||
-      project.contract?.freelancer?.accountId === user.accountId)) {
-      setInternalVersion(true)
+    if (
+      user &&
+      project &&
+      (project.client?.accountId === user.accountId ||
+        project.contract?.freelancer?.accountId === user.accountId)
+    ) {
+      setInternalVersion(true);
     }
   }, [data, user]);
 
   ////////////////////////////////
 
   if (isLoading) {
-    return <Spin size="large" style={{margin: "100px auto", display: "block"}}/>
+    return (
+      <Spin size="large" style={{ margin: "100px auto", display: "block" }} />
+    );
   }
 
   if (isError || !data?.data) {
@@ -54,8 +55,11 @@ const ProjectDetail: React.FC = () => {
     );
   }
 
-  return internalVersion ? <ProjectInternalDetail project={data.data}/> :
-    <ProjectPublicDetail project={data.data}/>
+  return internalVersion ? (
+    <ProjectInternalDetail project={data.data} />
+  ) : (
+    <ProjectPublicDetail project={data.data} refetch={refetch} />
+  );
 };
 
 export default ProjectDetail;
