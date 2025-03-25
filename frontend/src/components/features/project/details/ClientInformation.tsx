@@ -1,6 +1,6 @@
 import React from "react";
 import { Card, Space, Avatar, Typography, Divider, Tag } from "antd";
-import { DollarOutlined, UserOutlined } from "@ant-design/icons";
+import { CheckCircleOutlined, DollarOutlined, UserOutlined } from "@ant-design/icons";
 import { ProjectDto } from "../../../../../generated";
 
 interface ClientInformationProps {
@@ -18,47 +18,20 @@ export const ClientInformation: React.FC<ClientInformationProps> = ({
     >
       <Space direction="vertical" size="middle" style={{ width: "100%" }}>
         <Space align="start">
-          <Avatar
-            src={project?.client?.avatarUrl}
-            size={64}
-            icon={<UserOutlined />}
-          />
-          <div>
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+              <Avatar 
+                  icon={<UserOutlined/>} 
+                  src={project?.client?.avatarUrl} 
+                  className="bg-blue-500"
+                  size={32} />
+              <div style={{ marginLeft: '16px' }}>
             <Typography.Text strong style={{ fontSize: 16 }}>
               {project?.client?.firstName} {project?.client?.lastName}
+                  {project.client?.isVerified &&
+                    <CheckCircleOutlined className="ml-1 text-blue-500"/>}
             </Typography.Text>
-            <br />
-            {/*<Typography.Text type="secondary">*/}
-            {/*  Member since {new Date(project?.client?.createdAt!).getFullYear()}*/}
-            {/*</Typography.Text>*/}
+            </div>
           </div>
-        </Space>
-
-        <Divider style={{ margin: "16px 0" }} />
-
-        <Space direction="vertical" style={{ width: "100%" }}>
-          <Typography.Text strong>
-            <DollarOutlined /> Project Estimated Budget
-          </Typography.Text>
-          <Typography.Title level={4} style={{ margin: 0 }}>
-            $
-            {project?.minBudget
-              ?.toFixed(0)
-              .replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
-            - $
-            {project?.maxBudget
-              ?.toFixed(0)
-              .replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
-          </Typography.Title>
-        </Space>
-
-        <Divider style={{ margin: "16px 0" }} />
-
-        <Space direction="vertical" style={{ width: "100%" }}>
-          <Typography.Text strong>Client Verified Status</Typography.Text>
-          <Tag color={project?.client?.isVerified ? "green" : "red"}>
-            {project?.client?.isVerified ? "Verified" : "Not Verified"}
-          </Tag>
         </Space>
       </Space>
     </Card>

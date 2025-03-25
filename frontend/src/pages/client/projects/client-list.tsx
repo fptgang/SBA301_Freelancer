@@ -139,6 +139,9 @@ const ClientList = () => {
                 <Space direction="vertical" size={0}>
                   <Text strong className="text-blue-600">
                     {value}
+                    {record.toTerminate && (
+                      <Tag color="red" className="ml-2">To-be-terminated</Tag>
+                    )}
                   </Text>
                   <Text type="secondary" className="text-xs">
                     Project ID: {record.projectId}

@@ -55,6 +55,12 @@ const TabProposals: React.FC<{
           value: statusFilter,
         }] : []),
       ],
+      sorters: [
+        {
+          field: "updatedAt",
+          order: "desc",
+        },
+      ],
     });
 
   const proposals = proposalsData?.data || [];

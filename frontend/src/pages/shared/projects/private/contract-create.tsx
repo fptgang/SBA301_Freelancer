@@ -108,22 +108,22 @@ export const ContractCreateButton: React.FC<ContractCreateButtonProps> = ({
                   <Text strong>Project:</Text> <Text>{project.title}</Text>
                 </Col>
                 <Col span={12}>
-                  <Text strong>Client:</Text>
+                  <Text strong>Client:</Text>{" "}
                   <Text>{`${project.client?.firstName} ${project.client?.lastName || ''}`}</Text>
                 </Col>
                 <Col span={12}>
-                  <Text strong>Freelancer:</Text>
+                  <Text strong>Freelancer:</Text>{" "}
                   <Text>{`${proposal.freelancer?.firstName} ${proposal.freelancer?.lastName || ''}`}</Text>
                 </Col>
               </Row>
               <Divider/>
               <Row gutter={[16, 16]}>
                 <Col span={12}>
-                  <Text strong>Start Date:</Text>
+                  <Text strong>Start Date:</Text>{" "}
                   <Text>{localSettings.formatDateTime(project.startDate!)}</Text>
                 </Col>
                 <Col span={12}>
-                  <Text strong>Total Budget:</Text>
+                  <Text strong>Total Budget:</Text>{" "}
                   <Text>${proposal.budget}</Text>
                 </Col>
 

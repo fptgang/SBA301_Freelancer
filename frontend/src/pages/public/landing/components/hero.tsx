@@ -4,45 +4,53 @@ import { Button, Typography } from "antd";
 import { ArrowRightOutlined } from "@ant-design/icons";
 import TrustedBy from "./trusted-by";
 import { motion } from "framer-motion";
-import { useIsAuthenticated } from "@refinedev/core";
+import { useGetIdentity, useIsAuthenticated } from "@refinedev/core";
 import { useNavigate } from "react-router";
+import { AccountDto } from "../../../../../generated";
 
 const { Title, Paragraph } = Typography;
 
-const text = "Find Top Freelancers for Your Next Project";
-
-const hooks = [
+const clientHooks = [
   "Find Top Freelancers for Your Next Project",
   "Connect with skilled professionals worldwide.",
   "Hire the best talent for your business needs on Hireable.",
 ];
+
+const freelancerHooks = [
+  "Find Your Next Exciting Project",
+  "Connect with potential clients worldwide.",
+  "Showcase your skills and earn on Hireable.",
+];
+
 const Hero: React.FC = () => {
+  const { data: user } = useGetIdentity<AccountDto>();
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [text, setText] = useState(hooks[0]);
+  const [isFreelancer, setIsFreelancer] = useState(false);
+  const [text, setText] = useState(isFreelancer ? freelancerHooks[0] : clientHooks[0]);
+
   useEffect(() => {
+    const currentHooks = isFreelancer ? freelancerHooks : clientHooks;
     const interval = setInterval(() => {
-      setCurrentIndex((prev) => (prev + 1) % hooks.length);
-      setText(hooks[currentIndex]);
-    }, 4000); // 4 seconds total (2s for animation + 2s delay)
+      setCurrentIndex((prev) => (prev + 1) % currentHooks.length);
+      setText(currentHooks[currentIndex]);
+    }, 4000);
 
     return () => clearInterval(interval);
-  }, [currentIndex]);
+  }, [currentIndex, isFreelancer]);
+
+  useEffect(() => {
+    if (user?.role === "FREELANCER") {
+      setIsFreelancer(true);
+    }
+  }, [user]);
+
   const { data: auth } = useIsAuthenticated();
   const nav = useNavigate();
   const handleHireTalentButton = () => {
     if (!auth?.authenticated) {
-      console.log("Authenticated");
       nav("/login", { replace: true });
-    }else{
-      nav("/search", { replace: true });
-    }
-  };
-
-  const handleLearnMore = () => {
-    if (!auth?.authenticated) {
-      nav("/login", { replace: true });
-    }else{
-      nav("/search", { replace: true });
+    } else {
+      nav(isFreelancer ? "/search?type=work" : "/search?type=talent", { replace: true });
     }
   };
 
@@ -75,8 +83,9 @@ const Hero: React.FC = () => {
               </motion.div>
             </Title>
             <Paragraph className="text-lg text-gray-600">
-              Connect with skilled professionals worldwide. Hire the best talent
-              for your business needs on Hireable.
+              {isFreelancer 
+                ? "Discover exciting projects and opportunities. Showcase your expertise and connect with clients looking for your skills."
+                : "Connect with skilled professionals worldwide. Hire the best talent for your business needs on Hireable."}
             </Paragraph>
             <div className="flex gap-4">
               <Button
@@ -84,14 +93,7 @@ const Hero: React.FC = () => {
                 size="large"
                 onClick={handleHireTalentButton}
               >
-                Hire Talent
-              </Button>
-              <Button
-                size="large"
-                className="flex items-center"
-                onClick={handleLearnMore}
-              >
-                Learn More <ArrowRightOutlined className="ml-2" />
+                {isFreelancer ? "Find Projects" : "Hire Talent"}
               </Button>
             </div>
           </div>

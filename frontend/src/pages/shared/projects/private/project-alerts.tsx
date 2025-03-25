@@ -186,7 +186,7 @@ const ProjectAlerts: React.FC<{
     );
   }
 
-  return <div className="flex flex-col gap-4">{alerts}</div>;
+  return <div className="flex flex-col">{alerts}</div>;
 };
 
 export default ProjectAlerts;
