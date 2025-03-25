@@ -11,7 +11,16 @@ import {
   RefreshButton,
   CreateButton,
 } from "@refinedev/antd";
-import { Table, Space, Tooltip, Typography, Input, Badge, Tag } from "antd";
+import {
+  Table,
+  Space,
+  Tooltip,
+  Typography,
+  Input,
+  Badge,
+  Tag,
+  Form,
+} from "antd";
 import {
   FolderOutlined,
   CheckSquareOutlined,
@@ -19,12 +28,12 @@ import {
   EyeOutlined,
 } from "@ant-design/icons";
 import { stompClient } from "../../../utils/stompClient";
-import {useLocalSettings} from "../../../hooks/useLocalSettings";
+import { useLocalSettings } from "../../../hooks/useLocalSettings";
 
 const { Text } = Typography;
 
 export const ProjectCategoriesList: React.FC = () => {
-  const [localSettings] = useLocalSettings()
+  const [localSettings] = useLocalSettings();
   const { tableProps, searchFormProps } = useTable({
     syncWithLocation: true,
     sorters: {
@@ -35,14 +44,15 @@ export const ProjectCategoriesList: React.FC = () => {
         },
       ],
     },
-    filters: {
-      initial: [
+    onSearch: (values) => {
+      console.log("Search values", values);
+      return [
         {
-          field: "isVisible",
-          operator: "eq",
-          value: undefined,
+          field: "name",
+          operator: "contains",
+          value: values.search,
         },
-      ],
+      ];
     },
     liveMode: "manual",
   });
@@ -80,13 +90,22 @@ export const ProjectCategoriesList: React.FC = () => {
       ]}
     >
       <div className="mb-6">
-        <Input.Search
-          placeholder="Search project categories..."
-          className="max-w-md"
-          {...(searchFormProps.onFinish && {
-            onSearch: searchFormProps.onFinish,
-          })}
-        />
+        <Form {...searchFormProps}>
+          <Space>
+            <Form.Item name="search">
+              <Input.Search
+                placeholder="Search skills..."
+                className="max-w-md"
+                onChange={(e) => {
+                  searchFormProps?.form?.setFieldsValue({
+                    search: e.target.value,
+                  });
+                  searchFormProps?.form?.submit();
+                }}
+              />{" "}
+            </Form.Item>
+          </Space>
+        </Form>
       </div>
 
       <Table

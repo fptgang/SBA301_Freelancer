@@ -113,7 +113,7 @@ import WithdrawPage from "./pages/shared/wallet/withdraw";
 import ProjectDetailsScreen from "./pages/public/project";
 import { Message } from "./pages/public/message";
 import MessageLayout from "./layouts/message-layout";
-import { ReportsEdit, ReportsList, ReportsShow } from "./pages/admin/reports";
+import { ReportsList, ReportsShow } from "./pages/admin/reports";
 import { stompClient } from "./utils";
 import VNPayReturnHandler from "./pages/shared/payment/VNPayReturnHandler";
 
@@ -183,11 +183,10 @@ const resources = [
   {
     name: "reports",
     list: "/admin/reports",
-    edit: "/admin/reports/edit/:id",
+    // edit: "/admin/reports/edit/:id",
     show: "/admin/reports/show/:id",
     meta: {
       label: "Reports",
-      canDelete: true,
       icon: <FileTextOutlined />,
     },
   },
@@ -306,7 +305,7 @@ function App() {
 
                     <Route path="reports">
                       <Route index element={<ReportsList />} />
-                      <Route path="edit/:id" element={<ReportsEdit />} />
+                      {/* <Route path="edit/:id" element={<ReportsEdit />} /> */}
                       <Route path="show/:id" element={<ReportsShow />} />
                     </Route>
                   </Route>
