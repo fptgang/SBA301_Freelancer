@@ -89,8 +89,8 @@ public class TransactionMapper extends BaseMapper<TransactionDto, Transaction> {
             entity.setFromAccount(accountRepos.getReferenceById(dto.getAccountId()));
         }
         entity.setAmount(dto.getAmount());
-        entity.setPaymentMethod(dto.getPaymentMethod() == null ? null :
-                Transaction.PaymentMethod.valueOf(dto.getPaymentMethod().name()));
+        entity.setPaymentMethod(Transaction.PaymentMethod.INTERNAL_WALLET);
+        entity.setType(Transaction.TransactionType.WITHDRAWAL);
         entity.setNotes(dto.getNotes());
         return entity;
     }

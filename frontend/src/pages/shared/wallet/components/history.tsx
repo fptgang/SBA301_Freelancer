@@ -20,6 +20,7 @@ const TransactionHistoryTable: React.FC = () => {
   const [pageSize, setPageSize] = useState(10);
   const { data } = useList<TransactionDto>({
     resource: "transactions",
+    sorters: [{ field: "createdAt", order: "desc" }],
     pagination: { current, pageSize },
   });
   const transactions = data?.data || [];
@@ -113,7 +114,7 @@ const TransactionHistoryTable: React.FC = () => {
     {
       title: "Action",
       key: "action",
-      render: (_, record) => 
+      render: (_, record) =>
         (!!record.notes || !!record.milestone) && <Button
           type="text"
           icon={<InfoCircleOutlined />}
@@ -174,7 +175,7 @@ const TransactionHistoryTable: React.FC = () => {
           <div>
             <h4>Milestone Information:</h4>
             <p><strong>Title:</strong> {selectedTransaction.milestone.title}</p>
-            <Button 
+            <Button
               type="primary"
               icon={<ArrowRightOutlined />}
               onClick={() => navigate(`/client/projects/${selectedTransaction.milestone?.projectId}`)}

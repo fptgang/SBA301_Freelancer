@@ -1,12 +1,15 @@
 import { Card, Typography } from "antd";
 import TransactionHistoryTable from "./components/history";
 import { store } from "../../../store";
+import { useGetIdentity } from "@refinedev/core";
+import { AccountDto } from "../../../../generated";
 const { Title } = Typography;
 
 // TODO: Replace with actual balance from API
 
 const WalletPage: React.FC = () => {
-  const currentBalance = store.getState().auth.account?.balance || 0;
+  const { data: user } = useGetIdentity<AccountDto>();
+  const currentBalance = user?.balance || 0;
 
   return (
     <div className="space-y-6">

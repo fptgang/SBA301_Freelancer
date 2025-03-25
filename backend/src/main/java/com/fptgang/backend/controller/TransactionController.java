@@ -116,6 +116,7 @@ public class TransactionController implements TransactionsApi {
 
     @Override
     public ResponseEntity<TransactionDto> createWithdrawRequest(@Valid @RequestBody WithdrawDto withdrawDto){
+        withdrawDto.setAccountId(SecurityUtil.requireCurrentUserId());
         Transaction transaction = transactionService.createWithdrawalRequest(transactionMapper.toEntity(withdrawDto));
 
         if(!SecurityUtil.hasPermission(Role.FREELANCER) &&

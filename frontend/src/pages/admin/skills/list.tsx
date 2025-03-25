@@ -9,13 +9,22 @@ import {
   BooleanField,
   DateField,
 } from "@refinedev/antd";
-import { Table, Space, Input, Tooltip, Typography, Tag, Badge } from "antd";
+import {
+  Table,
+  Space,
+  Input,
+  Tooltip,
+  Typography,
+  Tag,
+  Badge,
+  Form,
+} from "antd";
 import {
   CodeOutlined,
   EyeOutlined,
   ClockCircleOutlined,
 } from "@ant-design/icons";
-import {useLocalSettings} from "../../../hooks/useLocalSettings";
+import { useLocalSettings } from "../../../hooks/useLocalSettings";
 
 const { Text } = Typography;
 
@@ -28,7 +37,7 @@ interface Skill {
 }
 
 export const SkillsList: React.FC = () => {
-  const [localSettings] = useLocalSettings()
+  const [localSettings] = useLocalSettings();
   const { tableProps, searchFormProps } = useTable<Skill>({
     syncWithLocation: true,
     sorters: {
@@ -39,14 +48,15 @@ export const SkillsList: React.FC = () => {
         },
       ],
     },
-    filters: {
-      initial: [
+    onSearch: (values) => {
+      console.log("Search values", values);
+      return [
         {
-          field: "isVisible",
-          operator: "eq",
-          value: undefined,
+          field: "name",
+          operator: "contains",
+          value: values.search,
         },
-      ],
+      ];
     },
   });
 
@@ -80,13 +90,22 @@ export const SkillsList: React.FC = () => {
   return (
     <List>
       <div className="mb-6">
-        <Input.Search
-          placeholder="Search skills..."
-          className="max-w-md"
-          {...(searchFormProps.onFinish && {
-            onSearch: searchFormProps.onFinish,
-          })}
-        />
+        <Form {...searchFormProps}>
+          <Space>
+            <Form.Item name="search">
+              <Input.Search
+                placeholder="Search skills..."
+                className="max-w-md"
+                onChange={(e) => {
+                  searchFormProps?.form?.setFieldsValue({
+                    search: e.target.value,
+                  });
+                  searchFormProps?.form?.submit();
+                }}
+              />{" "}
+            </Form.Item>
+          </Space>
+        </Form>
       </div>
 
       <Table

@@ -24,7 +24,7 @@ import {
   TransactionTypeDto,
 } from "../../../../generated";
 import { ShowTransactionDrawer } from "./components/ShowTransactionDrawer";
-import {useLocalSettings} from "../../../hooks/useLocalSettings";
+import { useLocalSettings } from "../../../hooks/useLocalSettings";
 
 const { Text } = Typography;
 
@@ -40,11 +40,15 @@ const TYPE_CONFIG: Record<
 };
 
 export const TransactionsList: React.FC = () => {
-  const [localSettings] = useLocalSettings()
+  const [localSettings] = useLocalSettings();
   const [showDrawer, setShowDrawer] = useState(false);
   const [selectedTransaction, setSelectedTransaction] =
     useState<TransactionDto>();
-  const { tableProps, searchFormProps } = useTable<TransactionDto>({
+  const {
+    tableProps,
+    searchFormProps,
+    tableQuery: { refetch },
+  } = useTable<TransactionDto>({
     syncWithLocation: true,
     sorters: {
       initial: [
@@ -250,6 +254,7 @@ export const TransactionsList: React.FC = () => {
           setShowDrawer(false);
         }}
         open={showDrawer}
+        refetch={refetch}
         transaction={selectedTransaction}
       />
     </>

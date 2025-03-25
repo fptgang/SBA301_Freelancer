@@ -1,6 +1,17 @@
 import React from "react";
-import { useShow } from "@refinedev/core";
-import { Drawer, Skeleton, Space, Tag, Alert, Descriptions, Card } from "antd";
+import { useShow, useNotification } from "@refinedev/core";
+import {
+  Drawer,
+  Skeleton,
+  Space,
+  Tag,
+  Alert,
+  Descriptions,
+  Card,
+  Button,
+  Modal,
+  Typography,
+} from "antd";
 import {
   DollarOutlined,
   SwapOutlined,
@@ -8,15 +19,20 @@ import {
   UserOutlined,
   CheckCircleOutlined,
   ArrowsAltOutlined,
+  CheckOutlined,
+  CloseOutlined,
+  BookOutlined,
 } from "@ant-design/icons";
 import {
   TransactionDto,
   TransactionStatusDto,
   TransactionTypeDto,
+  UpdateWithdrawDto,
 } from "../../../../../generated";
 import { DateField, NumberField } from "@refinedev/antd";
 import { Link } from "react-router";
-import {useLocalSettings} from "../../../../hooks/useLocalSettings";
+import { useLocalSettings } from "../../../../hooks/useLocalSettings";
+import api from "../../../../services/api/openapi-config";
 
 const STATUS_COLOR_MAP: Record<TransactionStatusDto, string> = {
   SUCCESS: "green",
@@ -36,14 +52,62 @@ interface ShowTransactionDrawerProps {
   transaction?: TransactionDto;
   open: boolean;
   onClose: () => void;
+  refetch?: () => void;
 }
 
 export const ShowTransactionDrawer: React.FC<ShowTransactionDrawerProps> = ({
   transaction,
   open,
   onClose,
+  refetch,
 }) => {
-  const [localSettings] = useLocalSettings()
+  const [localSettings] = useLocalSettings();
+  const { open: openNotification } = useNotification();
+  const [updateModalVisible, setUpdateModalVisible] = React.useState(false);
+  const [updatingStatus, setUpdatingStatus] =
+    React.useState<TransactionStatusDto | null>(null);
+
+  const handleStatusUpdate = async (status: TransactionStatusDto) => {
+    if (!transaction) return;
+
+    setUpdatingStatus(status);
+    setUpdateModalVisible(true);
+  };
+
+  const confirmStatusUpdate = async () => {
+    if (!transaction || !updatingStatus) return;
+
+    try {
+      const updateDto: UpdateWithdrawDto = {
+        transactionId: transaction.transactionId,
+        transactionStatus: updatingStatus,
+      };
+
+      await api.updateWithdrawRequest({
+        updateWithdrawDto: updateDto,
+      });
+
+      openNotification?.({
+        type: "success",
+        message: "Transaction status updated successfully",
+        description: `Status has been updated to ${updatingStatus}`,
+      });
+
+      // Close modal and refresh the page
+      setUpdateModalVisible(false);
+      refetch?.();
+    } catch (error) {
+      console.error("Error updating transaction status:", error);
+      openNotification?.({
+        type: "error",
+        message: "Error updating status",
+        description: "Failed to update transaction status. Please try again.",
+      });
+    } finally {
+      setUpdatingStatus(null);
+    }
+  };
+
   const getStatusTag = (status: TransactionStatusDto) => (
     <Tag color={STATUS_COLOR_MAP[status]} className="text-sm">
       {status}
@@ -148,6 +212,21 @@ export const ShowTransactionDrawer: React.FC<ShowTransactionDrawerProps> = ({
             </Descriptions.Item>
           </Descriptions>
         </Card>
+        {transaction?.type === TransactionTypeDto.Withdrawal && (
+          <Card
+            title={
+              <Space>
+                <BookOutlined className="text-blue-500" />
+                <span className="font-semibold">Notes from user</span>
+              </Space>
+            }
+            className="shadow-md"
+          >
+            <Typography.Title level={5}>
+              {transaction?.notes || "No notes provided"}
+            </Typography.Title>
+          </Card>
+        )}
 
         <Card
           title={
@@ -220,7 +299,71 @@ export const ShowTransactionDrawer: React.FC<ShowTransactionDrawerProps> = ({
             </Descriptions.Item>
           </Descriptions>
         </Card>
+
+        {/* Add Withdrawal Status Update Section */}
+        {transaction &&
+          transaction.type === TransactionTypeDto.Withdrawal &&
+          transaction.status === TransactionStatusDto.Pending && (
+            <Card
+              title={
+                <Space>
+                  <CheckCircleOutlined className="text-blue-500" />
+                  <span className="font-semibold">
+                    Withdrawal Status Update
+                  </span>
+                </Space>
+              }
+              className="shadow-md"
+            >
+              <Space direction="vertical" className="w-full">
+                <Alert
+                  message="Action Required"
+                  description="Please review the withdrawal request and update its status."
+                  type="warning"
+                  showIcon
+                />
+                <Space className="mt-4">
+                  <Button
+                    type="primary"
+                    icon={<CheckOutlined />}
+                    onClick={() =>
+                      handleStatusUpdate(TransactionStatusDto.Success)
+                    }
+                  >
+                    Mark as Success
+                  </Button>
+                  <Button
+                    danger
+                    icon={<CloseOutlined />}
+                    onClick={() =>
+                      handleStatusUpdate(TransactionStatusDto.Failed)
+                    }
+                  >
+                    Mark as Failed
+                  </Button>
+                </Space>
+              </Space>
+            </Card>
+          )}
       </Space>
+
+      <Modal
+        title="Confirm Status Update"
+        open={updateModalVisible}
+        onOk={confirmStatusUpdate}
+        onCancel={() => {
+          setUpdateModalVisible(false);
+          setUpdatingStatus(null);
+        }}
+      >
+        <p>
+          Are you sure you want to update this withdrawal transaction status to{" "}
+          <Tag color={updatingStatus === "SUCCESS" ? "success" : "error"}>
+            {updatingStatus}
+          </Tag>
+          ?
+        </p>
+      </Modal>
     </Drawer>
   );
 };
