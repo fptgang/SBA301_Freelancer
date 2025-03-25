@@ -36,7 +36,7 @@ const SettingsLayout: React.FC = ({}) => {
 
   return (
     <Layout>
-      <Header className="sticky top-0 z-[1] w-full flex items-center bg-inherit">
+      <Header className="sticky top-0 z-[1] w-full flex items-center bg-inherit p-0">
         <NavBar />
       </Header>
       <div style={{ padding: "0 48px" }}>
