@@ -301,16 +301,8 @@ public class EmailServiceImpl implements EmailService {
     public void sendProjectEmailTemplateToBoth(Long id) throws IOException {
         Project project = projectRepos.findByProjectId(id)
                 .orElseThrow(() -> new IllegalArgumentException("Cannot find Project Id"));
-        if (project.getStatus() != Project.ProjectStatus.FINISHED && project.getStatus() != Project.ProjectStatus.TERMINATED){
-            log.info("Project status is not valid for client notification: {}", project.getStatus());
-            return;
-        }
-        else if(Boolean.TRUE.equals(project.getToTerminate())){
-            log.info("Project to be terminate is not valid for client notification: {}", project.getToTerminate());
-            return;
-        }
 
-        log.info("Preparing to send project completed both to client,freelancer: {} ,{}", project.getClient().getEmail(),project.getFreelancer().getEmail());
+        log.info("Preparing to send project completed both to client,freelancer: {}", project.getClient().getEmail());
 
         var template = projectCompletedTemplate.getContentAsString(StandardCharsets.UTF_8);
         var data = projectEmailTemplateMapper.create(project);
@@ -319,7 +311,6 @@ public class EmailServiceImpl implements EmailService {
         String content = TemplateUtil.render(projectCompletedTemplate.getFilename(), template, data);
 
         sendMail(emailFrom, project.getClient().getEmail(), subject, content);
-        sendMail(emailFrom, project.getFreelancer().getEmail(), subject, content);
     }
 
     @Override
