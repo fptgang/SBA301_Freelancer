@@ -83,6 +83,7 @@ public class MilestoneMapper extends BaseMapper<MilestoneDto, Milestone> {
         if (authContext.hasInternalAccess(entity.getProject())) {
             dto.setContractualBudget(entity.getContractualBudget());
             dto.setDeliverables(entity.getDeliverables().stream()
+                    .filter(file -> file.getIsVisible() || authContext.hasInvisibilityBypass())
                     .map(f -> fileMapper.toDTO(f, DetailLevel.FULL))
                     .toList());
         }

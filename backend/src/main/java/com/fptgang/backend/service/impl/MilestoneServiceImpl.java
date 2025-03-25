@@ -161,7 +161,6 @@ public class MilestoneServiceImpl implements MilestoneService {
     @Override
     @Transactional
     public Milestone submitWork(Milestone milestone, List<MultipartFile> blobs) {
-        Preconditions.checkArgument(!blobs.isEmpty(), "Files are empty");
         Preconditions.checkArgument(
                 milestone.getStatus() == Milestone.MilestoneStatus.IN_PROGRESS ||
                         milestone.getStatus() == Milestone.MilestoneStatus.REVIEWING,
@@ -175,16 +174,19 @@ public class MilestoneServiceImpl implements MilestoneService {
         Preconditions.checkNotNull(milestone.getProject().getContract());
         authContext.requireAccountId(milestone.requireFreelancer().getAccountId());
 
-        // Change to reviewing if not yet
-        if (milestone.getStatus() == Milestone.MilestoneStatus.IN_PROGRESS) {
-            milestone.setStatus(Milestone.MilestoneStatus.REVIEWING);
-            milestone = milestoneRepos.save(milestone);
-        }
-
         for (MultipartFile blob : blobs) {
             milestone.getDeliverables().add(
                     fileService.createForMilestone(milestone.getMilestoneId(), blob)
             );
+        }
+
+        // Change to reviewing if not yet
+        if (milestone.getStatus() == Milestone.MilestoneStatus.IN_PROGRESS) {
+            if (blobs.isEmpty() &&
+                    fileService.countVisibleFilesForMilestone(milestone.getMilestoneId()) == 0)
+                throw new IllegalStateException("No files have been submitted");
+            milestone.setStatus(Milestone.MilestoneStatus.REVIEWING);
+            milestone = milestoneRepos.save(milestone);
         }
 
         return milestone;

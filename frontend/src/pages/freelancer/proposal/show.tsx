@@ -37,7 +37,6 @@ import { useNavigate, useParams } from "react-router";
 import api from "../../../services/api/openapi-config";
 import dayjs from "dayjs";
 import { useLocalSettings } from "../../../hooks/useLocalSettings";
-import { ContractSignButton } from "../../../components";
 
 const { Title, Text, Paragraph } = Typography;
 

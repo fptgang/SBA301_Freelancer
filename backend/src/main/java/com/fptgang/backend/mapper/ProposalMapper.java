@@ -8,6 +8,7 @@ import com.fptgang.backend.repository.AccountRepos;
 import com.fptgang.backend.repository.ContractRepos;
 import com.fptgang.backend.repository.FileRepos;
 import com.fptgang.backend.repository.ProjectRepos;
+import com.fptgang.backend.security.AuthContext;
 import com.fptgang.backend.util.DateTimeUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -22,13 +23,16 @@ public class ProposalMapper extends BaseMapper<ProposalDto, Proposal> {
     private final FileRepos fileRepos;
     private final FileMapper fileMapper;
     private final ContractRepos contractRepos;
+    private final AuthContext authContext;
 
     public ProposalMapper(ProjectRepos projectRepos,
                           AccountRepos accountRepos,
                           AccountMapper accountMapper,
                           ContractMapper.Converter contractConverter,
                           FileRepos fileRepos,
-                          FileMapper fileMapper, ContractRepos contractRepos) {
+                          FileMapper fileMapper,
+                          ContractRepos contractRepos,
+                          AuthContext authContext) {
         this.projectRepos = projectRepos;
         this.accountRepos = accountRepos;
         this.accountMapper = accountMapper;
@@ -36,6 +40,7 @@ public class ProposalMapper extends BaseMapper<ProposalDto, Proposal> {
         this.fileRepos = fileRepos;
         this.fileMapper = fileMapper;
         this.contractRepos = contractRepos;
+        this.authContext = authContext;
     }
 
     @Override
@@ -82,7 +87,10 @@ public class ProposalMapper extends BaseMapper<ProposalDto, Proposal> {
         dto.setContractId(entity.getContract()!=null?entity.getContract().getContractId():null);
         dto.setCreatedAt(DateTimeUtil.fromLocalToOffset(entity.getCreatedAt()));
         dto.setUpdatedAt(DateTimeUtil.fromLocalToOffset(entity.getUpdatedAt()));
-        dto.setFiles(entity.getFiles().stream().map((file -> fileMapper.toDTO(file, DetailLevel.FULL))).toList());
+        dto.setFiles(entity.getFiles().stream()
+                .filter(file -> file.getIsVisible() || authContext.hasInvisibilityBypass())
+                .map((file -> fileMapper.toDTO(file, DetailLevel.FULL)))
+                .toList());
         return dto;
     }
 }

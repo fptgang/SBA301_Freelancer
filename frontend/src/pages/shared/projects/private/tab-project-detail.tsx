@@ -3,7 +3,7 @@ import {ProjectDto} from "../../../../../generated";
 import {Avatar, Button, Divider, List, Tag, Typography} from "antd";
 import {FileTextOutlined, ToolOutlined} from "@ant-design/icons";
 import {useLocalSettings} from "../../../../hooks/useLocalSettings";
-import FileList from "../shared/file-list";
+import FileList from "../../../../components/common/file-list";
 
 const { Title, Text, Paragraph } = Typography;
 
@@ -55,13 +55,18 @@ const TabProjectDetail: React.FC<{ project: ProjectDto }> = ({ project }) => {
 
         <Divider />
 
-        {project.files && project.files.length > 0 && (
+        
+        <Title level={5} className="text-gray-700">
+          Attachments
+        </Title>
+        {project.files && project.files.length > 0 ? (
           <>
-            <Title level={5} className="text-gray-700">
-              Attachments
-            </Title>
-            <FileList files={project.files} />
+            <FileList files={project.files.filter(file => file.isVisible)} />
           </>
+        ) : (
+          <Text type="secondary" className="italic">
+            No attachments
+          </Text>
         )}
       </div>
     </>

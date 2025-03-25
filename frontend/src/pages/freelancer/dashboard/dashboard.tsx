@@ -43,8 +43,8 @@ import {
 import { store } from "../../../store";
 import { useNavigate } from "react-router";
 import ContractShowModal from "../../../components/ContractShowModal";
-import { ContractSignButton } from "../../../components";
 import { useLocalSettings } from "../../../hooks/useLocalSettings";
+import ContractSignButton from "../../../components/contract/contract-sign-button";
 
 const { Title, Text } = Typography;
 

@@ -159,6 +159,7 @@ public class ProjectMapper extends BaseMapper<ProjectDto, Project> {
                 ProjectTerminationReasonDto.valueOf(entity.getTerminationReason().name()));
         dto.setToTerminate(entity.getToTerminate());
         dto.setMilestones(entity.getMilestones().stream()
+                .filter(milestone -> milestone.getIsVisible() || authContext.hasInvisibilityBypass())
                 .map(milestone -> milestoneMapper.toDTO(milestone, DetailLevel.FULL))
                 .collect(Collectors.toList()));
         dto.setActiveMilestone(milestoneMapper.toDTO(entity.getActiveMilestone(), DetailLevel.FULL));

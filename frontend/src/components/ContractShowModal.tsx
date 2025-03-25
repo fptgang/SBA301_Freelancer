@@ -67,7 +67,7 @@ const ContractShowModal: React.FC<ContractShowModalProps> = ({
                 </Text>
               </Descriptions.Item>
               <Descriptions.Item label="Created Date">
-                {localSettings.formatDateTime(contract.createdAt)}
+                {localSettings.formatDateTime(contract.createdAt!)}
               </Descriptions.Item>
               <Descriptions.Item label="Budget">
                 ${contract.budget}

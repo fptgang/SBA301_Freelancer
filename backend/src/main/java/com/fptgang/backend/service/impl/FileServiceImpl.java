@@ -2,6 +2,8 @@ package com.fptgang.backend.service.impl;
 
 import com.fptgang.backend.model.Contract;
 import com.fptgang.backend.model.File;
+import com.fptgang.backend.model.Project;
+import com.fptgang.backend.model.Role;
 import com.fptgang.backend.repository.*;
 import com.fptgang.backend.security.AuthContext;
 import com.fptgang.backend.service.AzureBlobService;
@@ -87,6 +89,11 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
+    public long countVisibleFilesForMilestone(Long milestoneId) {
+        return fileRepos.countByMilestone_MilestoneIdAndIsVisibleTrue(milestoneId);
+    }
+
+    @Override
     public File create(MultipartFile blob) {
         return create(File.builder().build(), blob);
     }
@@ -119,6 +126,29 @@ public class FileServiceImpl implements FileService {
     public File deleteById(long id) {
         File file = fileRepos.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("File does not exist"));
+
+        // Only staff+ or the owner can delete
+        authContext.requirePermissionOrAccountIds(Role.STAFF, file.getUploader().getAccountId());
+
+        // Can only delete milestone file during in progress
+        if (file.getMilestone() != null &&
+                file.getMilestone().getProject().getStatus() != Project.ProjectStatus.IN_PROGRESS){
+            throw new IllegalStateException("Milestone is not in progress");
+        }
+
+        // Can only delete project file during OPEN
+        if (file.getProject() != null && file.getProject().getStatus() != Project.ProjectStatus.OPEN){
+            throw new IllegalStateException("Project is not in OPEN");
+        }
+
+        // Cannot delete contract file
+        if (file.getContract() != null)
+            throw new IllegalStateException("Cannot delete contract supporting document");
+
+        // Cannot delete proposal file
+        if (file.getProposal() != null)
+            throw new IllegalStateException("Cannot delete proposal supporting documents");
+
         file.setIsVisible(false);
         return fileRepos.save(file);
     }

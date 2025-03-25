@@ -15,53 +15,48 @@ import {
   message,
   Checkbox,
   Statistic,
+  Table,
 } from "antd";
 import { InboxOutlined, CheckCircleOutlined } from "@ant-design/icons";
 import { useModal } from "@refinedev/antd";
 import type { UploadFile } from "antd/es/upload/interface";
-import { store } from "../../../store";
-import api from "../../../services/api/openapi-config";
-import DepositModal from "../../../components/DepositModal";
-import { AccountDto } from "../../../../generated";
+import { AccountDto, ProjectDto, ProposalDto } from "../../../../../generated";
+import api from "../../../../services/api/openapi-config";
+import ModalTopup from "./modal-topup";
+import { useLocalSettings } from "../../../../hooks/useLocalSettings";
+
 
 const { Step } = Steps;
 const { Dragger } = Upload;
 const { Text } = Typography;
 
 interface ContractCreateButtonProps {
-  projectTitle: string;
-  freelancerName: string;
-  milestoneAmount: number;
-  proposalId: number;
+  project: ProjectDto;
+  proposal: ProposalDto;
   onSubmit?: () => void;
 }
 
 export const ContractCreateButton: React.FC<ContractCreateButtonProps> = ({
-  projectTitle,
-  freelancerName,
-  milestoneAmount,
-  proposalId,
+  project,
+  proposal,
   onSubmit,
 }) => {
+  const [localSettings] = useLocalSettings()
+  const milestoneAmount = (project.milestones?.filter(m => m.isVisible)[0]?.budgetRatio || 0) * (proposal.budget || 0);
   const { data: user } = useGetIdentity<AccountDto>();
-  // Modal state
   const { modalProps, show, close } = useModal();
   const [currentStep, setCurrentStep] = useState(0);
   const [fileList, setFileList] = useState<UploadFile[]>([]);
   const [showTopUpModal, setShowTopUpModal] = useState(false);
-  // Handle file upload
   const handleFileChange = ({ fileList }: { fileList: UploadFile[] }) => {
     setFileList([...fileList]);
   };
 
-  // Handle step form submission
   const handleStepSubmit = async () => {
-    if (currentStep === 1) {
-      // Final step - prepare the contract data
-      // Add files if any
+    if (currentStep === 2) {
       await api
         .createContract({
-          proposalId: proposalId,
+          proposalId: proposal.proposalId || 0,
         })
         .then(async (data) => {
           fileList.forEach((file) => {
@@ -81,40 +76,28 @@ export const ContractCreateButton: React.FC<ContractCreateButtonProps> = ({
       onSubmit && onSubmit();
       close();
     } else {
-      // Move to next step
       setCurrentStep(currentStep + 1);
     }
   };
 
-  // Navigate to previous step
   const handlePrevStep = () => {
     setCurrentStep(currentStep - 1);
   };
 
-  // Step forms
   const renderStepContent = () => {
     switch (currentStep) {
       case 0:
+        const visibleMilestones = project.milestones?.filter(m => m.isVisible).map(m => {
+          m.contractualBudget = m.budgetRatio! * (proposal.budget || 0);
+          return m
+        }) || [];
+
         return (
           <Form
             layout="vertical"
             onFinish={handleStepSubmit}
             initialValues={{ terms: false }}
           >
-            <Alert
-              message="Contract Creation"
-              description={
-                <Text>
-                  Once you accept, we will create a contract between you and{" "}
-                  {freelancerName}. Please ensure that your balance has enough
-                  funds to deposit for the first milestone payment.
-                </Text>
-              }
-              type="info"
-              showIcon
-              style={{ marginBottom: 24 }}
-            />
-
             <Card
               title="Contract Details"
               bordered={false}
@@ -122,13 +105,90 @@ export const ContractCreateButton: React.FC<ContractCreateButtonProps> = ({
             >
               <Row gutter={[16, 16]}>
                 <Col span={24}>
-                  <Text strong>Project:</Text> <Text>{projectTitle}</Text>
+                  <Text strong>Project:</Text> <Text>{project.title}</Text>
                 </Col>
                 <Col span={12}>
-                  <Text strong>Freelancer:</Text> <Text>{freelancerName}</Text>
+                  <Text strong>Client:</Text> <Text>{`${project.client?.firstName} ${project.client?.lastName || ''}`}</Text>
                 </Col>
+                <Col span={12}>
+                  <Text strong>Freelancer:</Text> <Text>{`${proposal.freelancer?.firstName} ${proposal.freelancer?.lastName || ''}`}</Text>
+                </Col>
+              </Row>
+              <Divider />
+              <Row gutter={[16, 16]}>
+                <Col span={12}>
+                <Text strong>Start Date:</Text> <Text>{localSettings.formatDateTime(project.startDate!)}</Text>
+                </Col>
+                <Col span={12}>
+                  <Text strong>Total Budget:</Text> <Text>${proposal.budget}</Text>
+                </Col>
+
                 <Col span={24}>
-                  <Divider style={{ margin: "12px 0" }} />
+                  <Text strong>Milestones:</Text>
+                  <Table
+                    dataSource={visibleMilestones}
+                    style={{ width: '100%', marginTop: '16px' }}
+                    pagination={false}
+                    rowKey="milestoneId"
+                  >
+                    <Table.Column title="Title" dataIndex="title" key="title" />
+                    <Table.Column title="Budget Ratio" dataIndex="budgetRatio" key="budgetRatio" render={(text) => `${(text * 100).toFixed(0)}%`} />
+                    <Table.Column title="Absolute Budget" dataIndex="contractualBudget" key="contractualBudget" render={(text) => `$${text.toFixed(2)}`} />
+                    <Table.Column title="Deadline" dataIndex="deadline" key="deadline" render={(text) => localSettings.formatDateTime(text)} />
+                  </Table>
+                </Col>
+              </Row>
+            </Card>
+
+            <Alert
+              message="Important Notice"
+              description="By creating this contract, you agree to deposit the first milestone amount into escrow. This amount will only be released to the freelancer upon your approval of the completed work."
+              type="warning"
+              showIcon
+              style={{ marginBottom: 24 }}
+            />
+
+            <Form.Item
+              name="terms"
+              valuePropName="checked"
+              rules={[
+                {
+                  validator: (_, value) =>
+                    value
+                      ? Promise.resolve()
+                      : Promise.reject(
+                          new Error("You must accept the terms to proceed")
+                        ),
+                },
+              ]}
+            >
+              <Checkbox>
+                I understand and agree to the terms of this contract
+              </Checkbox>
+            </Form.Item>
+
+            <div style={{ display: "flex", justifyContent: "flex-end" }}>
+              <Button 
+                type="primary" 
+                htmlType="submit"
+              >
+                Next
+              </Button>
+            </div>
+          </Form>
+        );
+
+        case 1:
+          return (
+            <Form layout="vertical" onFinish={handleStepSubmit}>
+              
+            <Card
+              title="Contract Details"
+              bordered={false}
+              style={{ marginBottom: 24 }}
+            >
+              <Row gutter={[16, 16]}>
+                <Col span={24}>
                   <div
                     style={{ display: "flex", justifyContent: "space-between" }}
                   >
@@ -181,42 +241,21 @@ export const ContractCreateButton: React.FC<ContractCreateButtonProps> = ({
               </Row>
             </Card>
 
-            <Alert
-              message="Important Notice"
-              description="By creating this contract, you agree to deposit the first milestone amount into escrow. This amount will only be released to the freelancer upon your approval of the completed work."
-              type="warning"
-              showIcon
-              style={{ marginBottom: 24 }}
-            />
 
-            <Form.Item
-              name="terms"
-              valuePropName="checked"
-              rules={[
-                {
-                  validator: (_, value) =>
-                    value
-                      ? Promise.resolve()
-                      : Promise.reject(
-                          new Error("You must accept the terms to proceed")
-                        ),
-                },
-              ]}
-            >
-              <Checkbox>
-                I understand and agree to the terms of this contract
-              </Checkbox>
-            </Form.Item>
+            <div style={{ display: "flex", justifyContent: "space-between" }}>
+              <Button onClick={handlePrevStep}>Previous</Button>
+                <Button 
+                  type="primary" 
+                  htmlType="submit"
+                  disabled={(user?.balance || 0) < milestoneAmount}
+                >
+                  Next
+                </Button>
+              </div>
+            </Form>
+          );
 
-            <div style={{ display: "flex", justifyContent: "flex-end" }}>
-              <Button type="primary" htmlType="submit">
-                Next
-              </Button>
-            </div>
-          </Form>
-        );
-
-      case 1:
+      case 2:
         return (
           <Form layout="vertical" onFinish={handleStepSubmit}>
             <Form.Item
@@ -289,14 +328,16 @@ export const ContractCreateButton: React.FC<ContractCreateButtonProps> = ({
         maskClosable={false}
       >
         <Steps current={currentStep} className="mb-8">
-          <Step title="Contract Details" description="Review terms" />
+          <Step title="Reviews" description="Review terms" />
+          <Step title="Deposit" description="Review deposit" />
           <Step title="Documents" description="Upload files" />
         </Steps>
         {renderStepContent()}
       </Modal>
 
-      <DepositModal
+      <ModalTopup
         visible={showTopUpModal}
+        suggestedAmount={milestoneAmount - (user?.balance || 0)}
         onClose={() => {
           setShowTopUpModal(false);
         }}

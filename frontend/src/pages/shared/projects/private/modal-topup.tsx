@@ -1,19 +1,16 @@
 import React, { useState } from "react";
 import { Modal, Form, Input, Select, Button, notification, Card } from "antd";
-import {
-  DepositDto,
-  DepositDtoPaymentMethodEnum,
-} from "../../generated/models/DepositDto";
-import api from "../services/api/openapi-config";
 import { useGetIdentity } from "@refinedev/core";
-import { AccountDto } from "../../generated";
+import { AccountDto, DepositDto, DepositDtoPaymentMethodEnum } from "../../../../../generated";
+import api from "../../../../services/api/openapi-config";
 
-interface DepositModalProps {
+interface ModalTopupProps {
   visible: boolean;
+  suggestedAmount: number | undefined;
   onClose: () => void;
 }
 
-const DepositModal: React.FC<DepositModalProps> = ({ visible, onClose }) => {
+const ModalTopup: React.FC<ModalTopupProps> = ({ visible, onClose, suggestedAmount }) => {
   const [form] = Form.useForm();
   const { data: user } = useGetIdentity<AccountDto>();
 
@@ -60,6 +57,7 @@ const DepositModal: React.FC<DepositModalProps> = ({ visible, onClose }) => {
         <Form.Item
           name="amount"
           label="Amount"
+          initialValue={suggestedAmount || 0}
           rules={[{ required: true, message: "Please input the amount!" }]}
         >
           <Input type="number" />
@@ -82,4 +80,4 @@ const DepositModal: React.FC<DepositModalProps> = ({ visible, onClose }) => {
   );
 };
 
-export default DepositModal;
+export default ModalTopup;

@@ -22,6 +22,7 @@ import {
 import api from "../../../services/api/openapi-config";
 import {
   ArrowLeftOutlined,
+  BarChartOutlined,
   BulbOutlined,
   CalendarOutlined,
   CheckCircleOutlined,
@@ -37,16 +38,18 @@ import {
 } from "@ant-design/icons";
 import {useNavigate, useParams} from "react-router";
 import ClientProjectEditButton from "../../client/projects/client-edit";
-import ContractCreateButton from "../../client/projects/contract-create";
 import {ReportModal} from "../../../components/message/ReportModal";
-import DepositModal from "../../../components/DepositModal";
 import ProjectProgress from "./private/project-progress";
 import ProjectStats from "./private/project-stats";
-import ProjectToTerminate from "./private/project-to-terminate";
+import ProjectToTerminate from "./private/project-alerts";
 import TabProjectDetail from "./private/tab-project-detail";
 import TabMilestones from "./private/tab-milestones";
 import TabProposals from "./private/tab-proposals";
 import ModalProfile from "./private/modal-profile";
+import ModalTopup from "./private/modal-topup";
+import ProjectAlerts from "./private/project-alerts";
+import TabContract from "./private/tab-contract";
+import TabReports from "./private/tab-reports";
 
 const { Title, Text, Paragraph } = Typography;
 const { Step } = Steps;
@@ -378,8 +381,8 @@ const ProjectInternalDetail: React.FC<{ project: ProjectDto }> = ({ project }) =
 
       {/* Main Content - Centered */}
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
-        {/* Project ToTerminate */}
-        <ProjectToTerminate project={project} />
+        {/* ProjectAlerts */}
+        <ProjectAlerts project={project} />
 
         {/* Project Progress */}
         <ProjectProgress project={project} />
@@ -438,26 +441,54 @@ const ProjectInternalDetail: React.FC<{ project: ProjectDto }> = ({ project }) =
                   />
                 </div>
               ) : (
-                <TabProposals project={project} openProfile={openProfile}/>
+                <TabProposals project={project} openProfile={openProfile} onContractMade={() => window.location.reload()} />
               )}
             </TabPane>
+
+<TabPane
+  tab={
+    <span className="px-1">
+      <FileTextOutlined /> Contract
+    </span>
+  }
+  key="contract"
+>
+  <TabContract project={project} />
+</TabPane>
+
+<TabPane
+  tab={
+    <span className="px-1">
+      <BarChartOutlined /> Reports
+    </span>
+  }
+  key="reports"
+>
+  <TabReports project={project} />
+</TabPane>
+
+
           </Tabs>
         </Card>
       </div>
-      {user?.role == "CLIENT" ? (
-        <>
-          <ModalProfile
+
+
+      <ModalProfile
             profileId={profileIdModal}
             visible={showProfileModal}
             onClose={() => setShowProfileModal(false)}
           />
+
+      {user?.role == "CLIENT" ? (
+        <>
           <ReportModal
             showReportModal={showReportModal}
             setShowReportModal={setShowReportModal}
             project={project}
           />
-          <DepositModal
+          <ModalTopup
             visible={showDepositModal}
+            suggestedAmount={(project.activeMilestone?.contractualBudget || 0) - (user?.balance || 0)}
             onClose={() => {
               setShowDepositModal(false);
               // setSelectedMilestone(null);

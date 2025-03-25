@@ -1,7 +1,8 @@
 import {Avatar, Badge, Button, List, Popconfirm, Tag, Typography, Select} from "antd";
-import ContractCreateButton from "../../../client/projects/contract-create";
+import ContractCreateButton from "./contract-create";
 import {
   CalendarOutlined,
+  CheckCircleOutlined,
   FileTextOutlined,
   MessageOutlined,
   UserOutlined
@@ -15,12 +16,16 @@ import {
 } from "../../../../../generated";
 import {useCustomMutation, useInvalidate, useList} from "@refinedev/core";
 import {useLocalSettings} from "../../../../hooks/useLocalSettings";
-import FileList from "../shared/file-list";
+import FileList from "../../../../components/common/file-list";
 
 const {Title, Text, Paragraph} = Typography;
 
-const TabProposals: React.FC<{ project: ProjectDto, openProfile: (profileId: number) => void }> 
-  = ({project, openProfile}) => {
+const TabProposals: React.FC<{ 
+  project: ProjectDto, 
+  openProfile: (profileId: number) => void,
+  onContractMade: () => void,
+ }> 
+  = ({project, openProfile, onContractMade}) => {
   const [localSettings] = useLocalSettings()
   const [statusFilter, setStatusFilter] = useState<string | null>(
     project.status === ProjectStatusDto.InProgress ? null :
@@ -130,18 +135,9 @@ const TabProposals: React.FC<{ project: ProjectDto, openProfile: (profileId: num
                     <Button danger>Reject Proposal</Button>
                   </Popconfirm>
                   <ContractCreateButton
-                    proposalId={proposal.proposalId || 0}
-                    projectTitle={project.title || ""}
-                    freelancerName={
-                      proposal.freelancer?.firstName +
-                      " " +
-                      proposal.freelancer?.lastName || ""
-                    }
-                    milestoneAmount={
-                      (proposal.budget || 0) *
-                      (project?.milestones?.[0]?.budgetRatio || 0)
-                    }
-                    // onSubmit={projectQueryResult.refetch}
+                    proposal={proposal}
+                    project={project}
+                    onSubmit={onContractMade}
                   />
                 </div>,
               ]
@@ -159,13 +155,11 @@ const TabProposals: React.FC<{ project: ProjectDto, openProfile: (profileId: num
             }
             title={
               <div className="flex justify-between items-center">
-                <Text strong className="text-lg">
+                <Text strong className="text-lg cursor-pointer hover:text-blue-500" 
+                    onClick={() => openProfile(proposal.freelancer?.profileId || 0)}>
                   {`${proposal.freelancer?.firstName} ${proposal.freelancer?.lastName || ''}`}
+                  {proposal.freelancer?.isVerified && <CheckCircleOutlined className="ml-1 text-blue-500" />}
                 </Text>
-                {proposal.freelancer?.profileId && 
-                <Button type="link" onClick={() => openProfile(proposal.freelancer?.profileId || 0)}>
-                  View Profile
-                </Button>}
                 <div className="flex items-center">
                   <Tag color="blue">Budget: ${proposal.budget}</Tag>
                   <Badge
