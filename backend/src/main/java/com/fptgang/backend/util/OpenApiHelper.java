@@ -164,10 +164,10 @@ public class OpenApiHelper {
 
         return (root, query, criteriaBuilder) -> {
             String[] fieldPaths = path.split("\\.");
-            if (!getFilterableFields(root.getJavaType()).contains(fieldPaths[0])) {
-                LOGGER.warn("Field {} in {} is not filterable", fieldPaths[0], root.getJavaType().getName());
-                return criteriaBuilder.or();
-            }
+//            if (!getFilterableFields(root.getJavaType()).contains(fieldPaths[0])) {
+//                LOGGER.warn("Field {} in {} is not filterable", fieldPaths[0], root.getJavaType().getName());
+//                return criteriaBuilder.or();
+//            }
             Path<?> fieldPath = root.get(fieldPaths[0]);
 
             if (fieldPath == null) {
@@ -175,10 +175,10 @@ public class OpenApiHelper {
             }
 
             for (int i = 1; i < Math.min(5, fieldPaths.length); i++) {
-                if (!getFilterableFields(fieldPath.getJavaType()).contains(fieldPaths[i])) {
-                    LOGGER.warn("Field {} in {} is not filterable", fieldPaths[i], fieldPath.getJavaType().getName());
-                    return criteriaBuilder.or();
-                }
+//                if (!getFilterableFields(fieldPath.getJavaType()).contains(fieldPaths[i])) {
+//                    LOGGER.warn("Field {} in {} is not filterable", fieldPaths[i], fieldPath.getJavaType().getName());
+//                    return criteriaBuilder.or();
+//                }
                 fieldPath = fieldPath.get(fieldPaths[i]);
 
                 if (fieldPath == null) {
@@ -424,9 +424,9 @@ public class OpenApiHelper {
         if (fields == null) {
             fields = new HashSet<>();
             for (Field field : clazz.getDeclaredFields()) {
-                if (field.isAnnotationPresent(OneToMany.class) || field.isAnnotationPresent(ManyToMany.class)) {
-                    continue;
-                }
+//                if (field.isAnnotationPresent(OneToMany.class) || field.isAnnotationPresent(ManyToMany.class)) {
+//                    continue;
+//                }
                 fields.add(field.getName());
             }
             FILTERABLE_FIELDS.put(clazz, fields);

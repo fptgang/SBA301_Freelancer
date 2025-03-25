@@ -4,9 +4,11 @@ import com.fptgang.backend.api.model.SolutionDto;
 import com.fptgang.backend.exception.InvalidInputException;
 import com.fptgang.backend.model.*;
 import com.fptgang.backend.repository.AccountRepos;
+import com.fptgang.backend.repository.MilestoneRepos;
 import com.fptgang.backend.repository.ProjectRepos;
 import com.fptgang.backend.repository.ReportRepos;
 import com.fptgang.backend.security.AuthContext;
+import com.fptgang.backend.service.MilestoneService;
 import com.fptgang.backend.service.ProjectService;
 import com.fptgang.backend.service.ReportService;
 import com.fptgang.backend.service.TransactionService;
@@ -31,19 +33,23 @@ public class ReportServiceImpl implements ReportService {
     private final AuthContext authContext;
     private final ProjectRepos projectRepos;
     private final AccountRepos accountRepos;
+    private final MilestoneService milestoneService;
+    private final MilestoneRepos milestoneRepos;
 
     public ReportServiceImpl(ReportRepos reportRepos,
                              ProjectService projectService,
                              TransactionService transactionService,
                              AuthContext authContext,
                              ProjectRepos projectRepos,
-                             AccountRepos accountRepos) {
+                             AccountRepos accountRepos, MilestoneService milestoneService, MilestoneRepos milestoneRepos) {
         this.reportRepos = reportRepos;
         this.projectService = projectService;
         this.transactionService = transactionService;
         this.authContext = authContext;
         this.projectRepos = projectRepos;
         this.accountRepos = accountRepos;
+        this.milestoneService = milestoneService;
+        this.milestoneRepos = milestoneRepos;
     }
 
     @Override
@@ -55,7 +61,7 @@ public class ReportServiceImpl implements ReportService {
         if (project.getStatus() != Project.ProjectStatus.IN_PROGRESS)
             throw new IllegalStateException("Project must be in progress to create a report");
 
-        if (!authContext.hasInternalAccess(project)){
+        if (!authContext.hasInternalAccess(project)) {
             throw new AccessDeniedException("No access to this project");
         }
 
@@ -109,35 +115,67 @@ public class ReportServiceImpl implements ReportService {
             projectService.terminateByStaff(project.getProjectId(), Role.valueOf(solution.getTransferDepositTo().name()));
         } else {
             if (SolutionDto.TransferDepositToEnum.CLIENT == solution.getTransferDepositTo()) {
-                // Refund client
+                // Refund client for a first milestone not in completed state
                 log.info("Refunding client for project {}", project.getProjectId());
-                project.getMilestones().forEach(milestone -> {
-                    if (milestone.getStatus() != Milestone.MilestoneStatus.FINISHED &&
-                            milestone.getStatus() != Milestone.MilestoneStatus.TERMINATED
-                    && milestone.getFundStatus() == Milestone.FundStatus.DEPOSITED) {
-                        Transaction refundTransaction = transactionService.createEscrowRefund(milestone);
-                        if (refundTransaction.getStatus() == Transaction.TransactionStatus.SUCCESS) {
-                            log.info("Refunded client for milestone {}", milestone.getMilestoneId());
-                            milestone.setFundStatus(Milestone.FundStatus.REFUNDED);
-                        }
+                Milestone milestone = project.getActiveMilestone();
+                if (milestone.getStatus() != Milestone.MilestoneStatus.TERMINATED
+                        && milestone.getStatus() != Milestone.MilestoneStatus.FINISHED
+                        && milestone.getFundStatus() == Milestone.FundStatus.DEPOSITED) {
+                    Transaction refundTransaction = transactionService.createEscrowRefund(milestone);
+                    if (refundTransaction.getStatus() == Transaction.TransactionStatus.SUCCESS) {
+                        log.info("Refunded client for milestone {}", milestone.getMilestoneId());
+                        finishMilestone(milestone);
                     }
-                });
+                }
             } else if (SolutionDto.TransferDepositToEnum.FREELANCER == solution.getTransferDepositTo()) {
+                // Refund freelancer for a first milestone not in completed state
                 log.info("Release deposit  for freelancer {}", project.getProjectId());
-                project.getMilestones().forEach(milestone -> {
-                    if (milestone.getStatus() == Milestone.MilestoneStatus.IN_PROGRESS) {
-                        Transaction refundTransaction = transactionService.createEscrowRelease(milestone);
-                        if (refundTransaction.getStatus() == Transaction.TransactionStatus.SUCCESS) {
-                            log.info("Refunded freelancer for milestone {}", milestone.getMilestoneId());
-                            milestone.setFundStatus(Milestone.FundStatus.RELEASED);
-                        }
+                Milestone milestone = project.getActiveMilestone();
+                if (milestone.getStatus() != Milestone.MilestoneStatus.TERMINATED
+                        && milestone.getStatus() != Milestone.MilestoneStatus.FINISHED
+                        && milestone.getFundStatus() == Milestone.FundStatus.DEPOSITED) {
+                    Transaction refundTransaction = transactionService.createEscrowRelease(milestone);
+                    if (refundTransaction.getStatus() == Transaction.TransactionStatus.SUCCESS) {
+                        log.info("Refunded freelancer for milestone {}", milestone.getMilestoneId());
+                        finishMilestone(milestone);
                     }
-                });
+                }
+                ;
             }
         }
         report.setSolution(solution.getSolution());
         report.setStatus(Report.ReportStatus.SOLVED);
         log.info("Resolved report {}", report.getReportId());
         return reportRepos.save(report);
+    }
+
+    private void finishMilestone(Milestone milestone) {
+        milestone.setStatus(Milestone.MilestoneStatus.FINISHED);
+        milestone = milestoneRepos.save(milestone);
+        log.info("Milestone {} finished", milestone.getMilestoneId());
+
+        // *** If no more milestones, finish project
+        Milestone nextMilestone = milestone.getNextVisibleMilestone();
+        if (nextMilestone == null) {
+            milestone.getProject().setStatus(Project.ProjectStatus.FINISHED);
+            milestone.getProject().setActiveMilestone(null);
+            milestone.setProject(projectRepos.save(milestone.getProject()));
+            log.info("Project {} finished", milestone.getProject().getProjectId());
+            return;
+        }
+
+        // *** Otherwise, start next milestone
+        if (nextMilestone.getFundStatus() == Milestone.FundStatus.NONE) {
+            if (nextMilestone.getProject().getClient().getBalance().compareTo(nextMilestone.getContractualBudget()) < 0) {
+                throw new IllegalStateException("Not enough balance to fund the next milestone");
+            }
+            nextMilestone = milestoneService.depositFund(nextMilestone);
+        }
+
+        nextMilestone.setStatus(Milestone.MilestoneStatus.IN_PROGRESS);
+        nextMilestone = milestoneRepos.save(nextMilestone);
+        nextMilestone.getProject().setActiveMilestone(nextMilestone);
+        nextMilestone.setProject(projectRepos.save(nextMilestone.getProject()));
+        log.info("Milestone {} started", nextMilestone.getMilestoneId());
     }
 }

@@ -1,7 +1,7 @@
 import React from "react";
 import { Typography, Table, Tag, Button, Space } from "antd";
 import { FlagOutlined } from "@ant-design/icons";
-import { MilestoneDto } from "../../../../../generated";
+import { MilestoneDto, MilestoneStatusDto } from "../../../../../generated";
 
 interface ProjectMilestonesProps {
   budget?: number;
@@ -49,14 +49,16 @@ export const ProjectMilestones: React.FC<ProjectMilestonesProps> = ({
           title="Status"
           dataIndex="status"
           key="status"
-          render={(status: string) => (
+          render={(status: MilestoneStatusDto) => (
             <Tag
               color={
-                status === "COMPLETED"
+                status === "FINISHED"
                   ? "green"
-                  : status === "IN_PROGRESS"
+                  : status === "IN_PROGRESS" || status === "REVIEWING"
                   ? "blue"
-                  : "red"
+                  : status === "TERMINATED"
+                  ? "red"
+                  : "default"
               }
             >
               {status.replace("_", " ")}

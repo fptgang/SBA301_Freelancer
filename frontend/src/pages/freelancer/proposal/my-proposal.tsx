@@ -21,7 +21,7 @@ import {
   Modal,
   Alert,
   message,
-  Descriptions
+  Descriptions,
 } from "antd";
 import {
   SearchOutlined,
@@ -39,15 +39,23 @@ import {
   ReloadOutlined,
   MoreOutlined,
   EditOutlined,
+  XOutlined,
+  CloseCircleOutlined,
 } from "@ant-design/icons";
-import { useGetIdentity, useList, useOne } from "@refinedev/core";
+import { useGetIdentity, useList, useMany, useOne } from "@refinedev/core";
 import type { ColumnsType } from "antd/es/table";
-import { AccountDto, ProposalDto, ProjectDto, ContractDto } from "../../../../generated";
+import {
+  AccountDto,
+  ProposalDto,
+  ProjectDto,
+  ContractDto,
+  ContractStatusDto,
+} from "../../../../generated";
 import api from "../../../services/api/openapi-config";
 import { useLocation, useNavigate } from "react-router";
 import { store } from "../../../store";
-import {useLocalSettings} from "../../../hooks/useLocalSettings";
-import { ContractSignButton } from "../../../components";
+import { useLocalSettings } from "../../../hooks/useLocalSettings";
+import ContractSignButton from "../../../components/contract/contract-sign-button";
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -71,13 +79,13 @@ const ContractSigningModal: React.FC<{
         setLoading(true);
         try {
           const contractData = await api.getContractById({
-            contractId: contractId
+            contractId: contractId,
           });
           setContract(contractData);
-          
+
           if (contractData.projectId) {
             const projectData = await api.getProjectById({
-              projectId: contractData.projectId
+              projectId: contractData.projectId,
             });
             setProject(projectData);
           }
@@ -88,12 +96,9 @@ const ContractSigningModal: React.FC<{
         }
       }
     };
-    
+
     fetchData();
   }, [visible, contractId]);
-
-  // Check if the contract is already signed
-  const isContractSigned = contract?.status === "SIGNED";
 
   return (
     <Modal
@@ -111,15 +116,23 @@ const ContractSigningModal: React.FC<{
       ) : contract && project ? (
         <div className="space-y-4">
           <Alert
-            message={`${isContractSigned ? "Contract Details" : "Sign Contract for"}: ${projectTitle}`}
-            description={isContractSigned 
-              ? "This contract has already been signed." 
-              : "Review the contract details carefully before signing."}
-            type={isContractSigned ? "success" : "info"}
+            message={`${
+              contract.status === "UNSIGNED"
+                ? "Sign Contract for"
+                : "Contract Details"
+            }: ${projectTitle}`}
+            description={
+              contract.status === "SIGNED"
+                ? "This contract has already been signed."
+                : contract.status === "UNSIGNED"
+                ? "Review the contract details carefully before signing."
+                : "This contract has been terminated."
+            }
+            type={contract.status === "SIGNED" ? "success" : "info"}
             showIcon
             className="mb-4"
           />
-          
+
           {/* Show contract details */}
           <Card className="shadow-sm">
             <Descriptions layout="vertical" bordered>
@@ -132,7 +145,9 @@ const ContractSigningModal: React.FC<{
                 </Tag>
               </Descriptions.Item>
               <Descriptions.Item label="Created At">
-                {contract.createdAt ? new Date(contract.createdAt).toLocaleDateString() : 'N/A'}
+                {contract.createdAt
+                  ? new Date(contract.createdAt).toLocaleDateString()
+                  : "N/A"}
               </Descriptions.Item>
               {contract.signedAt && (
                 <Descriptions.Item label="Signed At">
@@ -144,12 +159,12 @@ const ContractSigningModal: React.FC<{
               </Descriptions.Item>
             </Descriptions>
           </Card>
-          
+
           {/* Only show sign button if not already signed */}
-          {!isContractSigned && (
-            <ContractSignButton 
-              contract={contract} 
-              project={project} 
+          {contract.status === "UNSIGNED" && (
+            <ContractSignButton
+              contract={contract}
+              project={project}
               onSuccess={() => {
                 onSuccess();
                 onClose();
@@ -185,13 +200,19 @@ const FreelancerMyProposalPage: React.FC = () => {
     total: 0,
     pending: 0,
     accepted: 0,
-    rejected: 0
+    rejected: 0,
   });
   const [contractModalVisible, setContractModalVisible] = useState(false);
-  const [selectedContractId, setSelectedContractId] = useState<number | null>(null);
+  const [selectedContractId, setSelectedContractId] = useState<number | null>(
+    null
+  );
   const [selectedProjectTitle, setSelectedProjectTitle] = useState<string>("");
   // Track contract status for each proposal
-  const [proposalContractStatus, setProposalContractStatus] = useState<Record<number, string>>({});
+  const [proposalContractStatus, setProposalContractStatus] = useState<
+    Record<number, ContractStatusDto | undefined>
+  >({});
+  const [page, setPage] = useState<number>();
+  const [pageSize, setPageSize] = useState<number>();
 
   const { data, isLoading, refetch } = useList<ProposalDto>({
     resource: "proposals",
@@ -233,41 +254,62 @@ const FreelancerMyProposalPage: React.FC = () => {
     queryOptions: {
       enabled: !!user,
     },
+    pagination: {
+      current: page,
+      pageSize,
+    },
   });
 
   const nav = useNavigate();
   const proposals = data?.data || [];
 
+  // Fetch project details for all proposals
+  const { data: projectData } = useMany<ProjectDto>({
+    resource: "projects",
+    ids: proposals?.map((proposal) => proposal.projectId) || [],
+    queryOptions: {
+      enabled: !!proposals,
+    },
+  });
+
+  const projects = projectData?.data || [];
+
   // Fetch contract statuses for all proposals with contracts
   useEffect(() => {
     const fetchContractStatuses = async () => {
-      const statuses: Record<number, string> = {};
-      
+      const statuses: Record<number, ContractStatusDto | undefined> = {};
+
       for (const proposal of proposals) {
         if (proposal.contractId && proposal.proposalId) {
           try {
             const contract = await api.getContractById({
-              contractId: proposal.contractId
+              contractId: proposal.contractId,
             });
-            statuses[proposal.proposalId] = contract.status || '';
+            statuses[proposal.proposalId] = contract.status;
           } catch (error) {
-            console.error(`Error fetching contract for proposal ${proposal.proposalId}:`, error);
+            console.error(
+              `Error fetching contract for proposal ${proposal.proposalId}:`,
+              error
+            );
           }
         }
       }
-      
+
       setProposalContractStatus(statuses);
     };
-    
+
     if (proposals.length > 0) {
       fetchContractStatuses();
     }
   }, [proposals]);
 
   // Show contract signing modal
-  const handleShowContractModal = async (proposalId: number | undefined, projectTitle: string) => {
+  const handleShowContractModal = async (
+    proposalId: number | undefined,
+    projectTitle: string
+  ) => {
     if (!proposalId) return;
-    
+
     try {
       // Fetch the contract ID associated with this proposal
       const proposal = await api.getProposalById({ proposalId });
@@ -285,9 +327,9 @@ const FreelancerMyProposalPage: React.FC = () => {
   };
 
   // Check if a proposal's contract is already signed
-  const isContractSigned = (proposalId: number | undefined) => {
+  const getContractStatus = (proposalId: number | undefined) => {
     if (!proposalId) return false;
-    return proposalContractStatus[proposalId] === "SIGNED";
+    return proposalContractStatus[proposalId];
   };
 
   // Calculate stats when proposals change
@@ -295,9 +337,9 @@ const FreelancerMyProposalPage: React.FC = () => {
     if (proposals) {
       const stats = {
         total: proposals.length,
-        pending: proposals.filter(p => p.status === 'PENDING').length,
-        accepted: proposals.filter(p => p.status === 'ACCEPTED').length,
-        rejected: proposals.filter(p => p.status === 'REJECTED').length
+        pending: proposals.filter((p) => p.status === "PENDING").length,
+        accepted: proposals.filter((p) => p.status === "ACCEPTED").length,
+        rejected: proposals.filter((p) => p.status === "REJECTED").length,
       };
       setSummaryStats(stats);
     }
@@ -326,7 +368,11 @@ const FreelancerMyProposalPage: React.FC = () => {
 
   const bulkActionMenu = (
     <Menu>
-      <Menu.Item key="export" icon={<ExportOutlined />} onClick={() => handleBulkAction('export')}>
+      <Menu.Item
+        key="export"
+        icon={<ExportOutlined />}
+        onClick={() => handleBulkAction("export")}
+      >
         Export Selected
       </Menu.Item>
       <Menu.Divider />
@@ -335,7 +381,7 @@ const FreelancerMyProposalPage: React.FC = () => {
         icon={<DeleteOutlined />}
         danger
         disabled={selectedRowKeys.length === 0}
-        onClick={() => handleBulkAction('withdraw')}
+        onClick={() => handleBulkAction("withdraw")}
       >
         Withdraw Selected
       </Menu.Item>
@@ -350,26 +396,27 @@ const FreelancerMyProposalPage: React.FC = () => {
       Table.SELECTION_INVERT,
       Table.SELECTION_NONE,
       {
-        key: 'pending',
-        text: 'Select Pending',
+        key: "pending",
+        text: "Select Pending",
         onSelect: () => {
           const pendingKeys = proposals
-            .filter(proposal => proposal.status === 'PENDING')
-            .map(proposal => proposal.proposalId as React.Key);
+            .filter((proposal) => proposal.status === "PENDING")
+            .map((proposal) => proposal.proposalId as React.Key);
           setSelectedRowKeys(pendingKeys);
-        }
-      }
-    ]
+        },
+      },
+    ],
   };
 
   const handleWithdrawProposal = (proposalId: number) => {
     Modal.confirm({
-      title: 'Withdraw Proposal',
-      content: 'Are you sure you want to withdraw this proposal? This action cannot be undone.',
-      okText: 'Yes, Withdraw',
-      okType: 'danger',
-      cancelText: 'Cancel',
-      icon: <DeleteOutlined style={{ color: '#f5222d' }} />,
+      title: "Withdraw Proposal",
+      content:
+        "Are you sure you want to withdraw this proposal? This action cannot be undone.",
+      okText: "Yes, Withdraw",
+      okType: "danger",
+      cancelText: "Cancel",
+      icon: <DeleteOutlined style={{ color: "#f5222d" }} />,
       onOk: () => {
         api
           .withdrawProposal({
@@ -378,7 +425,7 @@ const FreelancerMyProposalPage: React.FC = () => {
           .then(() => {
             refetch();
           });
-      }
+      },
     });
   };
 
@@ -389,21 +436,22 @@ const FreelancerMyProposalPage: React.FC = () => {
       key: "projectId",
       render: (text: string, record: ProposalDto) => (
         <div className="flex items-center space-x-3">
-          <Avatar 
-            icon={<FileTextOutlined />} 
-            style={{ backgroundColor: '#1890ff' }} 
-            size="small" 
+          <Avatar
+            icon={<FileTextOutlined />}
+            style={{ backgroundColor: "#1890ff" }}
+            size="small"
           />
           <Tooltip title="View project details">
-            <a onClick={() => nav("/projects/" + record.projectId)}
-               className="text-blue-600 hover:text-blue-800 hover:underline font-medium"
+            <a
+              onClick={() => nav("/projects/" + record.projectId)}
+              className="text-blue-600 hover:text-blue-800 hover:underline font-medium"
             >
               {text}
             </a>
           </Tooltip>
         </div>
       ),
-      width: '25%',
+      width: "25%",
     },
     {
       title: "Budget",
@@ -411,12 +459,12 @@ const FreelancerMyProposalPage: React.FC = () => {
       key: "budget",
       render: (amount: number) => (
         <div className="flex items-center space-x-2">
-          <DollarCircleOutlined style={{ color: '#52c41a' }} />
+          <DollarCircleOutlined style={{ color: "#52c41a" }} />
           <span className="font-medium">${amount?.toFixed(2)}</span>
         </div>
       ),
       sorter: true,
-      width: '15%',
+      width: "15%",
     },
     {
       title: "Date Submitted",
@@ -424,12 +472,12 @@ const FreelancerMyProposalPage: React.FC = () => {
       key: "createdAt",
       render: (date: string) => (
         <div className="flex items-center space-x-2">
-          <CalendarOutlined style={{ color: '#722ed1' }} />
+          <CalendarOutlined style={{ color: "#722ed1" }} />
           <span>{localSettings.formatDate(date)}</span>
         </div>
       ),
       sorter: true,
-      width: '20%',
+      width: "20%",
     },
     {
       title: "Status",
@@ -437,21 +485,34 @@ const FreelancerMyProposalPage: React.FC = () => {
       key: "status",
       render: (status: string, record: ProposalDto) => (
         <Space>
-          <Tag 
+          <Tag
             color={statusColors[status] || "default"}
             icon={statusIcons[status]}
             className="px-3 py-1 text-sm rounded-full"
           >
             {status}
           </Tag>
-          {record.contractId && isContractSigned(record.proposalId) && (
-            <Tag color="green" icon={<CheckCircleOutlined />} className="px-3 py-1 text-sm rounded-full">
+          {record.contractId &&
+          getContractStatus(record.proposalId) === "SIGNED" ? (
+            <Tag
+              color="green"
+              icon={<CheckCircleOutlined />}
+              className="px-3 py-1 text-sm rounded-full"
+            >
               CONTRACT SIGNED
             </Tag>
-          )}
+          ) : getContractStatus(record.proposalId) === "TERMINATED" ? (
+            <Tag
+              color="red"
+              icon={<CloseCircleOutlined />}
+              className="px-3 py-1 text-sm rounded-full"
+            >
+              CONTRACT TERMINATED
+            </Tag>
+          ) : null}
         </Space>
       ),
-      width: '15%',
+      width: "15%",
     },
     {
       title: "Actions",
@@ -473,7 +534,9 @@ const FreelancerMyProposalPage: React.FC = () => {
             <Tooltip title="Withdraw proposal">
               <Button
                 icon={<DeleteOutlined />}
-                onClick={() => record.proposalId && handleWithdrawProposal(record.proposalId)}
+                onClick={() =>
+                  record.proposalId && handleWithdrawProposal(record.proposalId)
+                }
                 danger
                 size="small"
                 shape="round"
@@ -481,87 +544,136 @@ const FreelancerMyProposalPage: React.FC = () => {
               />
             </Tooltip>
           )}
-          {record.status === "ACCEPTED" && record.contractId && !isContractSigned(record.proposalId) && (
-            <Tooltip title="View project details & contract">
-              <Button
-                icon={<CheckCircleOutlined />}
-                size="small"
-                type="primary"
-                onClick={() => handleShowContractModal(record.proposalId, record.projectId ? String(record.projectId) : "Project")}
-              >
-                Sign Contract
-              </Button>
-            </Tooltip>
-          )}
-          {record.status === "ACCEPTED" && record.contractId && isContractSigned(record.proposalId) && (
-            <Tooltip title="View contract details">
-              <Button
-                icon={<FileTextOutlined />}
-                size="small"
-                type="default"
-                onClick={() => handleShowContractModal(record.proposalId, record.projectId ? String(record.projectId) : "Project")}
-              >
-                View Contract
-              </Button>
-            </Tooltip>
-          )}
-          <Dropdown overlay={
-            <Menu>
-              <Menu.Item key="details" icon={<EyeOutlined />} onClick={() => 
-                nav("/freelancer/proposals/" + record.proposalId)
-              }>
-                View Details
-              </Menu.Item>
-              {record.status === "PENDING" && (
-                <Menu.Item 
-                  key="withdraw" 
-                  icon={<DeleteOutlined />} 
-                  danger
-                  onClick={() => record.proposalId && handleWithdrawProposal(record.proposalId)}
-                >
-                  Withdraw Proposal
-                </Menu.Item>
-              )}
-              {record.status === "ACCEPTED" && record.contractId && !isContractSigned(record.proposalId) && (
-                <Menu.Item 
-                  key="sign" 
+          {record.status === "ACCEPTED" &&
+            record.contractId &&
+            getContractStatus(record.proposalId) === "UNSIGNED" && (
+              <Tooltip title="View project details & contract">
+                <Button
                   icon={<CheckCircleOutlined />}
-                  onClick={() => handleShowContractModal(record.proposalId, record.projectId ? String(record.projectId) : "Project")}
+                  size="small"
+                  type="primary"
+                  onClick={() =>
+                    handleShowContractModal(
+                      record.proposalId,
+                      record.projectId ? String(record.projectId) : "Project"
+                    )
+                  }
                 >
                   Sign Contract
-                </Menu.Item>
-              )}
-              {record.status === "ACCEPTED" && record.contractId && isContractSigned(record.proposalId) && (
-                <Menu.Item 
-                  key="view" 
+                </Button>
+              </Tooltip>
+            )}
+          {record.status === "ACCEPTED" &&
+            record.contractId &&
+            getContractStatus(record.proposalId) !== "UNSIGNED" && (
+              <Tooltip title="View contract details">
+                <Button
                   icon={<FileTextOutlined />}
-                  onClick={() => handleShowContractModal(record.proposalId, record.projectId ? String(record.projectId) : "Project")}
+                  size="small"
+                  type="default"
+                  onClick={() =>
+                    handleShowContractModal(
+                      record.proposalId,
+                      record.projectId ? String(record.projectId) : "Project"
+                    )
+                  }
                 >
                   View Contract
+                </Button>
+              </Tooltip>
+            )}
+          <Dropdown
+            overlay={
+              <Menu>
+                <Menu.Item
+                  key="details"
+                  icon={<EyeOutlined />}
+                  onClick={() =>
+                    nav("/freelancer/proposals/" + record.proposalId)
+                  }
+                >
+                  View Details
                 </Menu.Item>
-              )}
-            </Menu>
-          } trigger={['click']}>
-            <Button 
-              icon={<MoreOutlined />} 
-              size="small" 
+                {record.status === "PENDING" && (
+                  <Menu.Item
+                    key="withdraw"
+                    icon={<DeleteOutlined />}
+                    danger
+                    onClick={() =>
+                      record.proposalId &&
+                      handleWithdrawProposal(record.proposalId)
+                    }
+                  >
+                    Withdraw Proposal
+                  </Menu.Item>
+                )}
+                {record.status === "ACCEPTED" &&
+                  record.contractId &&
+                  getContractStatus(record.proposalId) === "UNSIGNED" && (
+                    <Menu.Item
+                      key="sign"
+                      icon={<CheckCircleOutlined />}
+                      onClick={() =>
+                        handleShowContractModal(
+                          record.proposalId,
+                          record.projectId
+                            ? String(record.projectId)
+                            : "Project"
+                        )
+                      }
+                    >
+                      Sign Contract
+                    </Menu.Item>
+                  )}
+                {record.status === "ACCEPTED" &&
+                  record.contractId &&
+                  getContractStatus(record.proposalId) != "UNSIGNED" && (
+                    <Menu.Item
+                      key="view"
+                      icon={<FileTextOutlined />}
+                      onClick={() =>
+                        handleShowContractModal(
+                          record.proposalId,
+                          record.projectId
+                            ? String(record.projectId)
+                            : "Project"
+                        )
+                      }
+                    >
+                      View Contract
+                    </Menu.Item>
+                  )}
+              </Menu>
+            }
+            trigger={["click"]}
+          >
+            <Button
+              icon={<MoreOutlined />}
+              size="small"
               type="text"
               className="flex items-center justify-center"
             />
           </Dropdown>
         </Space>
       ),
-      width: '25%',
-      align: 'right' as const,
+      width: "25%",
+      align: "right" as const,
     },
   ];
 
   return (
     <div className="bg-gray-50 min-h-screen">
       <div className="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
-        <Row gutter={[24, 24]} align="middle" justify="space-between" className="mb-6">
+        <Row
+          gutter={[24, 24]}
+          align="middle"
+          justify="space-between"
+          className="mb-6"
+        >
           <Col>
-            <Title level={3} className="mb-0">My Proposals</Title>
+            <Title level={3} className="mb-0">
+              My Proposals
+            </Title>
             <Text type="secondary">
               Track and manage all your project proposals
             </Text>
@@ -571,42 +683,54 @@ const FreelancerMyProposalPage: React.FC = () => {
         {/* Summary Stats */}
         <Row gutter={[16, 16]} className="mb-6">
           <Col xs={24} sm={12} md={6}>
-            <Card bordered={false} className="h-full shadow-sm hover:shadow-md transition-shadow">
-              <Statistic 
-                title="Total Proposals" 
-                value={summaryStats.total} 
-                prefix={<FileTextOutlined />} 
-                valueStyle={{ color: '#1890ff' }}
+            <Card
+              bordered={false}
+              className="h-full shadow-sm hover:shadow-md transition-shadow"
+            >
+              <Statistic
+                title="Total Proposals"
+                value={summaryStats.total}
+                prefix={<FileTextOutlined />}
+                valueStyle={{ color: "#1890ff" }}
               />
             </Card>
           </Col>
           <Col xs={24} sm={12} md={6}>
-            <Card bordered={false} className="h-full shadow-sm hover:shadow-md transition-shadow">
-              <Statistic 
-                title="Pending" 
-                value={summaryStats.pending} 
-                prefix={<ClockCircleOutlined />} 
-                valueStyle={{ color: '#fa8c16' }}
+            <Card
+              bordered={false}
+              className="h-full shadow-sm hover:shadow-md transition-shadow"
+            >
+              <Statistic
+                title="Pending"
+                value={summaryStats.pending}
+                prefix={<ClockCircleOutlined />}
+                valueStyle={{ color: "#fa8c16" }}
               />
             </Card>
           </Col>
           <Col xs={24} sm={12} md={6}>
-            <Card bordered={false} className="h-full shadow-sm hover:shadow-md transition-shadow">
-              <Statistic 
-                title="Accepted" 
-                value={summaryStats.accepted} 
-                prefix={<CheckCircleOutlined />} 
-                valueStyle={{ color: '#52c41a' }}
+            <Card
+              bordered={false}
+              className="h-full shadow-sm hover:shadow-md transition-shadow"
+            >
+              <Statistic
+                title="Accepted"
+                value={summaryStats.accepted}
+                prefix={<CheckCircleOutlined />}
+                valueStyle={{ color: "#52c41a" }}
               />
             </Card>
           </Col>
           <Col xs={24} sm={12} md={6}>
-            <Card bordered={false} className="h-full shadow-sm hover:shadow-md transition-shadow">
-              <Statistic 
-                title="Rejected" 
-                value={summaryStats.rejected} 
-                prefix={<DeleteOutlined />} 
-                valueStyle={{ color: '#f5222d' }}
+            <Card
+              bordered={false}
+              className="h-full shadow-sm hover:shadow-md transition-shadow"
+            >
+              <Statistic
+                title="Rejected"
+                value={summaryStats.rejected}
+                prefix={<DeleteOutlined />}
+                valueStyle={{ color: "#f5222d" }}
               />
             </Card>
           </Col>
@@ -614,7 +738,9 @@ const FreelancerMyProposalPage: React.FC = () => {
 
         <Card bordered={false} className="shadow-md">
           <div className="mb-6">
-            <Title level={5} className="mb-4">Filters</Title>
+            <Title level={5} className="mb-4">
+              Filters
+            </Title>
             <Row gutter={[16, 16]}>
               <Col xs={24} sm={12} md={8} lg={6}>
                 <Input
@@ -651,27 +777,38 @@ const FreelancerMyProposalPage: React.FC = () => {
           {/* Table actions area */}
           <div className="flex flex-wrap items-center justify-between mb-4 gap-3">
             <div className="flex items-center space-x-2">
-              <Button 
-                type="primary" 
+              <Button
+                type="primary"
                 icon={<PlusOutlined />}
                 onClick={() => nav("/projects")}
               >
                 Create New Proposal
               </Button>
-              <Dropdown overlay={bulkActionMenu} trigger={['click']} disabled={selectedRowKeys.length === 0}>
-                <Button className={selectedRowKeys.length === 0 ? "opacity-60" : ""}>
+              <Dropdown
+                overlay={bulkActionMenu}
+                trigger={["click"]}
+                disabled={selectedRowKeys.length === 0}
+              >
+                <Button
+                  className={selectedRowKeys.length === 0 ? "opacity-60" : ""}
+                >
                   Bulk Actions <DownOutlined />
                 </Button>
               </Dropdown>
             </div>
-            
+
             <div className="flex items-center space-x-2">
-              <Badge count={selectedRowKeys.length} showZero color="#1890ff" style={{ marginRight: 8 }}>
+              <Badge
+                count={selectedRowKeys.length}
+                showZero
+                color="#1890ff"
+                style={{ marginRight: 8 }}
+              >
                 <Text type="secondary">Selected</Text>
               </Badge>
-              
-              <Button 
-                icon={<ReloadOutlined />} 
+
+              <Button
+                icon={<ReloadOutlined />}
                 onClick={() => refetch()}
                 type="default"
               >
@@ -689,10 +826,11 @@ const FreelancerMyProposalPage: React.FC = () => {
             pagination={{
               defaultPageSize: 10,
               showSizeChanger: true,
-              pageSizeOptions: ['10', '20', '50'],
+              total: data?.total || 0,
+              pageSizeOptions: ["10", "20", "50"],
               showTotal: (total) => `Total ${total} proposals`,
-              position: ['bottomCenter'],
-              className: "mt-4"
+              position: ["bottomCenter"],
+              className: "mt-4",
             }}
             locale={{
               emptyText: (
@@ -704,6 +842,8 @@ const FreelancerMyProposalPage: React.FC = () => {
             }}
             onChange={(pagination, filters, sorter: any) => {
               setProjectId(undefined);
+              if (pagination.current) setPage(pagination.current);
+              if (pagination.pageSize) setPageSize(pagination.pageSize);
               if (sorter && sorter.field) {
                 setSortBy(sorter.field);
                 setSortOrder(sorter.order === "descend" ? "desc" : "asc");
@@ -714,7 +854,7 @@ const FreelancerMyProposalPage: React.FC = () => {
             }}
             className="custom-table"
             rowClassName="hover:bg-blue-50 transition-colors"
-            style={{ borderRadius: '8px', overflow: 'hidden' }}
+            style={{ borderRadius: "8px", overflow: "hidden" }}
           />
         </Card>
       </div>

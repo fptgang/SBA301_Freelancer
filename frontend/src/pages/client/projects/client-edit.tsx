@@ -19,6 +19,7 @@ import {
   Col,
   Tooltip,
   Alert,
+  message,
 } from "antd";
 import {
   EditOutlined,
@@ -31,10 +32,12 @@ import {
   CheckCircleOutlined,
   ExclamationCircleOutlined,
 } from "@ant-design/icons";
-import { useApiUrl, useCustomMutation } from "@refinedev/core";
+import { HttpError, useApiUrl, useCustomMutation } from "@refinedev/core";
 import dayjs from "dayjs";
 import { ProjectDto } from "../../../../generated/models/ProjectDto";
 import { ProficiencyEnum } from "../../../../generated/models/ProficiencyEnum";
+import api from "../../../services/api/openapi-config";
+import { useSelect } from "@refinedev/antd";
 
 const { Title, Text } = Typography;
 const { TextArea } = Input;
@@ -63,6 +66,13 @@ const ClientProjectEditButton: React.FC<ClientProjectEditButtonProps> = ({
   
   const { mutate } = useCustomMutation();
   const apiUrl = useApiUrl();
+  
+  // Add category select hook
+  const { selectProps: categorySelectProps } = useSelect({
+    resource: "project-categories",
+    optionLabel: "name",
+    optionValue: "projectCategoryId",
+  });
   
   // Fetch skills when the modal opens
   const fetchSkills = async () => {
@@ -176,43 +186,26 @@ const ClientProjectEditButton: React.FC<ClientProjectEditButtonProps> = ({
       // Transform the data for API submission
       const formattedValues = {
         ...values,
-        startDate: values.startDate ? values.startDate.toISOString() : undefined,
         milestones: values.milestones.map((milestone: any) => ({
-          ...milestone,
-          deadline: milestone.deadline ? milestone.deadline.toISOString() : undefined,
+          ...milestone
         })),
       };
       
       setLoading(true);
       
-      mutate(
-        {
-          url: `projects/${project.projectId}`,
-          method: "put",
-          values: formattedValues,
-          successNotification: () => ({
-            message: "Success",
-            description: "Project updated successfully",
-            type: "success",
-          }),
-          errorNotification: () => ({
-            message: "Error",
-            description: "Failed to update project",
-            type: "error",
-          }),
-        },
-        {
-          onSuccess: () => {
-            setLoading(false);
-            setVisible(false);
-            if (onSuccess) onSuccess();
-          },
-          onError: (error) => {
-            setLoading(false);
-            console.error("Failed to update project", error);
-          },
-        }
-      );
+      try {
+        await api.updateProject({
+          projectUpdateDto: formattedValues,
+          projectId: project.projectId!,
+        })  
+        setLoading(false);
+        setVisible(false);
+        message.success("Project updated successfully");
+        if (onSuccess) onSuccess();
+      } catch(error) {
+        message.error((error as Error).toString());
+        setLoading(false);
+      }
     } catch (error) {
       console.error("Validation failed", error);
     }
@@ -447,13 +440,14 @@ const ClientProjectEditButton: React.FC<ClientProjectEditButtonProps> = ({
                 label="Project Category"
                 rules={[{ required: true, message: "Please select a category" }]}
               >
-                <Select placeholder="Select project category">
-                  {project.projectCategory && (
-                    <Option value={project.projectCategory.projectCategoryId}>
-                      {project.projectCategory.name}
-                    </Option>
-                  )}
-                </Select>
+                <Select 
+                  placeholder="Select project category"
+                  {...categorySelectProps}
+                  options={categorySelectProps.options?.map((option) => ({
+                    value: option.value,
+                    label: option.label,
+                  }))}
+                />
               </Form.Item>
               
               <Row gutter={16}>

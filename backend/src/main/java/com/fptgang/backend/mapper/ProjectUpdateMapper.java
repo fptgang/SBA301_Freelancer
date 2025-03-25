@@ -9,8 +9,6 @@ import com.fptgang.backend.repository.SkillRepos;
 import com.fptgang.backend.util.DateTimeUtil;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Component

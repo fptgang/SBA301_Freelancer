@@ -41,8 +41,10 @@ public class AccountController implements AccountsApi {
     }
 
     @Override
-    @PreAuthorize("hasAnyRole('ADMIN')")
     public ResponseEntity<AccountDto> createAccount(AccountDto accountDto) {
+        if(!SecurityUtil.hasPermission(Role.ADMIN)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
         log.info("Creating account");
         accountDto = accountMapper
                 .toDTO(accountService.create(accountMapper.toEntity(accountDto)), DetailLevel.FULL);
@@ -56,6 +58,9 @@ public class AccountController implements AccountsApi {
     @Override
     public ResponseEntity<Void> deleteAccount(Long accountId) {
         log.info("Deleting account" + accountId);
+        if(!SecurityUtil.hasRole(Role.ADMIN, Role.STAFF)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
         accountService.deleteById(accountId);
         messagingTemplate.convertAndSend("resources/accounts", "Deleted account " + accountId);
         return new ResponseEntity<>(HttpStatus.OK);
@@ -72,8 +77,10 @@ public class AccountController implements AccountsApi {
     }
 
     @Override
-    @PreAuthorize("hasAnyRole('ADMIN', 'STAFF')")
     public ResponseEntity<GetAccounts200Response> getAccounts(Pageable pageable, String filter, String search) {
+        if(!SecurityUtil.hasRole(Role.ADMIN, Role.STAFF)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
         log.info("Getting accounts");
         var includeInvisible = SecurityUtil.hasPermission(Role.ADMIN);
         var params = ListParams.builder()

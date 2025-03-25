@@ -1,21 +1,26 @@
-import React, { useState } from "react";
-import { Modal, Form, Input, Select, Button, notification, Card } from "antd";
+import React from "react";
+import {Button, Form, Input, Modal, notification, Select} from "antd";
+import {useGetIdentity} from "@refinedev/core";
 import {
+  AccountDto,
   DepositDto,
-  DepositDtoPaymentMethodEnum,
-} from "../../generated/models/DepositDto";
-import api from "../services/api/openapi-config";
-import { useGetIdentity } from "@refinedev/core";
-import { AccountDto } from "../../generated";
+  DepositDtoPaymentMethodEnum
+} from "../../../../../generated";
+import api from "../../../../services/api/openapi-config";
 
-interface DepositModalProps {
+interface ModalTopupProps {
   visible: boolean;
+  suggestedAmount: number | undefined;
   onClose: () => void;
 }
 
-const DepositModal: React.FC<DepositModalProps> = ({ visible, onClose }) => {
+const ModalTopup: React.FC<ModalTopupProps> = ({
+                                                 visible,
+                                                 onClose,
+                                                 suggestedAmount
+                                               }) => {
   const [form] = Form.useForm();
-  const { data: user } = useGetIdentity<AccountDto>();
+  const {data: user} = useGetIdentity<AccountDto>();
 
   const handleFinish = async (values: any) => {
     const deposit: DepositDto = {
@@ -23,7 +28,7 @@ const DepositModal: React.FC<DepositModalProps> = ({ visible, onClose }) => {
       paymentMethod: values.paymentMethod,
     };
     const response = await api
-      .createDeposit({ depositDto: deposit })
+      .createDeposit({depositDto: deposit})
       .then((data) => {
         console.log("Deposit successful:", data);
         if (data.paymentRedirectUrl)
@@ -60,15 +65,16 @@ const DepositModal: React.FC<DepositModalProps> = ({ visible, onClose }) => {
         <Form.Item
           name="amount"
           label="Amount"
-          rules={[{ required: true, message: "Please input the amount!" }]}
+          initialValue={suggestedAmount || 0}
+          rules={[{required: true, message: "Please input the amount!"}]}
         >
-          <Input type="number" />
+          <Input type="number"/>
         </Form.Item>
         <Form.Item
           name="paymentMethod"
           label="Payment Method"
           rules={[
-            { required: true, message: "Please select a payment method!" },
+            {required: true, message: "Please select a payment method!"},
           ]}
         >
           <Select>
@@ -82,4 +88,4 @@ const DepositModal: React.FC<DepositModalProps> = ({ visible, onClose }) => {
   );
 };
 
-export default DepositModal;
+export default ModalTopup;

@@ -39,11 +39,26 @@ public class ProposalController implements ProposalsApi {
 
     @Override
     public ResponseEntity<GetProposals200Response> getProposals(Pageable pageable, String filter, String search) {
+        if (SecurityUtil.isGuest()) {
+            throw new AccessDeniedException("No access");
+        }
+
         var page = OpenApiHelper.toPageable(pageable);
         var params = ListParams.builder()
                 .pageable(page)
                 .search(search)
                 .filter(filter);
+
+        // Freelancer can only access his proposals
+        if (SecurityUtil.requireCurrentUserRole() == Role.FREELANCER) {
+            params.setFilter("freelancer.accountId", "eq", SecurityUtil.requireCurrentUserId());
+        }
+
+        // Client can view all proposals only if they belong to their own projects
+        if (SecurityUtil.requireCurrentUserRole() == Role.CLIENT) {
+            params.setFilter("project.client.accountId", "eq", SecurityUtil.requireCurrentUserId());
+        }
+
         var res = proposalService
                 .getAll(params.build())
                 .map(proposal -> proposalMapper.toDTO(proposal, DetailLevel.SUMMARY));
@@ -52,7 +67,7 @@ public class ProposalController implements ProposalsApi {
 
     @Override
     public ResponseEntity<ProposalDto> getProposalById(Long proposalId) {
-        var res =proposalService.findById(proposalId);
+        var res = proposalService.findById(proposalId);
         if(SecurityUtil.hasRole(Role.STAFF, Role.ADMIN)) {
             return new ResponseEntity<>(proposalMapper.toDTO(res, DetailLevel.FULL), HttpStatus.OK);
         }

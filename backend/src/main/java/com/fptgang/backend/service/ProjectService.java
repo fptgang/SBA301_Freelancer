@@ -30,4 +30,8 @@ public interface ProjectService {
     Project joinProject(Long projectId, Long currentUserId);
 
     Project leaveProject(Long projectId, Long currentUserId);
+
+    Long countProjectsByCategoryId(Long categoryId);
+    Long countProjectsByCategoryIdAndStatus(Long categoryId, Project.ProjectStatus status);
+
 }

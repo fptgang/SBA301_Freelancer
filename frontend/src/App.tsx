@@ -96,11 +96,9 @@ import {
 import { ColorModeContextProvider } from "./contexts/color-mode";
 import FreelancerProfilePage from "./pages/freelancer/profile";
 import SearchPage from "./pages/public/search";
-import ClientProjectShow from "./pages/client/projects/client-show";
 import ChatPage from "./pages/shared/chat";
 import SettingPage from "./pages/shared/setting";
 import FreelancerProposalShow from "./pages/freelancer/proposal/show";
-import SharedProjectShow from "./pages/shared/projects/show";
 import { liveProvider } from "./providers/live-provider";
 import SettingsLayout from "./layouts/settings-layout";
 import AccountSettingsPage from "./pages/shared/setting/account";
@@ -110,12 +108,12 @@ import WalletPage from "./pages/shared/wallet";
 import WalletLayout from "./layouts/wallet-layout";
 import DepositPage from "./pages/shared/wallet/deposit";
 import WithdrawPage from "./pages/shared/wallet/withdraw";
-import ProjectDetailsScreen from "./pages/public/project";
 import { Message } from "./pages/public/message";
 import MessageLayout from "./layouts/message-layout";
-import { ReportsEdit, ReportsList, ReportsShow } from "./pages/admin/reports";
+import { ReportsList, ReportsShow } from "./pages/admin/reports";
 import { stompClient } from "./utils";
 import VNPayReturnHandler from "./pages/shared/payment/VNPayReturnHandler";
+import ProjectDetail from "./pages/shared/projects/detail";
 
 const resources = [
   {
@@ -183,11 +181,10 @@ const resources = [
   {
     name: "reports",
     list: "/admin/reports",
-    edit: "/admin/reports/edit/:id",
+    // edit: "/admin/reports/edit/:id",
     show: "/admin/reports/show/:id",
     meta: {
       label: "Reports",
-      canDelete: true,
       icon: <FileTextOutlined />,
     },
   },
@@ -222,10 +219,7 @@ function App() {
                     <Route index element={<LandingPage />} />
                     <Route path="pricing" element={<Pricing />} />
                     <Route path="search" element={<SearchPage />} />
-                    <Route
-                      path="projects/:id"
-                      element={<ProjectDetailsScreen />}
-                    />
+                    <Route path="projects/:id" element={<ProjectDetail />} />
                   </Route>
                   <Route path="login" element={<Login />} />
                   <Route path="register" element={<Register />} />
@@ -306,7 +300,7 @@ function App() {
 
                     <Route path="reports">
                       <Route index element={<ReportsList />} />
-                      <Route path="edit/:id" element={<ReportsEdit />} />
+                      {/* <Route path="edit/:id" element={<ReportsEdit />} /> */}
                       <Route path="show/:id" element={<ReportsShow />} />
                     </Route>
                   </Route>
@@ -317,17 +311,8 @@ function App() {
                     <Route path="dashboard" element={<ClientDashboard />} />
                     <Route path="projects">
                       <Route index element={<ClientList />} />
-                      <Route path=":id" element={<ClientProjectShow />} />
+                      <Route path=":id" element={<ProjectDetail />} />
                     </Route>
-                    {/* <Route path="wallet">
-                      <Route index element={<Navigate to="transactions" />} /> */}
-                    {/* <Route path="deposit" element={<DepositFunds />} /> */}
-                    {/* <Route path="withdraw" element={<WithdrawFunds />} /> */}
-                    {/* <Route
-                        path="transactions"
-                        element={<ClientTransactionList />}
-                      />
-                    </Route> */}
                     <Route path="chat" element={<ChatPage />} />
                   </Route>
 
@@ -339,7 +324,8 @@ function App() {
                       element={<FreelancerDashboardPage />}
                     />
                     <Route path="projects">
-                      <Route path=":id" element={<SharedProjectShow />} />
+                      <Route index element={<FreelancerActiveProject />} />
+                      <Route path=":id" element={<ProjectDetail />} />
                     </Route>
 
                     <Route path="proposals">
@@ -349,13 +335,6 @@ function App() {
 
                     <Route path="profile" element={<FreelancerProfilePage />} />
 
-                    {/* <Route path="wallet">
-                      <Route index element={<Navigate to="transactions" />} />
-                      <Route
-                        path="transactions"
-                        element={<ClientTransactionList />}
-                      />
-                    </Route> */}
                     <Route path="chat" element={<ChatPage />} />
                   </Route>
 

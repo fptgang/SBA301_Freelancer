@@ -2,6 +2,7 @@ package com.fptgang.backend.security;
 
 import com.fptgang.backend.model.Project;
 import com.fptgang.backend.model.Role;
+import com.fptgang.backend.model.Skill;
 import com.fptgang.backend.model.Transaction;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.lang.Nullable;
@@ -70,6 +71,9 @@ public interface AuthContext {
         return hasPermission(Role.STAFF) ||
                 (transaction.getFromAccount() != null && matchAccountId(transaction.getFromAccount().getAccountId())) ||
                 (transaction.getToAccount() != null && matchAccountId(transaction.getToAccount().getAccountId()));
+    }
+    default boolean hasInvisibilityBypass() {
+        return hasPermission(Role.ADMIN);
     }
     //==================================
     boolean isAuthenticated();

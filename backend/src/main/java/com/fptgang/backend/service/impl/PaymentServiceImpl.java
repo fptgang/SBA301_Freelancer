@@ -67,7 +67,6 @@ public class PaymentServiceImpl implements PaymentService {
         }
 
         trans.setStatus(success ? Transaction.TransactionStatus.SUCCESS : Transaction.TransactionStatus.FAILED);
-        transactionService.update(trans);
 
         log.info("Deposit txn {} paid status {}", trans.getTransactionId(), trans.getStatus());
     }

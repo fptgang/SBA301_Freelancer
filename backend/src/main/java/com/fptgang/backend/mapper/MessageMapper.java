@@ -5,6 +5,7 @@ import com.fptgang.backend.model.Message;
 import com.fptgang.backend.repository.AccountRepos;
 import com.fptgang.backend.repository.FileRepos;
 import com.fptgang.backend.repository.ProjectRepos;
+import com.fptgang.backend.security.AuthContext;
 import com.fptgang.backend.util.DateTimeUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -17,17 +18,20 @@ public class MessageMapper extends BaseMapper<MessageDto, Message> {
     private final FileMapper fileMapper;
     private final FileRepos fileRepos;
     private final AccountMapper accountMapper;
+    private final AuthContext authContext;
 
     public MessageMapper(AccountRepos accountRepos,
                          ProjectRepos projectRepos,
                          FileMapper fileMapper,
                          FileRepos fileRepos,
-                         AccountMapper accountMapper) {
+                         AccountMapper accountMapper,
+                         AuthContext authContext) {
         this.accountRepos = accountRepos;
         this.projectRepos = projectRepos;
         this.fileMapper = fileMapper;
         this.fileRepos = fileRepos;
         this.accountMapper = accountMapper;
+        this.authContext = authContext;
     }
 
     @Override
@@ -48,6 +52,7 @@ public class MessageMapper extends BaseMapper<MessageDto, Message> {
         entity.setIsVisible(dto.getIsVisible());
         entity.setFiles(dto.getFiles() == null ? null : dto.getFiles().stream()
                 .filter(e -> e.getFileId() != null)
+                .filter(file -> file.getIsVisible() || authContext.hasInvisibilityBypass())
                 .map(e -> fileRepos.getReferenceById(e.getFileId()))
                 .toList());
         entity.setCreatedAt(DateTimeUtil.fromOffsetToLocal(dto.getCreatedAt()));

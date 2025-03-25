@@ -350,6 +350,9 @@ public class ProjectServiceImpl implements ProjectService {
         for (Milestone milestone : project.getMilestones()) {
             if (!milestone.getIsVisible()) continue;
 
+            boolean isActive = project.getActiveMilestone() != null &&
+                    Objects.equals(project.getActiveMilestone().getMilestoneId(), milestone.getMilestoneId());
+
             if (current != null) {
                 if (milestone.getDeadline().isBefore(current)) {
                     throw new InvalidInputException(visibleCount == 0 ?
@@ -359,7 +362,8 @@ public class ProjectServiceImpl implements ProjectService {
                 if (milestone.getDeadline().isBefore(current.plusDays(hirableConfig.getMinMilestoneDurationBetween()))) {
                     throw new InvalidInputException("Milestone must have at least " + hirableConfig.getMinMilestoneDurationBetween() + " days in duration");
                 }
-                if (milestone.getDeadline().isAfter(current.plusDays(hirableConfig.getMaxMilestoneDurationBetween()))) {
+                // active milestone is an exception to this rule
+                if (!isActive && milestone.getDeadline().isAfter(current.plusDays(hirableConfig.getMaxMilestoneDurationBetween()))) {
                     throw new InvalidInputException("Milestone cannot exceed " + hirableConfig.getMaxMilestoneDurationBetween() + " days in duration");
                 }
             }
@@ -456,6 +460,16 @@ public class ProjectServiceImpl implements ProjectService {
         });
         project.setStaff(null);
         return projectRepos.save(project);
+    }
+
+    @Override
+    public Long countProjectsByCategoryId(Long categoryId) {
+        return projectRepos.countAllByCategory_ProjectCategoryId(categoryId);
+    }
+
+    @Override
+    public Long countProjectsByCategoryIdAndStatus(Long categoryId, Project.ProjectStatus status) {
+        return projectRepos.countAllByCategory_ProjectCategoryIdAndStatus(categoryId, status);
     }
 
     /**
@@ -603,6 +617,25 @@ public class ProjectServiceImpl implements ProjectService {
 
         if (count > 0) {
             log.info("Terminated {} projects due to client requested", count);
+        }
+    }
+
+    @Scheduled(cron = "0 */5 * * * ?")
+    @Transactional
+    public synchronized void verifyAccounts() {
+        List<Account> accounts = accountRepos.findByIsVerified(false);
+
+        int count = 0;
+        for( Account a: accounts){
+            Long successProjects= projectRepos.countByStatusAndClient_AccountId(Project.ProjectStatus.FINISHED, a.getAccountId());
+            if(successProjects>0){
+                a.setIsVerified(true);
+                accountRepos.save(a);
+                count++;
+            }
+        }
+        if (count > 0) {
+            log.info("Verify {} accounts", count);
         }
     }
 

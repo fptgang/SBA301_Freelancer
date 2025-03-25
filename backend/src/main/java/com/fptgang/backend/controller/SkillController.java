@@ -32,8 +32,10 @@ public class SkillController implements SkillsApi {
      * Can access: Staff+
      */
     @Override
-    @PreAuthorize("hasAnyRole('ADMIN', 'STAFF')")
     public ResponseEntity<SkillDto> createSkill(SkillDto skillDto) {
+        if(!SecurityUtil.hasRole(Role.ADMIN, Role.STAFF)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
         var skill = skillMapper.toEntity(skillDto);
         return new ResponseEntity<>(skillMapper.toDTO(skillService.create(skill), DetailLevel.FULL), HttpStatus.OK);
     }
@@ -42,8 +44,10 @@ public class SkillController implements SkillsApi {
      * Can access: Staff+
      */
     @Override
-    @PreAuthorize("hasAnyRole('ADMIN', 'STAFF')")
     public ResponseEntity<Void> deleteSkill(Long skillId) {
+        if(!SecurityUtil.hasRole(Role.ADMIN, Role.STAFF)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
         skillService.deleteById(skillId);
         return new ResponseEntity<>(HttpStatus.OK);
     }
@@ -72,8 +76,10 @@ public class SkillController implements SkillsApi {
      * Can access: Staff+
      */
     @Override
-    @PreAuthorize("hasAnyRole('ADMIN', 'STAFF')")
     public ResponseEntity<SkillDto> updateSkill(Long skillId, SkillDto skillDto) {
+        if(!SecurityUtil.hasRole(Role.ADMIN, Role.STAFF)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
         skillDto.setSkillId(skillId); // Override skillId
 
         return new ResponseEntity<>(

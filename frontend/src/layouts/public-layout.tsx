@@ -10,7 +10,9 @@ const { Header, Content, Footer } = Layout;
 const PublicLayout: React.FC = () => {
   return (
     <Layout>
-      <NavBar />
+      <Header className="sticky top-0 z-[1] w-full flex items-center bg-inherit p-0">
+        <NavBar />
+      </Header>
       <Content>
         <Outlet />
       </Content>

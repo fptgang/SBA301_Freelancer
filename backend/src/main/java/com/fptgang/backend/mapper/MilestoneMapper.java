@@ -67,12 +67,12 @@ public class MilestoneMapper extends BaseMapper<MilestoneDto, Milestone> {
         dto.setMilestoneId(entity.getMilestoneId());
         dto.setTitle(entity.getTitle());
         dto.setIsVisible(entity.getIsVisible());
+        dto.setProjectId(entity.getProject().getProjectId());
 
         if (level == DetailLevel.REFERENCE) {
             return dto; // those fields are enough
         }
 
-        dto.setProjectId(entity.getProject().getProjectId());
         dto.setDescription(entity.getDescription());
         dto.setBudgetRatio(entity.getBudgetRatio());
         dto.setDeadline(DateTimeUtil.fromLocalToOffset(entity.getDeadline()));
@@ -83,6 +83,7 @@ public class MilestoneMapper extends BaseMapper<MilestoneDto, Milestone> {
         if (authContext.hasInternalAccess(entity.getProject())) {
             dto.setContractualBudget(entity.getContractualBudget());
             dto.setDeliverables(entity.getDeliverables().stream()
+                    .filter(file -> file.getIsVisible() || authContext.hasInvisibilityBypass())
                     .map(f -> fileMapper.toDTO(f, DetailLevel.FULL))
                     .toList());
         }

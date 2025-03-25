@@ -7,10 +7,32 @@ import {
   StarFilled,
 } from "@ant-design/icons";
 import Hero from "./components/hero";
+import { useList, useMany } from "@refinedev/core";
+import {
+  ProjectCategoryDto,
+  ProjectInCategoryDto,
+} from "../../../../generated";
+import { useNavigate } from "react-router";
 
 const { Title, Text } = Typography;
 
 const LandingPage = () => {
+  const nav = useNavigate();
+  const { data } = useList<ProjectCategoryDto>({
+    resource: "project-categories",
+    pagination: { pageSize: 8 },
+    sorters: [{ field: "createdAt", order: "desc" }],
+    meta: {
+      param: [{ field: "findTop", value: "true" }],
+    },
+  });
+  const categories = data?.data || [];
+
+  const { data: projectData } = useMany<ProjectInCategoryDto>({
+    resource: "project-categories/project-in-category",
+    ids: categories.map((category) => category.projectCategoryId),
+    queryOptions: { enabled: !!categories.length },
+  });
   return (
     <div className="min-h-screen bg-white">
       {/* Navigation */}
@@ -69,19 +91,49 @@ const LandingPage = () => {
       <div className="bg-gray-50 py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <Title level={2} className="text-3xl font-bold mb-12">
-            Browse talent by category
+            Browse works by top category
           </Title>
           <div className="grid md:grid-cols-4 gap-8">
             {categories.map((category) => (
-              <div key={category.name} className="mb-8">
-                <div className="flex items-center mb-2">
-                  <StarFilled className="text-green-500 mr-2" />
-                  <Text className="font-bold">{category.rating}</Text>
-                  <Text className="text-gray-500 ml-2">
-                    {category.skills} skills
-                  </Text>
+              <div
+                key={category.name}
+                className="group relative bg-white rounded-xl p-6 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 cursor-pointer border border-gray-100"
+                onClick={() =>
+                  nav(`/search?type=work`, {
+                    state: { categoryId: category.projectCategoryId },
+                  })
+                }
+              >
+                <div className="flex items-center mb-3">
+                  <div className="flex items-center bg-green-50 px-3 py-1 rounded-full">
+                    <StarFilled className="text-green-500 mr-1" />
+                    <Text className="text-sm text-green-600">
+                      {
+                        projectData?.data?.find(
+                          (project) =>
+                            project.categoryId === category.projectCategoryId
+                        )?.success
+                      }
+                      /{" "}
+                      {
+                        projectData?.data?.find(
+                          (project) =>
+                            project.categoryId === category.projectCategoryId
+                        )?.total
+                      }{" "}
+                      success
+                    </Text>
+                  </div>
                 </div>
-                <Title level={4}>{category.name}</Title>
+                <Title
+                  level={4}
+                  className="text-xl font-semibold mb-2 group-hover:text-green-600 transition-colors"
+                >
+                  {category.name}
+                </Title>
+                <div className="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <ArrowRightOutlined className="text-green-500 text-lg" />
+                </div>
               </div>
             ))}
           </div>
@@ -90,16 +142,5 @@ const LandingPage = () => {
     </div>
   );
 };
-
-const categories = [
-  { name: "Development & IT", rating: "4.85/5", skills: "1853" },
-  { name: "AI Services", rating: "4.8/5", skills: "294" },
-  { name: "Design & Creative", rating: "4.91/5", skills: "968" },
-  { name: "Sales & Marketing", rating: "4.77/5", skills: "392" },
-  { name: "Writing & Translation", rating: "4.92/5", skills: "505" },
-  { name: "Admin & Customer Support", rating: "4.77/5", skills: "508" },
-  { name: "Finance & Accounting", rating: "4.79/5", skills: "214" },
-  { name: "Engineering & Architecture", rating: "4.85/5", skills: "650" },
-];
 
 export default LandingPage;

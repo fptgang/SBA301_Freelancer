@@ -15,6 +15,6 @@ public interface FileService {
     File findById(long id);
     File deleteById(long id);
     Page<File> getAll(ListParams params);
-
     File createForContract(Long contractId, MultipartFile blob);
+    long countVisibleFilesForMilestone(Long milestoneId);
 }

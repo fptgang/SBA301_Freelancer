@@ -47,10 +47,12 @@ export const ResolveModal: React.FC<ResolveModalProps> = ({
   const transferToRoleOptions = Object.values(SolutionDtoTransferDepositToEnum);
   const projectStatusOptions = Object.values(SolutionDtoProjectStatusEnum);
   const nav = useNavigate();
+  const [haveAction, setHaveAction] = React.useState(false);
 
   const handleResolve = async (value: any) => {
     const solution: SolutionDto = {
       solution: value.solution,
+      haveAction: haveAction,
       projectStatus: value.projectStatus,
       transferDepositTo: value.transferDepositTo,
     };
@@ -129,18 +131,44 @@ export const ResolveModal: React.FC<ResolveModalProps> = ({
             allowClear
           />
         </Form.Item>
-
+        <Form.Item
+          label={
+            <span className="flex items-center gap-2">
+              Will you have action on this report?
+              <Tooltip title="Select an action to take on this project.">
+                <QuestionCircleOutlined className="text-gray-400" />
+              </Tooltip>
+            </span>
+          }
+          name="haveAction"
+        >
+          <Select
+            placeholder="Will you have action on this report:"
+            className="w-full"
+            optionFilterProp="label"
+            defaultValue={"false"}
+            value={haveAction ? "true" : "false"}
+            onChange={(value) => setHaveAction(value === "true")}
+          >
+            <Select.Option value="true">Yes</Select.Option>
+            <Select.Option value="false">No</Select.Option>
+          </Select>
+        </Form.Item>
         <Form.Item
           label={
             <span className="flex items-center gap-2">
               Action on Project
-              <Tooltip title="Select an action to take on this project">
+              <Tooltip title="Select an action to take on this project.">
                 <QuestionCircleOutlined className="text-gray-400" />
               </Tooltip>
             </span>
           }
           name="projectStatus"
-          rules={[{ required: true, message: "Please select an action" }]}
+          rules={
+            haveAction
+              ? [{ required: true, message: "Please select an action" }]
+              : []
+          }
         >
           <Select
             placeholder="Select action"
@@ -151,6 +179,7 @@ export const ResolveModal: React.FC<ResolveModalProps> = ({
             className="w-full"
             showSearch
             optionFilterProp="label"
+            disabled={!haveAction}
           />
         </Form.Item>
 
@@ -165,7 +194,11 @@ export const ResolveModal: React.FC<ResolveModalProps> = ({
             </span>
           }
           name="transferDepositTo"
-          rules={[{ required: true, message: "Please select a role" }]}
+          rules={
+            haveAction
+              ? [{ required: true, message: "Please select a role" }]
+              : []
+          }
         >
           <Select
             placeholder="Select role"
@@ -176,6 +209,7 @@ export const ResolveModal: React.FC<ResolveModalProps> = ({
             className="w-full"
             showSearch
             optionFilterProp="label"
+            disabled={!haveAction}
           />
         </Form.Item>
       </Form>
