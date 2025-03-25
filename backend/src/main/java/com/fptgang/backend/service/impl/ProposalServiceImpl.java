@@ -41,6 +41,12 @@ public class ProposalServiceImpl implements ProposalService {
 
     @Override
     public Proposal create(Proposal proposal) {
+        if (proposal == null || proposal.getProject() == null) {
+            throw new InvalidInputException("Proposal or project cannot be null");
+        }
+        if (proposal.getBudget() == null) {
+            throw new InvalidInputException("Proposal budget cannot be null");
+        }
         proposal.setProposalId(null);
         proposal.setFreelancer(accountRepos.getReferenceById(authContext.requireAccountId()));
         Project project = projectRepos.findByProjectId(proposal.getProject().getProjectId())
@@ -83,6 +89,10 @@ public class ProposalServiceImpl implements ProposalService {
     public Proposal acceptProposal(long proposalId) {
         Proposal proposal = findById(proposalId);
         authContext.requireAccountId(proposal.getProject().getClient().getAccountId()); // Client operation
+        if (proposal.getProject() == null || proposal.getProject().getClient() == null) {
+            throw new IllegalStateException("Proposal project or client is missing");
+        }
+
         if (proposal.getStatus() != Proposal.ProposalStatus.PENDING) {
             throw new IllegalStateException("Proposal is not pending");
         }
@@ -111,7 +121,9 @@ public class ProposalServiceImpl implements ProposalService {
     public Proposal rejectProposal(long proposalId) {
         Proposal proposal = findById(proposalId);
         authContext.requireAccountId(proposal.getProject().getClient().getAccountId()); // Client operation
-
+        if (proposal.getProject() == null || proposal.getProject().getClient() == null) {
+            throw new IllegalStateException("Proposal project or client is missing");
+        }
         if (proposal.getStatus() != Proposal.ProposalStatus.PENDING) {
             throw new IllegalStateException("Proposal is not pending");
         }
@@ -126,6 +138,9 @@ public class ProposalServiceImpl implements ProposalService {
     @Override
     public Proposal withdrawProposal(long proposalId) {
         Proposal proposal = findById(proposalId);
+        if (proposal.getFreelancer() == null) {
+            throw new IllegalStateException("Proposal freelancer is missing");
+        }
         authContext.requireAccountId(proposal.getFreelancer().getAccountId()); // Freelancer operation
         if (proposal.getStatus() != Proposal.ProposalStatus.PENDING) {
             throw new IllegalStateException("Proposal is not pending");

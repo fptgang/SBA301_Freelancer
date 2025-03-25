@@ -86,6 +86,7 @@ public class ReportServiceImpl implements ReportService {
         Report existing = reportRepos.findById(report.getReportId())
                 .orElseThrow(() -> new IllegalArgumentException("Report does not exist"));
         EntityUtil.merge(existing, report);
+
         return reportRepos.save(existing);
     }
 
@@ -150,6 +151,13 @@ public class ReportServiceImpl implements ReportService {
     }
 
     private void finishMilestone(Milestone milestone) {
+        if (milestone == null) {
+            throw new IllegalArgumentException("Milestone cannot be null");
+        }
+        if (milestone.getStatus() == Milestone.MilestoneStatus.FINISHED) {
+            log.info("Milestone {} is already finished", milestone.getMilestoneId());
+            return;
+        }
         milestone.setStatus(Milestone.MilestoneStatus.FINISHED);
         milestone = milestoneRepos.save(milestone);
         log.info("Milestone {} finished", milestone.getMilestoneId());

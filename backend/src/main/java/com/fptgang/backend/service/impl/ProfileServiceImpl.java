@@ -31,6 +31,9 @@ public class ProfileServiceImpl implements ProfileService {
     public Profile create(Profile profile) {
         if (authContext.requireRole() != Role.FREELANCER)
             throw new AccessDeniedException("Non-freelancer cannot create profile");
+        if (profile == null) {
+            throw new InvalidInputException("Profile cannot be null");
+        }
         profile.setProfileId(null);
         profile.setAccount(accountRepos.getReferenceById(authContext.requireAccountId()));
         return profileRepos.save(profile);
@@ -44,6 +47,9 @@ public class ProfileServiceImpl implements ProfileService {
 
         var existing = profileRepos.findByProfileId(profile.getProfileId()).orElseThrow(
                 () -> new InvalidInputException("Profile does not exist"));
+        if (!existing.getIsVisible()) {
+            throw new IllegalStateException("Cannot update a deleted profile");
+        }
         authContext.requirePermissionOrAccountIds(Role.STAFF, existing.getAccount().getAccountId());
 
         if (profile.getSkills() != null && !profile.getSkills().equals(existing.getSkills())) {

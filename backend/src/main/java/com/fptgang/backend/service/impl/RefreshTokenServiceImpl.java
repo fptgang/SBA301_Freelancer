@@ -38,7 +38,21 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
     public RefreshToken createRefreshToken(String email, Fingerprint fingerprint) {
         Account account = accountRepos.findByEmail(email)
                 .orElseThrow(() -> new InvalidInputException("Account not found with email " + email));
-
+        if (email == null || email.trim().isEmpty()) {
+            throw new InvalidInputException("Email cannot be null or empty");
+        }
+        if (fingerprint == null) {
+            throw new InvalidInputException("Fingerprint cannot be null");
+        }
+        if (fingerprint.getIpAddress() == null || fingerprint.getIpAddress().trim().isEmpty()) {
+            throw new InvalidInputException("IP address cannot be null or empty");
+        }
+        if (fingerprint.getSessionId() == null || fingerprint.getSessionId().trim().isEmpty()) {
+            throw new InvalidInputException("Session ID cannot be null or empty");
+        }
+        if (fingerprint.getClientInfo() == null || fingerprint.getClientInfo().trim().isEmpty()) {
+            throw new InvalidInputException("Client info cannot be null or empty");
+        }
         RefreshToken refreshToken = RefreshToken.builder()
                 .token(UUID.randomUUID().toString())
                 .ipAddress(fingerprint.getIpAddress())
