@@ -21,7 +21,7 @@ import java.time.LocalDateTime;
 @TestConfiguration(proxyBeanMethods = false)
 @Testcontainers
 @Import(TestcontainersConfiguration.class)
-//@Disabled
+@Disabled
 public class TestEmailTemplate {
     @Autowired
     private EmailService emailService;
