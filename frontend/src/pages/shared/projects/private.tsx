@@ -359,7 +359,7 @@ const ProjectInternalDetail: React.FC<{
                 <TabProposals
                   project={project}
                   openProfile={openProfile}
-                  onContractMade={() => projectQueryResult.refetch()}
+                  refetch={projectQueryResult.refetch}
                 />
               )}
             </TabPane>

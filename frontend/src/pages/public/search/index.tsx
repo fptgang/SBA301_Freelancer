@@ -68,7 +68,7 @@ const SearchPage = () => {
     isError: isSkillsError,
   } = useList<SkillDto, HttpError>({
     resource: "skills",
-    pagination: { pageSize: 100 },
+    pagination: { pageSize: 1000 },
   });
 
   const {
@@ -78,7 +78,7 @@ const SearchPage = () => {
     isSuccess: isCategoriesSuccess,
   } = useList<ProjectCategoryDto, HttpError>({
     resource: "project-categories",
-    pagination: { pageSize: 100 },
+    pagination: { pageSize: 1000 },
   });
 
   useEffect(() => {
@@ -204,15 +204,15 @@ const SearchPage = () => {
         className="mb-4"
       />
 
-      <Tabs 
-        activeKey={activeTab} 
+      <Tabs
+        activeKey={activeTab}
         onChange={(key) => {
           setActiveTab(key);
           setSearchParams({
             type: key === "projects" ? "work" : "talent",
-            ...(searchText && { keyword: searchText })
+            ...(searchText && { keyword: searchText }),
           });
-        }} 
+        }}
         className="mb-4"
       >
         <Tabs.TabPane

@@ -26,7 +26,7 @@ import {
 import Countdown from "../../../../components/Countdown";
 import dayjs from "dayjs";
 
-const {Title, Text, Paragraph} = Typography;
+const { Title, Text, Paragraph } = Typography;
 
 const ProjectCard: React.FC<{ project: ProjectDto }> = ({ project }) => {
   const [localSettings] = useLocalSettings();
@@ -71,62 +71,75 @@ const ProjectCard: React.FC<{ project: ProjectDto }> = ({ project }) => {
               </Space>
               <Typography.Title level={4}>{project.title}</Typography.Title>
 
-
-
               <Row gutter={[16, 16]}>
-        <Col span={12}>
-          <Text strong><CalendarOutlined /> Created At:{" "}</Text>
-          <Text>{localSettings.formatDateTime(project.createdAt!)}</Text>
-        </Col>
-        <Col span={12}>
-          <Text strong><CalendarOutlined /> Start Date:{" "}</Text>
-          <Text>{localSettings.formatDateTime(project.startDate!)}</Text>
-        </Col>
-        <Col span={12}>
-          <Text strong><CalendarOutlined /> Proposal Submission Deadline:{" "}</Text>
-          <Text>
-            <Countdown 
-                        targetDate={dayjs(project.startDate).subtract(1, 'day').toDate()} 
-                      />
-                      </Text>
-        </Col>
-        <Col span={12}>
-          <Text strong><DollarOutlined /> Budget Range:{" "}</Text>
-          <Text>{budgetRange}</Text>
-        </Col>
-      </Row>
+                <Col span={12}>
+                  <Text strong>
+                    <CalendarOutlined /> Created At:{" "}
+                  </Text>
+                  <Text>
+                    {localSettings.formatDateTime(project.createdAt!)}
+                  </Text>
+                </Col>
+                <Col span={12}>
+                  <Text strong>
+                    <CalendarOutlined /> Start Date:{" "}
+                  </Text>
+                  <Text>
+                    {localSettings.formatDateTime(project.startDate!)}
+                  </Text>
+                </Col>
+                <Col span={12}>
+                  <Text strong>
+                    <CalendarOutlined /> Proposal Submission Deadline:{" "}
+                  </Text>
+                  <Text>
+                    <Countdown
+                      targetDate={dayjs(project.startDate)
+                        .subtract(1, "day")
+                        .toDate()}
+                    />
+                  </Text>
+                </Col>
+                <Col span={12}>
+                  <Text strong>
+                    <DollarOutlined /> Budget Range:{" "}
+                  </Text>
+                  <Text>{budgetRange}</Text>
+                </Col>
+              </Row>
 
-              <Divider/>
+              <Divider />
 
-      <Paragraph
-        className="text-gray-700 whitespace-pre-wrap bg-gray-50 p-6 rounded-md border border-gray-100">
-        {project.description}
-      </Paragraph>
+              <Paragraph
+                className="text-gray-700 whitespace-pre-wrap bg-gray-50 p-6 rounded-md border border-gray-100"
+                ellipsis={{ rows: 5, expandable: true, symbol: "" }}
+              >
+                {project.description}
+              </Paragraph>
 
-      <Divider/>
-
+              <Divider />
 
               <Title level={5} className="text-blue-600">
-        Required Skills
-      </Title>
-      {project.requiredSkills && project.requiredSkills.length > 0 ? (
-        <div className="flex flex-wrap gap-2 mt-3">
-          {project.requiredSkills.map((projectSkill, index) => (
-            <Tag
-              key={projectSkill.projectSkillId || index}
-              color="blue"
-              className="flex items-center px-3 py-1 rounded-full"
-            >
-              <ToolOutlined className="mr-1"/>
-              {projectSkill.skill?.name} - {projectSkill.proficiency}
-            </Tag>
-          ))}
-        </div>
-      ) : (
-        <Text type="secondary" className="italic">
-          No specific skills required
-        </Text>
-      )}
+                Required Skills
+              </Title>
+              {project.requiredSkills && project.requiredSkills.length > 0 ? (
+                <div className="flex flex-wrap gap-2 mt-3">
+                  {project.requiredSkills.map((projectSkill, index) => (
+                    <Tag
+                      key={projectSkill.projectSkillId || index}
+                      color="blue"
+                      className="flex items-center px-3 py-1 rounded-full"
+                    >
+                      <ToolOutlined className="mr-1" />
+                      {projectSkill.skill?.name} - {projectSkill.proficiency}
+                    </Tag>
+                  ))}
+                </div>
+              ) : (
+                <Text type="secondary" className="italic">
+                  No specific skills required
+                </Text>
+              )}
             </Space>
           </Col>
         </Row>

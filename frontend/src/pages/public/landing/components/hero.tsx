@@ -83,7 +83,7 @@ const Hero: React.FC = () => {
               </motion.div>
             </Title>
             <Paragraph className="text-lg text-gray-600">
-              {isFreelancer 
+              {isFreelancer
                 ? "Discover exciting projects and opportunities. Showcase your expertise and connect with clients looking for your skills."
                 : "Connect with skilled professionals worldwide. Hire the best talent for your business needs on Hireable."}
             </Paragraph>
@@ -99,7 +99,7 @@ const Hero: React.FC = () => {
           </div>
           <div className="hidden md:block">
             <img
-              src="/public/homepage-banner.jpg"
+              src="https://hirable.blob.core.windows.net/documents/e4c2b21b-2517-4363-b50e-ded95a81820f%2Fhomepage-banner.jpg"
               alt="Freelancing Platform"
               className="w-full h-auto"
             />

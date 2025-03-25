@@ -114,7 +114,8 @@ import { ReportsList, ReportsShow } from "./pages/admin/reports";
 import { stompClient } from "./utils";
 import VNPayReturnHandler from "./pages/shared/payment/VNPayReturnHandler";
 import ProjectDetail from "./pages/shared/projects/detail";
-
+import ProtectedRoute from "./components/auth/ProtectedRoute";
+import { AccountDtoRoleEnum } from "../generated";
 const resources = [
   {
     name: "dashboard",
@@ -201,7 +202,7 @@ function App() {
                 dataProvider={dataProvider(API_URL, axiosConfig)}
                 notificationProvider={notificationProvider}
                 authProvider={authProvider}
-                // accessControlProvider={accessControlProvider}
+                accessControlProvider={accessControlProvider}
                 routerProvider={routerBindings}
                 resources={resources}
                 liveProvider={liveProvider(stompClient)}
@@ -211,20 +212,33 @@ function App() {
                   useNewQueryKeys: true,
                   mutationMode: "optimistic",
                   liveMode: "off",
+                  title: {
+                    icon: (
+                      <img
+                        src="https://raw.githubusercontent.com/fptgang/SBA301_Freelancer/c7c1c58ae260583a6b506cc70000b8c2749e6c16/images/icon.svg"
+                        alt="logo"
+                      />
+                    ),
+                    text: "Hirable Admin",
+                  },
                 }}
               >
                 <Routes>
-                  {/* Public Routes */}
+                  {/* Public Routes - No authentication required */}
                   <Route element={<PublicLayout />}>
                     <Route index element={<LandingPage />} />
                     <Route path="pricing" element={<Pricing />} />
                     <Route path="search" element={<SearchPage />} />
                     <Route path="projects/:id" element={<ProjectDetail />} />
                   </Route>
+                  
+                  {/* Auth Routes - No authentication required */}
                   <Route path="login" element={<Login />} />
                   <Route path="register" element={<Register />} />
                   <Route path="forgot-password" element={<ForgotPassword />} />
                   <Route path="reset-password" element={<ResetPassword />} />
+
+                  {/* Protected Routes - Authentication required but no specific role */}
                   <Route
                     element={
                       <Authenticated
@@ -242,16 +256,13 @@ function App() {
                     />
                   </Route>
 
-                  {/* Admin Routes */}
+                  {/* Admin Routes - Admin role required */}
                   <Route
                     path="admin"
                     element={
-                      <Authenticated
-                        fallback={<Navigate to="/login" />}
-                        key={"authenticated-inner"}
-                      >
+                      <ProtectedRoute requiredRoles={[AccountDtoRoleEnum.Admin,AccountDtoRoleEnum.Staff]}>
                         <AdminLayout />
-                      </Authenticated>
+                      </ProtectedRoute>
                     }
                   >
                     <Route index element={<Navigate to="/admin/dashboard" />} />
@@ -305,8 +316,15 @@ function App() {
                     </Route>
                   </Route>
 
-                  {/* Client Routes */}
-                  <Route path="client" element={<ClientLayout />}>
+                  {/* Client Routes - Client role required */}
+                  <Route 
+                    path="client" 
+                    element={
+                      <ProtectedRoute requiredRoles={[AccountDtoRoleEnum.Client]}>
+                        <ClientLayout />
+                      </ProtectedRoute>
+                    }
+                  >
                     <Route index element={<Navigate to="dashboard" />} />
                     <Route path="dashboard" element={<ClientDashboard />} />
                     <Route path="projects">
@@ -316,8 +334,15 @@ function App() {
                     <Route path="chat" element={<ChatPage />} />
                   </Route>
 
-                  {/* Freelancer Routes */}
-                  <Route path="freelancer" element={<FreelancerLayout />}>
+                  {/* Freelancer Routes - Freelancer role required */}
+                  <Route 
+                    path="freelancer" 
+                    element={
+                      <ProtectedRoute requiredRoles={[AccountDtoRoleEnum.Freelancer]}>
+                        <FreelancerLayout />
+                      </ProtectedRoute>
+                    }
+                  >
                     <Route index element={<Navigate to="dashboard" />} />
                     <Route
                       path="dashboard"
@@ -338,14 +363,29 @@ function App() {
                     <Route path="chat" element={<ChatPage />} />
                   </Route>
 
-                  <Route path="settings" element={<SettingsLayout />}>
+                  {/* Shared Protected Routes - Any authenticated user */}
+                  <Route 
+                    path="settings" 
+                    element={
+                      <ProtectedRoute>
+                        <SettingsLayout />
+                      </ProtectedRoute>
+                    }
+                  >
                     <Route index element={<Navigate to="account" />} />
                     <Route path="account" element={<AccountSettingsPage />} />
                     <Route path="security" element={<SecuritySettingsPage />} />
                     <Route path="local" element={<LocalSettingsPage />} />
                   </Route>
 
-                  <Route path="wallet" element={<WalletLayout />}>
+                  <Route 
+                    path="wallet" 
+                    element={
+                      <ProtectedRoute>
+                        <WalletLayout />
+                      </ProtectedRoute>
+                    }
+                  >
                     <Route index element={<WalletPage />} />
                     <Route path="deposit" element={<DepositPage />} />
                     <Route path="withdraw" element={<WithdrawPage />} />
@@ -356,7 +396,29 @@ function App() {
 
                 <RefineKbar />
                 <UnsavedChangesNotifier />
-                <DocumentTitleHandler />
+                <DocumentTitleHandler
+                  handler={({ action, params, resource }) => {
+                    const id = params?.id ?? "";
+
+                    const actionPrefixMatcher = {
+                      create: "Create new ",
+                      clone: `#${id} Clone ${resource?.meta?.label}`,
+                      edit: `#${id} Edit ${resource?.meta?.label}`,
+                      show: `#${id} Show ${resource?.meta?.label}`,
+                      list: `${resource?.meta?.label}`,
+                    };
+
+                    const suffix = "Hirable";
+                    const title =
+                      actionPrefixMatcher[action || "list"] +
+                      (actionPrefixMatcher[action || "list"].length > 0
+                        ? " | "
+                        : "") +
+                      suffix;
+
+                    return title;
+                  }}
+                />
               </Refine>
               <DevtoolsPanel />
             </DevtoolsProvider>
