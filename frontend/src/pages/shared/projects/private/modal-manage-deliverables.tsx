@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Modal, Button, Table, Upload, Typography, Alert, Popconfirm, message } from 'antd';
 import { InboxOutlined, DeleteOutlined, DownloadOutlined } from '@ant-design/icons';
 import { MilestoneDto, FileDto } from '../../../../../generated';
@@ -20,44 +20,69 @@ const ManageDeliverables: React.FC<ManageDeliverablesProps> = ({
   milestone,
   onClose,
 }) => {
+  const [deliverables, setDeliverables] = useState<FileDto[]>([]);
+  const invalidate = useInvalidate();
+
+  useEffect(() => {
+    setDeliverables(milestone?.deliverables?.filter(d => d.isVisible) || []);
+  }, [milestone]);
+
   const handleDelete = async (fileId: number) => {
     try {
       await api.deleteFile({
         fileId
       });
       message.success('File deleted successfully');
-      milestone.deliverables = milestone.deliverables?.filter(f => f.fileId !== fileId);
+      setDeliverables(prev => prev.filter(f => f.fileId !== fileId));
+      invalidate({
+        resource: "projects",
+        id: milestone.projectId,
+        invalidates: ["detail"],
+      });
+      invalidate({
+        resource: "milestones",
+        invalidates: ["list", "many"],
+      });
     } catch (error) {
-      message.error('Failed to delete file');
+      message.error((error as Error).toString());
     }
   };
 
   const handleUpload = async (file: File) => {
     if (!milestone?.milestoneId) return;
     try {
-      if (!milestone.deliverables)
-        milestone.deliverables = [];
-      milestone.deliverables.push(await api.uploadFile({
+      const uploadedFile = await api.uploadFile({
         blob: file,
         milestoneId: milestone.milestoneId
-      }));
+      });
       message.success('File uploaded successfully');
+      setDeliverables(prev => [...prev, uploadedFile]);
+      invalidate({
+        resource: "projects",
+        id: milestone.projectId,
+        invalidates: ["detail"],
+      });
+      invalidate({
+        resource: "milestones",
+        invalidates: ["list", "many"],
+      });
     } catch (error) {
-      message.error('Failed to upload file');
+      message.error((error as Error).toString());
     }
-    return false; // Prevent default upload behavior
+    return false;
   };
 
   const handleMarkAsDone = async () => {
     if (!milestone?.milestoneId) return;
     try {
       await api.submitMilestoneWork({
-        milestoneId: milestone.milestoneId
+        milestoneId: milestone.milestoneId,
+        blobs: []
       })
       message.success('Mark as done successfully');
       window.location.reload();
     } catch (error) {
-      message.error('Failed to mark as done');
+      message.error((error as Error).toString());
     }
   };
 
@@ -172,7 +197,7 @@ const ManageDeliverables: React.FC<ManageDeliverablesProps> = ({
       <Title level={5}>Current Deliverables</Title>
       <Table
         columns={columns}
-        dataSource={milestone?.deliverables?.filter(d => d.isVisible) || []}
+        dataSource={deliverables}
         rowKey="fileId"
         pagination={false}
       />

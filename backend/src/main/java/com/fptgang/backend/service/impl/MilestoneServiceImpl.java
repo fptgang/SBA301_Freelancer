@@ -174,15 +174,17 @@ public class MilestoneServiceImpl implements MilestoneService {
         Preconditions.checkNotNull(milestone.getProject().getContract());
         authContext.requireAccountId(milestone.requireFreelancer().getAccountId());
 
-        for (MultipartFile blob : blobs) {
-            milestone.getDeliverables().add(
-                    fileService.createForMilestone(milestone.getMilestoneId(), blob)
-            );
+        if (blobs != null) {
+            for (MultipartFile blob : blobs) {
+                milestone.getDeliverables().add(
+                        fileService.createForMilestone(milestone.getMilestoneId(), blob)
+                );
+            }
         }
 
         // Change to reviewing if not yet
         if (milestone.getStatus() == Milestone.MilestoneStatus.IN_PROGRESS) {
-            if (blobs.isEmpty() &&
+            if ((blobs == null || blobs.isEmpty()) &&
                     fileService.countVisibleFilesForMilestone(milestone.getMilestoneId()) == 0)
                 throw new IllegalStateException("No files have been submitted");
             milestone.setStatus(Milestone.MilestoneStatus.REVIEWING);
