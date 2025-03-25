@@ -4,6 +4,7 @@ import {
   SettingOutlined,
   LogoutOutlined,
   DashboardOutlined,
+  CheckCircleOutlined,
 } from "@ant-design/icons";
 import { useGetIdentity, useLogout } from "@refinedev/core";
 import { Button, Dropdown, Avatar, Space, Typography, Divider } from "antd";
@@ -29,12 +30,15 @@ export const ProfileDropdownButton = () => {
             <div className="flex items-center mb-2">
               <Avatar
                 size={48}
+                src={user?.avatarUrl}
                 icon={<UserOutlined />}
                 className="mr-3 bg-blue-500"
               />
               <div>
                 <Text strong className="block">
                   {user?.firstName || ""} {user?.lastName || ""}
+                  {user?.isVerified &&
+                    <CheckCircleOutlined className="ml-1 text-blue-500"/>}
                 </Text>
                 <Text type="secondary" className="block">
                   {user?.email}
@@ -142,9 +146,12 @@ export const ProfileDropdownButton = () => {
             size="small"
             icon={<UserOutlined />}
             className="bg-blue-500"
+                src={user?.avatarUrl}
           />
           <span className="hidden sm:inline">
             {user?.firstName || "Account"}
+            {user?.isVerified &&
+              <CheckCircleOutlined className="ml-1 text-blue-500"/>}
           </span>
         </Space>
       </Button>

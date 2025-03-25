@@ -1,16 +1,15 @@
-import { Avatar, Button, Col, Drawer, Row, Tabs, Tag, Typography } from "antd";
-import React, { useState } from "react";
-import {
-  ProjectCategoryDto,
-  ProjectDto,
-  ProjectStatusDto,
-} from "../../../../../generated";
-import { HttpError, useList, useOne } from "@refinedev/core";
+import { Avatar, Button, Col, Drawer, Row, Tag, Typography } from "antd";
+import React from "react";
+import { ProjectDto, ProjectStatusDto } from "../../../../../generated";
 import { renderSkillTags } from "../../../../utils/renderSkillTags";
 import { Link, useNavigate } from "react-router";
-import { ArrowsAltOutlined, WindowsFilled } from "@ant-design/icons";
+import {
+  ArrowsAltOutlined,
+  CheckCircleOutlined,
+  UserOutlined,
+} from "@ant-design/icons";
 import { store } from "../../../../store";
-import {useLocalSettings} from "../../../../hooks/useLocalSettings";
+import { useLocalSettings } from "../../../../hooks/useLocalSettings";
 
 const ProjectDrawer: React.FC<{
   project: ProjectDto;
@@ -45,7 +44,11 @@ const ProjectDrawer: React.FC<{
       <br />
       <br />
       <Typography.Title level={5}>Description</Typography.Title>
-      <Typography.Text>{project.description}</Typography.Text>
+      <Typography.Paragraph
+        ellipsis={{ rows: 4, expandable: true, symbol: "more" }}
+      >
+        {project.description}
+      </Typography.Paragraph>
 
       <Typography.Title level={5} style={{ marginTop: 16 }}>
         Required Skills
@@ -62,29 +65,31 @@ const ProjectDrawer: React.FC<{
       <Typography.Title level={5} style={{ marginTop: 16 }}>
         Client
       </Typography.Title>
-      <Row gutter={16} align="middle" className="my-4">
-        <Col>
-          <Avatar src={project.client?.avatarUrl} size={64} />
-        </Col>
-        <Col>
-          <Typography.Title level={5} style={{ margin: 0 }}>
-            {project.client?.firstName} {project.client?.lastName}{" "}
-            <Tag color={project.client?.isVerified ? "green" : "red"}>
-              {project.client?.isVerified ? "Verified" : "Not Verified"}
-            </Tag>
-          </Typography.Title>
-          <Typography.Text type="secondary">
-            member since{" "}
-            {project.client && localSettings.formatDate(project.client.createdAt!)}{" "}
-          </Typography.Text>{" "}
-          <br />
-          <Typography.Text>
-            Contact: &nbsp;
-            <a href={`mailto:${project.client?.email}`}>
-              {project.client?.email}
-            </a>{" "}
-          </Typography.Text>
-        </Col>
+      <Row align="middle">
+        <div style={{ display: "flex", alignItems: "center" }}>
+          <Avatar
+            icon={<UserOutlined />}
+            src={project.client?.avatarUrl}
+            className="bg-blue-500"
+            size={24}
+          />
+          <div style={{ marginLeft: "16px" }}>
+            <Typography.Title level={5} style={{ margin: 0 }}>
+              {project.client?.firstName} {project.client?.lastName}
+              {project.client?.isVerified && (
+                <CheckCircleOutlined className="ml-1 text-blue-500" />
+              )}
+            </Typography.Title>
+          </div>
+        </div>
+      </Row>
+      <Row>
+        <Typography.Text>
+          Contact: &nbsp;
+          <a href={`mailto:${project.client?.email}`}>
+            {project.client?.email}
+          </a>{" "}
+        </Typography.Text>
       </Row>
 
       <Typography.Title level={5} style={{ marginTop: 16 }}>
@@ -96,37 +101,25 @@ const ProjectDrawer: React.FC<{
       {/* <Typography.Text>{categoryData?.data?.name}</Typography.Text> */}
 
       <Typography.Title level={5} style={{ marginTop: 16 }}>
-        Visibility
-      </Typography.Title>
-      <Typography.Text>
-        {project.isVisible ? "Visible" : "Hidden"}
-      </Typography.Text>
-
-      <Typography.Title level={5} style={{ marginTop: 16 }}>
         Created At
       </Typography.Title>
       <Typography.Text>
         {localSettings.formatDate(project.createdAt!)}
       </Typography.Text>
 
-      <Typography.Title level={5} style={{ marginTop: 16 }}>
-        Last Updated
-      </Typography.Title>
-      <Typography.Text>
-        {localSettings.formatDate(project.updatedAt!)}
-      </Typography.Text>
       <br />
       <br />
       {role === "CLIENT" ? (
-        <Button
-          block
-          type="primary"
-          onClick={() =>
-            navigate(`/client/projects/create`, { state: { project } })
-          }
-        >
-          Post a Project Like This
-        </Button>
+        // <Button
+        //   block
+        //   type="primary"
+        //   onClick={() =>
+        //     navigate(`/client/projects/create`, {state: {project}})
+        //   }
+        // >
+        //   Post a Project Like This
+        // </Button>
+        <></>
       ) : role === "FREELANCER" ? (
         <Button block type="primary" onClick={onApplyJobClick}>
           Apply for this Project

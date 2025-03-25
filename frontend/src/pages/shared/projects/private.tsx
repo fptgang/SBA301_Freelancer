@@ -1,5 +1,10 @@
-import React, {useState} from "react";
-import {AccountDto, ProjectDto, ProposalDto} from "../../../../generated";
+import React, { useState } from "react";
+import {
+  AccountDto,
+  ProjectDto,
+  ProjectStatusDto,
+  ProposalDto,
+} from "../../../../generated";
 import {
   Button,
   Card,
@@ -9,7 +14,7 @@ import {
   Space,
   Tabs,
   Tag,
-  Typography
+  Typography,
 } from "antd";
 import {
   useGetIdentity,
@@ -17,7 +22,7 @@ import {
   useList,
   useNotification,
   useOne,
-  useShow
+  useShow,
 } from "@refinedev/core";
 import api from "../../../services/api/openapi-config";
 import {
@@ -30,11 +35,11 @@ import {
   FileTextOutlined,
   PlayCircleOutlined,
   ProjectOutlined,
-  TeamOutlined
+  TeamOutlined,
 } from "@ant-design/icons";
-import {useNavigate, useParams} from "react-router";
+import { useNavigate, useParams } from "react-router";
 import ClientProjectEditButton from "../../client/projects/client-edit";
-import {ReportModal} from "../../../components/message/ReportModal";
+import { ReportModal } from "../../../components/message/ReportModal";
 import ProjectProgress from "./private/project-progress";
 import ProjectStats from "./private/project-stats";
 import ProjectAlerts from "./private/project-alerts";
@@ -46,19 +51,19 @@ import ModalTopup from "./private/modal-topup";
 import TabContract from "./private/tab-contract";
 import TabReports from "./private/tab-reports";
 
-const {Title, Text, Paragraph} = Typography;
-const {TabPane} = Tabs;
+const { Title, Text, Paragraph } = Typography;
+const { TabPane } = Tabs;
 
 const ProjectInternalDetail: React.FC<{
-  project: ProjectDto
-}> = ({project}) => {
+  project: ProjectDto;
+}> = ({ project }) => {
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [profileIdModal, setProfileIdModal] = useState(0);
 
-  const {data: user} = useGetIdentity<AccountDto>();
-  const {id} = useParams();
+  const { data: user } = useGetIdentity<AccountDto>();
+  const { id } = useParams();
   const navigate = useNavigate();
-  const {open} = useNotification();
+  const { open } = useNotification();
   const invalidate = useInvalidate();
   const [showReportModal, setShowReportModal] = useState(false);
   const [showDepositModal, setShowDepositModal] = useState(false);
@@ -66,10 +71,10 @@ const ProjectInternalDetail: React.FC<{
   // Get the current search params
   const searchParams = new URLSearchParams(window.location.search);
   // Get the active tab from URL or default to 'details'
-  const defaultActiveTab = searchParams.get('tab') || 'details';
+  const defaultActiveTab = searchParams.get("tab") || "details";
 
   // Fetch project data
-  const {queryResult: projectQueryResult} = useShow<ProjectDto>({
+  const { queryResult: projectQueryResult } = useShow<ProjectDto>({
     resource: "projects",
     id,
     queryOptions: {
@@ -84,7 +89,7 @@ const ProjectInternalDetail: React.FC<{
   } = projectQueryResult;
 
   // Fetch project category
-  const {data: categoryData, isLoading: isCategoryLoading} = useOne({
+  const { data: categoryData, isLoading: isCategoryLoading } = useOne({
     resource: "project-categories",
     id: project?.projectCategory?.projectCategoryId || "",
     queryOptions: {
@@ -93,7 +98,7 @@ const ProjectInternalDetail: React.FC<{
   });
 
   // Fetch proposals for this project
-  const {data: proposalsData, isLoading: isProposalsLoading} =
+  const { data: proposalsData, isLoading: isProposalsLoading } =
     useList<ProposalDto>({
       resource: "proposals",
       filters: [
@@ -109,30 +114,30 @@ const ProjectInternalDetail: React.FC<{
 
   // Project status mapping for visual elements
   const statusMap = {
-    OPEN: {color: "blue", text: "Open", step: 0, icon: <BulbOutlined/>},
+    OPEN: { color: "blue", text: "Open", step: 0, icon: <BulbOutlined /> },
     IN_PROGRESS: {
       color: "orange",
       text: "In Progress",
       step: 1,
-      icon: <ClockCircleOutlined/>,
+      icon: <ClockCircleOutlined />,
     },
     TERMINATED: {
       color: "red",
       text: "Terminated",
       step: 2,
-      icon: <CloseCircleOutlined/>,
+      icon: <CloseCircleOutlined />,
     },
     FINISHED: {
       color: "green",
       text: "Finished",
       step: 2,
-      icon: <CheckCircleOutlined/>,
+      icon: <CheckCircleOutlined />,
     },
     PAUSED: {
       color: "default",
       text: "Paused",
       step: 0,
-      icon: <PlayCircleOutlined/>,
+      icon: <PlayCircleOutlined />,
     },
   };
 
@@ -164,8 +169,10 @@ const ProjectInternalDetail: React.FC<{
   const handleTabChange = (activeKey: string) => {
     // Update the URL when tab changes
     const newSearchParams = new URLSearchParams(window.location.search);
-    newSearchParams.set('tab', activeKey);
-    navigate(`${window.location.pathname}?${newSearchParams.toString()}`, { replace: true });
+    newSearchParams.set("tab", activeKey);
+    navigate(`${window.location.pathname}?${newSearchParams.toString()}`, {
+      replace: true,
+    });
   };
 
   // Render loading state
@@ -173,7 +180,7 @@ const ProjectInternalDetail: React.FC<{
     return (
       <div className="bg-gray-50 min-h-screen">
         <div className="max-w-6xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-          <Skeleton active paragraph={{rows: 12}}/>
+          <Skeleton active paragraph={{ rows: 12 }} />
         </div>
       </div>
     );
@@ -183,8 +190,7 @@ const ProjectInternalDetail: React.FC<{
   if (isProjectError || !project) {
     return (
       <div className="bg-gray-50 min-h-screen">
-        <div
-          className="max-w-6xl mx-auto py-12 px-4 sm:px-6 lg:px-8 text-center">
+        <div className="max-w-6xl mx-auto py-12 px-4 sm:px-6 lg:px-8 text-center">
           <Empty
             description="Project not found or you don't have permission to view it"
             image={Empty.PRESENTED_IMAGE_SIMPLE}
@@ -213,10 +219,9 @@ const ProjectInternalDetail: React.FC<{
       {/* Project Header - Full width with accent color */}
       <div className="bg-white shadow-md border-b border-gray-200">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div
-            className="flex flex-col md:flex-row md:items-center md:justify-between">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between">
             <div className="flex items-center">
-              <ProjectOutlined className="text-blue-500 text-2xl mr-3"/>
+              <ProjectOutlined className="text-blue-500 text-2xl mr-3" />
               <div>
                 <Title level={3} className="mb-0 text-gray-800">
                   {project.title}
@@ -240,30 +245,31 @@ const ProjectInternalDetail: React.FC<{
               <Button
                 type="default"
                 onClick={() => navigate("/client/projects")}
-                icon={<ArrowLeftOutlined/>}
+                icon={<ArrowLeftOutlined />}
               >
                 Back
               </Button>
 
               {/* Add Edit Button Here */}
-              {project.status === "OPEN" && (
+              {project.status === ProjectStatusDto.Open && (
                 <ClientProjectEditButton
                   project={project}
                   onSuccess={projectQueryResult.refetch}
                 />
               )}
-              {project.status === "IN_PROGRESS" && (
+              {project.status === ProjectStatusDto.InProgress && (
                 <Button
                   type="primary"
                   danger
-                  style={{marginLeft: 8}}
+                  style={{ marginLeft: 8 }}
                   onClick={() => setShowReportModal(true)}
                 >
                   Report
                 </Button>
               )}
 
-              {project.status === "OPEN" && (
+              {(project.status === ProjectStatusDto.Open ||
+                !!project.contract) && (
                 <Popconfirm
                   title="Are you sure you want to close this project?"
                   onConfirm={handleTerminateProject}
@@ -284,13 +290,13 @@ const ProjectInternalDetail: React.FC<{
       {/* Main Content - Centered */}
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
         {/* ProjectAlerts */}
-        <ProjectAlerts project={project}/>
+        <ProjectAlerts project={project} refetch={projectQueryResult.refetch} />
 
         {/* Project Progress */}
-        <ProjectProgress project={project}/>
+        <ProjectProgress project={project} />
 
         {/* Project Stats */}
-        <ProjectStats project={project}/>
+        <ProjectStats project={project} />
 
         {/* Project Details & Proposals Tabs */}
         <Card className="shadow-sm">
@@ -303,35 +309,38 @@ const ProjectInternalDetail: React.FC<{
             <TabPane
               tab={
                 <span className="px-1">
-                  <FileTextOutlined/> Details
+                  <FileTextOutlined /> Details
                 </span>
               }
               key="details"
             >
-              <TabProjectDetail project={project}/>
+              <TabProjectDetail project={project} />
             </TabPane>
 
             <TabPane
               tab={
                 <span className="px-1">
-                  <ClockCircleOutlined/> Milestones
+                  <ClockCircleOutlined /> Milestones
                 </span>
               }
               key="milestones"
             >
-              <TabMilestones project={project}/>
+              <TabMilestones
+                project={project}
+                refetch={projectQueryResult.refetch}
+              />
             </TabPane>
 
             <TabPane
               tab={
                 <span className="px-1">
-                  <TeamOutlined/> Proposals ({proposals.length})
+                  <TeamOutlined /> Proposals ({proposals.length})
                 </span>
               }
               key="proposals"
             >
               {isProposalsLoading ? (
-                <Skeleton active paragraph={{rows: 5}}/>
+                <Skeleton active paragraph={{ rows: 5 }} />
               ) : proposals.length === 0 ? (
                 <div className="py-12 text-center">
                   <Empty
@@ -344,38 +353,38 @@ const ProjectInternalDetail: React.FC<{
                   />
                 </div>
               ) : (
-                <TabProposals project={project} openProfile={openProfile}
-                              onContractMade={() => window.location.reload()}/>
+                <TabProposals
+                  project={project}
+                  openProfile={openProfile}
+                  refetch={projectQueryResult.refetch}
+                />
               )}
             </TabPane>
 
             <TabPane
               tab={
                 <span className="px-1">
-                  <FileTextOutlined/> Contract
+                  <FileTextOutlined /> Contract
                 </span>
               }
               key="contract"
             >
-              <TabContract project={project}/>
+              <TabContract project={project} />
             </TabPane>
 
             <TabPane
               tab={
                 <span className="px-1">
-                  <BarChartOutlined/> Reports
+                  <BarChartOutlined /> Reports ({project?.reports?.length})
                 </span>
               }
               key="reports"
             >
-              <TabReports project={project}/>
+              <TabReports project={project} />
             </TabPane>
-
-
           </Tabs>
         </Card>
       </div>
-
 
       <ModalProfile
         profileId={profileIdModal}
@@ -392,7 +401,10 @@ const ProjectInternalDetail: React.FC<{
           />
           <ModalTopup
             visible={showDepositModal}
-            suggestedAmount={(project.activeMilestone?.contractualBudget || 0) - (user?.balance || 0)}
+            suggestedAmount={
+              (project.activeMilestone?.contractualBudget || 0) -
+              (user?.balance || 0)
+            }
             onClose={() => {
               setShowDepositModal(false);
               // setSelectedMilestone(null);

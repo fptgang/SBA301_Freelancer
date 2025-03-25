@@ -9,10 +9,10 @@ const { Header, Content, Footer } = Layout;
 const ClientLayout: React.FC = () => {
   return (
     <Layout>
-      <Header className="sticky top-0 z-[1] w-full flex items-center bg-inherit">
+      <Header className="sticky top-0 z-[1] w-full flex items-center bg-inherit p-0">
         <NavBar />
       </Header>
-      <Content style={{ padding: "0 48px", minHeight: "50vh", marginTop: 48 }}>
+      <Content>
         <Outlet />
       </Content>
       <Footer style={{ textAlign: "center" }}>

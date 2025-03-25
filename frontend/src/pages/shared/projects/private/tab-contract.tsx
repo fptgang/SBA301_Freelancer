@@ -37,26 +37,26 @@ const TabContract: React.FC<{ project: ProjectDto }> = ({project}) => {
           <Text strong>Project:</Text> <Text>{project.title}</Text>
         </Col>
         <Col span={12}>
-          <Text strong>Client:</Text>
+          <Text strong>Client:{" "}</Text>
           <Text>{`${project.client?.firstName} ${project.client?.lastName || ''}`}</Text>
         </Col>
         <Col span={12}>
-          <Text strong>Freelancer:</Text>
+          <Text strong>Freelancer:{" "}</Text>
           <Text>{`${contract.freelancer?.firstName} ${contract.freelancer?.lastName || ''}`}</Text>
         </Col>
         <Col span={12}>
-          <Text strong>Created At:</Text>
+          <Text strong>Created At:{" "}</Text>
           <Text>{localSettings.formatDateTime(contract.createdAt!)}</Text>
         </Col>
         <Col span={12}>
-          <Text strong>Signed At:</Text>
+          <Text strong>Signed At:{" "}</Text>
           <Text>{contract.signedAt ? localSettings.formatDateTime(contract.signedAt) : 'Not signed yet'}</Text>
         </Col>
       </Row>
       <Divider/>
       <Row gutter={[16, 16]}>
         <Col span={12}>
-          <Text strong>Start Date:</Text>
+          <Text strong>Start Date:{" "}</Text>
           <Text>{localSettings.formatDateTime(project.startDate!)}</Text>
         </Col>
         <Col span={12}>

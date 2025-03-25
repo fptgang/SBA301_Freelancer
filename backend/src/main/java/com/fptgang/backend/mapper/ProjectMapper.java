@@ -169,7 +169,10 @@ public class ProjectMapper extends BaseMapper<ProjectDto, Project> {
         dto.setRequiredSkills(entity.getRequiredSkills().stream()
                 .map((s) -> projectSkillMapper.toDTO(s, DetailLevel.FULL))
                 .collect(Collectors.toList()));
-
+        if (authContext.hasInternalAccess(entity)) {
+            dto.setContract(entity.getContract() != null ?
+                    contractMapper.toDTO(entity.getContract(), DetailLevel.FULL) : null);
+        }
         if (level == DetailLevel.SUMMARY) {
             return dto; // Those fields are enough
         }
@@ -183,8 +186,7 @@ public class ProjectMapper extends BaseMapper<ProjectDto, Project> {
 
             dto.setStaff(entity.getStaff() != null && entity.getStaff().getAccountId() != 0 ?
                     accountMapper.toDTO(entity.getStaff(), DetailLevel.REFERENCE) : null);
-            dto.setContract(entity.getContract() != null ?
-                    contractMapper.toDTO(entity.getContract(), DetailLevel.FULL) : null);
+
             dto.setLatestMessage(messageMapper.toDTO(
                     messageService.findLatestVisibleMessageByProject(entity.getProjectId()),
                     DetailLevel.REFERENCE
@@ -198,13 +200,13 @@ public class ProjectMapper extends BaseMapper<ProjectDto, Project> {
         // Freelancers can view his own proposals to this project
         // The freelancer is not necessarily the one get contracted
         if (authContext.getRole() != null && authContext.getRole() == Role.FREELANCER) {
-            List<ProposalDto> mps= proposalService
+            List<ProposalDto> mps = proposalService
                     .findByProjectAndFreelancer(
                             entity.getProjectId(),
                             authContext.requireAccountId()
                     ).stream().map(e -> proposalMapper.toDTO(e, DetailLevel.FULL)).toList();
-            log.info("get my Proposals: {}",mps.size());
-            if(!mps.isEmpty()) {
+            log.info("get my Proposals: {}", mps.size());
+            if (!mps.isEmpty()) {
                 dto.setMyProposals(mps);
             }
         }

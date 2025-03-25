@@ -4,10 +4,13 @@ import com.fptgang.backend.api.controller.ProjectCategoriesApi;
 import com.fptgang.backend.api.model.GetProjectCategories200Response;
 import com.fptgang.backend.api.model.Pageable;
 import com.fptgang.backend.api.model.ProjectCategoryDto;
+import com.fptgang.backend.api.model.ProjectInCategoryDto;
 import com.fptgang.backend.mapper.DetailLevel;
 import com.fptgang.backend.mapper.ProjectCategoryMapper;
+import com.fptgang.backend.model.Project;
 import com.fptgang.backend.model.Role;
 import com.fptgang.backend.service.ProjectCategoryService;
+import com.fptgang.backend.service.ProjectService;
 import com.fptgang.backend.service.params.ListParams;
 import com.fptgang.backend.util.OpenApiHelper;
 import com.fptgang.backend.util.SecurityUtil;
@@ -29,14 +32,16 @@ public class ProjectCategoryController implements ProjectCategoriesApi {
     private final ProjectCategoryService projectCategoryService;
     private final ProjectCategoryMapper projectCategoryMapper;
     private final SimpMessagingTemplate messagingTemplate;
+    private final ProjectService projectService;
 
     @Autowired
     public ProjectCategoryController(ProjectCategoryService projectCategoryService,
                                      ProjectCategoryMapper projectCategoryMapper,
-                                     SimpMessagingTemplate messagingTemplate) {
+                                     SimpMessagingTemplate messagingTemplate, ProjectService projectService) {
         this.projectCategoryService = projectCategoryService;
         this.projectCategoryMapper = projectCategoryMapper;
         this.messagingTemplate = messagingTemplate;
+        this.projectService = projectService;
     }
 
     @Override
@@ -92,5 +97,15 @@ public class ProjectCategoryController implements ProjectCategoriesApi {
         projectCategoryDto.setProjectCategoryId(projectCategoryId); // Override projectCategoryId
         messagingTemplate.convertAndSend("resources/projectCategories", projectCategoryDto);
         return new ResponseEntity<>(projectCategoryMapper.toDTO(projectCategoryService.update(projectCategoryMapper.toEntity(projectCategoryDto)),DetailLevel.FULL), HttpStatus.OK);
+    }
+
+    @Override
+    public ResponseEntity<ProjectInCategoryDto> countProjectInCategoryById(Long projectCategoryId) {
+        ProjectInCategoryDto projectInCategoryDto = new ProjectInCategoryDto();
+        projectInCategoryDto.setCategoryId(projectCategoryId);
+        projectInCategoryDto.setSuccess(projectService.countProjectsByCategoryIdAndStatus(projectCategoryId, Project.ProjectStatus.FINISHED));
+        projectInCategoryDto.setTotal(projectService.countProjectsByCategoryId(projectCategoryId));
+        return new ResponseEntity<>(projectInCategoryDto, HttpStatus.OK);
+
     }
 }

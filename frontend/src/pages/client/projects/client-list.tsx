@@ -1,9 +1,5 @@
 import { useState } from "react";
-import {
-  useTable,
-  List,
-  DateField,
-} from "@refinedev/antd";
+import { useTable, List, DateField } from "@refinedev/antd";
 import {
   Table,
   Card,
@@ -26,14 +22,14 @@ import { formatCurrency } from "../../../utils/formatter";
 import ClientCreateButton from "./client-create";
 import { ProjectDto } from "../../../../generated";
 import { store } from "../../../store";
-import { useNavigate } from "react-router";
-import {useLocalSettings} from "../../../hooks/useLocalSettings";
+import { useNavigate, useSearchParams } from "react-router";
+import { useLocalSettings } from "../../../hooks/useLocalSettings";
 
 const { Text } = Typography;
 const { Option } = Select;
 
 const ClientList = () => {
-  const [localSettings] = useLocalSettings()
+  const [localSettings] = useLocalSettings();
   const [searchText, setSearchText] = useState("");
   const me = store?.getState()?.auth?.account;
   const nav = useNavigate();
@@ -73,6 +69,9 @@ const ClientList = () => {
     },
   });
 
+  const [searchParams, setSearchParams] = useSearchParams();
+  const showCreateModal = searchParams.get("modal") === "create";
+
   const handleSearch = (value) => {
     setSearchText(value);
     setFilters([
@@ -99,6 +98,11 @@ const ClientList = () => {
     );
   };
 
+  const handleCloseModal = () => {
+    searchParams.delete("modal");
+    setSearchParams(searchParams);
+  };
+
   return (
     <div className="p-4">
       <List
@@ -119,7 +123,11 @@ const ClientList = () => {
               className="max-w-md"
             />
             <Space>
-              <ClientCreateButton refetch={refetch} />
+              <ClientCreateButton 
+                refetch={refetch} 
+                showModal={showCreateModal}
+                onClose={handleCloseModal}
+              />
             </Space>
           </div>
 
@@ -165,7 +173,10 @@ const ClientList = () => {
                 </Tooltip>
               }
               render={(value) => (
-                <DateField value={value} format={localSettings.dateTimeFormat} />
+                <DateField
+                  value={value}
+                  format={localSettings.dateTimeFormat}
+                />
               )}
               sorter
               width={200}
@@ -177,8 +188,11 @@ const ClientList = () => {
                 <Space>
                   <DollarOutlined />
                   <span>
-                    {formatCurrency(record.minBudget)}-
-                    {formatCurrency(record.maxBudget)}
+                    {record?.contract
+                      ? formatCurrency(record.contract?.budget || 0)
+                      : `${formatCurrency(
+                          record.minBudget || 0
+                        )}-${formatCurrency(record.maxBudget || 0)}`}
                   </span>
                 </Space>
               )}
@@ -231,7 +245,7 @@ const ClientList = () => {
                     color="default"
                     style={{ border: "1px solid #f0f0f0" }}
                     onClick={() => {
-                      nav(`/client/projects/${record.projectId}`);
+                      nav(`/projects/${record.projectId}`);
                     }}
                   />
                 </Space>

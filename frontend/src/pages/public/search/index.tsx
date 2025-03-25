@@ -30,7 +30,7 @@ const SearchPage = () => {
   >([]);
   const [current, setCurrent] = useState(1);
   const [pageSize, setPageSize] = useState(10); // Default page size
-  const [searchParam] = useSearchParams();
+  const [searchParam, setSearchParams] = useSearchParams();
   const [searchText, setSearchText] = useState<string>(
     searchParam.get("keyword") || ""
   );
@@ -68,7 +68,7 @@ const SearchPage = () => {
     isError: isSkillsError,
   } = useList<SkillDto, HttpError>({
     resource: "skills",
-    pagination: { pageSize: 100 },
+    pagination: { pageSize: 1000 },
   });
 
   const {
@@ -78,7 +78,7 @@ const SearchPage = () => {
     isSuccess: isCategoriesSuccess,
   } = useList<ProjectCategoryDto, HttpError>({
     resource: "project-categories",
-    pagination: { pageSize: 100 },
+    pagination: { pageSize: 1000 },
   });
 
   useEffect(() => {
@@ -204,7 +204,17 @@ const SearchPage = () => {
         className="mb-4"
       />
 
-      <Tabs activeKey={activeTab} onChange={setActiveTab} className="mb-4">
+      <Tabs
+        activeKey={activeTab}
+        onChange={(key) => {
+          setActiveTab(key);
+          setSearchParams({
+            type: key === "projects" ? "work" : "talent",
+            ...(searchText && { keyword: searchText }),
+          });
+        }}
+        className="mb-4"
+      >
         <Tabs.TabPane
           tab={
             <span>
