@@ -61,18 +61,7 @@ const PublicNavBar: React.FC = () => {
       path: "/search?type=work",
       icon: <SearchOutlined />,
     },
-    {
-      key: "categories",
-      label: "Categories",
-      path: "/categories",
-      icon: <ProjectOutlined />,
-    },
-    {
-      key: "popular",
-      label: "Popular Skills",
-      path: "/popular-skills",
-      icon: <ProfileOutlined />,
-    },
+
   ];
 
   const findTalentItems = [
@@ -85,25 +74,26 @@ const PublicNavBar: React.FC = () => {
     {
       key: "post-job",
       label: "Post a Job",
-      path: "/post-job",
+      path: "/client/projects",
       icon: <FileTextOutlined />,
     },
   ];
 
-  const resourcesItems = [
-    {
-      key: "pricing",
-      label: "Pricing",
-      path: "/pricing",
-      icon: <WalletOutlined />,
-    },
-    {
-      key: "help",
-      label: "Help Center",
-      path: "/help",
-      icon: <MessageOutlined />,
-    },
-  ];
+  // const resourcesItems = [
+  //   {
+  //     key: "pricing",
+  //     label: "Pricing",
+  //     path: "/pricing",
+  //     icon: <WalletOutlined />,
+  //   },
+  //   {
+  //     key: "help",
+  //     label: "Help Center",
+  //     path: "/help",
+  //     icon: <MessageOutlined />,
+  //   },
+  // ];
+ 
 
   const isActive = (path: string) => {
     return (
@@ -140,7 +130,7 @@ const PublicNavBar: React.FC = () => {
           <div className="hidden md:flex items-center space-x-4">
             <NavDropdown label="Find Work" items={findWorkItems} />
             <NavDropdown label="Find Talent" items={findTalentItems} />
-            <NavDropdown label="Resources" items={resourcesItems} />
+            {/* <NavDropdown label="Resources" items={resourcesItems} /> */}
           </div>
         </div>
 
@@ -280,7 +270,7 @@ const PublicNavBar: React.FC = () => {
             ))}
           </div>
 
-          <div className="flex flex-col space-y-2">
+          {/* <div className="flex flex-col space-y-2">
             <Text strong className="pb-1 border-b">
               Resources
             </Text>
@@ -301,7 +291,7 @@ const PublicNavBar: React.FC = () => {
                 {item.label}
               </Button>
             ))}
-          </div>
+          </div> */}
 
           <div
             className="pt-4 border-t"
@@ -332,7 +322,7 @@ const ClientNavBar: React.FC = () => {
   const { data: user } = useGetIdentity<AccountDto>();
 
   // Mock wallet amount - in a real app, get this from user data
-  const walletAmount = 2500.75;
+  const walletAmount = user?.balance || 0;
 
   const handleSearch = (value: string) => {
     setSearchTerm(value);
@@ -352,12 +342,6 @@ const ClientNavBar: React.FC = () => {
       label: "Dashboard",
       path: "/client/dashboard",
       icon: <DashboardOutlined />,
-    },
-    {
-      key: "analytics",
-      label: "Analytics",
-      path: "/client/analytics",
-      icon: <SettingOutlined />,
     },
   ];
 
@@ -659,12 +643,6 @@ const FreelancerNavBar: React.FC = () => {
       path: "/freelancer/dashboard",
       icon: <DashboardOutlined />,
     },
-    {
-      key: "analytics",
-      label: "Analytics",
-      path: "/freelancer/analytics",
-      icon: <SettingOutlined />,
-    },
   ];
 
   const workItems = [
@@ -686,12 +664,6 @@ const FreelancerNavBar: React.FC = () => {
       path: "/search?type=work",
       icon: <SearchOutlined />,
     },
-    {
-      key: "saved-jobs",
-      label: "Saved Jobs",
-      path: "/freelancer/saved-jobs",
-      icon: <FileTextOutlined />,
-    },
   ];
 
   const profileItems = [
@@ -700,18 +672,6 @@ const FreelancerNavBar: React.FC = () => {
       label: "My Profile",
       path: "/freelancer/profile",
       icon: <ProfileOutlined />,
-    },
-    {
-      key: "skills",
-      label: "Skills",
-      path: "/freelancer/skills",
-      icon: <ProfileOutlined />,
-    },
-    {
-      key: "portfolio",
-      label: "Portfolio",
-      path: "/freelancer/portfolio",
-      icon: <ProjectOutlined />,
     },
   ];
 
