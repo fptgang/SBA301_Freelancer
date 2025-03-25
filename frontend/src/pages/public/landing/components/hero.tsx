@@ -4,8 +4,9 @@ import { Button, Typography } from "antd";
 import { ArrowRightOutlined } from "@ant-design/icons";
 import TrustedBy from "./trusted-by";
 import { motion } from "framer-motion";
-import { useIsAuthenticated } from "@refinedev/core";
+import { useGetIdentity, useIsAuthenticated } from "@refinedev/core";
 import { useNavigate } from "react-router";
+import { AccountDto } from "../../../../../generated";
 
 const { Title, Paragraph } = Typography;
 
@@ -27,13 +28,14 @@ const Hero: React.FC = () => {
 
     return () => clearInterval(interval);
   }, [currentIndex]);
+  const { data: user } = useGetIdentity<AccountDto>();
   const { data: auth } = useIsAuthenticated();
   const nav = useNavigate();
   const handleHireTalentButton = () => {
     if (!auth?.authenticated) {
       console.log("Authenticated");
       nav("/login", { replace: true });
-    }else{
+    } else {
       nav("/search", { replace: true });
     }
   };
@@ -41,8 +43,12 @@ const Hero: React.FC = () => {
   const handleLearnMore = () => {
     if (!auth?.authenticated) {
       nav("/login", { replace: true });
-    }else{
-      nav("/search", { replace: true });
+    } else {
+      if (user?.role === "FREELANCER") {
+        nav("/search", { replace: true });
+      } else {
+        nav("/search?type=work", { replace: true });
+      }
     }
   };
 
@@ -97,7 +103,7 @@ const Hero: React.FC = () => {
           </div>
           <div className="hidden md:block">
             <img
-              src="/public/homepage-banner.jpg"
+              src="https://hirable.blob.core.windows.net/documents/e4c2b21b-2517-4363-b50e-ded95a81820f%2Fhomepage-banner.jpg"
               alt="Freelancing Platform"
               className="w-full h-auto"
             />

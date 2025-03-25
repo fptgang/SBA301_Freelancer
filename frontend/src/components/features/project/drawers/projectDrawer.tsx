@@ -1,17 +1,21 @@
-import {Avatar, Button, Col, Drawer, Row, Tag, Typography} from "antd";
+import { Avatar, Button, Col, Drawer, Row, Tag, Typography } from "antd";
 import React from "react";
-import {ProjectDto, ProjectStatusDto,} from "../../../../../generated";
-import {renderSkillTags} from "../../../../utils/renderSkillTags";
-import {Link, useNavigate} from "react-router";
-import {ArrowsAltOutlined, CheckCircleOutlined, UserOutlined} from "@ant-design/icons";
-import {store} from "../../../../store";
-import {useLocalSettings} from "../../../../hooks/useLocalSettings";
+import { ProjectDto, ProjectStatusDto } from "../../../../../generated";
+import { renderSkillTags } from "../../../../utils/renderSkillTags";
+import { Link, useNavigate } from "react-router";
+import {
+  ArrowsAltOutlined,
+  CheckCircleOutlined,
+  UserOutlined,
+} from "@ant-design/icons";
+import { store } from "../../../../store";
+import { useLocalSettings } from "../../../../hooks/useLocalSettings";
 
 const ProjectDrawer: React.FC<{
   project: ProjectDto;
   isDrawerVisible: any;
   onClose: any;
-}> = ({project, isDrawerVisible, onClose}) => {
+}> = ({ project, isDrawerVisible, onClose }) => {
   const [localSettings] = useLocalSettings();
   const navigate = useNavigate();
 
@@ -35,54 +39,60 @@ const ProjectDrawer: React.FC<{
       width={500}
     >
       <Link to={`/projects/${project.projectId}`}>
-        View {project.title} on full screen <ArrowsAltOutlined/>
+        View {project.title} on full screen <ArrowsAltOutlined />
       </Link>
-      <br/>
-      <br/>
+      <br />
+      <br />
       <Typography.Title level={5}>Description</Typography.Title>
-      <Typography.Text>{project.description}</Typography.Text>
+      <Typography.Paragraph
+        ellipsis={{ rows: 4, expandable: true, symbol: "more" }}
+      >
+        {project.description}
+      </Typography.Paragraph>
 
-      <Typography.Title level={5} style={{marginTop: 16}}>
+      <Typography.Title level={5} style={{ marginTop: 16 }}>
         Required Skills
       </Typography.Title>
       {project.requiredSkills && renderSkillTags(project.requiredSkills)}
 
-      <Typography.Title level={5} style={{marginTop: 16}}>
+      <Typography.Title level={5} style={{ marginTop: 16 }}>
         Status
       </Typography.Title>
       <Tag color={project.status === "OPEN" ? "green" : "red"}>
         {project.status}
       </Tag>
 
-      <Typography.Title level={5} style={{marginTop: 16}}>
+      <Typography.Title level={5} style={{ marginTop: 16 }}>
         Client
       </Typography.Title>
       <Row align="middle">
-            <div style={{ display: 'flex', alignItems: 'center' }}>
-              <Avatar 
-                  icon={<UserOutlined/>} 
-                  src={project.client?.avatarUrl} 
-                  className="bg-blue-500"
-                  size={24} />
-              <div style={{ marginLeft: '16px' }}>
-                <Typography.Title level={5} style={{ margin: 0 }}>
-                  {project.client?.firstName} {project.client?.lastName}
-                  {project.client?.isVerified &&
-                    <CheckCircleOutlined className="ml-1 text-blue-500"/>}
-                </Typography.Title>
-              </div>
-            </div>
-            </Row>
-          <Row>
-  <Typography.Text>
-    Contact: &nbsp;
-    <a href={`mailto:${project.client?.email}`}>
-      {project.client?.email}
-    </a>{" "}
-  </Typography.Text>
-          </Row>
+        <div style={{ display: "flex", alignItems: "center" }}>
+          <Avatar
+            icon={<UserOutlined />}
+            src={project.client?.avatarUrl}
+            className="bg-blue-500"
+            size={24}
+          />
+          <div style={{ marginLeft: "16px" }}>
+            <Typography.Title level={5} style={{ margin: 0 }}>
+              {project.client?.firstName} {project.client?.lastName}
+              {project.client?.isVerified && (
+                <CheckCircleOutlined className="ml-1 text-blue-500" />
+              )}
+            </Typography.Title>
+          </div>
+        </div>
+      </Row>
+      <Row>
+        <Typography.Text>
+          Contact: &nbsp;
+          <a href={`mailto:${project.client?.email}`}>
+            {project.client?.email}
+          </a>{" "}
+        </Typography.Text>
+      </Row>
 
-      <Typography.Title level={5} style={{marginTop: 16}}>
+      <Typography.Title level={5} style={{ marginTop: 16 }}>
         Project Category
       </Typography.Title>
       <Typography.Text>
@@ -90,15 +100,15 @@ const ProjectDrawer: React.FC<{
       </Typography.Text>
       {/* <Typography.Text>{categoryData?.data?.name}</Typography.Text> */}
 
-      <Typography.Title level={5} style={{marginTop: 16}}>
+      <Typography.Title level={5} style={{ marginTop: 16 }}>
         Created At
       </Typography.Title>
       <Typography.Text>
         {localSettings.formatDate(project.createdAt!)}
       </Typography.Text>
 
-      <br/>
-      <br/>
+      <br />
+      <br />
       {role === "CLIENT" ? (
         // <Button
         //   block

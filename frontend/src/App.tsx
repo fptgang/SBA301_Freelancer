@@ -212,6 +212,15 @@ function App() {
                   useNewQueryKeys: true,
                   mutationMode: "optimistic",
                   liveMode: "off",
+                  title: {
+                    icon: (
+                      <img
+                        src="https://raw.githubusercontent.com/fptgang/SBA301_Freelancer/c7c1c58ae260583a6b506cc70000b8c2749e6c16/images/icon.svg"
+                        alt="logo"
+                      />
+                    ),
+                    text: "Hirable Admin",
+                  },
                 }}
               >
                 <Routes>
@@ -387,7 +396,29 @@ function App() {
 
                 <RefineKbar />
                 <UnsavedChangesNotifier />
-                <DocumentTitleHandler />
+                <DocumentTitleHandler
+                  handler={({ action, params, resource }) => {
+                    const id = params?.id ?? "";
+
+                    const actionPrefixMatcher = {
+                      create: "Create new ",
+                      clone: `#${id} Clone ${resource?.meta?.label}`,
+                      edit: `#${id} Edit ${resource?.meta?.label}`,
+                      show: `#${id} Show ${resource?.meta?.label}`,
+                      list: `${resource?.meta?.label}`,
+                    };
+
+                    const suffix = "Hirable";
+                    const title =
+                      actionPrefixMatcher[action || "list"] +
+                      (actionPrefixMatcher[action || "list"].length > 0
+                        ? " | "
+                        : "") +
+                      suffix;
+
+                    return title;
+                  }}
+                />
               </Refine>
               <DevtoolsPanel />
             </DevtoolsProvider>
