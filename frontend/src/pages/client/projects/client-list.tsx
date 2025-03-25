@@ -1,9 +1,5 @@
 import { useState } from "react";
-import {
-  useTable,
-  List,
-  DateField,
-} from "@refinedev/antd";
+import { useTable, List, DateField } from "@refinedev/antd";
 import {
   Table,
   Card,
@@ -27,13 +23,13 @@ import ClientCreateButton from "./client-create";
 import { ProjectDto } from "../../../../generated";
 import { store } from "../../../store";
 import { useNavigate } from "react-router";
-import {useLocalSettings} from "../../../hooks/useLocalSettings";
+import { useLocalSettings } from "../../../hooks/useLocalSettings";
 
 const { Text } = Typography;
 const { Option } = Select;
 
 const ClientList = () => {
-  const [localSettings] = useLocalSettings()
+  const [localSettings] = useLocalSettings();
   const [searchText, setSearchText] = useState("");
   const me = store?.getState()?.auth?.account;
   const nav = useNavigate();
@@ -165,7 +161,10 @@ const ClientList = () => {
                 </Tooltip>
               }
               render={(value) => (
-                <DateField value={value} format={localSettings.dateTimeFormat} />
+                <DateField
+                  value={value}
+                  format={localSettings.dateTimeFormat}
+                />
               )}
               sorter
               width={200}
@@ -177,8 +176,11 @@ const ClientList = () => {
                 <Space>
                   <DollarOutlined />
                   <span>
-                    {formatCurrency(record.minBudget)}-
-                    {formatCurrency(record.maxBudget)}
+                    {record?.contract
+                      ? formatCurrency(record.contract?.budget || 0)
+                      : `${formatCurrency(
+                          record.minBudget || 0
+                        )}-${formatCurrency(record.maxBudget || 0)}`}
                   </span>
                 </Space>
               )}

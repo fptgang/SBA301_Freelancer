@@ -284,7 +284,7 @@ const ProjectInternalDetail: React.FC<{
       {/* Main Content - Centered */}
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
         {/* ProjectAlerts */}
-        <ProjectAlerts project={project} />
+        <ProjectAlerts project={project} refetch={projectQueryResult.refetch} />
 
         {/* Project Progress */}
         <ProjectProgress project={project} />
@@ -319,7 +319,10 @@ const ProjectInternalDetail: React.FC<{
               }
               key="milestones"
             >
-              <TabMilestones project={project} />
+              <TabMilestones
+                project={project}
+                refetch={projectQueryResult.refetch}
+              />
             </TabPane>
 
             <TabPane
@@ -347,7 +350,7 @@ const ProjectInternalDetail: React.FC<{
                 <TabProposals
                   project={project}
                   openProfile={openProfile}
-                  onContractMade={() => window.location.reload()}
+                  onContractMade={() => projectQueryResult.refetch()}
                 />
               )}
             </TabPane>

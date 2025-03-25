@@ -96,7 +96,6 @@ import {
 import { ColorModeContextProvider } from "./contexts/color-mode";
 import FreelancerProfilePage from "./pages/freelancer/profile";
 import SearchPage from "./pages/public/search";
-import ClientProjectShow from "./pages/client/projects/client-show";
 import ChatPage from "./pages/shared/chat";
 import SettingPage from "./pages/shared/setting";
 import FreelancerProposalShow from "./pages/freelancer/proposal/show";

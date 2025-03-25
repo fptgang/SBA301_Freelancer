@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from "react";
 import {
   Alert,
   Button,
@@ -7,52 +7,54 @@ import {
   Popconfirm,
   Table,
   Typography,
-  Upload
-} from 'antd';
+  Upload,
+} from "antd";
 import {
   DeleteOutlined,
   DownloadOutlined,
-  InboxOutlined
-} from '@ant-design/icons';
+  InboxOutlined,
+} from "@ant-design/icons";
 import {
   FileDto,
   MilestoneDto,
-  MilestoneStatusDto
-} from '../../../../../generated';
-import api from '../../../../services/api/openapi-config';
-import {handleFileDownload} from '../../../../components/common/file-list';
-import {useInvalidate} from '@refinedev/core';
-import {useLocalSettings} from '../../../../hooks/useLocalSettings';
+  MilestoneStatusDto,
+} from "../../../../../generated";
+import api from "../../../../services/api/openapi-config";
+import { handleFileDownload } from "../../../../components/common/file-list";
+import { useInvalidate } from "@refinedev/core";
+import { useLocalSettings } from "../../../../hooks/useLocalSettings";
 
-const {Dragger} = Upload;
-const {Title, Text, Paragraph} = Typography;
+const { Dragger } = Upload;
+const { Title, Text, Paragraph } = Typography;
 
 interface ManageDeliverablesProps {
   visible: boolean;
   milestone: MilestoneDto;
   onClose: () => void;
+  refetch?: () => void;
 }
 
 const ManageDeliverables: React.FC<ManageDeliverablesProps> = ({
-                                                                 visible,
-                                                                 milestone,
-                                                                 onClose,
-                                                               }) => {
+  visible,
+  milestone,
+  onClose,
+  refetch,
+}) => {
   const [localSettings] = useLocalSettings();
   const [deliverables, setDeliverables] = useState<FileDto[]>([]);
   const invalidate = useInvalidate();
 
   useEffect(() => {
-    setDeliverables(milestone?.deliverables?.filter(d => d.isVisible) || []);
+    setDeliverables(milestone?.deliverables?.filter((d) => d.isVisible) || []);
   }, [milestone]);
 
   const handleDelete = async (fileId: number) => {
     try {
       await api.deleteFile({
-        fileId
+        fileId,
       });
-      message.success('File deleted successfully');
-      setDeliverables(prev => prev.filter(f => f.fileId !== fileId));
+      message.success("File deleted successfully");
+      setDeliverables((prev) => prev.filter((f) => f.fileId !== fileId));
       invalidate({
         resource: "projects",
         id: milestone.projectId,
@@ -72,10 +74,10 @@ const ManageDeliverables: React.FC<ManageDeliverablesProps> = ({
     try {
       const uploadedFile = await api.uploadFile({
         blob: file,
-        milestoneId: milestone.milestoneId
+        milestoneId: milestone.milestoneId,
       });
-      message.success('File uploaded successfully');
-      setDeliverables(prev => [...prev, uploadedFile]);
+      message.success("File uploaded successfully");
+      setDeliverables((prev) => [...prev, uploadedFile]);
       invalidate({
         resource: "projects",
         id: milestone.projectId,
@@ -96,10 +98,12 @@ const ManageDeliverables: React.FC<ManageDeliverablesProps> = ({
     try {
       await api.submitMilestoneWork({
         milestoneId: milestone.milestoneId,
-        blobs: []
-      })
-      message.success('Mark as done successfully');
-      window.location.reload();
+        blobs: [],
+      });
+      message.success("Mark as done successfully");
+      if (refetch) refetch();
+      else window.location.reload();
+      onClose();
     } catch (error) {
       message.error((error as Error).toString());
     }
@@ -108,7 +112,7 @@ const ManageDeliverables: React.FC<ManageDeliverablesProps> = ({
   const confirmUpload = (file: File) => {
     return new Promise<boolean>((resolve) => {
       Modal.confirm({
-        title: 'Confirm Upload',
+        title: "Confirm Upload",
         content: `Are you sure you want to upload ${file.name}?`,
         onOk: () => resolve(true),
         onCancel: () => resolve(false),
@@ -118,45 +122,47 @@ const ManageDeliverables: React.FC<ManageDeliverablesProps> = ({
 
   const columns = [
     {
-      title: 'File Name',
-      dataIndex: 'fileName',
-      key: 'fileName',
+      title: "File Name",
+      dataIndex: "fileName",
+      key: "fileName",
     },
     {
-      title: 'Upload Date ',
-      dataIndex: 'createdAt',
-      key: 'createdAt',
-      render: (date: string) => date ? localSettings.formatDateTime(date) : 'N/A ',
+      title: "Upload Date ",
+      dataIndex: "createdAt",
+      key: "createdAt",
+      render: (date: string) =>
+        date ? localSettings.formatDateTime(date) : "N/A ",
     },
     {
-      title: 'Size',
-      dataIndex: 'size',
-      key: 'size',
-      render: (size: number) => size ? `${(size / 1024).toFixed(2)} KB` : 'N/A',
+      title: "Size",
+      dataIndex: "size",
+      key: "size",
+      render: (size: number) =>
+        size ? `${(size / 1024).toFixed(2)} KB` : "N/A",
     },
     {
-      title: 'Actions',
-      key: 'actions',
+      title: "Actions",
+      key: "actions",
       render: (_: any, record: FileDto) => (
         <>
-          {(milestone && milestone.status === MilestoneStatusDto.InProgress) &&
+          {milestone && milestone.status === MilestoneStatusDto.InProgress && (
             <Popconfirm
               title="Are you sure you want to delete this file?"
               onConfirm={() => handleDelete(record.fileId!)}
               okText="Yes"
               cancelText="No"
             >
-              <Button
-                danger
-                icon={<DeleteOutlined/>}
-              >
+              <Button danger icon={<DeleteOutlined />}>
                 Delete
               </Button>
-            </Popconfirm>}
+            </Popconfirm>
+          )}
           <Button
-            icon={<DownloadOutlined/>}
-            onClick={() => handleFileDownload(record.fileUrl!, record.fileName!)}
-            style={{marginLeft: 8}}
+            icon={<DownloadOutlined />}
+            onClick={() =>
+              handleFileDownload(record.fileUrl!, record.fileName!)
+            }
+            style={{ marginLeft: 8 }}
           >
             Download
           </Button>
@@ -175,13 +181,13 @@ const ManageDeliverables: React.FC<ManageDeliverablesProps> = ({
         <Button key="close" onClick={onClose}>
           Close
         </Button>,
-        (milestone && milestone.status === MilestoneStatusDto.InProgress) ?
+        milestone && milestone.status === MilestoneStatusDto.InProgress ? (
           <Popconfirm
             key="done"
             title="Mark as Done"
             description={
               <>
-                Are you sure you want to mark this milestone as done? <br/>
+                Are you sure you want to mark this milestone as done? <br />
                 This will notify the client for review.
               </>
             }
@@ -189,10 +195,11 @@ const ManageDeliverables: React.FC<ManageDeliverablesProps> = ({
             okText="Yes"
             cancelText="No"
           >
-            <Button type="primary">
-              Mark as Done
-            </Button>
-          </Popconfirm> : <></>,
+            <Button type="primary">Mark as Done</Button>
+          </Popconfirm>
+        ) : (
+          <></>
+        ),
       ]}
     >
       <Alert
@@ -200,24 +207,31 @@ const ManageDeliverables: React.FC<ManageDeliverablesProps> = ({
         description={
           <ul>
             <li>
-              <Text>• Upload and manage your work files through this
-                interface</Text>
+              <Text>
+                • Upload and manage your work files through this interface
+              </Text>
             </li>
             <li>
-              <Text>• After uploading all required deliverables, submit for
-                client review using "Mark as Done"</Text>
+              <Text>
+                • After uploading all required deliverables, submit for client
+                review using "Mark as Done"
+              </Text>
             </li>
             <li>
-              <Text>• During review phase: file deletion is disabled, but you
-                can still upload additional files per client feedback</Text>
+              <Text>
+                • During review phase: file deletion is disabled, but you can
+                still upload additional files per client feedback
+              </Text>
             </li>
             <li>
-              <Text>• Payment will be processed upon client approval of
-                deliverables</Text>
+              <Text>
+                • Payment will be processed upon client approval of deliverables
+              </Text>
             </li>
             <li>
-              <Text>• Contact support staff for any client-related
-                concerns</Text>
+              <Text>
+                • Contact support staff for any client-related concerns
+              </Text>
             </li>
           </ul>
         }
@@ -227,14 +241,14 @@ const ManageDeliverables: React.FC<ManageDeliverablesProps> = ({
 
       <Title level={5}>Upload Files</Title>
       <Dragger
-        customRequest={({file}) => handleUpload(file as File)}
+        customRequest={({ file }) => handleUpload(file as File)}
         beforeUpload={confirmUpload}
         multiple={true}
         showUploadList={false}
         className="mb-4"
       >
         <p className="ant-upload-drag-icon">
-          <InboxOutlined/>
+          <InboxOutlined />
         </p>
         <p className="ant-upload-text">Click or drag files to upload</p>
       </Dragger>
@@ -250,4 +264,4 @@ const ManageDeliverables: React.FC<ManageDeliverablesProps> = ({
   );
 };
 
-export default ManageDeliverables; 
+export default ManageDeliverables;
