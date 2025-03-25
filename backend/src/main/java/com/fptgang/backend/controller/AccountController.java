@@ -91,7 +91,7 @@ public class AccountController implements AccountsApi {
 
         // Staff cannot view Admin
         if (SecurityUtil.hasRole(Role.STAFF)) {
-            params.setFilter("role", "in", "STAFF,CUSTOMER");
+            params.setFilter("role", "in", "STAFF,CUSTOMER,CLIENT");
         }
         var res = accountService
                 .getAll(params.build())

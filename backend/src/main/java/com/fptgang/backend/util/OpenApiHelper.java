@@ -137,11 +137,11 @@ public class OpenApiHelper {
         for (String str : filters) {
             String[] filterParts = str.split(",", 3);
 
-            if (filterParts.length != 2 && filterParts.length != 3) {
-                throw new IllegalArgumentException("Invalid filter format. Expected: field,op,value");
-            }
+            String filterValue = filterParts.length > 2 ?
+                    String.join(",", Arrays.copyOfRange(filterParts, 2, filterParts.length)) :
+                    "";
 
-            filterMap.put(filterParts[0], new String[]{filterParts[1], filterParts[2]});
+            filterMap.put(filterParts[0], new String[]{filterParts[1], filterValue});
         }
 
         return filterMap;

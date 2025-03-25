@@ -473,7 +473,7 @@ const FreelancerMyProposalPage: React.FC = () => {
       render: (date: string) => (
         <div className="flex items-center space-x-2">
           <CalendarOutlined style={{ color: "#722ed1" }} />
-          <span>{localSettings.formatDate(date)}</span>
+          <span>{localSettings.formatDateTime(date)}</span>
         </div>
       ),
       sorter: true,
@@ -552,33 +552,9 @@ const FreelancerMyProposalPage: React.FC = () => {
                   icon={<CheckCircleOutlined />}
                   size="small"
                   type="primary"
-                  onClick={() =>
-                    handleShowContractModal(
-                      record.proposalId,
-                      record.projectId ? String(record.projectId) : "Project"
-                    )
-                  }
+                  onClick={() => nav("/projects/" + record.projectId)}
                 >
                   Sign Contract
-                </Button>
-              </Tooltip>
-            )}
-          {record.status === "ACCEPTED" &&
-            record.contractId &&
-            getContractStatus(record.proposalId) !== "UNSIGNED" && (
-              <Tooltip title="View contract details">
-                <Button
-                  icon={<FileTextOutlined />}
-                  size="small"
-                  type="default"
-                  onClick={() =>
-                    handleShowContractModal(
-                      record.proposalId,
-                      record.projectId ? String(record.projectId) : "Project"
-                    )
-                  }
-                >
-                  View Contract
                 </Button>
               </Tooltip>
             )}
@@ -777,13 +753,6 @@ const FreelancerMyProposalPage: React.FC = () => {
           {/* Table actions area */}
           <div className="flex flex-wrap items-center justify-between mb-4 gap-3">
             <div className="flex items-center space-x-2">
-              <Button
-                type="primary"
-                icon={<PlusOutlined />}
-                onClick={() => nav("/projects")}
-              >
-                Create New Proposal
-              </Button>
               <Dropdown
                 overlay={bulkActionMenu}
                 trigger={["click"]}

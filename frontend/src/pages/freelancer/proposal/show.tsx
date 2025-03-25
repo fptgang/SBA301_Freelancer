@@ -151,46 +151,55 @@ const FreelancerProposalShow: React.FC = () => {
           </Col>
         </Row>
 
-        <Row gutter={[24, 24]}>
-          {/* Key Stats Section */}
-          <Col xs={24}>
-            <Row gutter={[16, 16]} className="mb-6">
-              <Col xs={24} sm={12} md={8} lg={6}>
-                <Card bordered={false} className="h-full shadow-sm hover:shadow-md transition-shadow">
-                  <Statistic 
-                    title="Proposed Budget" 
-                    value={proposal.budget || 0} 
-                    prefix={<DollarOutlined />} 
-                    valueStyle={{ color: '#52c41a' }}
-                    precision={2}
-                  />
-                </Card>
-              </Col>
-              <Col xs={24} sm={12} md={8} lg={6}>
-                <Card bordered={false} className="h-full shadow-sm hover:shadow-md transition-shadow">
-                  <Statistic 
-                    title="Date Submitted" 
-                    value={proposal.createdAt ? dayjs(proposal.createdAt).format("MMM D, YYYY") : "N/A"} 
-                    prefix={<CalendarOutlined />} 
-                    valueStyle={{ color: '#1890ff' }}
-                  />
-                </Card>
-              </Col>
-              <Col xs={24} sm={12} md={8} lg={6}>
-                <Card bordered={false} className="h-full shadow-sm hover:shadow-md transition-shadow">
-                  <Statistic 
-                    title="Status" 
-                    value={proposal.status || "N/A"} 
-                    prefix={statusIcons[proposal.status as ProposalStatusDto]} 
-                    valueStyle={{ color: proposal.status ? (statusColors[proposal.status as ProposalStatusDto] === "green" ? '#52c41a' : 
-                                            statusColors[proposal.status as ProposalStatusDto] === "orange" ? '#fa8c16' : 
-                                            statusColors[proposal.status as ProposalStatusDto] === "red" ? '#f5222d' : '#1890ff') : '#1890ff' }}
-                  />
-                </Card>
-              </Col>
-            </Row>
-          </Col>
+          <Row gutter={16} className="mb-6">
+          <Col xs={24} sm={12} md={6}>
+              <Card className="h-full shadow-sm">
+                <Statistic
+                  title="Proposed Budget"
+                  value={proposal.budget || 0}
+                  valueStyle={{ fontSize: "16px", color: '#52c41a' }}
+                  prefix={<DollarOutlined />}
+                  precision={2}
+                  className="text-center"
+                />
+              </Card>
+            </Col>
+            <Col xs={24} sm={12} md={6}>
+              <Card className="h-full shadow-sm">
+                <Statistic
+                  title="Date Submitted"
+                  value={localSettings.formatDateTime(proposal.createdAt!)}
+                  valueStyle={{ fontSize: "16px", color: '#1890ff' }}
+                  prefix={<CalendarOutlined />}
+                  className="text-center"
+                />
+              </Card>
+            </Col>
+            <Col xs={24} sm={12} md={6}>
+              <Card className="h-full shadow-sm">
+                <Statistic
+                  title="Status"
+                  value={proposal.status || "N/A"}
+                  valueStyle={{
+                    fontSize: "16px",
+                    color: proposal.status
+                      ? statusColors[proposal.status as ProposalStatusDto] === "green"
+                        ? '#52c41a'
+                        : statusColors[proposal.status as ProposalStatusDto] === "orange"
+                        ? '#fa8c16'
+                        : statusColors[proposal.status as ProposalStatusDto] === "red"
+                        ? '#f5222d'
+                        : '#1890ff'
+                      : '#1890ff',
+                  }}
+                  prefix={statusIcons[proposal.status as ProposalStatusDto]}
+                  className="text-center"
+                />
+              </Card>
+            </Col>
+          </Row>
 
+          <Row gutter={[24, 24]}>
           <Col xs={24} lg={16}>
             <Card 
               bordered={false} 
@@ -419,7 +428,7 @@ const FreelancerProposalShow: React.FC = () => {
                       <Button
                         type="primary"
                         icon={<CheckCircleOutlined />}
-                        onClick={() => proposal.projectId && navigate(`/freelancer/projects/${proposal.projectId}`)}
+                        onClick={() => proposal.projectId && navigate(`/projects/${proposal.projectId}`)}
                       >
                         View Project Details & Contract
                       </Button>

@@ -1,5 +1,5 @@
 import React from "react";
-import { Col, Descriptions, Row, Typography } from "antd";
+import { Col, Descriptions, Row, Typography, Divider, Tag } from "antd";
 import { useGetIdentity } from "@refinedev/core";
 import { ProjectHeader } from "../../../components/features/project/details/ProjectHeader";
 import { ProjectDescription } from "../../../components/features/project/details/ProjectDescription";
@@ -7,8 +7,9 @@ import { CheckCircleOutlined } from "@ant-design/icons";
 import { AccountDto, ProjectDto } from "../../../../generated";
 import { ActionCard } from "../../../components/features/project/details/ActionCard";
 import { ClientInformation } from "../../../components/features/project/details/ClientInformation";
+import FileList from "../../../components/common/file-list";
 
-const { Title } = Typography;
+const { Title, Text } = Typography;
 
 const ProjectPublicDetail: React.FC<{
   project: ProjectDto;
@@ -23,22 +24,18 @@ const ProjectPublicDetail: React.FC<{
         <Col xs={24} md={16}>
           {project && <ProjectHeader project={project} />}
           {project && <ProjectDescription project={project} />}
-          {project && (
-            <>
-              <Typography.Title level={5} style={{ marginBottom: 16 }}>
-                <CheckCircleOutlined style={{ marginRight: 8 }} />
-                Project Activity
-              </Typography.Title>
-              <Descriptions bordered column={1} size="small">
-                <Descriptions.Item label="Proposals Received">
-                  {project.proposalCount}
-                </Descriptions.Item>
-                <Descriptions.Item label="Category">
-                  {project.projectCategory?.name}
-                </Descriptions.Item>
-              </Descriptions>
-              <br />
-            </>
+          
+          <Divider />
+          
+          <Title level={5} className="text-gray-700">
+            Attachments
+          </Title>
+          {project.files && project.files.length > 0 ? (
+            <FileList files={project.files.filter(file => file.isVisible)} />
+          ) : (
+            <Text type="secondary" className="italic">
+              No attachments
+            </Text>
           )}
         </Col>
         <Col xs={24} md={8}>

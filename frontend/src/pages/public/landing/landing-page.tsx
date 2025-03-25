@@ -28,11 +28,6 @@ const LandingPage = () => {
   });
   const categories = data?.data || [];
 
-  const { data: projectData } = useMany<ProjectInCategoryDto>({
-    resource: "project-categories/project-in-category",
-    ids: categories.map((category) => category.projectCategoryId),
-    queryOptions: { enabled: !!categories.length },
-  });
   return (
     <div className="min-h-screen bg-white">
       {/* Navigation */}
@@ -107,7 +102,7 @@ const LandingPage = () => {
                 <div className="flex items-center mb-3">
                   <div className="flex items-center bg-green-50 px-3 py-1 rounded-full">
                     <StarFilled className="text-green-500 mr-1" />
-                    <Text className="text-sm text-green-600">
+                    {/* <Text className="text-sm text-green-600">
                       {
                         projectData?.data?.find(
                           (project) =>
@@ -122,7 +117,7 @@ const LandingPage = () => {
                         )?.total
                       }{" "}
                       success
-                    </Text>
+                    </Text> */}
                   </div>
                 </div>
                 <Title
