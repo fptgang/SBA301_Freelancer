@@ -25,9 +25,10 @@ import {
   UploadOutlined,
   InfoCircleOutlined,
   PercentageOutlined,
+  DeleteOutlined,
 } from "@ant-design/icons";
 import { useForm, useModal, useSelect } from "@refinedev/antd";
-import moment, { Moment } from "moment";
+import dayjs from "dayjs";
 import type { UploadFile, RcFile } from "antd/es/upload/interface";
 import api from "../../../services/api/openapi-config";
 import { store } from "../../../store";
@@ -38,7 +39,6 @@ import {
   ProficiencyEnum,
   ProjectSkillDto,
 } from "../../../../generated/models";
-import dayjs from "dayjs";
 
 const { Step } = Steps;
 interface ClientCreateButtonProps {
@@ -55,8 +55,6 @@ const ClientCreateButton: React.FC<ClientCreateButtonProps> = ({ refetch }) => {
   const [projectData, setProjectData] = useState<any>({});
   const [fileList, setFileList] = useState<UploadFile[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [newSkill, setNewSkill] = useState<Partial<ProjectSkillDto>>({});
-  const [skills, setSkills] = useState<ProjectSkillDto[]>([]);
 
   // Fetch categories for select
   const { selectProps: categorySelectProps } = useSelect({
@@ -99,14 +97,15 @@ const ClientCreateButton: React.FC<ClientCreateButtonProps> = ({ refetch }) => {
   };
 
   // Date validation rules
-  const isDateValid = (date: Moment | null) => {
-    const minDate = moment().add(3, "days");
+  const isDateValid = (date: dayjs.Dayjs | null) => {
+    const minDate = dayjs().add(3, "days");
     return date && date.isAfter(minDate);
   };
 
   // Validate milestone dates
   const validateMilestoneDates = (milestones: any[]) => {
     if (!milestones || milestones.length === 0) {
+      message.error("At least one milestone is required");
       return false;
     }
 
@@ -117,15 +116,13 @@ const ClientCreateButton: React.FC<ClientCreateButtonProps> = ({ refetch }) => {
 
     // Sort milestones by deadline
     const sortedMilestones = [...milestones].sort(
-      (a, b) => moment(a.deadline).valueOf() - moment(b.deadline).valueOf()
+      (a, b) => dayjs(a.deadline).valueOf() - dayjs(b.deadline).valueOf()
     );
 
     // Check if first milestone is at least 3 days from now
-    const firstMilestoneDate = moment(new Date(sortedMilestones[0].deadline));
+    const firstMilestoneDate = dayjs(sortedMilestones[0].deadline);
     if (!isDateValid(firstMilestoneDate)) {
-      message.error(
-        "First milestone deadline must be at least 3 days from now"
-      );
+      message.error("First milestone deadline must be at least 3 days from now");
       return false;
     }
 
@@ -202,7 +199,7 @@ const ClientCreateButton: React.FC<ClientCreateButtonProps> = ({ refetch }) => {
         maxBudget: updatedProjectData.maxBudget,
         requiredSkills: [],
         milestones: [],
-        startDate: moment(new Date(updatedProjectData.startDate)).toDate(),
+        startDate: dayjs(updatedProjectData.startDate).toDate(),
       };
 
       // Transform the skills to match SkillSetDto format
@@ -210,10 +207,11 @@ const ClientCreateButton: React.FC<ClientCreateButtonProps> = ({ refetch }) => {
         updatedProjectData.requiredSkills &&
         Array.isArray(updatedProjectData.requiredSkills)
       ) {
+        console.log(updatedProjectData.requiredSkills);
         projectCreateDto.requiredSkills = updatedProjectData.requiredSkills.map(
-          (skill: ProjectSkillDto): SkillSetDto => ({
-            skillId: skill.skill?.skillId || 0,
-            proficiency: skill.proficiency || ProficiencyEnum.Beginner,
+          (set: { proficiency: ProficiencyEnum , skill: number}): SkillSetDto => ({
+            skillId: set.skill,
+            proficiency: set.proficiency,
           })
         );
       }
@@ -228,7 +226,7 @@ const ClientCreateButton: React.FC<ClientCreateButtonProps> = ({ refetch }) => {
             title: milestone.title,
             description: milestone.description,
             budgetRatio: milestone.budget,
-            deadline: moment(new Date(milestone.deadline)).toDate(),
+            deadline: dayjs(milestone.deadline).toDate(),
           })
         );
       }
@@ -255,18 +253,13 @@ const ClientCreateButton: React.FC<ClientCreateButtonProps> = ({ refetch }) => {
         refetch();
       } catch (error) {
         console.error("Project creation error:", error);
-        message.error("Failed to create project. Please try again.");
+        message.error((error as Error).toString());
         setIsSubmitting(false);
       }
     } else {
       // Move to next step
       setCurrentStep(currentStep + 1);
     }
-  };
-
-  // Navigate to previous step
-  const handlePrevStep = () => {
-    setCurrentStep(currentStep - 1);
   };
 
   // Step forms
@@ -402,9 +395,9 @@ const ClientCreateButton: React.FC<ClientCreateButtonProps> = ({ refetch }) => {
                           return Promise.reject("Start date is required");
                         }
 
-                        const minDate = moment().add(3, "d");
+                        const minDate = dayjs().add(3, "d");
 
-                        if (moment(new Date(value)).isBefore(minDate)) {
+                        if (dayjs(value).isBefore(minDate)) {
                           return Promise.reject(
                             "Start date must be at least 3 days from today"
                           );
@@ -417,19 +410,20 @@ const ClientCreateButton: React.FC<ClientCreateButtonProps> = ({ refetch }) => {
                 >
                   <DatePicker
                     className="w-full"
+                    showTime={{ format: 'HH:mm' }}
+                    format="YYYY-MM-DD HH:mm"
                     disabledDate={(current) => {
-                      // Can't select days before today + 3 days
-                      return (
-                        current &&
-                        current < moment().add(3, "days").startOf("day")
-                      );
+                      return current && current < dayjs().add(3, "days").startOf("day");
                     }}
                   />
                 </Form.Item>
               </Col>
             </Row>
 
-            <div className="flex justify-end">
+            <div className="flex justify-between">
+              {currentStep > 0 && (
+                <Button onClick={() => setCurrentStep(currentStep - 1)}>Previous</Button>
+              )}
               <Button type="primary" htmlType="submit">
                 Next
               </Button>
@@ -476,103 +470,77 @@ const ClientCreateButton: React.FC<ClientCreateButtonProps> = ({ refetch }) => {
               {(fields, { add, remove }) => (
                 <Space direction="vertical" style={{ width: "100%" }}>
                   <Form.Item label="Required Skills">
-                    <Space>
-                      <Select
-                        {...skillSelectProps}
-                        placeholder="Select skill"
-                        onSelect={(option) => {
-                          setNewSkill((prev) => ({
-                            ...prev,
-                            skill: {
-                              skillId: Number(option),
-                              name:
-                                skillOptions?.find(
-                                  (skill) => skill.skillId === Number(option)
-                                )?.name || "abc",
-                            },
-                          }));
-                        }}
-                        value={newSkill.skill?.skillId}
-                      />
-                      <Select
-                        options={Object.values(ProficiencyEnum).map(
-                          (value) => ({
-                            label: value,
-                            value,
-                          })
-                        )}
-                        placeholder="Select proficiency level"
-                        onSelect={(value) => {
-                          setNewSkill((prev) => ({
-                            ...prev,
-                            proficiency: value as ProficiencyEnum,
-                          }));
-                        }}
-                        value={newSkill?.proficiency}
-                      />
-                      <a
-                        onClick={() => {
-                          if (newSkill?.skill && newSkill?.proficiency) {
-                            const currentSkills = skills;
-                            console.log(skills);
-                            const skillExists = currentSkills.some(
-                              (item: ProjectSkillDto) =>
-                                item.skill?.skillId === newSkill.skill?.skillId
-                            );
-
-                            if (skillExists) {
-                              notification.warning({
-                                message: "This skill is existed",
-                              });
-                              return;
-                            }
-                            setSkills((prev) => [...prev, newSkill]);
-                            add(newSkill);
-                            setNewSkill({});
-                          }
-                        }}
-                      >
-                        Add skill
-                      </a>
-                    </Space>
+                    <Button
+                      type="dashed"
+                      onClick={() => add({ skill: undefined, proficiency: ProficiencyEnum.Beginner })}
+                      block
+                      icon={<PlusOutlined />}
+                    >
+                      Add Skill
+                    </Button>
                   </Form.Item>
-                  {fields.map(({ key, name }) => (
-                    <Space key={key} align="baseline">
-                      <Form.Item
-                        name={[name, "skill", "name"]}
-                        rules={[{ required: true }]}
-                      >
-                        <Select
-                          {...skillSelectProps}
-                          placeholder="Select skill"
-                        />
-                      </Form.Item>
-                      <Form.Item
-                        name={[name, "proficiency"]}
-                        rules={[{ required: true }]}
-                      >
-                        <Select
-                          options={Object.values(ProficiencyEnum).map(
-                            (value) => ({
-                              label: value,
-                              value,
-                            })
-                          )}
-                          placeholder="Select proficiency level"
-                        />
-                      </Form.Item>
-                      <a
-                        onClick={() => {
-                          setSkills((prev) =>
-                            prev.filter((_, i) => i !== name)
-                          );
-                          remove(name);
-                        }}
-                      >
-                        Remove
-                      </a>
-                    </Space>
-                  ))}
+
+                  {fields.map(({ key, name, ...restField }) => {
+                    // Get current field's skill ID to filter out from options
+                    const currentSkills = form.getFieldValue('requiredSkills') || [];
+                    const usedSkillIds = currentSkills
+                      .map((s: any) => s?.skill?.skillId)
+                      .filter((id: number) => id !== undefined);
+
+                    // Filter out already selected skills
+                    const availableSkills = skillOptions?.filter(
+                      (skill) => !usedSkillIds.includes(skill.skillId) || 
+                        currentSkills[name]?.skill?.skillId === skill.skillId
+                    );
+
+                    // Determine if the skill set is fully defined
+                    const isSkillSetDefined = currentSkills[name]?.skill?.skillId !== undefined
+                      && currentSkills[name]?.proficiency !== undefined;
+
+                    return (
+                      <Space key={key} style={{ display: 'flex', marginBottom: 8 }} align="baseline">
+                        <Form.Item
+                          {...restField}
+                          name={[name, 'skill']}
+                          rules={[{ required: true, message: 'Please select a skill' }]}
+                        >
+                          <Select
+                            style={{ width: 200 }}
+                            placeholder="Select skill"
+                            options={availableSkills?.map((skill) => ({
+                              value: skill.skillId,
+                              label: skill.name,
+                            }))}
+                            onChange={(value) => {
+                              const skill = skillOptions?.find(s => s.skillId === value);
+                              form.setFieldValue(['requiredSkills', name, 'skill'], skill);
+                            }}
+                            disabled={isSkillSetDefined}
+                          />
+                        </Form.Item>
+
+                        <Form.Item
+                          {...restField}
+                          name={[name, 'proficiency']}
+                          rules={[{ required: true, message: 'Please select proficiency' }]}
+                        >
+                          <Select
+                            style={{ width: 150 }}
+                            placeholder="Select proficiency"
+                            options={Object.values(ProficiencyEnum).map((p) => ({
+                              value: p,
+                              label: p.charAt(0).toUpperCase() + p.slice(1).toLowerCase(),
+                            }))}
+                            disabled={isSkillSetDefined}
+                          />
+                        </Form.Item>
+
+                        <Button type="text" danger onClick={() => remove(name)}>
+                          <DeleteOutlined />
+                        </Button>
+                      </Space>
+                    );
+                  })}
                 </Space>
               )}
             </Form.List>
@@ -604,7 +572,9 @@ const ClientCreateButton: React.FC<ClientCreateButtonProps> = ({ refetch }) => {
             </div>
 
             <div className="flex justify-between">
-              <Button onClick={handlePrevStep}>Previous</Button>
+              {currentStep > 0 && (
+                <Button onClick={() => setCurrentStep(currentStep - 1)}>Previous</Button>
+              )}
               <Button type="primary" htmlType="submit">
                 Next
               </Button>
@@ -756,11 +726,9 @@ const ClientCreateButton: React.FC<ClientCreateButtonProps> = ({ refetch }) => {
                                     return Promise.reject("Date is required");
                                   }
 
-                                  const minDate = moment().add(3, "d");
+                                  const minDate = dayjs().add(3, "d");
 
-                                  if (
-                                    moment(new Date(value)).isBefore(minDate)
-                                  ) {
+                                  if (dayjs(value).isBefore(minDate)) {
                                     return Promise.reject(
                                       "Date must be at least 3 days from today"
                                     );
@@ -773,13 +741,10 @@ const ClientCreateButton: React.FC<ClientCreateButtonProps> = ({ refetch }) => {
                           >
                             <DatePicker
                               className="w-full"
+                              showTime={{ format: 'HH:mm' }}
+                              format="YYYY-MM-DD HH:mm"
                               disabledDate={(current) => {
-                                // Can't select days before today + 3 days
-                                return (
-                                  current &&
-                                  current <
-                                    moment().add(3, "days").startOf("day")
-                                );
+                                return current && current < dayjs().add(3, "days").startOf("day");
                               }}
                             />
                           </Form.Item>
@@ -819,7 +784,9 @@ const ClientCreateButton: React.FC<ClientCreateButtonProps> = ({ refetch }) => {
             </Form.List>
 
             <div className="flex justify-between">
-              <Button onClick={handlePrevStep}>Previous</Button>
+              {currentStep > 0 && (
+                <Button onClick={() => setCurrentStep(currentStep - 1)}>Previous</Button>
+              )}
               <Button
                 type="primary"
                 htmlType="submit"

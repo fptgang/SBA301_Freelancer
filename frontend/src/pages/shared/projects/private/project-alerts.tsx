@@ -13,6 +13,7 @@ import Countdown from "../../../../components/Countdown";
 import ContractSignButton from "../../../../components/contract/contract-sign-button";
 import { useGetIdentity } from "@refinedev/core";
 import MilestoneDeadlineAdjustButton from "./milestone-deadline-adjust";
+import ProjectUnpauseButton from "./project-unpause";
 
 const ProjectAlerts: React.FC<{
   project: ProjectDto;
@@ -23,7 +24,7 @@ const ProjectAlerts: React.FC<{
 
   const alerts = [];
 
-  if (project.status === ProjectStatusDto.Open) {
+  if (project.status === ProjectStatusDto.Open && user?.role == AccountDtoRoleEnum.Client) {
     const createContractDeadline = localSettings.formatDateTime(
       dayjs(project.startDate!).subtract(1, "day")
     );
@@ -35,6 +36,37 @@ const ProjectAlerts: React.FC<{
             You must accept a proposal and create the contract before{" "}
             {createContractDeadline} (Time left:{" "}
             <Countdown targetDate={createContractDeadline} />)
+          </>
+        }
+        type="warning"
+        showIcon
+        className="mb-6 shadow-sm"
+      />
+    );
+  }
+
+  if (project.status === ProjectStatusDto.Paused && user?.role == AccountDtoRoleEnum.Client) {
+    alerts.push(
+      <Alert
+        key="unsigned"
+        message={
+          <>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+              }}
+            >
+              <span>
+                The project is paused due to no contract is made on time.{" "}
+                Please unpause the project to continue.
+              </span>
+                <ProjectUnpauseButton
+                  project={project}
+                  callback={() => refetch?.()}
+                />
+            </div>
           </>
         }
         type="warning"
