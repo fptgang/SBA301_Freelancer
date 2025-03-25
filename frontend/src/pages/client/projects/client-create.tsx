@@ -135,8 +135,8 @@ const ClientCreateButton: React.FC<ClientCreateButtonProps> = ({ refetch }) => {
       const currDate = dayjs(sortedMilestones[i].deadline);
 
       // Use dayjs's diff method to get difference in days
-      const daysBetween = currDate.diff(prevDate, 'day', true);
-      
+      const daysBetween = currDate.diff(prevDate, "day", true);
+
       // Round to nearest whole number for better user experience
       const roundedDaysBetween = Math.round(daysBetween);
 

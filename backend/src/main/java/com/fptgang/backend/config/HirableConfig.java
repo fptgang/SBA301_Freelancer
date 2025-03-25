@@ -24,4 +24,7 @@ public class HirableConfig {
 
     @Value("${hirable.proposal.application-cutoff-duration:1}")
     private int proposalApplicationCutoffDuration;
+
+    @Value("${FRONTEND_URL}")
+    private String frontendUrl;
 }
