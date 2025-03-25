@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { AccountDto, ProjectDto, ProposalDto } from "../../../../generated";
+import { AccountDto, ProjectDto, ProjectStatusDto, ProposalDto } from "../../../../generated";
 import {
   Button,
   Card,
@@ -246,13 +246,13 @@ const ProjectInternalDetail: React.FC<{
               </Button>
 
               {/* Add Edit Button Here */}
-              {project.status === "OPEN" && (
+              {project.status === ProjectStatusDto.Open && (
                 <ClientProjectEditButton
                   project={project}
                   onSuccess={projectQueryResult.refetch}
                 />
               )}
-              {project.status === "IN_PROGRESS" && (
+              {project.status === ProjectStatusDto.InProgress && (
                 <Button
                   type="primary"
                   danger
@@ -263,7 +263,7 @@ const ProjectInternalDetail: React.FC<{
                 </Button>
               )}
 
-              {project.status === "OPEN" && (
+              {(project.status === ProjectStatusDto.Open || !!project.contract) && (
                 <Popconfirm
                   title="Are you sure you want to close this project?"
                   onConfirm={handleTerminateProject}

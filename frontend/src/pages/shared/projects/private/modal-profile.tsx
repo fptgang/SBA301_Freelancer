@@ -20,8 +20,6 @@ const ModalProfile: React.FC<ModalProfileProps> = ({
                                                    }) => {
   const [localSettings] = useLocalSettings();
 
-  console.log(profileId);
-
   const {data: contractData, isLoading: loading} = useOne<ProfileDto>({
     resource: "profiles",
     id: profileId,

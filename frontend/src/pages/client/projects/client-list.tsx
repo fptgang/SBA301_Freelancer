@@ -233,7 +233,7 @@ const ClientList = () => {
                     color="default"
                     style={{ border: "1px solid #f0f0f0" }}
                     onClick={() => {
-                      nav(`/client/projects/${record.projectId}`);
+                      nav(`/projects/${record.projectId}`);
                     }}
                   />
                 </Space>

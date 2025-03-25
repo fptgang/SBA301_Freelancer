@@ -1,22 +1,17 @@
-import { Avatar, Button, Col, Drawer, Row, Tabs, Tag, Typography } from "antd";
-import React, { useState } from "react";
-import {
-  ProjectCategoryDto,
-  ProjectDto,
-  ProjectStatusDto,
-} from "../../../../../generated";
-import { HttpError, useList, useOne } from "@refinedev/core";
-import { renderSkillTags } from "../../../../utils/renderSkillTags";
-import { Link, useNavigate } from "react-router";
-import { ArrowsAltOutlined, WindowsFilled } from "@ant-design/icons";
-import { store } from "../../../../store";
+import {Avatar, Button, Col, Drawer, Row, Tag, Typography} from "antd";
+import React from "react";
+import {ProjectDto, ProjectStatusDto,} from "../../../../../generated";
+import {renderSkillTags} from "../../../../utils/renderSkillTags";
+import {Link, useNavigate} from "react-router";
+import {ArrowsAltOutlined, CheckCircleOutlined, UserOutlined} from "@ant-design/icons";
+import {store} from "../../../../store";
 import {useLocalSettings} from "../../../../hooks/useLocalSettings";
 
 const ProjectDrawer: React.FC<{
   project: ProjectDto;
   isDrawerVisible: any;
   onClose: any;
-}> = ({ project, isDrawerVisible, onClose }) => {
+}> = ({project, isDrawerVisible, onClose}) => {
   const [localSettings] = useLocalSettings();
   const navigate = useNavigate();
 
@@ -40,54 +35,54 @@ const ProjectDrawer: React.FC<{
       width={500}
     >
       <Link to={`/projects/${project.projectId}`}>
-        View {project.title} on full screen <ArrowsAltOutlined />
+        View {project.title} on full screen <ArrowsAltOutlined/>
       </Link>
-      <br />
-      <br />
+      <br/>
+      <br/>
       <Typography.Title level={5}>Description</Typography.Title>
       <Typography.Text>{project.description}</Typography.Text>
 
-      <Typography.Title level={5} style={{ marginTop: 16 }}>
+      <Typography.Title level={5} style={{marginTop: 16}}>
         Required Skills
       </Typography.Title>
       {project.requiredSkills && renderSkillTags(project.requiredSkills)}
 
-      <Typography.Title level={5} style={{ marginTop: 16 }}>
+      <Typography.Title level={5} style={{marginTop: 16}}>
         Status
       </Typography.Title>
       <Tag color={project.status === "OPEN" ? "green" : "red"}>
         {project.status}
       </Tag>
 
-      <Typography.Title level={5} style={{ marginTop: 16 }}>
+      <Typography.Title level={5} style={{marginTop: 16}}>
         Client
       </Typography.Title>
-      <Row gutter={16} align="middle" className="my-4">
-        <Col>
-          <Avatar src={project.client?.avatarUrl} size={64} />
-        </Col>
-        <Col>
-          <Typography.Title level={5} style={{ margin: 0 }}>
-            {project.client?.firstName} {project.client?.lastName}{" "}
-            <Tag color={project.client?.isVerified ? "green" : "red"}>
-              {project.client?.isVerified ? "Verified" : "Not Verified"}
-            </Tag>
-          </Typography.Title>
-          <Typography.Text type="secondary">
-            member since{" "}
-            {project.client && localSettings.formatDate(project.client.createdAt!)}{" "}
-          </Typography.Text>{" "}
-          <br />
-          <Typography.Text>
-            Contact: &nbsp;
-            <a href={`mailto:${project.client?.email}`}>
-              {project.client?.email}
-            </a>{" "}
-          </Typography.Text>
-        </Col>
-      </Row>
+      <Row align="middle">
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              <Avatar 
+                  icon={<UserOutlined/>} 
+                  src={project.client?.avatarUrl} 
+                  className="bg-blue-500"
+                  size={24} />
+              <div style={{ marginLeft: '16px' }}>
+                <Typography.Title level={5} style={{ margin: 0 }}>
+                  {project.client?.firstName} {project.client?.lastName}
+                  {project.client?.isVerified &&
+                    <CheckCircleOutlined className="ml-1 text-blue-500"/>}
+                </Typography.Title>
+              </div>
+            </div>
+            </Row>
+          <Row>
+  <Typography.Text>
+    Contact: &nbsp;
+    <a href={`mailto:${project.client?.email}`}>
+      {project.client?.email}
+    </a>{" "}
+  </Typography.Text>
+          </Row>
 
-      <Typography.Title level={5} style={{ marginTop: 16 }}>
+      <Typography.Title level={5} style={{marginTop: 16}}>
         Project Category
       </Typography.Title>
       <Typography.Text>
@@ -95,38 +90,26 @@ const ProjectDrawer: React.FC<{
       </Typography.Text>
       {/* <Typography.Text>{categoryData?.data?.name}</Typography.Text> */}
 
-      <Typography.Title level={5} style={{ marginTop: 16 }}>
-        Visibility
-      </Typography.Title>
-      <Typography.Text>
-        {project.isVisible ? "Visible" : "Hidden"}
-      </Typography.Text>
-
-      <Typography.Title level={5} style={{ marginTop: 16 }}>
+      <Typography.Title level={5} style={{marginTop: 16}}>
         Created At
       </Typography.Title>
       <Typography.Text>
         {localSettings.formatDate(project.createdAt!)}
       </Typography.Text>
 
-      <Typography.Title level={5} style={{ marginTop: 16 }}>
-        Last Updated
-      </Typography.Title>
-      <Typography.Text>
-        {localSettings.formatDate(project.updatedAt!)}
-      </Typography.Text>
-      <br />
-      <br />
+      <br/>
+      <br/>
       {role === "CLIENT" ? (
-        <Button
-          block
-          type="primary"
-          onClick={() =>
-            navigate(`/client/projects/create`, { state: { project } })
-          }
-        >
-          Post a Project Like This
-        </Button>
+        // <Button
+        //   block
+        //   type="primary"
+        //   onClick={() =>
+        //     navigate(`/client/projects/create`, {state: {project}})
+        //   }
+        // >
+        //   Post a Project Like This
+        // </Button>
+        <></>
       ) : role === "FREELANCER" ? (
         <Button block type="primary" onClick={onApplyJobClick}>
           Apply for this Project

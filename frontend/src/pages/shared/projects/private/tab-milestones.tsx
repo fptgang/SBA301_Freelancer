@@ -23,7 +23,7 @@ import {
   ProjectDto,
 } from "../../../../../generated";
 import { useLocalSettings } from "../../../../hooks/useLocalSettings";
-import { MilestoneStatusDto } from "../../../../../generated/models/MilestoneStatusDto";
+import { MilestoneStatusDto } from "../../../../../generated";
 import Countdown from "../../../../components/Countdown";
 import FileList from "../../../../components/common/file-list";
 import ManageDeliverables from "./modal-manage-deliverables";
@@ -113,12 +113,12 @@ const TabMilestones: React.FC<{
                   milestone.status === MilestoneStatusDto.Finished
                     ? "green"
                     : milestone.status === MilestoneStatusDto.InProgress
-                    ? "blue"
-                    : milestone.status === MilestoneStatusDto.Reviewing
-                    ? "orange"
-                    : milestone.status === MilestoneStatusDto.Terminated
-                    ? "red"
-                    : "gray"
+                      ? "blue"
+                      : milestone.status === MilestoneStatusDto.Reviewing
+                        ? "orange"
+                        : milestone.status === MilestoneStatusDto.Terminated
+                          ? "red"
+                          : "gray"
                 }
               >
                 <Card
@@ -149,10 +149,10 @@ const TabMilestones: React.FC<{
                               milestone.status === "FINISHED"
                                 ? "green"
                                 : milestone.status === "IN_PROGRESS"
-                                ? "blue"
-                                : milestone.status === "REVIEWING"
-                                ? "orange"
-                                : "default"
+                                  ? "blue"
+                                  : milestone.status === "REVIEWING"
+                                    ? "orange"
+                                    : "default"
                             }
                           >
                             {milestone.status}
@@ -160,19 +160,19 @@ const TabMilestones: React.FC<{
                         )}
                         {milestone.fundStatus &&
                           milestone.fundStatus !==
-                            MilestoneFundStatusDto.None && (
+                          MilestoneFundStatusDto.None && (
                             <Tag
                               color={
                                 milestone.fundStatus ===
                                 MilestoneFundStatusDto.Deposited
                                   ? "green"
                                   : milestone.fundStatus ===
-                                    MilestoneFundStatusDto.Released
-                                  ? "blue"
-                                  : milestone.fundStatus ===
+                                  MilestoneFundStatusDto.Released
+                                    ? "blue"
+                                    : milestone.fundStatus ===
                                     MilestoneFundStatusDto.Refunded
-                                  ? "red"
-                                  : "default"
+                                      ? "red"
+                                      : "default"
                               }
                             >
                               FUND {milestone.fundStatus}
@@ -237,13 +237,13 @@ const TabMilestones: React.FC<{
                     {(!isFinished || isExpanded) && (
                       <Col span={6} className="flex justify-end">
                         <div className="flex flex-col gap-2">
-                          {user &&
-                            user.role == AccountDtoRoleEnum.Freelancer && (
+                          {(user &&
+                            user.role == AccountDtoRoleEnum.Freelancer && !!project.contract) && (
                               <>
                                 {(milestone.status ===
                                   MilestoneStatusDto.InProgress ||
                                   milestone.status ===
-                                    MilestoneStatusDto.Reviewing) && (
+                                  MilestoneStatusDto.Reviewing) && (
                                   <Button
                                     onClick={(e) =>
                                       handleManageDeliverables(milestone, e)
@@ -256,18 +256,18 @@ const TabMilestones: React.FC<{
                               </>
                             )}
 
-                          {user && user.role == AccountDtoRoleEnum.Client && (
+                          {(user && user.role == AccountDtoRoleEnum.Client && !!project.contract) && (
                             <>
                               {milestone.status ===
                                 MilestoneStatusDto.Reviewing && (
-                                <WorkAcceptButton
-                                  project={project}
-                                  milestone={milestone}
-                                  onSubmit={() => {
-                                    refetch?.();
-                                  }}
-                                />
-                              )}
+                                  <WorkAcceptButton
+                                    project={project}
+                                    milestone={milestone}
+                                    onSubmit={() => {
+                                      refetch?.();
+                                    }}
+                                  />
+                                )}
 
                               {milestone.fundStatus ===
                                 MilestoneFundStatusDto.None &&

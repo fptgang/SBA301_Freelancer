@@ -9,6 +9,8 @@ import {
   Space,
   Avatar,
   Tooltip,
+  Alert,
+  Divider,
 } from "antd";
 import { ProjectDto } from "../../../../../generated";
 import { renderSkillTags } from "../../../../utils/renderSkillTags";
@@ -19,7 +21,12 @@ import {
   FileOutlined,
   DollarOutlined,
   CalendarOutlined,
+  ToolOutlined,
 } from "@ant-design/icons";
+import Countdown from "../../../../components/Countdown";
+import dayjs from "dayjs";
+
+const {Title, Text, Paragraph} = Typography;
 
 const ProjectCard: React.FC<{ project: ProjectDto }> = ({ project }) => {
   const [localSettings] = useLocalSettings();
@@ -54,7 +61,7 @@ const ProjectCard: React.FC<{ project: ProjectDto }> = ({ project }) => {
         <Row gutter={[16, 16]}>
           <Col span={24}>
             <Space direction="vertical" size={4} style={{ width: "100%" }}>
-              <Space style={{ marginTop: 8 }}>
+              <Space style={{ marginTop: 8, marginBottom: 8 }}>
                 {project.projectCategory && (
                   <Tag color="blue">{project.projectCategory.name}</Tag>
                 )}
@@ -64,27 +71,62 @@ const ProjectCard: React.FC<{ project: ProjectDto }> = ({ project }) => {
               </Space>
               <Typography.Title level={4}>{project.title}</Typography.Title>
 
-              <Space align="center">
-                <CalendarOutlined />
-                <Typography.Text type="secondary">
-                  Posted: {localSettings.formatDate(project.createdAt!)}
-                </Typography.Text>
-              </Space>
 
-              <Space align="center">
-                <DollarOutlined />
-                <Typography.Text>{budgetRange}</Typography.Text>
-              </Space>
 
-              <Typography.Paragraph
-                ellipsis={{ rows: 3 }}
-                style={{ marginBottom: 12 }}
-              >
-                {project.description}
-              </Typography.Paragraph>
+              <Row gutter={[16, 16]}>
+        <Col span={12}>
+          <Text strong><CalendarOutlined /> Created At:{" "}</Text>
+          <Text>{localSettings.formatDateTime(project.createdAt!)}</Text>
+        </Col>
+        <Col span={12}>
+          <Text strong><CalendarOutlined /> Start Date:{" "}</Text>
+          <Text>{localSettings.formatDateTime(project.startDate!)}</Text>
+        </Col>
+        <Col span={12}>
+          <Text strong><CalendarOutlined /> Proposal Submission Deadline:{" "}</Text>
+          <Text>
+            <Countdown 
+                        targetDate={dayjs(project.startDate).subtract(1, 'day').toDate()} 
+                      />
+                      </Text>
+        </Col>
+        <Col span={12}>
+          <Text strong><DollarOutlined /> Budget Range:{" "}</Text>
+          <Text>{budgetRange}</Text>
+        </Col>
+      </Row>
 
-              {project.requiredSkills &&
-                renderSkillTags(project.requiredSkills)}
+              <Divider/>
+
+      <Paragraph
+        className="text-gray-700 whitespace-pre-wrap bg-gray-50 p-6 rounded-md border border-gray-100">
+        {project.description}
+      </Paragraph>
+
+      <Divider/>
+
+
+              <Title level={5} className="text-blue-600">
+        Required Skills
+      </Title>
+      {project.requiredSkills && project.requiredSkills.length > 0 ? (
+        <div className="flex flex-wrap gap-2 mt-3">
+          {project.requiredSkills.map((projectSkill, index) => (
+            <Tag
+              key={projectSkill.projectSkillId || index}
+              color="blue"
+              className="flex items-center px-3 py-1 rounded-full"
+            >
+              <ToolOutlined className="mr-1"/>
+              {projectSkill.skill?.name} - {projectSkill.proficiency}
+            </Tag>
+          ))}
+        </div>
+      ) : (
+        <Text type="secondary" className="italic">
+          No specific skills required
+        </Text>
+      )}
             </Space>
           </Col>
         </Row>
