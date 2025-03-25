@@ -55,60 +55,23 @@ const PublicNavBar: React.FC = () => {
   };
 
   const findWorkItems = [
-    {
-      key: "find-work",
-      label: "Browse Jobs",
-      path: "/search?type=work",
-      icon: <SearchOutlined />,
-    },
-    {
-      key: "categories",
-      label: "Categories",
-      path: "/categories",
-      icon: <ProjectOutlined />,
-    },
-    {
-      key: "popular",
-      label: "Popular Skills",
-      path: "/popular-skills",
-      icon: <ProfileOutlined />,
-    },
+    { key: "find-work", label: "Browse Jobs", path: "/search?type=work", icon: <SearchOutlined /> },
+    { key: "categories", label: "Categories", path: "/categories", icon: <ProjectOutlined /> },
+    { key: "popular", label: "Popular Skills", path: "/popular-skills", icon: <ProfileOutlined /> },
   ];
 
   const findTalentItems = [
-    {
-      key: "find-talent",
-      label: "Browse Talent",
-      path: "/search",
-      icon: <SearchOutlined />,
-    },
-    {
-      key: "post-job",
-      label: "Post a Job",
-      path: "/post-job",
-      icon: <FileTextOutlined />,
-    },
+    { key: "find-talent", label: "Browse Talent", path: "/search", icon: <SearchOutlined /> },
+    { key: "post-job", label: "Post a Job", path: "/post-job", icon: <FileTextOutlined /> },
   ];
 
   const resourcesItems = [
-    {
-      key: "pricing",
-      label: "Pricing",
-      path: "/pricing",
-      icon: <WalletOutlined />,
-    },
-    {
-      key: "help",
-      label: "Help Center",
-      path: "/help",
-      icon: <MessageOutlined />,
-    },
+    { key: "pricing", label: "Pricing", path: "/pricing", icon: <WalletOutlined /> },
+    { key: "help", label: "Help Center", path: "/help", icon: <MessageOutlined /> },
   ];
 
   const isActive = (path: string) => {
-    return (
-      location.pathname === path || location.pathname.startsWith(`${path}/`)
-    );
+    return location.pathname === path || location.pathname.startsWith(`${path}/`);
   };
 
   return (
@@ -173,33 +136,33 @@ const PublicNavBar: React.FC = () => {
             type="text"
             icon={<SearchOutlined />}
             onClick={() => {
-              const searchInput = document.createElement("input");
-              searchInput.type = "text";
-              searchInput.placeholder = "Search jobs...";
-              searchInput.style.position = "fixed";
-              searchInput.style.top = "16px";
-              searchInput.style.left = "50%";
-              searchInput.style.transform = "translateX(-50%)";
-              searchInput.style.zIndex = "1000";
-              searchInput.style.padding = "8px";
-              searchInput.style.borderRadius = "4px";
-              searchInput.style.width = "80%";
+              const searchInput = document.createElement('input');
+              searchInput.type = 'text';
+              searchInput.placeholder = 'Search jobs...';
+              searchInput.style.position = 'fixed';
+              searchInput.style.top = '16px';
+              searchInput.style.left = '50%';
+              searchInput.style.transform = 'translateX(-50%)';
+              searchInput.style.zIndex = '1000';
+              searchInput.style.padding = '8px';
+              searchInput.style.borderRadius = '4px';
+              searchInput.style.width = '80%';
               document.body.appendChild(searchInput);
               searchInput.focus();
-
-              searchInput.addEventListener("keydown", (e) => {
-                if (e.key === "Enter") {
+              
+              searchInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
                   handleSearch(searchInput.value);
                   document.body.removeChild(searchInput);
                 }
               });
-
-              searchInput.addEventListener("blur", () => {
+              
+              searchInput.addEventListener('blur', () => {
                 document.body.removeChild(searchInput);
               });
             }}
           />
-
+          
           <Button
             type="text"
             icon={mobileMenuOpen ? <CloseOutlined /> : <MenuOutlined />}
@@ -222,22 +185,14 @@ const PublicNavBar: React.FC = () => {
         }}
         title={
           <div className="flex items-center">
-            <img
-              src="/public/icon.svg"
-              alt="Logo"
-              className="h-6 w-auto mr-2"
-            />
-            <Title level={5} className="!m-0">
-              Hirable
-            </Title>
+            <img src="/public/icon.svg" alt="Logo" className="h-6 w-auto mr-2" />
+            <Title level={5} className="!m-0">Hirable</Title>
           </div>
         }
       >
         <div className="flex flex-col space-y-6">
           <div className="flex flex-col space-y-2">
-            <Text strong className="pb-1 border-b">
-              Find Work
-            </Text>
+            <Text strong className="pb-1 border-b">Find Work</Text>
             {findWorkItems.map((item) => (
               <Button
                 key={item.key}
@@ -248,9 +203,7 @@ const PublicNavBar: React.FC = () => {
                   navigate(item.path);
                   setMobileMenuOpen(false);
                 }}
-                className={
-                  isActive(item.path) ? "font-semibold bg-gray-100" : ""
-                }
+                className={isActive(item.path) ? "font-semibold bg-gray-100" : ""}
               >
                 {item.label}
               </Button>
@@ -258,9 +211,7 @@ const PublicNavBar: React.FC = () => {
           </div>
 
           <div className="flex flex-col space-y-2">
-            <Text strong className="pb-1 border-b">
-              Find Talent
-            </Text>
+            <Text strong className="pb-1 border-b">Find Talent</Text>
             {findTalentItems.map((item) => (
               <Button
                 key={item.key}
@@ -271,9 +222,7 @@ const PublicNavBar: React.FC = () => {
                   navigate(item.path);
                   setMobileMenuOpen(false);
                 }}
-                className={
-                  isActive(item.path) ? "font-semibold bg-gray-100" : ""
-                }
+                className={isActive(item.path) ? "font-semibold bg-gray-100" : ""}
               >
                 {item.label}
               </Button>
@@ -281,9 +230,7 @@ const PublicNavBar: React.FC = () => {
           </div>
 
           <div className="flex flex-col space-y-2">
-            <Text strong className="pb-1 border-b">
-              Resources
-            </Text>
+            <Text strong className="pb-1 border-b">Resources</Text>
             {resourcesItems.map((item) => (
               <Button
                 key={item.key}
@@ -294,9 +241,7 @@ const PublicNavBar: React.FC = () => {
                   navigate(item.path);
                   setMobileMenuOpen(false);
                 }}
-                className={
-                  isActive(item.path) ? "font-semibold bg-gray-100" : ""
-                }
+                className={isActive(item.path) ? "font-semibold bg-gray-100" : ""}
               >
                 {item.label}
               </Button>
@@ -311,7 +256,11 @@ const PublicNavBar: React.FC = () => {
               <Button type="text" onClick={handleLogin} block>
                 Log in
               </Button>
-              <Button type="primary" onClick={handleSignup} block>
+              <Button
+                type="primary"
+                onClick={handleSignup}
+                block
+              >
                 Sign up
               </Button>
             </Space>
@@ -330,9 +279,9 @@ const ClientNavBar: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { data: user } = useGetIdentity<AccountDto>();
-
+  
   // Mock wallet amount - in a real app, get this from user data
-  const walletAmount = user?.balance || 0;
+  const walletAmount = 2500.75;
 
   const handleSearch = (value: string) => {
     setSearchTerm(value);
@@ -347,81 +296,28 @@ const ClientNavBar: React.FC = () => {
   };
 
   const dashboardItems = [
-    {
-      key: "dashboard",
-      label: "Dashboard",
-      path: "/client/dashboard",
-      icon: <DashboardOutlined />,
-    },
-    {
-      key: "analytics",
-      label: "Analytics",
-      path: "/client/analytics",
-      icon: <SettingOutlined />,
-    },
+    { key: "dashboard", label: "Dashboard", path: "/client/dashboard", icon: <DashboardOutlined /> },
+    { key: "analytics", label: "Analytics", path: "/client/analytics", icon: <SettingOutlined /> },
   ];
 
   const projectItems = [
-    {
-      key: "projects",
-      label: "My Projects",
-      path: "/client/projects",
-      icon: <ProjectOutlined />,
-    },
-    {
-      key: "post-project",
-      label: "Post New Project",
-      path: "/client/post-project",
-      icon: <FileTextOutlined />,
-    },
-    {
-      key: "drafts",
-      label: "Project Drafts",
-      path: "/client/drafts",
-      icon: <FileTextOutlined />,
-    },
+    { key: "projects", label: "My Projects", path: "/client/projects", icon: <ProjectOutlined /> },
+    { key: "post-project", label: "Post New Project", path: "/client/post-project", icon: <FileTextOutlined /> },
+    { key: "drafts", label: "Project Drafts", path: "/client/drafts", icon: <FileTextOutlined /> },
   ];
 
   const messagingItems = [
-    {
-      key: "chat",
-      label: "Messages",
-      path: "/message",
-      icon: <MessageOutlined />,
-    },
-    {
-      key: "notifications",
-      label: "Notifications",
-      path: "/notifications",
-      icon: <BankOutlined />,
-    },
+    { key: "chat", label: "Messages", path: "/message", icon: <MessageOutlined /> },
   ];
 
-  const financeItems = [
-    {
-      key: "wallet",
-      label: "Wallet",
-      path: "/wallet",
-      icon: <WalletOutlined />,
-    },
-    {
-      key: "payments",
-      label: "Payment Methods",
-      path: "/payment-methods",
-      icon: <BankOutlined />,
-    },
-    {
-      key: "transactions",
-      label: "Transactions",
-      path: "/transactions",
-      icon: <FileTextOutlined />,
-    },
-  ];
+  // const financeItems = [
+  //   { key: "wallet", label: "Wallet", path: "/wallet", icon: <WalletOutlined /> },
+  //   { key: "payments", label: "Payment Methods", path: "/payment-methods", icon: <BankOutlined /> },
+  //   { key: "transactions", label: "Transactions", path: "/transactions", icon: <FileTextOutlined /> },
+  // ];
 
   const isActive = (path: string) => {
-    return (
-      location.pathname === path || location.pathname.startsWith(`${path}/`)
-    );
+    return location.pathname === path || location.pathname.startsWith(`${path}/`);
   };
 
   return (
@@ -454,12 +350,12 @@ const ClientNavBar: React.FC = () => {
             <NavDropdown label="Dashboard" items={dashboardItems} />
             <NavDropdown label="Projects" items={projectItems} />
             <NavDropdown label="Messages" items={messagingItems} />
-            <NavDropdown
-              label="Finance"
-              items={financeItems}
+            {/* <NavDropdown 
+              label="Finance" 
+              items={financeItems} 
               walletAmount={walletAmount}
-              userName={user?.firstName || "Client"}
-            />
+              userName={user?.firstName || 'Client'}
+            /> */}
           </div>
         </div>
 
@@ -485,33 +381,33 @@ const ClientNavBar: React.FC = () => {
             type="text"
             icon={<SearchOutlined />}
             onClick={() => {
-              const searchInput = document.createElement("input");
-              searchInput.type = "text";
-              searchInput.placeholder = "Search talent...";
-              searchInput.style.position = "fixed";
-              searchInput.style.top = "16px";
-              searchInput.style.left = "50%";
-              searchInput.style.transform = "translateX(-50%)";
-              searchInput.style.zIndex = "1000";
-              searchInput.style.padding = "8px";
-              searchInput.style.borderRadius = "4px";
-              searchInput.style.width = "80%";
+              const searchInput = document.createElement('input');
+              searchInput.type = 'text';
+              searchInput.placeholder = 'Search talent...';
+              searchInput.style.position = 'fixed';
+              searchInput.style.top = '16px';
+              searchInput.style.left = '50%';
+              searchInput.style.transform = 'translateX(-50%)';
+              searchInput.style.zIndex = '1000';
+              searchInput.style.padding = '8px';
+              searchInput.style.borderRadius = '4px';
+              searchInput.style.width = '80%';
               document.body.appendChild(searchInput);
               searchInput.focus();
-
-              searchInput.addEventListener("keydown", (e) => {
-                if (e.key === "Enter") {
+              
+              searchInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
                   handleSearch(searchInput.value);
                   document.body.removeChild(searchInput);
                 }
               });
-
-              searchInput.addEventListener("blur", () => {
+              
+              searchInput.addEventListener('blur', () => {
                 document.body.removeChild(searchInput);
               });
             }}
           />
-
+          
           <Button
             type="text"
             icon={mobileMenuOpen ? <CloseOutlined /> : <MenuOutlined />}
@@ -535,14 +431,8 @@ const ClientNavBar: React.FC = () => {
         title={
           <div className="flex items-center justify-between">
             <div className="flex items-center">
-              <img
-                src="/public/icon.svg"
-                alt="Logo"
-                className="h-6 w-auto mr-2"
-              />
-              <Title level={5} className="!m-0">
-                Hirable
-              </Title>
+              <img src="/public/icon.svg" alt="Logo" className="h-6 w-auto mr-2" />
+              <Title level={5} className="!m-0">Hirable</Title>
             </div>
             <Text className="text-green-500">${walletAmount.toFixed(2)}</Text>
           </div>
@@ -550,9 +440,7 @@ const ClientNavBar: React.FC = () => {
       >
         <div className="flex flex-col space-y-6">
           <div className="flex flex-col space-y-2">
-            <Text strong className="pb-1 border-b">
-              Dashboard
-            </Text>
+            <Text strong className="pb-1 border-b">Dashboard</Text>
             {dashboardItems.map((item) => (
               <Button
                 key={item.key}
@@ -563,9 +451,7 @@ const ClientNavBar: React.FC = () => {
                   navigate(item.path);
                   setMobileMenuOpen(false);
                 }}
-                className={
-                  isActive(item.path) ? "font-semibold bg-gray-100" : ""
-                }
+                className={isActive(item.path) ? "font-semibold bg-gray-100" : ""}
               >
                 {item.label}
               </Button>
@@ -573,9 +459,7 @@ const ClientNavBar: React.FC = () => {
           </div>
 
           <div className="flex flex-col space-y-2">
-            <Text strong className="pb-1 border-b">
-              Projects
-            </Text>
+            <Text strong className="pb-1 border-b">Projects</Text>
             {projectItems.map((item) => (
               <Button
                 key={item.key}
@@ -586,9 +470,7 @@ const ClientNavBar: React.FC = () => {
                   navigate(item.path);
                   setMobileMenuOpen(false);
                 }}
-                className={
-                  isActive(item.path) ? "font-semibold bg-gray-100" : ""
-                }
+                className={isActive(item.path) ? "font-semibold bg-gray-100" : ""}
               >
                 {item.label}
               </Button>
@@ -596,9 +478,7 @@ const ClientNavBar: React.FC = () => {
           </div>
 
           <div className="flex flex-col space-y-2">
-            <Text strong className="pb-1 border-b">
-              Messages
-            </Text>
+            <Text strong className="pb-1 border-b">Messages</Text>
             {messagingItems.map((item) => (
               <Button
                 key={item.key}
@@ -609,19 +489,15 @@ const ClientNavBar: React.FC = () => {
                   navigate(item.path);
                   setMobileMenuOpen(false);
                 }}
-                className={
-                  isActive(item.path) ? "font-semibold bg-gray-100" : ""
-                }
+                className={isActive(item.path) ? "font-semibold bg-gray-100" : ""}
               >
                 {item.label}
               </Button>
             ))}
           </div>
 
-          <div className="flex flex-col space-y-2">
-            <Text strong className="pb-1 border-b">
-              Finance
-            </Text>
+          {/* <div className="flex flex-col space-y-2">
+            <Text strong className="pb-1 border-b">Finance</Text>
             {financeItems.map((item) => (
               <Button
                 key={item.key}
@@ -632,14 +508,12 @@ const ClientNavBar: React.FC = () => {
                   navigate(item.path);
                   setMobileMenuOpen(false);
                 }}
-                className={
-                  isActive(item.path) ? "font-semibold bg-gray-100" : ""
-                }
+                className={isActive(item.path) ? "font-semibold bg-gray-100" : ""}
               >
                 {item.label}
               </Button>
             ))}
-          </div>
+          </div> */}
 
           <div
             className="pt-4 border-t"
@@ -661,9 +535,9 @@ const FreelancerNavBar: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { data: user } = useGetIdentity<AccountDto>();
-
+  
   // Mock wallet amount - in a real app, get this from user data
-  const walletAmount = 1275.5;
+  const walletAmount = 1275.50;
 
   const handleSearch = (value: string) => {
     setSearchTerm(value);
@@ -678,108 +552,35 @@ const FreelancerNavBar: React.FC = () => {
   };
 
   const dashboardItems = [
-    {
-      key: "dashboard",
-      label: "Dashboard",
-      path: "/freelancer/dashboard",
-      icon: <DashboardOutlined />,
-    },
-    {
-      key: "analytics",
-      label: "Analytics",
-      path: "/freelancer/analytics",
-      icon: <SettingOutlined />,
-    },
+    { key: "dashboard", label: "Dashboard", path: "/freelancer/dashboard", icon: <DashboardOutlined /> },
+    { key: "analytics", label: "Analytics", path: "/freelancer/analytics", icon: <SettingOutlined /> },
   ];
 
   const workItems = [
-    {
-      key: "proposals",
-      label: "My Proposals",
-      path: "/freelancer/proposals",
-      icon: <FileTextOutlined />,
-    },
-    {
-      key: "active-jobs",
-      label: "Active Jobs",
-      path: "/freelancer/active-jobs",
-      icon: <ProjectOutlined />,
-    },
-    {
-      key: "find-work",
-      label: "Find Jobs",
-      path: "/search?type=work",
-      icon: <SearchOutlined />,
-    },
-    {
-      key: "saved-jobs",
-      label: "Saved Jobs",
-      path: "/freelancer/saved-jobs",
-      icon: <FileTextOutlined />,
-    },
+    { key: "proposals", label: "My Proposals", path: "/freelancer/proposals", icon: <FileTextOutlined /> },
+    { key: "active-jobs", label: "Active Jobs", path: "/freelancer/active-jobs", icon: <ProjectOutlined /> },
+    { key: "find-work", label: "Find Jobs", path: "/search?type=work", icon: <SearchOutlined /> },
+    { key: "saved-jobs", label: "Saved Jobs", path: "/freelancer/saved-jobs", icon: <FileTextOutlined /> },
   ];
 
   const profileItems = [
-    {
-      key: "profile",
-      label: "My Profile",
-      path: "/freelancer/profile",
-      icon: <ProfileOutlined />,
-    },
-    {
-      key: "skills",
-      label: "Skills",
-      path: "/freelancer/skills",
-      icon: <ProfileOutlined />,
-    },
-    {
-      key: "portfolio",
-      label: "Portfolio",
-      path: "/freelancer/portfolio",
-      icon: <ProjectOutlined />,
-    },
+    { key: "profile", label: "My Profile", path: "/freelancer/profile", icon: <ProfileOutlined /> },
+    { key: "skills", label: "Skills", path: "/freelancer/skills", icon: <ProfileOutlined /> },
+    { key: "portfolio", label: "Portfolio", path: "/freelancer/portfolio", icon: <ProjectOutlined /> },
   ];
 
   const messagingItems = [
-    {
-      key: "chat",
-      label: "Messages",
-      path: "/message",
-      icon: <MessageOutlined />,
-    },
-    {
-      key: "notifications",
-      label: "Notifications",
-      path: "/notifications",
-      icon: <BankOutlined />,
-    },
+    { key: "chat", label: "Messages", path: "/message", icon: <MessageOutlined /> },
   ];
 
-  const financeItems = [
-    {
-      key: "wallet",
-      label: "Wallet",
-      path: "/wallet",
-      icon: <WalletOutlined />,
-    },
-    {
-      key: "payments",
-      label: "Payment Methods",
-      path: "/payment-methods",
-      icon: <BankOutlined />,
-    },
-    {
-      key: "earnings",
-      label: "Earnings",
-      path: "/earnings",
-      icon: <FileTextOutlined />,
-    },
-  ];
+  // const financeItems = [
+  //   { key: "wallet", label: "Wallet", path: "/wallet", icon: <WalletOutlined /> },
+  //   { key: "payments", label: "Payment Methods", path: "/payment-methods", icon: <BankOutlined /> },
+  //   { key: "earnings", label: "Earnings", path: "/earnings", icon: <FileTextOutlined /> },
+  // ];
 
   const isActive = (path: string) => {
-    return (
-      location.pathname === path || location.pathname.startsWith(`${path}/`)
-    );
+    return location.pathname === path || location.pathname.startsWith(`${path}/`);
   };
 
   return (
@@ -813,12 +614,12 @@ const FreelancerNavBar: React.FC = () => {
             <NavDropdown label="Work" items={workItems} />
             <NavDropdown label="Profile" items={profileItems} />
             <NavDropdown label="Messages" items={messagingItems} />
-            <NavDropdown
-              label="Finance"
-              items={financeItems}
+            {/* <NavDropdown 
+              label="Finance" 
+              items={financeItems} 
               walletAmount={walletAmount}
-              userName={user?.firstName || "Freelancer"}
-            />
+              userName={user?.firstName || 'Freelancer'}
+            /> */}
           </div>
         </div>
 
@@ -844,33 +645,33 @@ const FreelancerNavBar: React.FC = () => {
             type="text"
             icon={<SearchOutlined />}
             onClick={() => {
-              const searchInput = document.createElement("input");
-              searchInput.type = "text";
-              searchInput.placeholder = "Search jobs...";
-              searchInput.style.position = "fixed";
-              searchInput.style.top = "16px";
-              searchInput.style.left = "50%";
-              searchInput.style.transform = "translateX(-50%)";
-              searchInput.style.zIndex = "1000";
-              searchInput.style.padding = "8px";
-              searchInput.style.borderRadius = "4px";
-              searchInput.style.width = "80%";
+              const searchInput = document.createElement('input');
+              searchInput.type = 'text';
+              searchInput.placeholder = 'Search jobs...';
+              searchInput.style.position = 'fixed';
+              searchInput.style.top = '16px';
+              searchInput.style.left = '50%';
+              searchInput.style.transform = 'translateX(-50%)';
+              searchInput.style.zIndex = '1000';
+              searchInput.style.padding = '8px';
+              searchInput.style.borderRadius = '4px';
+              searchInput.style.width = '80%';
               document.body.appendChild(searchInput);
               searchInput.focus();
-
-              searchInput.addEventListener("keydown", (e) => {
-                if (e.key === "Enter") {
+              
+              searchInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
                   handleSearch(searchInput.value);
                   document.body.removeChild(searchInput);
                 }
               });
-
-              searchInput.addEventListener("blur", () => {
+              
+              searchInput.addEventListener('blur', () => {
                 document.body.removeChild(searchInput);
               });
             }}
           />
-
+          
           <Button
             type="text"
             icon={mobileMenuOpen ? <CloseOutlined /> : <MenuOutlined />}
@@ -894,14 +695,8 @@ const FreelancerNavBar: React.FC = () => {
         title={
           <div className="flex items-center justify-between">
             <div className="flex items-center">
-              <img
-                src="/public/icon.svg"
-                alt="Logo"
-                className="h-6 w-auto mr-2"
-              />
-              <Title level={5} className="!m-0">
-                Hirable
-              </Title>
+              <img src="/public/icon.svg" alt="Logo" className="h-6 w-auto mr-2" />
+              <Title level={5} className="!m-0">Hirable</Title>
             </div>
             <Text className="text-green-500">${walletAmount.toFixed(2)}</Text>
           </div>
@@ -909,9 +704,7 @@ const FreelancerNavBar: React.FC = () => {
       >
         <div className="flex flex-col space-y-6">
           <div className="flex flex-col space-y-2">
-            <Text strong className="pb-1 border-b">
-              Dashboard
-            </Text>
+            <Text strong className="pb-1 border-b">Dashboard</Text>
             {dashboardItems.map((item) => (
               <Button
                 key={item.key}
@@ -922,9 +715,7 @@ const FreelancerNavBar: React.FC = () => {
                   navigate(item.path);
                   setMobileMenuOpen(false);
                 }}
-                className={
-                  isActive(item.path) ? "font-semibold bg-gray-100" : ""
-                }
+                className={isActive(item.path) ? "font-semibold bg-gray-100" : ""}
               >
                 {item.label}
               </Button>
@@ -932,9 +723,7 @@ const FreelancerNavBar: React.FC = () => {
           </div>
 
           <div className="flex flex-col space-y-2">
-            <Text strong className="pb-1 border-b">
-              Work
-            </Text>
+            <Text strong className="pb-1 border-b">Work</Text>
             {workItems.map((item) => (
               <Button
                 key={item.key}
@@ -945,9 +734,7 @@ const FreelancerNavBar: React.FC = () => {
                   navigate(item.path);
                   setMobileMenuOpen(false);
                 }}
-                className={
-                  isActive(item.path) ? "font-semibold bg-gray-100" : ""
-                }
+                className={isActive(item.path) ? "font-semibold bg-gray-100" : ""}
               >
                 {item.label}
               </Button>
@@ -955,9 +742,7 @@ const FreelancerNavBar: React.FC = () => {
           </div>
 
           <div className="flex flex-col space-y-2">
-            <Text strong className="pb-1 border-b">
-              Profile
-            </Text>
+            <Text strong className="pb-1 border-b">Profile</Text>
             {profileItems.map((item) => (
               <Button
                 key={item.key}
@@ -968,9 +753,7 @@ const FreelancerNavBar: React.FC = () => {
                   navigate(item.path);
                   setMobileMenuOpen(false);
                 }}
-                className={
-                  isActive(item.path) ? "font-semibold bg-gray-100" : ""
-                }
+                className={isActive(item.path) ? "font-semibold bg-gray-100" : ""}
               >
                 {item.label}
               </Button>
@@ -978,9 +761,7 @@ const FreelancerNavBar: React.FC = () => {
           </div>
 
           <div className="flex flex-col space-y-2">
-            <Text strong className="pb-1 border-b">
-              Messages
-            </Text>
+            <Text strong className="pb-1 border-b">Messages</Text>
             {messagingItems.map((item) => (
               <Button
                 key={item.key}
@@ -991,19 +772,15 @@ const FreelancerNavBar: React.FC = () => {
                   navigate(item.path);
                   setMobileMenuOpen(false);
                 }}
-                className={
-                  isActive(item.path) ? "font-semibold bg-gray-100" : ""
-                }
+                className={isActive(item.path) ? "font-semibold bg-gray-100" : ""}
               >
                 {item.label}
               </Button>
             ))}
           </div>
 
-          <div className="flex flex-col space-y-2">
-            <Text strong className="pb-1 border-b">
-              Finance
-            </Text>
+          {/* <div className="flex flex-col space-y-2">
+            <Text strong className="pb-1 border-b">Finance</Text>
             {financeItems.map((item) => (
               <Button
                 key={item.key}
@@ -1014,14 +791,12 @@ const FreelancerNavBar: React.FC = () => {
                   navigate(item.path);
                   setMobileMenuOpen(false);
                 }}
-                className={
-                  isActive(item.path) ? "font-semibold bg-gray-100" : ""
-                }
+                className={isActive(item.path) ? "font-semibold bg-gray-100" : ""}
               >
                 {item.label}
               </Button>
             ))}
-          </div>
+          </div> */}
 
           <div
             className="pt-4 border-t"
@@ -1051,58 +826,25 @@ const NavBar: React.FC = () => {
     case AccountDtoRoleEnum.Admin:
       // Keep original admin section from previous implementation
       return (
-        <Header className="sticky top-0 z-50 px-6 h-16 flex items-center border-b border-solid w-full rounded-b-2xl">
+        <Header
+          className="sticky top-0 z-50 px-6 h-16 flex items-center border-b border-solid w-full rounded-b-2xl"
+        >
           <div className="flex items-center justify-between w-full">
             <div className="flex items-center">
-              <div
-                className="flex items-center cursor-pointer mr-12"
-                onClick={() => (window.location.href = "/")}
-              >
+              <div className="flex items-center cursor-pointer mr-12" onClick={() => window.location.href = "/"}>
                 <img src="/public/icon.svg" alt="Logo" className="h-8 w-auto" />
-                <Title level={5} className="!m-0 ml-2">
-                  Hirable Admin
-                </Title>
+                <Title level={5} className="!m-0 ml-2">Hirable Admin</Title>
               </div>
-              <NavDropdown
-                label="Admin Area"
+              <NavDropdown 
+                label="Admin Area" 
                 items={[
-                  {
-                    key: "dashboard",
-                    label: "Dashboard",
-                    path: "/admin/dashboard",
-                    icon: <DashboardOutlined />,
-                  },
-                  {
-                    key: "accounts",
-                    label: "Accounts",
-                    path: "/admin/accounts",
-                    icon: <UserOutlined />,
-                  },
-                  {
-                    key: "projects",
-                    label: "Projects",
-                    path: "/admin/projects",
-                    icon: <ProjectOutlined />,
-                  },
-                  {
-                    key: "project-categories",
-                    label: "Categories",
-                    path: "/admin/project-categories",
-                    icon: <ProjectOutlined />,
-                  },
-                  {
-                    key: "skills",
-                    label: "Skills",
-                    path: "/admin/skills",
-                    icon: <ProfileOutlined />,
-                  },
-                  {
-                    key: "transactions",
-                    label: "Transactions",
-                    path: "/admin/transactions",
-                    icon: <WalletOutlined />,
-                  },
-                ]}
+                  { key: "dashboard", label: "Dashboard", path: "/admin/dashboard", icon: <DashboardOutlined /> },
+                  { key: "accounts", label: "Accounts", path: "/admin/accounts", icon: <UserOutlined /> },
+                  { key: "projects", label: "Projects", path: "/admin/projects", icon: <ProjectOutlined /> },
+                  { key: "project-categories", label: "Categories", path: "/admin/project-categories", icon: <ProjectOutlined /> },
+                  { key: "skills", label: "Skills", path: "/admin/skills", icon: <ProfileOutlined /> },
+                  { key: "transactions", label: "Transactions", path: "/admin/transactions", icon: <WalletOutlined /> },
+                ]} 
               />
             </div>
             <ProfileDropdownButton />

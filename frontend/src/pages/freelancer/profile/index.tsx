@@ -12,6 +12,7 @@ import {
   Select,
   notification,
   Button,
+  Spin,
 } from "antd";
 import type { SelectProps } from "antd/es/select";
 import {
@@ -29,7 +30,7 @@ const { TextArea } = Input;
 const { Title } = Typography;
 
 const FreelancerProfilePage: React.FC = () => {
-  const { data: user } = useGetIdentity<AccountDto>();
+  const { data: user, isLoading } = useGetIdentity<AccountDto>();
   const [newSkill, setNewSkill] = useState<Partial<ProfileSkillDto>>({});
 
   const { formProps, saveButtonProps, queryResult } = useForm<ProfileFormDto>({
@@ -47,6 +48,14 @@ const FreelancerProfilePage: React.FC = () => {
     });
 
   const skillOptions = skillData?.data?.data;
+
+  if (isLoading) {
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px' }}>
+        <Spin size="large" />
+      </div>
+    );
+  }
 
   return (
     <Edit

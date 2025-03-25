@@ -55,7 +55,7 @@ import api from "../../../services/api/openapi-config";
 import { useLocation, useNavigate } from "react-router";
 import { store } from "../../../store";
 import { useLocalSettings } from "../../../hooks/useLocalSettings";
-import { ContractSignButton } from "../../../components";
+import ContractSignButton from "../../../components/contract/contract-sign-button";
 
 const { Title, Text } = Typography;
 const { Option } = Select;

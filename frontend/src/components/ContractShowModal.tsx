@@ -1,13 +1,11 @@
-import React, { useEffect, useState } from "react";
-import { Modal, Typography, Descriptions, Space, Button, Spin } from "antd";
-import { ContractDto } from "../../generated/models/ContractDto";
-import { ContractStatusDto } from "../../generated/models/ContractStatusDto";
-import api from "../services/api/openapi-config";
-import dayjs from "dayjs";
-import { useOne } from "@refinedev/core";
+import React from "react";
+import {Button, Descriptions, Modal, Space, Spin, Typography} from "antd";
+import {ContractDto} from "../../generated/models/ContractDto";
+import {ContractStatusDto} from "../../generated/models/ContractStatusDto";
+import {useOne} from "@refinedev/core";
 import {useLocalSettings} from "../hooks/useLocalSettings";
 
-const { Title, Text } = Typography;
+const {Title, Text} = Typography;
 
 interface ContractShowModalProps {
   visible: boolean;
@@ -16,12 +14,12 @@ interface ContractShowModalProps {
 }
 
 const ContractShowModal: React.FC<ContractShowModalProps> = ({
-  visible,
-  onClose,
-  contractId,
-}) => {
+                                                               visible,
+                                                               onClose,
+                                                               contractId,
+                                                             }) => {
   const [localSettings] = useLocalSettings()
-  const { data: contractData, isLoading: loading } = useOne<ContractDto>({
+  const {data: contractData, isLoading: loading} = useOne<ContractDto>({
     resource: "contracts",
     id: contractId,
     queryOptions: {
@@ -45,10 +43,10 @@ const ContractShowModal: React.FC<ContractShowModalProps> = ({
     >
       {loading ? (
         <div className="flex justify-center items-center h-64">
-          <Spin size="large" />
+          <Spin size="large"/>
         </div>
       ) : contract ? (
-        <Space direction="vertical" size="large" style={{ width: "100%" }}>
+        <Space direction="vertical" size="large" style={{width: "100%"}}>
           <div>
             <Title level={4}>Contract Information</Title>
             <Descriptions column={2}>
@@ -67,7 +65,7 @@ const ContractShowModal: React.FC<ContractShowModalProps> = ({
                 </Text>
               </Descriptions.Item>
               <Descriptions.Item label="Created Date">
-                {localSettings.formatDateTime(contract.createdAt)}
+                {localSettings.formatDateTime(contract.createdAt!)}
               </Descriptions.Item>
               <Descriptions.Item label="Budget">
                 ${contract.budget}

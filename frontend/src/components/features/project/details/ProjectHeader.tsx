@@ -14,7 +14,7 @@ export const ProjectHeader: React.FC<ProjectHeaderProps> = ({ project }) => {
     <>
       <Space direction="vertical" size="middle" style={{ width: "100%" }}>
         <Typography.Title level={2} style={{ margin: 0 }}>
-          {project?.title}
+          {project?.title} x
           <Tag
             color={project?.status === "OPEN" ? "#0f993e" : "red"}
             style={{

@@ -58,6 +58,7 @@ public class AccountMapper extends BaseMapper<AccountDto, Account> {
         dto.setIsVerified(entity.getIsVerified());
         dto.setIsVisible(entity.getIsVisible());
         dto.setEmail(entity.getEmail());
+        dto.setProfileId(entity.getProfile() == null ? null : entity.getProfile().getProfileId());
 
         if (level == DetailLevel.REFERENCE) {
             return dto; // those fields are enough
@@ -69,7 +70,6 @@ public class AccountMapper extends BaseMapper<AccountDto, Account> {
         dto.setVerifiedAt(DateTimeUtil.fromLocalToOffset(entity.getVerifiedAt()));
         dto.setCreatedAt(DateTimeUtil.fromLocalToOffset(entity.getCreatedAt()));
         dto.setUpdatedAt(DateTimeUtil.fromLocalToOffset(entity.getUpdatedAt()));
-        dto.setProfileId(entity.getProfile() == null ? null : entity.getProfile().getProfileId());
 
         return dto;
     }

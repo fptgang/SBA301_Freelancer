@@ -17,6 +17,7 @@ public interface FileRepos extends JpaRepository<File, Long>, JpaSpecificationEx
     List<File> findByProposal_ProposalIdAndIsVisibleTrue(Long proposalId);
     List<File> findByMessage_MessageIdAndIsVisibleTrue(Long messageId);
     List<File> findByMilestone_MilestoneIdAndIsVisibleTrue(Long milestoneId);
+    long countByMilestone_MilestoneIdAndIsVisibleTrue(Long milestoneId);
 
     // Methods to find all files by entity (including invisible ones)
     List<File> findByProject_ProjectId(Long projectId);
