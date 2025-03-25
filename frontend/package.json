@@ -56,7 +56,6 @@
   },
   "scripts": {
     "predev": "npm run generate-api",
-    "prebuild": "npm run generate-api",
     "prestart": "npm run generate-api",
     "dev": "refine dev",
     "build": "refine build",
