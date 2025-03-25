@@ -10,27 +10,27 @@ public interface EmailService {
 
     void sendResetPasswordEmail(Account account, String resetLink) throws IOException;
 
-    void sendProposalRejectToFreelancer(Proposal proposal) throws IOException;
+    void sendProposalRejectToFreelancer(Long id) throws IOException;
 
-    void sendContractCreatedToFreelancer(Contract contract) throws IOException;
+    void sendContractCreatedToFreelancer(Long id) throws IOException;
 
-    void sendContractSignedToFreelancer(Contract contract) throws IOException;
+    void sendContractSignedToFreelancer(Long id) throws IOException;
 
-    void sendContractSignedToClient(Contract contract) throws IOException;
-    void sendMilestoneStartedToFreelancer(Milestone milestone) throws IOException;
+    void sendContractSignedToClient(Long id) throws IOException;
+    void sendMilestoneStartedToFreelancer(Long milestoneId) throws IOException;
 
-    void sendMilestoneStartedToClient(Milestone milestone) throws IOException;
+    void sendMilestoneStartedToClient(Long milestoneId) throws IOException;
 
-    void sendMilestoneCompletedToClient(Milestone milestone) throws IOException;
+    void sendMilestoneCompletedToClient(Long milestoneId) throws IOException;
 
-    void sendMilestoneCompletedToFreelancer(Milestone milestone) throws IOException;
+    void sendMilestoneCompletedToFreelancer(Long milestoneId) throws IOException;
 
-    void sendMilestoneFundStatusReleaseToFreelancer(Milestone milestone) throws IOException;
+    void sendMilestoneFundStatusReleaseToFreelancer(Long milestoneId) throws IOException;
 
-    void sendMilestoneFundStatusDepositOrRefundToClient(Milestone milestone) throws IOException;
+    void sendMilestoneFundStatusDepositOrRefundToClient(Long milestoneId) throws IOException;
 
-    void sendProjectEmailTemplateToBoth(Project project) throws IOException;
-    void sendReportEmailTemplateToBoth(Report report) throws IOException;
+    void sendProjectEmailTemplateToBoth(Long id) throws IOException;
+    void sendReportEmailTemplateToBoth(Long id) throws IOException;
 
-    void sendTransactionEmailTemplateToBoth(Transaction transaction) throws IOException;
+    void sendTransactionEmailTemplateToBoth(Long id) throws IOException;
 }
