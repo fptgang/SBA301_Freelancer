@@ -1,38 +1,66 @@
-import React from 'react';
-import { Steps } from 'antd';
-import { UserOutlined, SolutionOutlined, SafetyOutlined, CheckCircleOutlined } from '@ant-design/icons';
+import React from "react";
+import { Steps } from "antd";
+import {
+  UserOutlined,
+  SolutionOutlined,
+  SafetyOutlined,
+  ProfileOutlined,
+  CheckCircleOutlined,
+} from "@ant-design/icons";
 
 interface StepProgressProps {
   currentStep: number;
+  totalSteps?: number;
   isComplete?: boolean;
 }
 
-export const StepProgress: React.FC<StepProgressProps> = ({ 
+export const StepProgress: React.FC<StepProgressProps> = ({
   currentStep,
-  isComplete = false
+  totalSteps = 4,
+  isComplete = false,
 }) => {
-  const steps = [
+  const baseSteps = [
     {
-      title: 'Account Type',
+      title: "Account Type",
       icon: <UserOutlined />,
-      description: 'Select your role',
+      description: "Select your role",
     },
     {
-      title: 'Personal Info',
+      title: "Personal Info",
       icon: <SolutionOutlined />,
-      description: 'Your basic information',
+      description: "Your basic information",
     },
     {
-      title: 'Credentials',
+      title: "Credentials",
       icon: <SafetyOutlined />,
-      description: 'Create account credentials',
-    },
-    {
-      title: 'Complete',
-      icon: <CheckCircleOutlined />,
-      description: 'Review and finish',
+      description: "Create account credentials",
     },
   ];
+
+  // If totalSteps is 5, add a profile step before completion
+  const steps =
+    totalSteps === 5
+      ? [
+          ...baseSteps,
+          {
+            title: "Profile",
+            icon: <ProfileOutlined />,
+            description: "Professional details",
+          },
+          {
+            title: "Complete",
+            icon: <CheckCircleOutlined />,
+            description: "Review and finish",
+          },
+        ]
+      : [
+          ...baseSteps,
+          {
+            title: "Complete",
+            icon: <CheckCircleOutlined />,
+            description: "Review and finish",
+          },
+        ];
 
   return (
     <Steps

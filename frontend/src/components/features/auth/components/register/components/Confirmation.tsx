@@ -1,6 +1,6 @@
-import React from 'react';
-import { Typography, Row, Col, Divider, Result } from 'antd';
-import { CheckCircleOutlined } from '@ant-design/icons';
+import React from "react";
+import { Typography, Row, Col, Divider, Result } from "antd";
+import { CheckCircleOutlined } from "@ant-design/icons";
 
 const { Title, Paragraph, Text } = Typography;
 
@@ -10,22 +10,22 @@ interface ConfirmationProps {
   isComplete: boolean;
 }
 
-export const Confirmation: React.FC<ConfirmationProps> = ({ 
-  formData, 
+export const Confirmation: React.FC<ConfirmationProps> = ({
+  formData,
   roleSelected,
-  isComplete
+  isComplete,
 }) => {
   if (isComplete) {
     return (
       <Result
-        icon={<CheckCircleOutlined style={{ color: '#52c41a' }} />}
+        icon={<CheckCircleOutlined style={{ color: "#52c41a" }} />}
         title="Registration Complete!"
         subTitle="Your account has been created successfully"
         className="text-center"
       />
     );
   }
-  
+
   return (
     <div className="w-full max-w-xl text-center">
       <Title
@@ -40,24 +40,33 @@ export const Confirmation: React.FC<ConfirmationProps> = ({
       >
         Review Your Information
       </Title>
-      
-      <Paragraph style={{ fontSize: '16px', marginBottom: '24px' }}>
+
+      <Paragraph style={{ fontSize: "16px", marginBottom: "24px" }}>
         Please review your information before completing your registration
       </Paragraph>
-      
+
       <div className="text-left p-6 bg-gray-50 rounded-lg mb-6 border border-gray-200">
         <div className="mb-4">
-          <Text strong className="block mb-2 text-lg">Account Type</Text>
+          <Text strong className="block mb-2 text-lg">
+            Account Type
+          </Text>
           <div className="bg-white p-3 rounded border border-gray-200">
-            {roleSelected === 'CLIENT' ? 'Client (Hiring)' : 'Freelancer (Working)'}
+            {roleSelected === "client"
+              ? "Client (Hiring)"
+              : "Freelancer (Working)"}
           </div>
         </div>
-        
+
         <Divider className="my-4" />
-        
+
         <div className="mb-4">
-          <Text strong className="block mb-2 text-lg">Personal Information</Text>
-          <Row gutter={[16, 16]} className="bg-white p-3 rounded border border-gray-200">
+          <Text strong className="block mb-2 text-lg">
+            Personal Information
+          </Text>
+          <Row
+            gutter={[16, 16]}
+            className="bg-white p-3 rounded border border-gray-200"
+          >
             <Col span={12}>
               <Text type="secondary">First Name</Text>
               <div>{formData.firstName}</div>
@@ -74,11 +83,13 @@ export const Confirmation: React.FC<ConfirmationProps> = ({
             )}
           </Row>
         </div>
-        
+
         <Divider className="my-4" />
-        
-        <div>
-          <Text strong className="block mb-2 text-lg">Account Information</Text>
+
+        <div className="mb-4">
+          <Text strong className="block mb-2 text-lg">
+            Account Information
+          </Text>
           <div className="bg-white p-3 rounded border border-gray-200">
             <Row>
               <Col span={24} className="mb-2">
@@ -92,10 +103,57 @@ export const Confirmation: React.FC<ConfirmationProps> = ({
             </Row>
           </div>
         </div>
+
+        {roleSelected === "freelancer" && formData.overview && (
+          <>
+            <Divider className="my-4" />
+
+            <div>
+              <Text strong className="block mb-2 text-lg">
+                Professional Profile
+              </Text>
+              <div className="bg-white p-3 rounded border border-gray-200">
+                <Row gutter={[16, 16]}>
+                  <Col span={24} className="mb-2">
+                    <Text type="secondary">Overview</Text>
+                    <div>{formData.overview}</div>
+                  </Col>
+                  <Col span={12}>
+                    <Text type="secondary">Education</Text>
+                    <div>{formData.education}</div>
+                  </Col>
+                  <Col span={12}>
+                    <Text type="secondary">Language</Text>
+                    <div>{formData.language}</div>
+                  </Col>
+
+                  {formData.skills && formData.skills.length > 0 && (
+                    <Col span={24} className="mt-4">
+                      <Text type="secondary">Skills</Text>
+                      <div className="flex flex-wrap gap-2 mt-1">
+                        {formData.skills.map((skill: any, index: number) => (
+                          <div
+                            key={index}
+                            className="bg-green-50 border border-green-200 rounded px-2 py-1 text-sm"
+                          >
+                            {skill.skill.name} -{" "}
+                            {skill.proficiency.charAt(0) +
+                              skill.proficiency.slice(1).toLowerCase()}
+                          </div>
+                        ))}
+                      </div>
+                    </Col>
+                  )}
+                </Row>
+              </div>
+            </div>
+          </>
+        )}
       </div>
-      
+
       <Paragraph className="text-gray-500 text-sm">
-        By clicking "Complete Registration", you agree to our Terms of Service and Privacy Policy.
+        By clicking "Complete Registration", you agree to our Terms of Service
+        and Privacy Policy.
       </Paragraph>
     </div>
   );

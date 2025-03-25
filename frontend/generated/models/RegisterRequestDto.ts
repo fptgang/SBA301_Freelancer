@@ -13,6 +13,14 @@
  */
 
 import { mapValues } from '../runtime';
+import type { ProfileSkillDto } from './ProfileSkillDto';
+import {
+    ProfileSkillDtoFromJSON,
+    ProfileSkillDtoFromJSONTyped,
+    ProfileSkillDtoToJSON,
+    ProfileSkillDtoToJSONTyped,
+} from './ProfileSkillDto';
+
 /**
  * 
  * @export
@@ -55,6 +63,36 @@ export interface RegisterRequestDto {
      * @memberof RegisterRequestDto
      */
     lastName?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof RegisterRequestDto
+     */
+    overview?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof RegisterRequestDto
+     */
+    education?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof RegisterRequestDto
+     */
+    phoneNumber?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof RegisterRequestDto
+     */
+    language?: string;
+    /**
+     * 
+     * @type {Array<ProfileSkillDto>}
+     * @memberof RegisterRequestDto
+     */
+    profileSkills?: Array<ProfileSkillDto>;
 }
 
 
@@ -91,6 +129,11 @@ export function RegisterRequestDtoFromJSONTyped(json: any, ignoreDiscriminator: 
         'confirmPassword': json['confirmPassword'] == null ? undefined : json['confirmPassword'],
         'firstName': json['firstName'] == null ? undefined : json['firstName'],
         'lastName': json['lastName'] == null ? undefined : json['lastName'],
+        'overview': json['overview'] == null ? undefined : json['overview'],
+        'education': json['education'] == null ? undefined : json['education'],
+        'phoneNumber': json['phoneNumber'] == null ? undefined : json['phoneNumber'],
+        'language': json['language'] == null ? undefined : json['language'],
+        'profileSkills': json['profileSkills'] == null ? undefined : ((json['profileSkills'] as Array<any>).map(ProfileSkillDtoFromJSON)),
     };
 }
 
@@ -111,6 +154,11 @@ export function RegisterRequestDtoToJSONTyped(value?: RegisterRequestDto | null,
         'confirmPassword': value['confirmPassword'],
         'firstName': value['firstName'],
         'lastName': value['lastName'],
+        'overview': value['overview'],
+        'education': value['education'],
+        'phoneNumber': value['phoneNumber'],
+        'language': value['language'],
+        'profileSkills': value['profileSkills'] == null ? undefined : ((value['profileSkills'] as Array<any>).map(ProfileSkillDtoToJSON)),
     };
 }
 
