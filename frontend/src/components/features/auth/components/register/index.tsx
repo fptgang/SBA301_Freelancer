@@ -10,15 +10,7 @@ import {
   useRegister,
 } from "@refinedev/core";
 import { ThemedTitleV2 } from "@refinedev/antd";
-import {
-  Row,
-  Col,
-  Layout,
-  Form,
-  Button,
-  theme,
-  message,
-} from "antd";
+import { Row, Col, Layout, Form, Button, theme, message } from "antd";
 
 // Import our modular components
 import { StepProgress } from "./components/StepProgress";
@@ -27,6 +19,9 @@ import { PersonalInfo } from "./components/PersonalInfo";
 import { AccountSetup } from "./components/AccountSetup";
 import { Confirmation } from "./components/Confirmation";
 import { SocialLogin } from "./components/SocialLogin";
+import { FreelancerProfile } from "./components/FreelancerProfile";
+import api from "../../../../../services/api/openapi-config";
+import { RegisterRequestDto } from "../../../../../../generated";
 
 type RegisterProps = RegisterPageProps<any, any, any>;
 
@@ -51,28 +46,37 @@ export const RegisterPage: React.FC<RegisterProps> = ({
   const Link = useLink();
   const { Link: LegacyLink } = useRouterContext();
   const ActiveLink = routerType === "legacy" ? LegacyLink : Link;
-  
+
   // State management
   const [currentStep, setCurrentStep] = useState(0);
   const [roleSelected, setRoleSelected] = useState<string | null>(null);
   const [formData, setFormData] = useState<RegisterFormTypes>({});
   const [registrationComplete, setRegistrationComplete] = useState(false);
-  
+
   const authProvider = useActiveAuthProvider();
   const { mutate: register, isLoading } = useRegister<RegisterFormTypes>({
     v3LegacyAuthProviderCompatible: Boolean(authProvider?.isLegacy),
   });
 
   // Handle social login provider selection
-  const handleProviderCallback = ({providerName, credential}) => {
-    if (!roleSelected || !credential)
-      return;
+  const handleProviderCallback = ({
+    provider,
+    credential,
+  }: {
+    provider: string;
+    credential: string;
+  }) => {
+    if (!roleSelected || !credential) return;
     register({
       ...mutationVariables,
-      providerName,
-      googleToken: credential,
-      role: roleSelected
+      providerName: provider,
+      // Only pass fields expected by RegisterFormTypes
     });
+  };
+
+  // Get total number of steps based on role
+  const getTotalSteps = () => {
+    return roleSelected === "FREELANCER" ? 5 : 4;
   };
 
   // Navigate to next step
@@ -81,39 +85,73 @@ export const RegisterPage: React.FC<RegisterProps> = ({
       // Validate fields in the current step
       if (currentStep === 0) {
         if (!roleSelected) {
-          message.error('Please select a role to continue');
+          message.error("Please select a role to continue");
           return;
         }
         setCurrentStep(currentStep + 1);
       } else if (currentStep === 1) {
-        await form.validateFields(['firstName', 'lastName']);
-        const values = form.getFieldsValue(['firstName', 'lastName', 'phoneNumber']);
+        await form.validateFields(["firstName", "lastName"]);
+        const values = form.getFieldsValue();
         setFormData({ ...formData, ...values });
         setCurrentStep(currentStep + 1);
       } else if (currentStep === 2) {
-        await form.validateFields(['email', 'password', 'confirmPassword']);
-        const values = form.getFieldsValue(['email', 'password', 'confirmPassword']);
-        setFormData({ ...formData, ...values, role: roleSelected });
+        await form.validateFields(["email", "password", "confirmPassword"]);
+        const values = form.getFieldsValue();
+        setFormData({ ...formData, ...values });
         setCurrentStep(currentStep + 1);
-      } else if (currentStep === 3) {
-        // Submit the form
+      } else if (currentStep === 3 && roleSelected === "FREELANCER") {
+        // Freelancer profile step
+        await form.validateFields([
+          "overview",
+          "education",
+          "language",
+          "profileSkills",
+        ]);
+        // Get skills - no validation needed as it's optional
+        const values = form.getFieldsValue();
+        console.log("Freelancer profile values:", values);
+        setFormData({ ...formData, ...values });
+        setCurrentStep(currentStep + 1);
+      } else {
+        // Final submission step
         const completeFormData = { ...formData, role: roleSelected };
-        register({ 
-          ...mutationVariables, 
-          ...completeFormData
-        }, {
-          onSuccess: () => {
-            setRegistrationComplete(true);
-            message.success('Registration successful!');
-          },
-          onError: () => {
-            message.error('Registration failed. Please try again.');
-          }
+        const registerRequestDto: RegisterRequestDto = {
+          email: completeFormData.email,
+          password: completeFormData.password,
+          firstName: completeFormData.firstName,
+          lastName: completeFormData.lastName,
+          role:
+            completeFormData.role === "FREELANCER" ? "FREELANCER" : "CLIENT",
+          confirmPassword: completeFormData.confirmPassword,
+          education: completeFormData.education,
+          language: completeFormData.language,
+          overview: completeFormData.overview,
+          profileSkills: completeFormData.profileSkills,
+          phoneNumber: completeFormData.phoneNumber,
+        };
+        console.log("Complete form data:", completeFormData);
+        api.register({
+          registerRequestDto: completeFormData,
         });
+        // register(
+        //   {
+        //     ...mutationVariables,
+        //     ...completeFormData,
+        //   },
+        //   {
+        //     onSuccess: () => {
+        //       setRegistrationComplete(true);
+        //       message.success("Registration successful!");
+        //     },
+        //     onError: () => {
+        //       message.error("Registration failed. Please try again.");
+        //     },
+        //   }
+        // );
       }
     } catch (error) {
       // Form validation error will be handled by the form itself
-      console.error('Validation error:', error);
+      console.error("Validation error:", error);
     }
   };
 
@@ -124,7 +162,8 @@ export const RegisterPage: React.FC<RegisterProps> = ({
 
   // Get button text based on current step
   const getButtonText = () => {
-    if (currentStep === 3) return "Complete Registration";
+    const finalStep = roleSelected === "FREELANCER" ? 4 : 3;
+    if (currentStep === finalStep) return "Complete Registration";
     return "Continue";
   };
 
@@ -139,20 +178,28 @@ export const RegisterPage: React.FC<RegisterProps> = ({
               onRoleSelect={setRoleSelected}
             />
             <SocialLogin
-              providers={providers}
+              providers={providers as any}
               callback={handleProviderCallback}
             />
           </>
         );
       case 1:
-        return (
-          <PersonalInfo form={form} />
-        );
+        return <PersonalInfo form={form} />;
       case 2:
-        return (
-          <AccountSetup form={form} />
-        );
+        return <AccountSetup form={form} />;
       case 3:
+        if (roleSelected === "FREELANCER") {
+          return <FreelancerProfile form={form} />;
+        } else {
+          return (
+            <Confirmation
+              formData={formData}
+              roleSelected={roleSelected}
+              isComplete={registrationComplete}
+            />
+          );
+        }
+      case 4:
         return (
           <Confirmation
             formData={formData}
@@ -164,7 +211,7 @@ export const RegisterPage: React.FC<RegisterProps> = ({
         return null;
     }
   };
-  
+
   // Common page elements
   const PageTitle =
     title === false ? null : (
@@ -187,10 +234,11 @@ export const RegisterPage: React.FC<RegisterProps> = ({
       <div className="w-full max-w-xl mb-8">
         <StepProgress
           currentStep={currentStep}
+          totalSteps={getTotalSteps()}
           isComplete={registrationComplete}
         />
       </div>
-      
+
       {/* Form */}
       <Form<RegisterFormTypes>
         layout="vertical"
@@ -201,26 +249,27 @@ export const RegisterPage: React.FC<RegisterProps> = ({
         className="w-full flex flex-col items-center"
       >
         {renderStepContent()}
-        
+
         {/* Navigation buttons */}
         <div className="flex justify-between w-full max-w-xl mt-8">
           {currentStep > 0 && !registrationComplete && (
-            <Button onClick={handlePrev}>
-              Back
-            </Button>
+            <Button onClick={handlePrev}>Back</Button>
           )}
-          {currentStep === 0 && !registrationComplete && (
-            <div></div>
-          )}
+          {currentStep === 0 && !registrationComplete && <div></div>}
           <div className="flex-1"></div>
           {!registrationComplete && (
             <Button
               type="primary"
               onClick={handleNext}
-              loading={isLoading && currentStep === 3}
+              loading={
+                isLoading &&
+                currentStep === (roleSelected === "FREELANCER" ? 4 : 3)
+              }
               style={{
-                backgroundColor: roleSelected || currentStep > 0 ? "#108B01" : "#E8E8E9",
-                borderColor: roleSelected || currentStep > 0 ? "#108B01" : "#E8E8E9",
+                backgroundColor:
+                  roleSelected || currentStep > 0 ? "#108B01" : "#E8E8E9",
+                borderColor:
+                  roleSelected || currentStep > 0 ? "#108B01" : "#E8E8E9",
                 color: roleSelected || currentStep > 0 ? "#fff" : "#A4A5B4",
               }}
               disabled={currentStep === 0 && !roleSelected}
@@ -233,7 +282,7 @@ export const RegisterPage: React.FC<RegisterProps> = ({
             <Button
               type="primary"
               style={{ backgroundColor: "#108B01", borderColor: "#108B01" }}
-              onClick={() => window.location.href = "/login"}
+              onClick={() => (window.location.href = "/login")}
               size="large"
             >
               Go to Login
@@ -241,7 +290,7 @@ export const RegisterPage: React.FC<RegisterProps> = ({
           )}
         </div>
       </Form>
-      
+
       {/* Login link */}
       <div className="mt-6 text-center">
         Already have an account?{" "}

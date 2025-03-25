@@ -7,12 +7,14 @@ import com.fptgang.backend.api.model.ResetPasswordRequestDto;
 import com.fptgang.backend.exception.InvalidInputException;
 import com.fptgang.backend.mapper.AccountMapper;
 import com.fptgang.backend.mapper.DetailLevel;
-import com.fptgang.backend.model.Account;
-import com.fptgang.backend.model.RefreshToken;
-import com.fptgang.backend.model.Role;
+import com.fptgang.backend.mapper.ProfileSkillMapper;
+import com.fptgang.backend.model.*;
 import com.fptgang.backend.repository.AccountRepos;
+import com.fptgang.backend.repository.ProfileRepos;
+import com.fptgang.backend.repository.ProjectRepos;
 import com.fptgang.backend.security.PasswordEncoderConfig;
 import com.fptgang.backend.service.*;
+import com.fptgang.backend.util.EntityUtil;
 import com.fptgang.backend.util.Fingerprint;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
@@ -32,6 +34,7 @@ import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -44,6 +47,8 @@ public class AuthServiceImpl implements AuthService {
     private final EmailService emailService;
     private final PasswordResetTokenService passwordResetTokenService;
     private final AccountMapper accountMapper;
+    private final ProfileSkillMapper profileSkillMapper;
+    private final ProfileRepos profileRepos;
 
     public AuthServiceImpl(AccountRepos accountRepos,
                            JwtService tokenService,
@@ -51,7 +56,7 @@ public class AuthServiceImpl implements AuthService {
                            PasswordEncoderConfig passwordEncoderConfig,
                            EmailService emailService,
                            PasswordResetTokenService passwordResetTokenService,
-                           AccountMapper accountMapper) {
+                           AccountMapper accountMapper, ProfileSkillMapper profileSkillMapper, ProfileRepos profileRepos) {
         this.accountRepos = accountRepos;
         this.tokenService = tokenService;
         this.refreshTokenService = refreshTokenService;
@@ -59,6 +64,8 @@ public class AuthServiceImpl implements AuthService {
         this.emailService = emailService;
         this.passwordResetTokenService = passwordResetTokenService;
         this.accountMapper = accountMapper;
+        this.profileSkillMapper = profileSkillMapper;
+        this.profileRepos = profileRepos;
     }
 
     @Override
@@ -110,7 +117,8 @@ public class AuthServiceImpl implements AuthService {
                 Role role = Role.valueOf(dto.getRole().name());
                 Preconditions.checkArgument(role == Role.FREELANCER || role == Role.CLIENT,
                         "Role must be FREELANCER or CLIENT");
-                accountRepos.save(
+
+                Account account = accountRepos.save(
                         Account.builder()
                                 .email(dto.getEmail())
                                 .firstName(dto.getFirstName())
@@ -119,6 +127,23 @@ public class AuthServiceImpl implements AuthService {
                                 .password(hashPass)
                                 .isVerified(false)
                                 .build());
+                Profile profile;
+                if (role == Role.FREELANCER) {
+                    profile = Profile.builder()
+                            .account(account)
+                            .education(dto.getEducation())
+                            .language(dto.getLanguage())
+                            .phoneNumber(dto.getPhoneNumber())
+                            .build();
+                    List<ProfileSkill> ps= dto.getProfileSkills().stream()
+                            .map(profileSkillMapper::toEntity)
+                            .peek(profileSkill -> profileSkill.setProfile(profile))
+                            .toList();
+                    profile.setSkills(ps);
+                    profileRepos.save(profile);
+                } else {
+                    profile = null;
+                }
                 log.info("User {} registered using Email-Password", dto.getEmail());
                 return true;
             } else {
@@ -152,15 +177,15 @@ public class AuthServiceImpl implements AuthService {
             log.info("User {} is verified using Google account ", email);
 
             accountRepos.save(
-                Account.builder()
-                        .email(email)
-                        .firstName(firstName == null ? "" : firstName.toString())
-                        .lastName(lastName == null ? null : lastName.toString())
-                        .avatarUrl(picture == null ? null : picture.toString())
-                        .role(role)
-                        .isVerified(true)
-                        .verifiedAt(LocalDateTime.now())
-                        .build()
+                    Account.builder()
+                            .email(email)
+                            .firstName(firstName == null ? "" : firstName.toString())
+                            .lastName(lastName == null ? null : lastName.toString())
+                            .avatarUrl(picture == null ? null : picture.toString())
+                            .role(role)
+                            .isVerified(true)
+                            .verifiedAt(LocalDateTime.now())
+                            .build()
             );
 
             log.info("User {} registered using Google account", email);

@@ -14,7 +14,18 @@ RegisterRequestDto:
       type: string
     lastName:
       type: string
-
+    overview:
+      type: string
+    education:
+      type: string
+    phoneNumber:
+      type: string
+    language:
+      type: string
+    profileSkills:
+      type: array
+      items:
+        $ref: '../profile-skill.yml#/ProfileSkillDto'
 
 
 
