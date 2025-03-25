@@ -9,9 +9,9 @@ const { Header, Content, Footer } = Layout;
 const ClientLayout: React.FC = () => {
   return (
     <Layout>
-      {/* <Header className="sticky top-0 z-[1] w-full flex items-center bg-inherit"> */}
-      <NavBar />
-      {/* </Header> */}
+      <Header className="sticky top-0 z-[1] w-full flex items-center bg-inherit">
+        <NavBar />
+      </Header>
       <Content style={{ padding: "0 48px", minHeight: "50vh", marginTop: 48 }}>
         <Outlet />
       </Content>

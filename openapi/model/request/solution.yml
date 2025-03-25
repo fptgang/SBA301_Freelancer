@@ -2,13 +2,13 @@
 SolutionDto:
     type: object
     required:
-        - projectStatus
-        - TransferDepositTo
         - solution
     properties:
         staffId:
             type: integer
             format: int64
+        haveAction:
+            type: boolean
         projectStatus:
             type: string
             enum: [CONTINUE, TERMINATE]

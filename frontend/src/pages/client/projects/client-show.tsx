@@ -32,6 +32,7 @@ import {
   Statistic,
   Modal,
   Progress,
+  Alert,
 } from "antd";
 import {
   ProjectOutlined,
@@ -327,24 +328,25 @@ const MilestoneDetailModal: React.FC<MilestoneDetailModalProps> = ({
         )}
 
         {/* Only show actions if milestone is in REVIEWING status and contract is not already signed */}
-        {milestone.status === "REVIEWING" && (
-          <div className="mt-6 flex justify-end space-x-3">
-            <Button danger onClick={onReport}>
-              Report Issue
-            </Button>
-            <Popconfirm
-              title="Confirm milestone completion"
-              description="This action will release the payment to the freelancer."
-              icon={<ExclamationCircleOutlined style={{ color: "green" }} />}
-              onConfirm={handleConfirm}
-              okText="Yes, Complete"
-              cancelText="Cancel"
-              okButtonProps={{ loading: confirmLoading }}
-            >
-              <Button type="primary">Confirm Completion</Button>
-            </Popconfirm>
-          </div>
-        )}
+        {milestone.status === "REVIEWING" &&
+          !project?.reports?.find((rp) => rp.status != "SOLVED") && (
+            <div className="mt-6 flex justify-end space-x-3">
+              <Button danger onClick={onReport}>
+                Report Issue
+              </Button>
+              <Popconfirm
+                title="Confirm milestone completion"
+                description="This action will release the payment to the freelancer."
+                icon={<ExclamationCircleOutlined style={{ color: "green" }} />}
+                onConfirm={handleConfirm}
+                okText="Yes, Complete"
+                cancelText="Cancel"
+                okButtonProps={{ loading: confirmLoading }}
+              >
+                <Button type="primary">Confirm Completion</Button>
+              </Popconfirm>
+            </div>
+          )}
       </Card>
     </Modal>
   );
@@ -352,7 +354,7 @@ const MilestoneDetailModal: React.FC<MilestoneDetailModalProps> = ({
 
 const ClientProjectShow: React.FC = () => {
   const [localSettings] = useLocalSettings();
-  const { data: user } = useGetIdentity<AccountDto>();
+  const { data: user, refetch } = useGetIdentity<AccountDto>();
   const { id } = useParams();
   const navigate = useNavigate();
   const { open } = useNotification();
@@ -378,6 +380,7 @@ const ClientProjectShow: React.FC = () => {
     data: projectData,
     isLoading: isProjectLoading,
     isError: isProjectError,
+    refetch: refetchProject,
   } = projectQueryResult;
   const project = projectData?.data;
 
@@ -559,6 +562,38 @@ const ClientProjectShow: React.FC = () => {
     }
   };
 
+  const handleDeposit = async (milestone: any) => {
+    if (user?.balance! < project?.contract?.budget! * milestone.budgetRatio!) {
+      open?.({
+        type: "error",
+        message: "Not enough balance to deposit for this milestone",
+      });
+      setShowDepositModal(true);
+      return;
+    }
+    try {
+      api
+        .depositMilestoneFund({
+          milestoneId: milestone.milestoneId,
+        })
+        .then(() => {
+          open?.({
+            type: "success",
+            message: "Deposit successful",
+          });
+          refetch();
+          refetchProject();
+        });
+    } catch (e) {
+      console.error(e);
+      open?.({
+        type: "error",
+        message: "Failed to deposit",
+      });
+      throw e;
+    }
+  };
+
   // Render loading state
   if (isProjectLoading) {
     return (
@@ -619,6 +654,13 @@ const ClientProjectShow: React.FC = () => {
                 </Space>
               </div>
             </div>
+            <div>
+              <Space>
+                {project?.reports?.find((rp) => rp.status !== "SOLVED") && (
+                  <Alert message="Reported" type="warning" showIcon />
+                )}
+              </Space>
+            </div>
 
             <div className="mt-4 md:mt-0 flex space-x-3">
               <Button
@@ -642,6 +684,11 @@ const ClientProjectShow: React.FC = () => {
                   danger
                   style={{ marginLeft: 8 }}
                   onClick={() => setShowReportModal(true)}
+                  disabled={
+                    project?.reports?.find((rp) => rp.status !== "SOLVED")
+                      ? true
+                      : false
+                  }
                 >
                   Report
                 </Button>
@@ -1036,12 +1083,12 @@ const ClientProjectShow: React.FC = () => {
                           : "gray"
                       }
                     >
-                      <Card
-                        className="mb-4 cursor-pointer hover:shadow-md transition-shadow"
-                        onClick={() => handleShowMilestoneDetail(milestone)}
-                      >
+                      <Card className="mb-4 cursor-pointer hover:shadow-md transition-shadow">
                         <Row>
-                          <Col span={18}>
+                          <Col
+                            span={18}
+                            onClick={() => handleShowMilestoneDetail(milestone)}
+                          >
                             <Title level={5}>{milestone.title}</Title>
                             <Paragraph>{milestone.description}</Paragraph>
                             <div className="flex gap-4 mt-2">
@@ -1091,6 +1138,17 @@ const ClientProjectShow: React.FC = () => {
                                 View Details
                               </Button>
                             )}
+                            {milestone.status === "PENDING" &&
+                              milestone.fundStatus != "DEPOSITED" && (
+                                <Popconfirm
+                                  title="Are you sure you want to deposit for this milestone?"
+                                  onConfirm={() => handleDeposit(milestone)}
+                                  okText="Yes"
+                                  cancelText="No"
+                                >
+                                  <Button type="primary">Deposit</Button>
+                                </Popconfirm>
+                              )}
                           </Col>
                         </Row>
                       </Card>
