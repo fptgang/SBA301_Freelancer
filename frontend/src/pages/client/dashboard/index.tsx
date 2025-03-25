@@ -26,52 +26,50 @@ import { useTable } from "@refinedev/antd";
 import dayjs from "dayjs";
 import { formatCurrency } from "../../../utils/formatter";
 import ClientCreateButton from "../projects/client-create";
-import { MessageDto, ProjectDto } from "../../../../generated";
+import { AccountDto, MessageDto, ProjectDto } from "../../../../generated";
 import { useNavigate } from "react-router";
-import {useLocalSettings} from "../../../hooks/useLocalSettings";
+import { useLocalSettings } from "../../../hooks/useLocalSettings";
 
 const { Title, Text } = Typography;
 
 const ClientDashboard: React.FC = () => {
-  const [localSettings] = useLocalSettings()
+  const [localSettings] = useLocalSettings();
   // Get current user identity
-  const { data: identity } = useGetIdentity<{ id: number }>();
-  const userId = identity?.id;
+  const { data: user } = useGetIdentity<AccountDto>();
+  const userId = user?.accountId;
   const nav = useNavigate();
 
   // Fetch active projects
-  const { data: projectData, isLoading: projectsLoading } = useList<ProjectDto>(
-    {
-      resource: "projects",
-      filters: [
-        {
-          field: "client.accountId",
-          operator: "eq",
-          value: userId,
-        },
-      ],
-      pagination: {
-        pageSize: 5,
-      },
-      sorters: [
-        {
-          field: "updatedAt",
-          order: "desc",
-        },
-      ],
-    }
-  );
-
-  // Fetch latest transactions
-  const { data: transactionData, isLoading: transactionsLoading } = useList({
-    resource: "transactions",
+  const {
+    data: projectData,
+    isLoading: projectsLoading,
+    refetch: projectRefetch,
+  } = useList<ProjectDto>({
+    resource: "projects",
     filters: [
       {
-        field: "fromAccount.accountId",
+        field: "client.accountId",
         operator: "eq",
         value: userId,
       },
     ],
+    pagination: {
+      pageSize: 5,
+    },
+    queryOptions: {
+      enabled: !!userId,
+    },
+    sorters: [
+      {
+        field: "updatedAt",
+        order: "desc",
+      },
+    ],
+  });
+
+  // Fetch latest transactions
+  const { data: transactionData, isLoading: transactionsLoading } = useList({
+    resource: "transactions",
     pagination: {
       pageSize: 5,
     },
@@ -161,7 +159,7 @@ const ClientDashboard: React.FC = () => {
     <div className="p-4">
       <div className="flex justify-between items-center mb-6">
         <Typography.Title level={2}>Client Dashboard</Typography.Title>
-        <ClientCreateButton />
+        <ClientCreateButton refetch={projectRefetch} />
       </div>
 
       {/* Statistics Overview */}
@@ -240,8 +238,7 @@ const ClientDashboard: React.FC = () => {
                     description={
                       <Space direction="vertical" size="small">
                         <Text type="secondary" className="text-xs">
-                          Created:{" "}
-                          {localSettings.formatDate(project.createdAt)}
+                          Created: {localSettings.formatDate(project.createdAt)}
                         </Text>
                         <Text type="secondary" className="text-xs">
                           Proposals: {project.proposalCount || 0}
