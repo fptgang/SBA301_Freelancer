@@ -220,10 +220,7 @@ function App() {
                     <Route index element={<LandingPage />} />
                     <Route path="pricing" element={<Pricing />} />
                     <Route path="search" element={<SearchPage />} />
-                    <Route
-                      path="projects/:id"
-                      element={<ProjectDetail />}
-                    />
+                    <Route path="projects/:id" element={<ProjectDetail />} />
                   </Route>
                   <Route path="login" element={<Login />} />
                   <Route path="register" element={<Register />} />
@@ -328,6 +325,7 @@ function App() {
                       element={<FreelancerDashboardPage />}
                     />
                     <Route path="projects">
+                      <Route index element={<FreelancerActiveProject />} />
                       <Route path=":id" element={<ProjectDetail />} />
                     </Route>
 

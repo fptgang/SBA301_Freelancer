@@ -298,7 +298,7 @@ public class EmailServiceImpl implements EmailService {
             log.info("Project status is not valid for client notification: {}", project.getStatus());
             return;
         }
-        else if(Boolean.FALSE.equals(project.getToTerminate())){
+        else if(Boolean.TRUE.equals(project.getToTerminate())){
             log.info("Project to be terminate is not valid for client notification: {}", project.getToTerminate());
             return;
         }
