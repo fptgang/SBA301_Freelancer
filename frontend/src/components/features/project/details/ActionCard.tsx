@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Card, Button, Space, Divider, Typography } from "antd";
+import { Card, Button, Space, Divider, Typography, Row, Col } from "antd";
 import {
   DollarOutlined,
   CalendarOutlined,
@@ -15,6 +15,9 @@ import FreelancerCreateProposalButton from "../../../../pages/freelancer/proposa
 import { useGetIdentity } from "@refinedev/core";
 import ContractShowModal from "../../../ContractShowModal";
 import {useLocalSettings} from "../../../../hooks/useLocalSettings";
+import dayjs from "dayjs";
+
+const {Title, Text, Paragraph} = Typography;
 
 interface ActionCardProps {
   project: ProjectDto;
@@ -36,7 +39,30 @@ export const ActionCard: React.FC<ActionCardProps> = ({
   const { data: user } = useGetIdentity<AccountDto>();
 
   return (
-    <Card style={{ borderRadius: 8 }} bodyStyle={{ padding: 16 }}>
+    <Card 
+    title="Proposal Submission" 
+    style={{ borderRadius: 8 }} bodyStyle={{ padding: 16 }}>
+
+
+    <Space direction="vertical" style={{ width: "100%" }}>
+      
+    <Row gutter={[16, 16]}>
+        <Col span={24}>
+          <Text strong>Budget Range:</Text> <Text>${project.minBudget} - ${project.maxBudget}</Text>
+        </Col>
+        <Col span={24}>
+          <Text strong>Start Date:{" "}</Text>
+          <Text>{localSettings.formatDateTime(project.startDate!)}</Text>
+        </Col>
+        <Col span={24}>
+          <Text strong>Submission Deadline:</Text>{" "}
+          <Text>{localSettings.formatDateTime(dayjs(project.startDate!).subtract(1, 'day').toDate())}</Text>
+        </Col>
+      </Row>
+    </Space>
+
+    <Divider style={{ margin: "16px 0" }} />
+
       <Space direction="vertical" size="middle" style={{ width: "100%" }}>
         {role === "CLIENT" ? (
           <Button
@@ -141,31 +167,6 @@ export const ActionCard: React.FC<ActionCardProps> = ({
             </>
           )}
 
-        {role === "CLIENT" ||
-          (project.status === ProjectStatusDto.Open && (
-            <Divider style={{ margin: "16px 0" }} />
-          ))}
-        <Space direction="vertical" size="small">
-          <Typography.Text strong>Project Details</Typography.Text>
-          <Typography.Text>
-            <DollarOutlined /> <strong>Budget:</strong> $
-            {project?.minBudget
-              ?.toFixed(0)
-              .replace(/\B(?=(\d{3})+(?!\d))/g, ",")}{" "}
-            - $
-            {project?.maxBudget
-              ?.toFixed(0)
-              .replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
-          </Typography.Text>
-          <Typography.Text>
-            <CalendarOutlined /> <strong>Posted:</strong>{" "}
-            {localSettings.formatDate(project.createdAt!)}
-          </Typography.Text>
-          <Typography.Text>
-            <UserOutlined /> <strong>Client:</strong>{" "}
-            {project?.client?.firstName}
-          </Typography.Text>
-        </Space>
       </Space>
     </Card>
   );

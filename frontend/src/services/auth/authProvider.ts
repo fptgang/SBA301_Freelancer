@@ -25,7 +25,9 @@ export const authProvider: AuthProvider = {
 
         return {
           success: true,
-          redirectTo: response?.accountResponseDTO?.role === AccountDtoRoleEnum.Admin ? "/admin" : "/",
+          redirectTo: (response?.accountResponseDTO?.role === AccountDtoRoleEnum.Admin ||
+            response?.accountResponseDTO?.role === AccountDtoRoleEnum.Staff
+          ) ? "/admin" : "/",
         };
       }
 
@@ -40,7 +42,9 @@ export const authProvider: AuthProvider = {
 
         return {
           success: true,
-          redirectTo: response?.accountResponseDTO?.role === AccountDtoRoleEnum.Admin ? "/admin" : "/",
+          redirectTo: (response?.accountResponseDTO?.role === AccountDtoRoleEnum.Admin ||
+            response?.accountResponseDTO?.role === AccountDtoRoleEnum.Staff
+          ) ? "/admin" : "/",
         };
       }
     } catch (e) {

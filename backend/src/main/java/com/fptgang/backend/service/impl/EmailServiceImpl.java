@@ -316,7 +316,6 @@ public class EmailServiceImpl implements EmailService {
 
     @Override
     public void sendReportEmailTemplateToBoth(Report report) throws IOException {
-
         log.info("Preparing to send Report completed both to client,freelancer: {} ,{}", report.getProject().getClient().getEmail(),report.requireFreelancer().getEmail());
 
         var template = reportEmailTemplate.getContentAsString(StandardCharsets.UTF_8);
