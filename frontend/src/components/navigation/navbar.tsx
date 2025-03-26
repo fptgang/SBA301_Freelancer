@@ -70,12 +70,6 @@ const PublicNavBar: React.FC = () => {
       path: "/search",
       icon: <SearchOutlined />,
     },
-    {
-      key: "post-job",
-      label: "Post a Job",
-      path: "/client/projects",
-      icon: <FileTextOutlined />,
-    },
   ];
 
   // const resourcesItems = [

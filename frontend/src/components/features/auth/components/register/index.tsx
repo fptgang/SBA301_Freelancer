@@ -66,10 +66,15 @@ export const RegisterPage: React.FC<RegisterProps> = ({
     provider: string;
     credential: string;
   }) => {
-    if (!roleSelected || !credential) return;
+    if (!roleSelected || !credential) {
+      message.error("Please select a role to continue");
+      return;
+    }
     register({
       ...mutationVariables,
       providerName: provider,
+      googleToken: credential,
+      role: roleSelected,
       // Only pass fields expected by RegisterFormTypes
     });
   };
@@ -130,9 +135,15 @@ export const RegisterPage: React.FC<RegisterProps> = ({
           phoneNumber: completeFormData.phoneNumber,
         };
         console.log("Complete form data:", completeFormData);
-        api.register({
-          registerRequestDto: completeFormData,
-        });
+        api
+          .register({
+            registerRequestDto: completeFormData,
+          })
+          .then((response) => {
+            console.log(response);
+            window.location.href = "/login";
+          });
+
         // register(
         //   {
         //     ...mutationVariables,
