@@ -241,7 +241,7 @@ export const createProject = (date: Date) => {
   }
 
   const numMilestones = faker.number.int(milestoneAmount());
-  let currentDeadline = date;
+  let currentDeadline = project.start_date;
   const budgetRatios = generateSegmentedArray(numMilestones);
 
   for (let i = 0; i < numMilestones; i++) {

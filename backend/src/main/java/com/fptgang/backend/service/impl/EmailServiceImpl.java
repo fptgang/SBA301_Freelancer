@@ -1,5 +1,6 @@
 package com.fptgang.backend.service.impl;
 
+import com.fptgang.backend.config.HirableConfig;
 import com.fptgang.backend.mapper.template.*;
 import com.fptgang.backend.model.*;
 import com.fptgang.backend.repository.*;
@@ -67,13 +68,10 @@ public class EmailServiceImpl implements EmailService {
 
     private final MilestoneRepos milestoneRepos;
     private final ContractRepos contractRepos;
-    private final AccountRepos accountRepos;
-    private final TransactionRepos transactionRepos;
     private final ProposalRepos proposalRepos;
-    private final ProjectRepos projectRepos;
-    private final ReportRepos reportRepos;
+    private final HirableConfig hirableConfig;
 
-    public EmailServiceImpl(ContractCreatedEmailTemplateMapper contractCreatedEmailTemplateMapper, ProposalRejectedEmailTemplateMapper proposalRejectedEmailTemplateMapper, ResetPasswordEmailTemplateMapper resetPasswordEmailTemplateMapper, ContractSignedEmailTemplateMapper contractSignedEmailTemplateMapper, MilestoneStartedEmailTemplateMapper milestoneStartedEmailTemplateMapper, MilestoneCompletedEmailTemplateMapper milestoneCompletedEmailTemplateMapper, MilestoneFundEmailTemplateMapper milestoneFundEmailTemplateMapper, ProjectEmailTemplateMapper projectEmailTemplateMapper, ReportEmailTemplateMapper reportEmailTemplateMapper, TransactionDepositEmailTemplateMapper transactionDepositEmailTemplateMapper, MilestoneReleasedEmailTemplateMapper milestoneReleasedEmailTemplateMapper, MilestoneRepos milestoneRepos, ContractRepos contractRepos, AccountRepos accountRepos, TransactionRepos transactionRepos, ProposalRepos proposalRepos, ProjectRepos projectRepos, ReportRepos reportRepos) {
+    public EmailServiceImpl(ContractCreatedEmailTemplateMapper contractCreatedEmailTemplateMapper, ProposalRejectedEmailTemplateMapper proposalRejectedEmailTemplateMapper, ResetPasswordEmailTemplateMapper resetPasswordEmailTemplateMapper, ContractSignedEmailTemplateMapper contractSignedEmailTemplateMapper, MilestoneStartedEmailTemplateMapper milestoneStartedEmailTemplateMapper, MilestoneCompletedEmailTemplateMapper milestoneCompletedEmailTemplateMapper, MilestoneFundEmailTemplateMapper milestoneFundEmailTemplateMapper, ProjectEmailTemplateMapper projectEmailTemplateMapper, ReportEmailTemplateMapper reportEmailTemplateMapper, TransactionDepositEmailTemplateMapper transactionDepositEmailTemplateMapper, MilestoneReleasedEmailTemplateMapper milestoneReleasedEmailTemplateMapper, MilestoneRepos milestoneRepos, ContractRepos contractRepos, AccountRepos accountRepos, TransactionRepos transactionRepos, ProposalRepos proposalRepos, ProjectRepos projectRepos, ReportRepos reportRepos, HirableConfig hirableConfig) {
         this.contractCreatedEmailTemplateMapper = contractCreatedEmailTemplateMapper;
         this.proposalRejectedEmailTemplateMapper = proposalRejectedEmailTemplateMapper;
         this.resetPasswordEmailTemplateMapper = resetPasswordEmailTemplateMapper;
@@ -87,15 +85,16 @@ public class EmailServiceImpl implements EmailService {
         this.milestoneReleasedEmailTemplateMapper = milestoneReleasedEmailTemplateMapper;
         this.milestoneRepos = milestoneRepos;
         this.contractRepos = contractRepos;
-        this.accountRepos = accountRepos;
-        this.transactionRepos = transactionRepos;
         this.proposalRepos = proposalRepos;
-        this.projectRepos = projectRepos;
-        this.reportRepos = reportRepos;
+        this.hirableConfig = hirableConfig;
     }
 
     @Override
     public void sendMail(String from, String to, String subject, String html) {
+        if (!hirableConfig.isEnableSendingMail()) {
+            log.info("Dry run sending mail to " + to);
+            return;
+        }
         // send email
         Resend resend = new Resend(API_KEY);
         CreateEmailOptions params = CreateEmailOptions.builder()
