@@ -152,8 +152,6 @@ const resources = [
   {
     name: "projects",
     list: "/admin/projects",
-    create: "/admin/projects/create",
-    edit: "/admin/projects/edit/:id",
     show: "/admin/projects/show/:id",
     meta: {
       icon: <ProjectOutlined />,
@@ -202,7 +200,7 @@ function App() {
                 dataProvider={dataProvider(API_URL, axiosConfig)}
                 notificationProvider={notificationProvider}
                 authProvider={authProvider}
-                accessControlProvider={accessControlProvider}
+                // accessControlProvider={accessControlProvider}
                 routerProvider={routerBindings}
                 resources={resources}
                 liveProvider={liveProvider(stompClient)}
@@ -231,7 +229,7 @@ function App() {
                     <Route path="search" element={<SearchPage />} />
                     <Route path="projects/:id" element={<ProjectDetail />} />
                   </Route>
-                  
+
                   {/* Auth Routes - No authentication required */}
                   <Route path="login" element={<Login />} />
                   <Route path="register" element={<Register />} />
@@ -260,9 +258,9 @@ function App() {
                   <Route
                     path="admin"
                     element={
-                      <ProtectedRoute requiredRoles={[AccountDtoRoleEnum.Admin,AccountDtoRoleEnum.Staff]}>
+                      <Authenticated key={"admin-inner"}>
                         <AdminLayout />
-                      </ProtectedRoute>
+                      </Authenticated>
                     }
                   >
                     <Route index element={<Navigate to="/admin/dashboard" />} />
@@ -292,8 +290,6 @@ function App() {
 
                     <Route path="projects">
                       <Route index element={<ProjectsList />} />
-                      <Route path="create" element={<ProjectsCreate />} />
-                      <Route path="edit/:id" element={<ProjectsEdit />} />
                       <Route path="show/:id" element={<ProjectsShow />} />
                     </Route>
 
@@ -317,10 +313,12 @@ function App() {
                   </Route>
 
                   {/* Client Routes - Client role required */}
-                  <Route 
-                    path="client" 
+                  <Route
+                    path="client"
                     element={
-                      <ProtectedRoute requiredRoles={[AccountDtoRoleEnum.Client]}>
+                      <ProtectedRoute
+                        requiredRoles={[AccountDtoRoleEnum.Client]}
+                      >
                         <ClientLayout />
                       </ProtectedRoute>
                     }
@@ -335,10 +333,12 @@ function App() {
                   </Route>
 
                   {/* Freelancer Routes - Freelancer role required */}
-                  <Route 
-                    path="freelancer" 
+                  <Route
+                    path="freelancer"
                     element={
-                      <ProtectedRoute requiredRoles={[AccountDtoRoleEnum.Freelancer]}>
+                      <ProtectedRoute
+                        requiredRoles={[AccountDtoRoleEnum.Freelancer]}
+                      >
                         <FreelancerLayout />
                       </ProtectedRoute>
                     }
@@ -364,8 +364,8 @@ function App() {
                   </Route>
 
                   {/* Shared Protected Routes - Any authenticated user */}
-                  <Route 
-                    path="settings" 
+                  <Route
+                    path="settings"
                     element={
                       <ProtectedRoute>
                         <SettingsLayout />
@@ -378,8 +378,8 @@ function App() {
                     <Route path="local" element={<LocalSettingsPage />} />
                   </Route>
 
-                  <Route 
-                    path="wallet" 
+                  <Route
+                    path="wallet"
                     element={
                       <ProtectedRoute>
                         <WalletLayout />

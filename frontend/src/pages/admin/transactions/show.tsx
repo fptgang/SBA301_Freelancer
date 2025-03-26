@@ -76,10 +76,23 @@ export const TransactionsShow: React.FC = () => {
         transactionStatus: updatingStatus,
       };
 
-      await api.updateWithdrawRequest({
-        updateWithdrawDto: updateDto,
-      });
-
+      await api
+        .updateWithdrawRequest({
+          updateWithdrawDto: updateDto,
+        })
+        .then(() => {
+          setUpdateModalVisible(false);
+          queryResult.refetch();
+        })
+        .catch((error) => {
+          console.error("Error updating transaction status:", error);
+          openNotification?.({
+            type: "error",
+            message: "Error updating status",
+            description:
+              "Failed to update transaction status. Please try again.",
+          });
+        });
       openNotification?.({
         type: "success",
         message: "Transaction status updated successfully",
@@ -87,8 +100,6 @@ export const TransactionsShow: React.FC = () => {
       });
 
       // Close modal and refresh the page
-      setUpdateModalVisible(false);
-      queryResult.refetch();
     } catch (error) {
       console.error("Error updating transaction status:", error);
       openNotification?.({

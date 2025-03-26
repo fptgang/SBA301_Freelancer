@@ -21,10 +21,10 @@ import {
 import dayjs from "dayjs";
 import { ROLE_OPTIONS } from "../../../utils/constants";
 import { AccountDto } from "../../../../generated/models/AccountDto";
-import {useLocalSettings} from "../../../hooks/useLocalSettings";
+import { useLocalSettings } from "../../../hooks/useLocalSettings";
 
 export const AccountsEdit: React.FC = () => {
-  const [localSettings] = useLocalSettings()
+  const [localSettings] = useLocalSettings();
   const { formProps, saveButtonProps, queryResult } = useForm<AccountDto>({
     redirect: false,
     liveMode: "manual",
@@ -61,7 +61,9 @@ export const AccountsEdit: React.FC = () => {
         {AccountDtosData?.verifiedAt && (
           <Alert
             message="Verified Account"
-            description={`This Account was verified on ${localSettings.formatDate(AccountDtosData.verifiedAt)}`}
+            description={`This Account was verified on ${localSettings.formatDate(
+              AccountDtosData.verifiedAt
+            )}`}
             type="success"
             showIcon
             className="mb-6"
