@@ -96,7 +96,7 @@ export const AccountsList: React.FC = () => {
   return (
     <>
       {" "}
-      <List>
+      <List headerButtons={user?.role === "ADMIN" ? null : <></>}>
         <div className="mb-6">
           <Input.Search
             placeholder="Search accounts..."
