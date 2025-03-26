@@ -272,7 +272,8 @@ const ProjectInternalDetail: React.FC<{
                 </Button>
               )}
 
-              {((project.status === ProjectStatusDto.Open || (project.contract && !project.toTerminate))) && (
+              {((project.status === ProjectStatusDto.Open || (project.status === ProjectStatusDto.InProgress &&
+                project.contract && !project.toTerminate))) && (
                 <Popconfirm
                   title="Are you sure you want to close this project?"
                   onConfirm={handleTerminateProject}
