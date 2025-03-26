@@ -8,17 +8,20 @@ import com.fptgang.backend.model.Transaction;
 import com.fptgang.backend.repository.AccountRepos;
 import com.fptgang.backend.repository.TransactionRepos;
 import com.fptgang.backend.service.AccountService;
+import com.fptgang.backend.service.EmailService;
 import com.fptgang.backend.service.TransactionService;
 import com.fptgang.backend.service.params.ListParams;
 import com.fptgang.backend.util.EntityUtil;
 import com.google.common.base.Preconditions;
 import jakarta.persistence.criteria.Predicate;
+import jakarta.validation.constraints.Email;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Objects;
@@ -30,11 +33,13 @@ public class TransactionServiceImpl implements TransactionService {
     private final TransactionRepos transactionRepos;
     private final AccountService accountService;
     private  final AccountRepos accountRepos;
+    private final EmailService emailService;
     @Autowired
-    public TransactionServiceImpl(TransactionRepos transactionRepos, AccountService accountService, AccountRepos accountRepos) {
+    public TransactionServiceImpl(TransactionRepos transactionRepos, AccountService accountService, AccountRepos accountRepos, EmailService emailService) {
         this.transactionRepos = transactionRepos;
         this.accountService = accountService;
         this.accountRepos = accountRepos;
+        this.emailService = emailService;
     }
 
     @Override
@@ -108,7 +113,11 @@ public class TransactionServiceImpl implements TransactionService {
         if (transaction.getToAccount() != null) {
             transaction.getToAccount().getIncomingTransactions().add(transaction);
         }
+        try {
+            emailService.sendTransactionEmailTemplateToBoth(transaction);
+        } catch (IOException ignored) {
 
+        }
         return transaction;
     }
 
@@ -126,7 +135,7 @@ public class TransactionServiceImpl implements TransactionService {
         var to = accountService.getEscrowAccountReference();
         var fund = milestone.requireContractualBudget();
         milestone.setFundStatus(Milestone.FundStatus.DEPOSITED);
-        return create(Transaction.builder()
+        Transaction transaction1 = create(Transaction.builder()
                 .fromAccount(from)
                 .toAccount(to)
                 .milestone(milestone)
@@ -135,6 +144,12 @@ public class TransactionServiceImpl implements TransactionService {
                 .status(Transaction.TransactionStatus.SUCCESS)
                 .paymentMethod(Transaction.PaymentMethod.INTERNAL_WALLET)
                 .build());
+        try {
+            emailService.sendTransactionEmailTemplateToBoth(transaction1);
+        } catch (IOException ignored) {
+
+        }
+        return transaction1;
     }
 
     @Override
@@ -152,7 +167,7 @@ public class TransactionServiceImpl implements TransactionService {
             var to = milestone.requireFreelancer();
             var fund = milestone.requireContractualBudget();
             milestone.setFundStatus(Milestone.FundStatus.RELEASED);
-            return create(Transaction.builder()
+            Transaction transaction1 = create(Transaction.builder()
                     .fromAccount(from)
                     .toAccount(to)
                     .milestone(milestone)
@@ -161,6 +176,12 @@ public class TransactionServiceImpl implements TransactionService {
                     .status(Transaction.TransactionStatus.SUCCESS)
                     .paymentMethod(Transaction.PaymentMethod.INTERNAL_WALLET)
                     .build());
+            try {
+                emailService.sendTransactionEmailTemplateToBoth(transaction1);
+            } catch (IOException ignored) {
+
+            }
+            return transaction1;
         } else {
             throw new IllegalArgumentException("Escrow deposit does not exist on milestone");
         }
@@ -182,7 +203,8 @@ public class TransactionServiceImpl implements TransactionService {
             var to = milestone.getProject().getClient();
             var fund = milestone.requireContractualBudget();
             milestone.setFundStatus(Milestone.FundStatus.REFUNDED);
-            return create(Transaction.builder()
+
+            Transaction transaction1 = create(Transaction.builder()
                     .fromAccount(from)
                     .toAccount(to)
                     .milestone(milestone)
@@ -191,6 +213,12 @@ public class TransactionServiceImpl implements TransactionService {
                     .status(Transaction.TransactionStatus.SUCCESS)
                     .paymentMethod(Transaction.PaymentMethod.INTERNAL_WALLET)
                     .build());
+            try {
+                emailService.sendTransactionEmailTemplateToBoth(transaction1);
+            } catch (IOException ignored) {
+
+            }
+            return transaction1;
         } else {
             throw new IllegalArgumentException("Escrow deposit does not exist on milestone");
         }
@@ -237,6 +265,11 @@ public class TransactionServiceImpl implements TransactionService {
             }
 
         }
+        try {
+            emailService.sendTransactionEmailTemplateToBoth(existing);
+        } catch (IOException ignored) {
+
+        }
         return transactionRepos.save(existing);
     }
 
@@ -278,7 +311,11 @@ public class TransactionServiceImpl implements TransactionService {
                 .paymentMethod(transaction.getPaymentMethod())
                 .notes(transaction.getNotes())
                 .build();
+        try {
+            emailService.sendTransactionEmailTemplateToBoth(transactions);
+        } catch (IOException ignored) {
 
+        }
         return transactionRepos.save(transactions);
     }
 
@@ -304,7 +341,11 @@ public class TransactionServiceImpl implements TransactionService {
             account.setBalance(account.getBalance().add(transaction.getAmount()));
             accountRepos.save(account);
         }
+        try {
+            emailService.sendTransactionEmailTemplateToBoth(transaction);
+        } catch (IOException ignored) {
 
+        }
         return transactionRepos.save(transaction);
     }
 

@@ -18,6 +18,7 @@ import { r } from "react-router/dist/development/fog-of-war-CCAcUMgB";
 import { API_URL } from "../../utils";
 import { message } from "antd";
 
+
 export const REFRESH_TOKEN_KEY = "refine-refresh-token";
 
 export const authProvider: AuthProvider = {
@@ -159,6 +160,7 @@ export const authProvider: AuthProvider = {
             role: data.role,
           },
         });
+
       }
 
       return {

@@ -8,10 +8,7 @@ import com.fptgang.backend.repository.MilestoneRepos;
 import com.fptgang.backend.repository.ProjectRepos;
 import com.fptgang.backend.repository.ReportRepos;
 import com.fptgang.backend.security.AuthContext;
-import com.fptgang.backend.service.MilestoneService;
-import com.fptgang.backend.service.ProjectService;
-import com.fptgang.backend.service.ReportService;
-import com.fptgang.backend.service.TransactionService;
+import com.fptgang.backend.service.*;
 import com.fptgang.backend.service.params.ListParams;
 import com.fptgang.backend.util.EntityUtil;
 import com.fptgang.backend.util.OpenApiHelper;
@@ -21,6 +18,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.util.List;
 
 @Slf4j
@@ -35,13 +33,14 @@ public class ReportServiceImpl implements ReportService {
     private final AccountRepos accountRepos;
     private final MilestoneService milestoneService;
     private final MilestoneRepos milestoneRepos;
+    private final EmailService emailService;
 
     public ReportServiceImpl(ReportRepos reportRepos,
                              ProjectService projectService,
                              TransactionService transactionService,
                              AuthContext authContext,
                              ProjectRepos projectRepos,
-                             AccountRepos accountRepos, MilestoneService milestoneService, MilestoneRepos milestoneRepos) {
+                             AccountRepos accountRepos, MilestoneService milestoneService, MilestoneRepos milestoneRepos, EmailService emailService) {
         this.reportRepos = reportRepos;
         this.projectService = projectService;
         this.transactionService = transactionService;
@@ -50,6 +49,7 @@ public class ReportServiceImpl implements ReportService {
         this.accountRepos = accountRepos;
         this.milestoneService = milestoneService;
         this.milestoneRepos = milestoneRepos;
+        this.emailService = emailService;
     }
 
     @Override
@@ -75,6 +75,11 @@ public class ReportServiceImpl implements ReportService {
         report.setSolution(null);
         report.setStatus(Report.ReportStatus.UNSOLVED);
         report.setReporter(accountRepos.getReferenceById(authContext.requireAccountId()));
+        try {
+            emailService.sendReportEmailTemplateToBoth(report);
+        } catch (IOException ignored) {
+
+        }
         return reportRepos.save(report);
     }
 
@@ -86,6 +91,11 @@ public class ReportServiceImpl implements ReportService {
         Report existing = reportRepos.findById(report.getReportId())
                 .orElseThrow(() -> new IllegalArgumentException("Report does not exist"));
         EntityUtil.merge(existing, report);
+        try {
+            emailService.sendReportEmailTemplateToBoth(existing);
+        } catch (IOException ignored) {
+
+        }
         return reportRepos.save(existing);
     }
 
@@ -146,6 +156,11 @@ public class ReportServiceImpl implements ReportService {
         report.setSolution(solution.getSolution());
         report.setStatus(Report.ReportStatus.SOLVED);
         log.info("Resolved report {}", report.getReportId());
+        try {
+            emailService.sendReportEmailTemplateToBoth(report);
+        } catch (IOException ignored) {
+
+        }
         return reportRepos.save(report);
     }
 

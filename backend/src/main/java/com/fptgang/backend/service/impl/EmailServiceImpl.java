@@ -1,8 +1,11 @@
 package com.fptgang.backend.service.impl;
 
+import com.fptgang.backend.config.HirableConfig;
 import com.fptgang.backend.mapper.template.*;
 import com.fptgang.backend.model.*;
-import com.fptgang.backend.repository.*;
+import com.fptgang.backend.repository.ContractRepos;
+import com.fptgang.backend.repository.MilestoneRepos;
+import com.fptgang.backend.repository.ProposalRepos;
 import com.fptgang.backend.service.EmailService;
 import com.fptgang.backend.util.TemplateUtil;
 import com.resend.Resend;
@@ -16,8 +19,6 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.List;
 
 @Service
 @Slf4j
@@ -67,13 +68,10 @@ public class EmailServiceImpl implements EmailService {
 
     private final MilestoneRepos milestoneRepos;
     private final ContractRepos contractRepos;
-    private final AccountRepos accountRepos;
-    private final TransactionRepos transactionRepos;
     private final ProposalRepos proposalRepos;
-    private final ProjectRepos projectRepos;
-    private final ReportRepos reportRepos;
+    private final HirableConfig hirableConfig;
 
-    public EmailServiceImpl(ContractCreatedEmailTemplateMapper contractCreatedEmailTemplateMapper, ProposalRejectedEmailTemplateMapper proposalRejectedEmailTemplateMapper, ResetPasswordEmailTemplateMapper resetPasswordEmailTemplateMapper, ContractSignedEmailTemplateMapper contractSignedEmailTemplateMapper, MilestoneStartedEmailTemplateMapper milestoneStartedEmailTemplateMapper, MilestoneCompletedEmailTemplateMapper milestoneCompletedEmailTemplateMapper, MilestoneFundEmailTemplateMapper milestoneFundEmailTemplateMapper, ProjectEmailTemplateMapper projectEmailTemplateMapper, ReportEmailTemplateMapper reportEmailTemplateMapper, TransactionDepositEmailTemplateMapper transactionDepositEmailTemplateMapper, MilestoneReleasedEmailTemplateMapper milestoneReleasedEmailTemplateMapper, MilestoneRepos milestoneRepos, ContractRepos contractRepos, AccountRepos accountRepos, TransactionRepos transactionRepos, ProposalRepos proposalRepos, ProjectRepos projectRepos, ReportRepos reportRepos) {
+    public EmailServiceImpl(ContractCreatedEmailTemplateMapper contractCreatedEmailTemplateMapper, ProposalRejectedEmailTemplateMapper proposalRejectedEmailTemplateMapper, ResetPasswordEmailTemplateMapper resetPasswordEmailTemplateMapper, ContractSignedEmailTemplateMapper contractSignedEmailTemplateMapper, MilestoneStartedEmailTemplateMapper milestoneStartedEmailTemplateMapper, MilestoneCompletedEmailTemplateMapper milestoneCompletedEmailTemplateMapper, MilestoneFundEmailTemplateMapper milestoneFundEmailTemplateMapper, ProjectEmailTemplateMapper projectEmailTemplateMapper, ReportEmailTemplateMapper reportEmailTemplateMapper, TransactionDepositEmailTemplateMapper transactionDepositEmailTemplateMapper, MilestoneReleasedEmailTemplateMapper milestoneReleasedEmailTemplateMapper, MilestoneRepos milestoneRepos, ContractRepos contractRepos, ProposalRepos proposalRepos, HirableConfig hirableConfig) {
         this.contractCreatedEmailTemplateMapper = contractCreatedEmailTemplateMapper;
         this.proposalRejectedEmailTemplateMapper = proposalRejectedEmailTemplateMapper;
         this.resetPasswordEmailTemplateMapper = resetPasswordEmailTemplateMapper;
@@ -87,20 +85,21 @@ public class EmailServiceImpl implements EmailService {
         this.milestoneReleasedEmailTemplateMapper = milestoneReleasedEmailTemplateMapper;
         this.milestoneRepos = milestoneRepos;
         this.contractRepos = contractRepos;
-        this.accountRepos = accountRepos;
-        this.transactionRepos = transactionRepos;
         this.proposalRepos = proposalRepos;
-        this.projectRepos = projectRepos;
-        this.reportRepos = reportRepos;
+        this.hirableConfig = hirableConfig;
     }
 
     @Override
     public void sendMail(String from, String to, String subject, String html) {
+        if (!hirableConfig.isEnableSendingMail()) {
+            log.info("Dry run sending mail to " + to);
+            return;
+        }
         // send email
         Resend resend = new Resend(API_KEY);
         CreateEmailOptions params = CreateEmailOptions.builder()
                 //"Acme <onboarding@resend.dev>"
-                .from(from )
+                .from(from)
                 .to(to)
                 .subject(subject)
                 .html(html)
@@ -115,238 +114,332 @@ public class EmailServiceImpl implements EmailService {
 
     @Override
     public void sendResetPasswordEmail(Account account, String resetLink) throws IOException {
-        if (account.getEmail() == null || account.getEmail().isBlank()) {
-            throw new IllegalArgumentException("Recipient email is missing.");
+        if (!hirableConfig.isEnableSendingMail()) {
+            return;
         }
-        if (resetLink == null || resetLink.isBlank()) {
-            throw new IllegalArgumentException("Reset link is missing.");
+        try {
+            if (account.getEmail() == null || account.getEmail().isBlank()) {
+                throw new IllegalArgumentException("Recipient email is missing.");
+            }
+            if (resetLink == null || resetLink.isBlank()) {
+                throw new IllegalArgumentException("Reset link is missing.");
+            }
+
+            log.info("Preparing reset password email for: {}", account.getEmail());
+
+            var template = resetPasswordEmailTemplate.getContentAsString(StandardCharsets.UTF_8);
+            var data = resetPasswordEmailTemplateMapper.create(account, resetLink);
+            String subject = "Password Reset Request";
+            String content = TemplateUtil.render(resetPasswordEmailTemplate.getFilename(), template, data);
+
+            sendMail(emailFrom, account.getEmail(), subject, content);
+
+            log.info("Password reset email successfully sent to: {}", account.getEmail());
+        } catch (Exception e) {
+            log.info("Failed to send mail");
         }
-
-        log.info("Preparing reset password email for: {}", account.getEmail());
-
-        var template = resetPasswordEmailTemplate.getContentAsString(StandardCharsets.UTF_8);
-        var data = resetPasswordEmailTemplateMapper.create(account, resetLink);
-        String subject = "Password Reset Request";
-        String content = TemplateUtil.render(resetPasswordEmailTemplate.getFilename(), template, data);
-
-        sendMail(emailFrom, account.getEmail(), subject, content);
-
-        log.info("Password reset email successfully sent to: {}", account.getEmail());
     }
 
     @Override
     public void sendProposalRejectToFreelancer(Long id) throws IOException {
-        Proposal proposal = proposalRepos.findByProposalId(id)
-                .orElseThrow(() -> new IllegalArgumentException("Cannot find Proposal Id"));
+        if (!hirableConfig.isEnableSendingMail()) {
+            return;
+        }
+        try {
+            Proposal proposal = proposalRepos.findByProposalId(id)
+                    .orElseThrow(() -> new IllegalArgumentException("Cannot find Proposal Id"));
 
-        log.info("Preparing send proposal reject for: {}", proposal.getFreelancer().getEmail());
+            log.info("Preparing send proposal reject for: {}", proposal.getFreelancer().getEmail());
 
-        var template = proposalRejectTemplate.getContentAsString(StandardCharsets.UTF_8);
-        var data = proposalRejectedEmailTemplateMapper.create(proposal);
-        String subject = "Reject Proposal To Freelancer";
-        String content = TemplateUtil.render(proposalRejectTemplate.getFilename(),template,data);
+            var template = proposalRejectTemplate.getContentAsString(StandardCharsets.UTF_8);
+            var data = proposalRejectedEmailTemplateMapper.create(proposal);
+            String subject = "Reject Proposal To Freelancer";
+            String content = TemplateUtil.render(proposalRejectTemplate.getFilename(), template, data);
 
-        sendMail(emailFrom, proposal.getFreelancer().getEmail(), subject,content);
+            sendMail(emailFrom, proposal.getFreelancer().getEmail(), subject, content);
+        } catch (Exception e) {
+            log.info("Failed to send mail");
+        }
     }
 
     @Override
     public void sendContractCreatedToFreelancer(Long id) throws IOException {
-        Contract contract = contractRepos.findByContractId(id)
-                .orElseThrow(() -> new IllegalArgumentException("Cannot find Contract Id"));
+        if (!hirableConfig.isEnableSendingMail()) {
+            return;
+        }
+        try {
+            Contract contract = contractRepos.findByContractId(id)
+                    .orElseThrow(() -> new IllegalArgumentException("Cannot find Contract Id"));
 
-        log.info("Preparing send contract create for: {}", contract.getFreelancer().getEmail());
+            log.info("Preparing send contract create for: {}", contract.getFreelancer().getEmail());
 
-        var template = contractCreateTemplate.getContentAsString(StandardCharsets.UTF_8);
-        var data = contractCreatedEmailTemplateMapper.create(contract);
-        String subject = "Created Contract To Freelancer";
-        String content = TemplateUtil.render(contractCreateTemplate.getFilename(),template,data);
+            var template = contractCreateTemplate.getContentAsString(StandardCharsets.UTF_8);
+            var data = contractCreatedEmailTemplateMapper.create(contract);
+            String subject = "Created Contract To Freelancer";
+            String content = TemplateUtil.render(contractCreateTemplate.getFilename(), template, data);
 
-        sendMail(emailFrom, contract.getFreelancer().getEmail(), subject,content);
+            sendMail(emailFrom, contract.getFreelancer().getEmail(), subject, content);
+        } catch (Exception e) {
+            log.info("Failed to send mail");
+        }
     }
 
     @Override
     public void sendContractSignedToFreelancer(Long id) throws IOException {
-        Contract contract = contractRepos.findByContractId(id)
-                .orElseThrow(() -> new IllegalArgumentException("Cannot find Contract Id"));
+        if (!hirableConfig.isEnableSendingMail()) {
+            return;
+        }
+        try {
+            Contract contract = contractRepos.findByContractId(id)
+                    .orElseThrow(() -> new IllegalArgumentException("Cannot find Contract Id"));
 
-        log.info("Preparing send contract sign for: {}", contract.getFreelancer().getEmail());
+            log.info("Preparing send contract sign for: {}", contract.getFreelancer().getEmail());
 
-        var template = contractSignedTemplate.getContentAsString(StandardCharsets.UTF_8);
-        var data = contractSignedEmailTemplateMapper.create(contract);
-        String subject = "Signed Contract To Freelancer";
-        String content = TemplateUtil.render(contractSignedTemplate.getFilename(),template,data);
+            var template = contractSignedTemplate.getContentAsString(StandardCharsets.UTF_8);
+            var data = contractSignedEmailTemplateMapper.create(contract);
+            String subject = "Signed Contract To Freelancer";
+            String content = TemplateUtil.render(contractSignedTemplate.getFilename(), template, data);
 
-        sendMail(emailFrom, contract.getFreelancer().getEmail(), subject, content);
+            sendMail(emailFrom, contract.getFreelancer().getEmail(), subject, content);
+        } catch (Exception e) {
+            log.info("Failed to send mail");
+        }
     }
 
     @Override
     public void sendContractSignedToClient(Long id) throws IOException {
-        Contract contract = contractRepos.findByContractId(id)
-                .orElseThrow(() -> new IllegalArgumentException("Cannot find Contract Id"));
+        if (!hirableConfig.isEnableSendingMail()) {
+            return;
+        }
+        try {
+            Contract contract = contractRepos.findByContractId(id)
+                    .orElseThrow(() -> new IllegalArgumentException("Cannot find Contract Id"));
 
-        log.info("Preparing send contract sign for: {}", contract.getProject().getClient().getEmail());
+            log.info("Preparing send contract sign for: {}", contract.getProject().getClient().getEmail());
 
-        var template = contractSignedTemplate.getContentAsString(StandardCharsets.UTF_8);
-        var data = contractSignedEmailTemplateMapper.create(contract);
-        String subject = "Signed Contract To Client";
-        String content = TemplateUtil.render(contractSignedTemplate.getFilename(),template,data);
+            var template = contractSignedTemplate.getContentAsString(StandardCharsets.UTF_8);
+            var data = contractSignedEmailTemplateMapper.create(contract);
+            String subject = "Signed Contract To Client";
+            String content = TemplateUtil.render(contractSignedTemplate.getFilename(), template, data);
 
-        sendMail(emailFrom, contract.getProject().getClient().getEmail(), subject, content);
+            sendMail(emailFrom, contract.getProject().getClient().getEmail(), subject, content);
+        } catch (Exception e) {
+            log.info("Failed to send mail");
+        }
     }
 
     @Override
     public void sendMilestoneStartedToFreelancer(Long milestoneId) throws IOException {
-        Milestone milestone = milestoneRepos.findByMilestoneId(milestoneId)
-                .orElseThrow(() -> new IllegalArgumentException("Cannot find Milestone id"));
+        if (!hirableConfig.isEnableSendingMail()) {
+            return;
+        }
+        try {
+            Milestone milestone = milestoneRepos.findByMilestoneId(milestoneId)
+                    .orElseThrow(() -> new IllegalArgumentException("Cannot find Milestone id"));
 
-        log.info("Preparing send milestone started for: {}", milestone.requireFreelancer().getEmail());
+            log.info("Preparing send milestone started for: {}", milestone.requireFreelancer().getEmail());
 
-        var template = milestoneStartedTemplate.getContentAsString(StandardCharsets.UTF_8);
-        var data = milestoneStartedEmailTemplateMapper.create(milestone);
-        String subject = "Started Milestone To Freelancer";
-        String content = TemplateUtil.render(milestoneStartedTemplate.getFilename(),template,data);
+            var template = milestoneStartedTemplate.getContentAsString(StandardCharsets.UTF_8);
+            var data = milestoneStartedEmailTemplateMapper.create(milestone);
+            String subject = "Started Milestone To Freelancer";
+            String content = TemplateUtil.render(milestoneStartedTemplate.getFilename(), template, data);
 
-        sendMail(emailFrom, milestone.requireFreelancer().getEmail(), subject, content);
+            sendMail(emailFrom, milestone.requireFreelancer().getEmail(), subject, content);
+        } catch (Exception e) {
+            log.info("Failed to send mail");
+        }
     }
 
     @Override
     public void sendMilestoneStartedToClient(Long milestoneId) throws IOException {
-        Milestone milestone = milestoneRepos.findByMilestoneId(milestoneId)
-                .orElseThrow(() -> new IllegalArgumentException("Cannot find Milestone id"));
+        if (!hirableConfig.isEnableSendingMail()) {
+            return;
+        }
+        try {
+            Milestone milestone = milestoneRepos.findByMilestoneId(milestoneId)
+                    .orElseThrow(() -> new IllegalArgumentException("Cannot find Milestone id"));
 
-        log.info("Preparing send milestone started for: {}", milestone.getProject().getClient().getEmail());
+            log.info("Preparing send milestone started for: {}", milestone.getProject().getClient().getEmail());
 
-        var template = milestoneStartedTemplate.getContentAsString(StandardCharsets.UTF_8);
-        var data = milestoneStartedEmailTemplateMapper.create(milestone);
-        String subject = "Started Milestone To Client";
-        String content = TemplateUtil.render(milestoneStartedTemplate.getFilename(),template,data);
+            var template = milestoneStartedTemplate.getContentAsString(StandardCharsets.UTF_8);
+            var data = milestoneStartedEmailTemplateMapper.create(milestone);
+            String subject = "Started Milestone To Client";
+            String content = TemplateUtil.render(milestoneStartedTemplate.getFilename(), template, data);
 
-        sendMail(emailFrom, milestone.getProject().getClient().getEmail(), subject, content);
+            sendMail(emailFrom, milestone.getProject().getClient().getEmail(), subject, content);
+        } catch (Exception e) {
+            log.info("Failed to send mail");
+        }
     }
 
     @Override
     public void sendMilestoneCompletedToClient(Long milestoneId) throws IOException {
-        Milestone milestone = milestoneRepos.findByMilestoneId(milestoneId)
-                .orElseThrow(() -> new IllegalArgumentException("Cannot find Milestone id"));
+        if (!hirableConfig.isEnableSendingMail()) {
+            return;
+        }
+        try {
+            Milestone milestone = milestoneRepos.findByMilestoneId(milestoneId)
+                    .orElseThrow(() -> new IllegalArgumentException("Cannot find Milestone id"));
 
-        log.info("Preparing send milestone completed for: {}", milestone.getProject().getClient().getEmail());
+            log.info("Preparing send milestone completed for: {}", milestone.getProject().getClient().getEmail());
 
-        var template = milestoneCompletedTemplate.getContentAsString(StandardCharsets.UTF_8);
-        var data = milestoneCompletedEmailTemplateMapper.create(milestone);
-        String subject = "Completed Milestone To Client";
-        String content = TemplateUtil.render(milestoneCompletedTemplate.getFilename(),template,data);
+            var template = milestoneCompletedTemplate.getContentAsString(StandardCharsets.UTF_8);
+            var data = milestoneCompletedEmailTemplateMapper.create(milestone);
+            String subject = "Completed Milestone To Client";
+            String content = TemplateUtil.render(milestoneCompletedTemplate.getFilename(), template, data);
 
-        sendMail(emailFrom, milestone.getProject().getClient().getEmail(), subject, content);
+            sendMail(emailFrom, milestone.getProject().getClient().getEmail(), subject, content);
+        } catch (Exception e) {
+            log.info("Failed to send mail");
+        }
     }
 
     @Override
     public void sendMilestoneCompletedToFreelancer(Long milestoneId) throws IOException {
-        Milestone milestone = milestoneRepos.findByMilestoneId(milestoneId)
-                .orElseThrow(() -> new IllegalArgumentException("Cannot find Milestone id"));
+        if (!hirableConfig.isEnableSendingMail()) {
+            return;
+        }
+        try {
+            Milestone milestone = milestoneRepos.findByMilestoneId(milestoneId)
+                    .orElseThrow(() -> new IllegalArgumentException("Cannot find Milestone id"));
 
-        log.info("Preparing send milestone completed for: {}", milestone.requireFreelancer().getEmail());
+            log.info("Preparing send milestone completed for: {}", milestone.requireFreelancer().getEmail());
 
-        var template = milestoneCompletedTemplate.getContentAsString(StandardCharsets.UTF_8);
-        var data = milestoneCompletedEmailTemplateMapper.create(milestone);
-        String subject = "Completed Milestone To Freelancer";
-        String content = TemplateUtil.render(milestoneCompletedTemplate.getFilename(),template,data);
+            var template = milestoneCompletedTemplate.getContentAsString(StandardCharsets.UTF_8);
+            var data = milestoneCompletedEmailTemplateMapper.create(milestone);
+            String subject = "Completed Milestone To Freelancer";
+            String content = TemplateUtil.render(milestoneCompletedTemplate.getFilename(), template, data);
 
-        sendMail(emailFrom, milestone.requireFreelancer().getEmail(), subject, content);
+            sendMail(emailFrom, milestone.requireFreelancer().getEmail(), subject, content);
+        } catch (Exception e) {
+            log.info("Failed to send mail");
+        }
     }
 
     @Override
     public void sendMilestoneFundStatusReleaseToFreelancer(Long milestoneId) throws IOException {
-        Milestone milestone = milestoneRepos.findByMilestoneId(milestoneId)
-                .orElseThrow(() -> new IllegalArgumentException("Cannot find Milestone id"));
-        if (milestone.getFundStatus() != Milestone.FundStatus.RELEASED){
-            log.info("Milestone fund status is not valid for client notification: {}", milestone.getFundStatus());
+        if (!hirableConfig.isEnableSendingMail()) {
             return;
         }
-        log.info("Preparing send milestone released for: {}", milestone.requireFreelancer().getEmail());
+        try {
+            Milestone milestone = milestoneRepos.findByMilestoneId(milestoneId)
+                    .orElseThrow(() -> new IllegalArgumentException("Cannot find Milestone id"));
+            if (milestone.getFundStatus() != Milestone.FundStatus.RELEASED) {
+                log.info("Milestone fund status is not valid for client notification: {}", milestone.getFundStatus());
+                return;
+            }
+            log.info("Preparing send milestone released for: {}", milestone.requireFreelancer().getEmail());
 
-        var template = milestoneReleasedEmailTemplate.getContentAsString(StandardCharsets.UTF_8);
-        var data = milestoneFundEmailTemplateMapper.create(milestone);
-        String subject = "Milestone Fund Released";
-        String content = TemplateUtil.render(milestoneReleasedEmailTemplate.getFilename(),template,data);
+            var template = milestoneReleasedEmailTemplate.getContentAsString(StandardCharsets.UTF_8);
+            var data = milestoneFundEmailTemplateMapper.create(milestone);
+            String subject = "Milestone Fund Released";
+            String content = TemplateUtil.render(milestoneReleasedEmailTemplate.getFilename(), template, data);
 
-        sendMail(emailFrom, milestone.requireFreelancer().getEmail(), subject, content);
+            sendMail(emailFrom, milestone.requireFreelancer().getEmail(), subject, content);
+        } catch (Exception e) {
+            log.info("Failed to send mail");
+        }
     }
 
     @Override
     public void sendMilestoneFundStatusDepositOrRefundToClient(Long milestoneId) throws IOException {
-        Milestone milestone = milestoneRepos.findByMilestoneId(milestoneId)
-                .orElseThrow(() -> new IllegalArgumentException("Cannot find Milestone id"));
-
-        if (milestone.getFundStatus() != Milestone.FundStatus.DEPOSITED &&
-                milestone.getFundStatus() != Milestone.FundStatus.REFUNDED) {
-            log.info("Milestone fund status is not valid for client notification: {}", milestone.getFundStatus());
+        if (!hirableConfig.isEnableSendingMail()) {
             return;
         }
+        try {
+            Milestone milestone = milestoneRepos.findByMilestoneId(milestoneId)
+                    .orElseThrow(() -> new IllegalArgumentException("Cannot find Milestone id"));
 
-        log.info("Preparing to send milestone fund update to client: {}", milestone.getProject().getClient().getEmail());
+            if (milestone.getFundStatus() != Milestone.FundStatus.DEPOSITED &&
+                    milestone.getFundStatus() != Milestone.FundStatus.REFUNDED) {
+                log.info("Milestone fund status is not valid for client notification: {}", milestone.getFundStatus());
+                return;
+            }
 
-        var template = milestoneFundTemplate.getContentAsString(StandardCharsets.UTF_8);
-        var data = milestoneFundEmailTemplateMapper.create(milestone);
+            log.info("Preparing to send milestone fund update to client: {}", milestone.getProject().getClient().getEmail());
 
-        String subject = milestone.getFundStatus() == Milestone.FundStatus.DEPOSITED
-                ? "Milestone Fund Deposited"
-                : "Milestone Fund Refunded";
+            var template = milestoneFundTemplate.getContentAsString(StandardCharsets.UTF_8);
+            var data = milestoneFundEmailTemplateMapper.create(milestone);
 
-        String content = TemplateUtil.render(milestoneFundTemplate.getFilename(), template, data);
+            String subject = milestone.getFundStatus() == Milestone.FundStatus.DEPOSITED
+                    ? "Milestone Fund Deposited"
+                    : "Milestone Fund Refunded";
 
-        sendMail(emailFrom, milestone.getProject().getClient().getEmail(), subject, content);
-    }
+            String content = TemplateUtil.render(milestoneFundTemplate.getFilename(), template, data);
 
-    @Override
-    public void sendProjectEmailTemplateToBoth(Long id) throws IOException {
-        Project project = projectRepos.findByProjectId(id)
-                .orElseThrow(() -> new IllegalArgumentException("Cannot find Project Id"));
-
-        log.info("Preparing to send project completed both to client,freelancer: {}", project.getClient().getEmail());
-
-        var template = projectCompletedTemplate.getContentAsString(StandardCharsets.UTF_8);
-        var data = projectEmailTemplateMapper.create(project);
-
-        String subject = "Project Completed Notification";
-        String content = TemplateUtil.render(projectCompletedTemplate.getFilename(), template, data);
-
-        sendMail(emailFrom, project.getClient().getEmail(), subject, content);
-    }
-
-    @Override
-    public void sendReportEmailTemplateToBoth(Long id) throws IOException {
-        Report report = reportRepos.findByReportId(id)
-                .orElseThrow(() -> new IllegalArgumentException("Cannot find Report Id"));
-        log.info("Preparing to send Report completed both to client,freelancer: {} ,{}", report.getProject().getClient().getEmail(),report.requireFreelancer().getEmail());
-
-        var template = reportEmailTemplate.getContentAsString(StandardCharsets.UTF_8);
-        var data = reportEmailTemplateMapper.create(report);
-
-        String subject = "Project Completed Notification";
-        String content = TemplateUtil.render(reportEmailTemplate.getFilename(), template, data);
-
-        sendMail(emailFrom, report.getProject().getClient().getEmail(), subject, content);
-        sendMail(emailFrom, report.requireFreelancer().getEmail(), subject, content);
-    }
-
-    @Override
-    public void sendTransactionEmailTemplateToBoth(Long id) throws IOException {
-        Transaction transaction = transactionRepos.findByTransactionId(id)
-                .orElseThrow(() -> new IllegalArgumentException("Cannot find Transaction Id"));
-
-        log.info("Preparing to send transaction completed to client: {}",transaction.getToAccount().getEmail());
-        if (transaction.getToAccount().getEmail() == null){
-            throw new IOException("Recipient email is missing.");
+            sendMail(emailFrom, milestone.getProject().getClient().getEmail(), subject, content);
+        } catch (Exception e) {
+            log.info("Failed to send mail");
         }
+    }
+
+    @Override
+    public void sendProjectEmailTemplateToBoth(Project project) throws IOException {
+        if (!hirableConfig.isEnableSendingMail()) {
+            return;
+        }
+        try {
+            if (project == null) {
+                throw new IllegalArgumentException("Cannot find project");
+            }
+
+            log.info("Preparing to send project completed both to client,freelancer: {}", project.getClient().getEmail());
+
+            var template = projectCompletedTemplate.getContentAsString(StandardCharsets.UTF_8);
+            var data = projectEmailTemplateMapper.create(project);
+
+            String subject = "Project Completed Notification";
+            String content = TemplateUtil.render(projectCompletedTemplate.getFilename(), template, data);
+
+            sendMail(emailFrom, project.getClient().getEmail(), subject, content);
+        } catch (Exception e) {
+            log.info("Failed to send mail");
+        }
+    }
+
+    @Override
+    public void sendReportEmailTemplateToBoth(Report report) throws IOException {
+        if (!hirableConfig.isEnableSendingMail()) {
+            return;
+        }
+        try {
+            log.info("Preparing to send Report completed both to client,freelancer: {} ,{}", report.getProject().getClient().getEmail(), report.requireFreelancer().getEmail());
+
+            var template = reportEmailTemplate.getContentAsString(StandardCharsets.UTF_8);
+            var data = reportEmailTemplateMapper.create(report);
+
+            String subject = "Project Completed Notification";
+            String content = TemplateUtil.render(reportEmailTemplate.getFilename(), template, data);
+
+            sendMail(emailFrom, report.getProject().getClient().getEmail(), subject, content);
+            sendMail(emailFrom, report.requireFreelancer().getEmail(), subject, content);
+        } catch (Exception e) {
+            log.info("Failed to send mail");
+        }
+    }
+
+    @Override
+    public void sendTransactionEmailTemplateToBoth(Transaction transaction) throws IOException {
+        if (!hirableConfig.isEnableSendingMail()) {
+            return;
+        }
+        try {
+            log.info("Preparing to send transaction completed to client: {}", transaction.getToAccount().getEmail());
+            if (transaction.getToAccount().getEmail() == null) {
+                throw new IOException("Recipient email is missing.");
+            }
 
 
-        var template = transactionEmailTemplate.getContentAsString(StandardCharsets.UTF_8);
-        var data = transactionDepositEmailTemplateMapper.create(transaction);
+            var template = transactionEmailTemplate.getContentAsString(StandardCharsets.UTF_8);
+            var data = transactionDepositEmailTemplateMapper.create(transaction);
 
-        String subject = "Transaction Completed Notification";
-        String content = TemplateUtil.render(transactionEmailTemplate.getFilename(), template, data);
+            String subject = "Transaction Completed Notification";
+            String content = TemplateUtil.render(transactionEmailTemplate.getFilename(), template, data);
 
-        sendMail(emailFrom, transaction.getFromAccount().getEmail(), subject, content);
+            sendMail(emailFrom, transaction.getFromAccount().getEmail(), subject, content);
+        } catch (Exception e) {
+            log.info("Failed to send mail");
+        }
     }
 
 
