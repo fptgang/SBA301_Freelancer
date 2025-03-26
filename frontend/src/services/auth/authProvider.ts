@@ -13,6 +13,11 @@ import {
   setAccessToken,
   setAuthenticatedAccount,
 } from "../../store/auth";
+import axios from "axios";
+import { r } from "react-router/dist/development/fog-of-war-CCAcUMgB";
+import { API_URL } from "../../utils";
+import { message } from "antd";
+
 
 export const REFRESH_TOKEN_KEY = "refine-refresh-token";
 
@@ -122,12 +127,28 @@ export const authProvider: AuthProvider = {
   register: async (data) => {
     try {
       if (data.googleToken) {
-        await api.registerWithGoogle({
-          registerWithGoogleRequest: {
+        await axios
+          .post(API_URL + "/auth/register-with-google", {
             credential: data.googleToken,
             role: data.role,
-          },
-        });
+          })
+          .then((response) => {
+            console.log(response);
+            message.success("Successfully registered with Google");
+            return {
+              success: true,
+              redirectTo: "/login",
+            };
+          })
+          .catch((e) => {
+            return {
+              success: false,
+              error: {
+                name: "RegisterError",
+                message: e.toString(),
+              },
+            };
+          });
       } else {
         await api.register({
           registerRequestDto: {
@@ -139,6 +160,7 @@ export const authProvider: AuthProvider = {
             role: data.role,
           },
         });
+
       }
 
       return {
@@ -150,7 +172,7 @@ export const authProvider: AuthProvider = {
         success: false,
         error: {
           name: "RegisterError",
-          message: e.toString(),
+          message: e?.response?.data?.message || e.toString(),
         },
       };
     }
