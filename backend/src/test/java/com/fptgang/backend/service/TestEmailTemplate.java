@@ -29,7 +29,7 @@ public class TestEmailTemplate {
     @Test
     public void testProjectPlacedEmail() throws IOException {
         Project project =createExampleProject();
-        emailService.sendProjectEmailTemplateToBoth(project.getProjectId());
+        emailService.sendProjectEmailTemplateToBoth(project);
     }
     
     private static Account createExampleAccount(int i) {

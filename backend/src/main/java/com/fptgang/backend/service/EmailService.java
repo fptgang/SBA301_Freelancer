@@ -29,8 +29,8 @@ public interface EmailService {
 
     void sendMilestoneFundStatusDepositOrRefundToClient(Long milestoneId) throws IOException;
 
-    void sendProjectEmailTemplateToBoth(Long id) throws IOException;
-    void sendReportEmailTemplateToBoth(Long id) throws IOException;
+    void sendProjectEmailTemplateToBoth(Project project) throws IOException;
+    void sendReportEmailTemplateToBoth(Report report) throws IOException;
 
-    void sendTransactionEmailTemplateToBoth(Long id) throws IOException;
+    void sendTransactionEmailTemplateToBoth(Transaction transaction) throws IOException;
 }

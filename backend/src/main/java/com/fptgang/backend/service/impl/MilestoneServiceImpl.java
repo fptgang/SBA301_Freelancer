@@ -6,6 +6,7 @@ import com.fptgang.backend.model.Project;
 import com.fptgang.backend.repository.MilestoneRepos;
 import com.fptgang.backend.repository.ProjectRepos;
 import com.fptgang.backend.security.AuthContext;
+import com.fptgang.backend.service.EmailService;
 import com.fptgang.backend.service.FileService;
 import com.fptgang.backend.service.MilestoneService;
 import com.fptgang.backend.service.TransactionService;
@@ -19,6 +20,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -45,25 +47,31 @@ public class MilestoneServiceImpl implements MilestoneService {
     private final TransactionService transactionService;
     private final AuthContext authContext;
     private final FileService fileService;
-
+    private final EmailService emailService;
     public MilestoneServiceImpl(MilestoneRepos milestoneRepos,
                                 ProjectRepos projectRepos,
                                 TransactionService transactionService,
                                 AuthContext authContext,
-                                FileService fileService) {
+                                FileService fileService, EmailService emailService) {
         this.milestoneRepos = milestoneRepos;
         this.projectRepos = projectRepos;
         this.transactionService = transactionService;
         this.authContext = authContext;
         this.fileService = fileService;
+        this.emailService = emailService;
     }
 
     @Override
     public Milestone create(Milestone milestone) {
         milestone.setMilestoneId(null);
-        return milestoneRepos.save(milestone);
-    }
+        Milestone milestone1 = milestoneRepos.save(milestone);
+        try {
+            emailService.sendMilestoneFundStatusDepositOrRefundToClient(milestone.getMilestoneId());
+        } catch (IOException ignored) {
 
+        }
+        return milestone1;
+    }
     @Override
     public Milestone update(Milestone milestone) {
         var existing = milestoneRepos.findById(milestone.getMilestoneId())
@@ -118,6 +126,11 @@ public class MilestoneServiceImpl implements MilestoneService {
             milestone = milestoneRepos.save(milestone);
             log.info("Fund deposited for milestone {}", milestone.getMilestoneId());
         }
+        try {
+            emailService.sendMilestoneFundStatusDepositOrRefundToClient(milestone.getMilestoneId());
+        } catch (IOException ignored) {
+
+        }
         return milestone;
     }
 
@@ -135,6 +148,11 @@ public class MilestoneServiceImpl implements MilestoneService {
             milestone = milestoneRepos.save(milestone);
             log.info("Fund released for milestone {}", milestone.getMilestoneId());
         }
+        try {
+            emailService.sendMilestoneFundStatusReleaseToFreelancer(milestone.getMilestoneId());
+        } catch (IOException ignored) {
+
+        }
         return milestone;
     }
 
@@ -148,6 +166,11 @@ public class MilestoneServiceImpl implements MilestoneService {
             milestone.setFundStatus(Milestone.FundStatus.REFUNDED);
             milestone = milestoneRepos.save(milestone);
             log.info("Fund returned for milestone {}", milestone.getMilestoneId());
+        }
+        try {
+            emailService.sendMilestoneFundStatusDepositOrRefundToClient(milestone.getMilestoneId());
+        } catch (IOException ignored) {
+
         }
         return milestone;
     }
@@ -240,6 +263,12 @@ public class MilestoneServiceImpl implements MilestoneService {
         nextMilestone.setProject(projectRepos.save(nextMilestone.getProject()));
 
         log.info("Milestone {} started", nextMilestone.getMilestoneId());
+        try {
+            emailService.sendMilestoneCompletedToClient(milestone.getMilestoneId());
+            emailService.sendMilestoneCompletedToFreelancer(milestone.getMilestoneId());
+        } catch (IOException ignored) {
+
+        }
         return nextMilestone;
     }
 }

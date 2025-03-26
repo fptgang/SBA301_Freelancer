@@ -8,6 +8,7 @@ import com.fptgang.backend.repository.AccountRepos;
 import com.fptgang.backend.repository.ProjectRepos;
 import com.fptgang.backend.repository.ProposalRepos;
 import com.fptgang.backend.security.AuthContext;
+import com.fptgang.backend.service.EmailService;
 import com.fptgang.backend.service.ProposalService;
 import com.fptgang.backend.service.params.ListParams;
 import com.fptgang.backend.util.OpenApiHelper;
@@ -15,6 +16,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -26,17 +28,18 @@ public class ProposalServiceImpl implements ProposalService {
     private final AccountRepos accountRepos;
     private final HirableConfig hirableConfig;
     private final AuthContext authContext;
-
+    private final EmailService emailService;
     public ProposalServiceImpl(ProposalRepos proposalRepos,
                                ProjectRepos projectRepos,
                                AccountRepos accountRepos,
                                HirableConfig hirableConfig,
-                               AuthContext authContext) {
+                               AuthContext authContext, EmailService emailService) {
         this.proposalRepos = proposalRepos;
         this.projectRepos = projectRepos;
         this.accountRepos = accountRepos;
         this.hirableConfig = hirableConfig;
         this.authContext = authContext;
+        this.emailService = emailService;
     }
 
     @Override
@@ -120,6 +123,13 @@ public class ProposalServiceImpl implements ProposalService {
         }
 
         proposal.setStatus(Proposal.ProposalStatus.REJECTED);
+        try
+        {
+            emailService.sendProposalRejectToFreelancer(proposalId);
+        }catch (IOException ignored) {
+
+        }
+
         return proposalRepos.save(proposal);
     }
 

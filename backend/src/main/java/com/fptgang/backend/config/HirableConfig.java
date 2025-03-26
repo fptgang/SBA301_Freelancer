@@ -25,6 +25,9 @@ public class HirableConfig {
     @Value("${hirable.proposal.application-cutoff-duration:1}")
     private int proposalApplicationCutoffDuration;
 
+    @Value("${hirable.enable-sending-mail:false}")
+    private boolean enableSendingMail;
+
     @Value("${FRONTEND_URL}")
     private String frontendUrl;
 }

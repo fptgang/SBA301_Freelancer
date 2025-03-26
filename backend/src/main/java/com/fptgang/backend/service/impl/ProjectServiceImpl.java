@@ -5,10 +5,7 @@ import com.fptgang.backend.exception.InvalidInputException;
 import com.fptgang.backend.model.*;
 import com.fptgang.backend.repository.*;
 import com.fptgang.backend.security.AuthContext;
-import com.fptgang.backend.service.AccountService;
-import com.fptgang.backend.service.ContractService;
-import com.fptgang.backend.service.MilestoneService;
-import com.fptgang.backend.service.ProjectService;
+import com.fptgang.backend.service.*;
 import com.fptgang.backend.service.params.ListParams;
 import com.fptgang.backend.util.EntityUtil;
 import com.fptgang.backend.util.OpenApiHelper;
@@ -22,6 +19,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -44,7 +42,7 @@ public class ProjectServiceImpl implements ProjectService {
     private final MilestoneService milestoneService;
     private final AccountRepos accountRepos;
     private final ContractService contractService;
-
+    private final EmailService emailService;
     public ProjectServiceImpl(AuthContext authContext,
                               ProjectRepos projectRepos,
                               AccountService accountService,
@@ -55,7 +53,7 @@ public class ProjectServiceImpl implements ProjectService {
                               TransactionServiceImpl transactionService,
                               MilestoneService milestoneService,
                               AccountRepos accountRepos,
-                              ContractService contractService) {
+                              ContractService contractService, EmailService emailService) {
         this.authContext = authContext;
         this.projectRepos = projectRepos;
         this.accountService = accountService;
@@ -67,6 +65,7 @@ public class ProjectServiceImpl implements ProjectService {
         this.milestoneService = milestoneService;
         this.accountRepos = accountRepos;
         this.contractService = contractService;
+        this.emailService = emailService;
     }
 
     @Override
@@ -103,6 +102,11 @@ public class ProjectServiceImpl implements ProjectService {
             throw new InvalidInputException("Total budget ratio must be 1");
 
         project = projectRepos.save(project); // also save milestones and project skills
+        try {
+            emailService.sendProjectEmailTemplateToBoth(project);
+        } catch (IOException ignored) {
+
+        }
         return project;
     }
 
@@ -178,8 +182,12 @@ public class ProjectServiceImpl implements ProjectService {
             existing.getRequiredSkills().clear();
             existing.getRequiredSkills().addAll(updatedSkills);
         }
-
         EntityUtil.merge(existing, project);
+        try {
+            emailService.sendProjectEmailTemplateToBoth(existing);
+        } catch (IOException ignored) {
+
+        }
         return projectRepos.save(existing);
     }
 
@@ -210,6 +218,11 @@ public class ProjectServiceImpl implements ProjectService {
 
             project.setStatus(Project.ProjectStatus.TERMINATED);
             project.setTerminationReason(Project.TerminationReason.OTHER);
+            try {
+                emailService.sendProjectEmailTemplateToBoth(project);
+            } catch (IOException ignored) {
+
+            }
             return projectRepos.save(project);
         }
 
@@ -225,6 +238,11 @@ public class ProjectServiceImpl implements ProjectService {
             }
 
             project.setToTerminate(true);
+            try {
+                emailService.sendProjectEmailTemplateToBoth(project);
+            } catch (IOException ignored) {
+
+            }
             return projectRepos.save(project);
         }
 
@@ -278,7 +296,11 @@ public class ProjectServiceImpl implements ProjectService {
         project.setStatus(Project.ProjectStatus.TERMINATED);
         project.setTerminationReason(Project.TerminationReason.STAFF_DECISION);
         project.setActiveMilestone(null);
+        try {
+            emailService.sendProjectEmailTemplateToBoth(project);
+        } catch (IOException ignored) {
 
+        }
         return projectRepos.save(project);
     }
 
@@ -305,6 +327,11 @@ public class ProjectServiceImpl implements ProjectService {
         validateTimeline(existing, true);
         milestoneRepos.saveAll(existing.getMilestones());
         existing.setStatus(Project.ProjectStatus.OPEN);
+        try {
+            emailService.sendProjectEmailTemplateToBoth(existing);
+        } catch (IOException ignored) {
+
+        }
         return projectRepos.save(existing);
     }
 
@@ -333,6 +360,11 @@ public class ProjectServiceImpl implements ProjectService {
 
         validateTimeline(existing, false);
         milestoneRepos.saveAll(existing.getMilestones());
+        try {
+            emailService.sendProjectEmailTemplateToBoth(existing);
+        } catch (IOException ignored) {
+
+        }
         return existing;
     }
 
