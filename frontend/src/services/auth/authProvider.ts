@@ -7,8 +7,12 @@ import {
   ResetPasswordRequestDto,
 } from "../../../generated";
 import api from "../api/openapi-config";
-import {store} from "../../store";
-import {clearAuth, setAccessToken, setAuthenticatedAccount} from "../../store/auth";
+import { store } from "../../store";
+import {
+  clearAuth,
+  setAccessToken,
+  setAuthenticatedAccount,
+} from "../../store/auth";
 
 export const REFRESH_TOKEN_KEY = "refine-refresh-token";
 
@@ -16,7 +20,7 @@ export const authProvider: AuthProvider = {
   login: async ({ username, email, password, googleToken }) => {
     try {
       if (googleToken) {
-        const response = await api.loginWithGoogle({body: googleToken});
+        const response = await api.loginWithGoogle({ body: googleToken });
         console.log(response);
 
         localStorage.setItem(REFRESH_TOKEN_KEY, response.refreshToken ?? "");
@@ -25,15 +29,17 @@ export const authProvider: AuthProvider = {
 
         return {
           success: true,
-          redirectTo: (response?.accountResponseDTO?.role === AccountDtoRoleEnum.Admin ||
+          redirectTo:
+            response?.accountResponseDTO?.role === AccountDtoRoleEnum.Admin ||
             response?.accountResponseDTO?.role === AccountDtoRoleEnum.Staff
-          ) ? "/admin" : "/",
+              ? "/admin"
+              : "/",
         };
       }
 
       if ((username || email) && password) {
         const response: AuthResponseDto = await api.login({
-          loginRequestDto: {email: email, password: password},
+          loginRequestDto: { email: email, password: password },
         });
         console.log(response);
         localStorage.setItem(REFRESH_TOKEN_KEY, response.refreshToken ?? "");
@@ -42,9 +48,11 @@ export const authProvider: AuthProvider = {
 
         return {
           success: true,
-          redirectTo: (response?.accountResponseDTO?.role === AccountDtoRoleEnum.Admin ||
+          redirectTo:
+            response?.accountResponseDTO?.role === AccountDtoRoleEnum.Admin ||
             response?.accountResponseDTO?.role === AccountDtoRoleEnum.Staff
-          ) ? "/admin" : "/",
+              ? "/admin"
+              : "/",
         };
       }
     } catch (e) {
@@ -66,28 +74,32 @@ export const authProvider: AuthProvider = {
     };
   },
   check: async () => {
-    if (authProvider.getIdentity && await authProvider.getIdentity()) {
-      return { authenticated: true }
+    if (authProvider.getIdentity && (await authProvider.getIdentity())) {
+      return { authenticated: true };
     } else {
       return {
         authenticated: false,
         //redirectTo: "/login",
         error: {
           message: "Check failed",
-          name: "Not authenticated"
-        }
-      }
+          name: "Not authenticated",
+        },
+      };
     }
   },
   getPermissions: async () => {
     return store.getState().auth.account?.role;
   },
-  getIdentity: async (refetch = false) : Promise<AccountDto | undefined>=> {
+  getIdentity: async (refetch = false): Promise<AccountDto | undefined> => {
     // Force fetching if on first load, there is refresh token
-    if (refetch || (!store.getState().auth.account && localStorage.getItem(REFRESH_TOKEN_KEY))) {
+    if (
+      refetch ||
+      (!store.getState().auth.account &&
+        localStorage.getItem(REFRESH_TOKEN_KEY))
+    ) {
       console.log("[authProvider.getIdentity] fetching user profile...");
       try {
-        const response = await api.getCurrentUser()
+        const response = await api.getCurrentUser();
         console.log(response);
         store.dispatch(setAuthenticatedAccount(response));
       } catch (e) {
@@ -113,21 +125,20 @@ export const authProvider: AuthProvider = {
         await api.registerWithGoogle({
           registerWithGoogleRequest: {
             credential: data.googleToken,
-            role: data.role
+            role: data.role,
           },
         });
       } else {
-        await api
-          .register({
-            registerRequestDto: {
-              email: data.email,
-              password: data.password,
-              firstName: data.firstName,
-              lastName: data.lastName,
-              confirmPassword: data.confirmPassword,
-              role: data.role
-            },
-          });
+        await api.register({
+          registerRequestDto: {
+            email: data.email,
+            password: data.password,
+            firstName: data.firstName,
+            lastName: data.lastName,
+            confirmPassword: data.confirmPassword,
+            role: data.role,
+          },
+        });
       }
 
       return {
@@ -147,14 +158,13 @@ export const authProvider: AuthProvider = {
   updatePassword: async (params: ResetPasswordRequestDto) => {
     if (params.token) {
       try {
-        await api
-          .resetPassword({
-            resetPasswordRequestDto: {
-              token: params.token,
-              newPassword: params.newPassword,
-              confirmPassword: params.confirmPassword,
-            },
-          });
+        await api.resetPassword({
+          resetPasswordRequestDto: {
+            token: params.token,
+            newPassword: params.newPassword,
+            confirmPassword: params.confirmPassword,
+          },
+        });
         return {
           success: true,
           redirectTo: "/login",
@@ -178,7 +188,7 @@ export const authProvider: AuthProvider = {
   forgotPassword: async (params) => {
     try {
       await api.forgotPassword({
-        forgotPasswordRequestDto: {email: params.email},
+        forgotPasswordRequestDto: { email: params.email },
       });
       return {
         success: true,

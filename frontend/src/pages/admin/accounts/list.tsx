@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import {BaseRecord, useGetIdentity, useMany} from "@refinedev/core";
+import { BaseRecord, useGetIdentity, useMany } from "@refinedev/core";
 import {
   useTable,
   List,
@@ -35,13 +35,13 @@ import { AccountDto } from "../../../../generated/models/AccountDto";
 import { stompClient } from "../../../utils/stompClient";
 import { ShowAccountsShowDrawer } from "./components/ShowAccountDrawer";
 import { EditAccountsDrawer } from "./components/EditAccountDrawer";
-import {useLocalSettings} from "../../../hooks/useLocalSettings";
+import { useLocalSettings } from "../../../hooks/useLocalSettings";
 
 const { Text } = Typography;
 
 export const AccountsList: React.FC = () => {
-  const [localSettings] = useLocalSettings()
-  const {data: user} = useGetIdentity<AccountDto>();
+  const [localSettings] = useLocalSettings();
+  const { data: user } = useGetIdentity<AccountDto>();
   const [showDrawer, setShowDrawer] = useState(false);
   const [editDrawer, setEditDrawer] = useState(false);
   const [selectedAccount, setSelectedAccount] = useState<AccountDto>();
@@ -228,19 +228,20 @@ export const AccountsList: React.FC = () => {
             render={(_, record: AccountDto) => (
               <Space size="middle">
                 <Tooltip title="Edit Account">
-                  <Button
-                    type="link"
-                    size="small"
-                    icon={<EditOutlined />}
-                    onClick={() => {
-                      setSelectedAccount(record);
-                      setEditDrawer(true);
-                    }}
-                    style={{
-                      border: "1px solid #e8e8e8",
-                    }}
-                    disabled={user?.role !== "ADMIN" || !record.isVisible}
-                  />
+                  {user?.role === "ADMIN" && (
+                    <Button
+                      type="link"
+                      size="small"
+                      icon={<EditOutlined />}
+                      onClick={() => {
+                        setSelectedAccount(record);
+                        setEditDrawer(true);
+                      }}
+                      style={{
+                        border: "1px solid #e8e8e8",
+                      }}
+                    />
+                  )}
                 </Tooltip>
                 <Tooltip title="View Details">
                   <Button
@@ -257,17 +258,18 @@ export const AccountsList: React.FC = () => {
                   />
                 </Tooltip>
                 <Tooltip title="Delete Account">
-                  <DeleteButton
-                    hideText
-                    size="small"
-                    recordItemId={record.accountId}
-                    className="text-red-600 hover:text-red-700"
-                    confirmTitle="Delete Account"
-                    confirmOkText="Delete"
-                    confirmCancelText="Cancel"
-                    about="Are you sure you want to delete this account? This action cannot be undone."
-                    disabled={user?.role !== "ADMIN" || !record.isVisible}
-                  />
+                  {user?.role === "ADMIN" && (
+                    <DeleteButton
+                      hideText
+                      size="small"
+                      recordItemId={record.accountId}
+                      className="text-red-600 hover:text-red-700"
+                      confirmTitle="Delete Account"
+                      confirmOkText="Delete"
+                      confirmCancelText="Cancel"
+                      about="Are you sure you want to delete this account? This action cannot be undone."
+                    />
+                  )}
                 </Tooltip>
               </Space>
             )}

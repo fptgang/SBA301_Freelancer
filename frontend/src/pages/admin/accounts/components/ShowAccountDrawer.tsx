@@ -1,5 +1,10 @@
 import React from "react";
-import { useOne, useNavigation, useDelete } from "@refinedev/core";
+import {
+  useOne,
+  useNavigation,
+  useDelete,
+  useGetIdentity,
+} from "@refinedev/core";
 import {
   TagField,
   EmailField,
@@ -32,7 +37,7 @@ import {
 import { Link } from "react-router";
 import { AccountDto } from "../../../../../generated";
 import { ROLE_COLOR_MAP } from "../../../../utils/constants";
-import {useLocalSettings} from "../../../../hooks/useLocalSettings";
+import { useLocalSettings } from "../../../../hooks/useLocalSettings";
 
 const { Title } = Typography;
 
@@ -47,9 +52,10 @@ export const ShowAccountsShowDrawer: React.FC<ShowAccountsShowDrawerProps> = ({
   open,
   onClose,
 }) => {
-  const [localSettings] = useLocalSettings()
+  const [localSettings] = useLocalSettings();
   const { edit } = useNavigation();
   const { mutate: deleteMutation } = useDelete();
+  const { data: user } = useGetIdentity<AccountDto>();
 
   const getRoleTag = (role: string | undefined) => {
     const colorMap: Record<string, string> = ROLE_COLOR_MAP;
@@ -81,16 +87,17 @@ export const ShowAccountsShowDrawer: React.FC<ShowAccountsShowDrawerProps> = ({
     }
   };
 
-  const footerContent = !account?.isVerified ? (
-    <Space>
-      <Button onClick={handleEdit} disabled={!account}>
-        Edit
-      </Button>
-      <Button onClick={handleDelete} disabled={!account} danger>
-        Delete
-      </Button>
-    </Space>
-  ) : null;
+  const footerContent =
+    !account?.isVerified && user?.role === "ADMIN" ? (
+      <Space>
+        <Button onClick={handleEdit} disabled={!account}>
+          Edit
+        </Button>
+        <Button onClick={handleDelete} disabled={!account} danger>
+          Delete
+        </Button>
+      </Space>
+    ) : null;
 
   return (
     <Drawer

@@ -2,7 +2,8 @@ import React from "react";
 import { Edit, useForm } from "@refinedev/antd";
 import { Form, Input, Checkbox, Card, Space } from "antd";
 import { FolderOutlined, EyeOutlined } from "@ant-design/icons";
-import { ProjectCategoryDto } from "../../../../generated";
+import { AccountDto, ProjectCategoryDto } from "../../../../generated";
+import { useGetIdentity } from "@refinedev/core";
 
 export const ProjectCategoriesEdit: React.FC = () => {
   const { formProps, saveButtonProps, queryResult } =
@@ -10,8 +11,9 @@ export const ProjectCategoriesEdit: React.FC = () => {
       redirect: "show",
     });
 
+  const { data: user } = useGetIdentity<AccountDto>();
   const projectCategoriesData = queryResult?.data?.data;
-  const isAdmin = localStorage.getItem("role") === "ADMIN";
+  const isAdmin = user?.role === "ADMIN";
 
   return (
     <Edit saveButtonProps={saveButtonProps}>

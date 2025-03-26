@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { useMany, useOne } from "@refinedev/core";
+import { useGetIdentity, useMany, useOne } from "@refinedev/core";
 import {
   useTable,
   List,
@@ -23,7 +23,7 @@ import {
   ProjectStatusDto,
 } from "../../../../generated";
 import { stompClient } from "../../../utils/stompClient";
-import {useLocalSettings} from "../../../hooks/useLocalSettings";
+import { useLocalSettings } from "../../../hooks/useLocalSettings";
 
 const { Text } = Typography;
 
@@ -36,7 +36,8 @@ const STATUS_COLOR_MAP = {
 };
 
 export const ProjectsList: React.FC = () => {
-  const [localSettings] = useLocalSettings()
+  const [localSettings] = useLocalSettings();
+  const { data: user } = useGetIdentity<AccountDto>();
   const { tableProps, searchFormProps } = useTable<ProjectDto>({
     syncWithLocation: true,
     sorters: {
@@ -96,7 +97,7 @@ export const ProjectsList: React.FC = () => {
   }, []);
 
   return (
-    <List>
+    <List headerButtons={<></>}>
       <div className="mb-6">
         <Input.Search
           placeholder="Search projects..."
@@ -245,14 +246,6 @@ export const ProjectsList: React.FC = () => {
           fixed="right"
           render={(_, record: ProjectDto) => (
             <Space size="middle">
-              <Tooltip title="Edit Project">
-                <EditButton
-                  hideText
-                  size="small"
-                  recordItemId={record.projectId}
-                  className="text-blue-600 hover:text-blue-700"
-                />
-              </Tooltip>
               <Tooltip title="View Details">
                 <ShowButton
                   hideText
