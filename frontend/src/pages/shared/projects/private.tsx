@@ -1,5 +1,11 @@
 import React, { useState } from "react";
-import { AccountDto, ProjectDto, ProjectStatusDto, ProposalDto } from "../../../../generated";
+import {
+  AccountDto,
+  AccountDtoRoleEnum,
+  ProjectDto,
+  ProjectStatusDto,
+  ProposalDto
+} from "../../../../generated";
 import {
   Button,
   Card,
@@ -255,7 +261,7 @@ const ProjectInternalDetail: React.FC<{
               </Button>
 
               {/* Add Edit Button Here */}
-              {project.status === ProjectStatusDto.Open && (
+              {(project.status === ProjectStatusDto.Open && user?.role == AccountDtoRoleEnum.Client) && (
                 <ClientProjectEditButton
                   project={project}
                   onSuccess={projectQueryResult.refetch}
@@ -272,8 +278,11 @@ const ProjectInternalDetail: React.FC<{
                 </Button>
               )}
 
-              {((project.status === ProjectStatusDto.Open || (project.status === ProjectStatusDto.InProgress &&
-                project.contract && !project.toTerminate))) && (
+              {((
+                  project.status === ProjectStatusDto.Open ||
+                  (project.status === ProjectStatusDto.InProgress &&
+                    project.contract && !project.toTerminate)
+              ) && user?.role == AccountDtoRoleEnum.Client) && (
                 <Popconfirm
                   title="Are you sure you want to close this project?"
                   onConfirm={handleTerminateProject}
