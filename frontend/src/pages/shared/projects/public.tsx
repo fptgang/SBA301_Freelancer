@@ -24,14 +24,14 @@ const ProjectPublicDetail: React.FC<{
         <Col xs={24} md={16}>
           {project && <ProjectHeader project={project} />}
           {project && <ProjectDescription project={project} />}
-          
+
           <Divider />
-          
+
           <Title level={5} className="text-gray-700">
             Attachments
           </Title>
           {project.files && project.files.length > 0 ? (
-            <FileList files={project.files.filter(file => file.isVisible)} />
+            <FileList files={project.files.filter((file) => file.isVisible)} />
           ) : (
             <Text type="secondary" className="italic">
               No attachments
