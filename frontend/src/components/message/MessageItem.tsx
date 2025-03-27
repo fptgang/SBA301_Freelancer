@@ -3,7 +3,7 @@ import { Card, Space, Avatar, Typography, Button, Tooltip } from "antd";
 import { UserOutlined, PaperClipOutlined } from "@ant-design/icons";
 import { MessageDto } from "../../../generated";
 import { formatDistanceToNow, format } from "date-fns";
-import {useLocalSettings} from "../../hooks/useLocalSettings";
+import { useLocalSettings } from "../../hooks/useLocalSettings";
 
 interface MessageItemProps {
   msg: MessageDto;
@@ -14,7 +14,10 @@ export const MessageItem: React.FC<MessageItemProps> = ({
   msg,
   isCurrentUser,
 }) => {
-  const [localSettings] = useLocalSettings()
+  const [localSettings] = useLocalSettings();
+  if (!msg) return null;
+  if (msg.content?.trim() === "" && (!msg.files || msg.files?.length == 0))
+    return null;
   return (
     <div
       style={{
@@ -65,21 +68,35 @@ export const MessageItem: React.FC<MessageItemProps> = ({
               >
                 {msg.content}
               </Typography.Text>
-              {msg.files?.map((file) => (
-                <Button
-                  key={file.fileId}
-                  icon={<PaperClipOutlined />}
-                  type="link"
-                  href={file.fileUrl}
-                  target="_blank"
-                  style={{
-                    color: isCurrentUser ? "white" : "inherit",
-                    padding: 0,
-                  }}
-                >
-                  {file.fileName}
-                </Button>
-              ))}
+              {msg.files?.map((file) => {
+                if (
+                  file?.fileType?.startsWith("image") &&
+                  file?.fileType?.includes("svg")
+                ) {
+                  return (
+                    <img
+                      src={file.fileUrl}
+                      itemType="image/svg+xml"
+                      alt={file.fileName + "-click to open in new tab"}
+                      onClick={() => window.open(file.fileUrl, "_blank")}
+                      style={{ maxWidth: 200 }}
+                    />
+                  );
+                }
+                if (file?.fileType?.startsWith("image")) {
+                  return (
+                    <img
+                      src={file.fileUrl}
+                      alt={file.fileName}
+                      style={{ maxWidth: 200 }}
+                      onClick={() => window.open(file.fileUrl, "_blank")}
+                    />
+                  );
+                }
+                if (file?.fileType?.startsWith("video")) {
+                  return <video src={file.fileUrl} controls autoPlay />;
+                }
+              })}
             </Space>
           </Card>
         </Tooltip>

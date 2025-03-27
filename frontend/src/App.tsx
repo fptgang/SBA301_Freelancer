@@ -37,12 +37,7 @@ import {
   AccountsShow,
   AccountsCreate,
 } from "./pages/admin/accounts";
-import {
-  ProjectsList,
-  ProjectsCreate,
-  ProjectsEdit,
-  ProjectsShow,
-} from "./pages/admin/projects";
+import { ProjectsList, ProjectsShow } from "./pages/admin/projects";
 
 import {
   SkillsList,
