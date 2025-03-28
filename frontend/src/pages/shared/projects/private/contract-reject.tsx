@@ -111,6 +111,25 @@ export const ContractRejectButton: React.FC<ContractRejectButtonProps> = ({
                 required: true,
                 message: "Please provide a reason for rejection",
               },
+              {
+                min: 10,
+                message: "Rejection reason must be at least 10 characters",
+              },
+              {
+                max: 500,
+                message: "Rejection reason cannot exceed 500 characters",
+              },
+              {
+                validator: (_, value) => {
+                  if (value && value.trim().length < 10) {
+                    return Promise.reject("Rejection reason must contain meaningful content");
+                  }
+                  if (value && value.trim().split(/\s+/).length < 3) {
+                    return Promise.reject("Please provide a more detailed explanation");
+                  }
+                  return Promise.resolve();
+                },
+              },
             ]}
           >
             <TextArea
