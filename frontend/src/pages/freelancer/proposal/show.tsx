@@ -29,7 +29,8 @@ import {
   UserOutlined,
   LinkOutlined,
   DownloadOutlined,
-  EditOutlined
+  EditOutlined,
+   ExclamationCircleOutlined
 } from "@ant-design/icons";
 import { useOne, useNavigation } from "@refinedev/core";
 import { ProposalDto, ProposalStatusDto } from "../../../../generated";
@@ -150,10 +151,37 @@ const FreelancerProposalShow: React.FC = () => {
             </Card>
           </Col>
         </Row>
-
+        {proposal.status === "REJECTED" && proposal.rejectReason && (
+          <Row gutter={[16, 16]}>
+            <Col span={24}>
+              <Alert
+                message={
+                  <div className="flex items-center">
+                    <ExclamationCircleOutlined className="text-lg mr-2 text-red-500" />
+                    <span className="text-lg font-medium">Proposal Rejected</span>
+                  </div>
+                }
+                description={
+                  <Card 
+                    className="mt-2 bg-red-50 border border-red-100"
+                    bodyStyle={{ padding: "16px" }}
+                  >
+                    <Title level={5}>Reason for Rejection:</Title>
+                    <Paragraph className="whitespace-pre-wrap text-gray-800 bg-white p-4 rounded-md border border-red-100">
+                      {proposal.rejectReason}
+                    </Paragraph>
+                  </Card>
+                }
+                type="error"
+                showIcon={false}
+                className="mb-6 shadow-md"
+              />
+            </Col>
+          </Row>
+        )}
           <Row gutter={16} className="mb-6">
           <Col xs={24} sm={12} md={6}>
-              <Card className="h-full shadow-sm">
+              <Card className="h-full shadow-sm"> 
                 <Statistic
                   title="Proposed Budget"
                   value={proposal.budget || 0}
@@ -243,7 +271,7 @@ const FreelancerProposalShow: React.FC = () => {
                     )}
                   </div>
                 </Card>
-
+                
                 {/* Budget Details Block */}
                 <Card 
                   bordered={false}
