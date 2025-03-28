@@ -147,7 +147,11 @@ public class ProjectMapper extends BaseMapper<ProjectDto, Project> {
         }
 
         dto.setProposalCount(proposalService.countByProjectIdAndStatus(entity.getProjectId(), null));
-        dto.setProjectCategory(projectCategoryMapper.toDTO(entity.getCategory(), DetailLevel.FULL));
+        dto.setProjectCategory(projectCategoryMapper.toDTO(entity.getCategory().getIsVisible() ?
+                        entity.getCategory() :
+                        authContext.hasInvisibilityBypass() ?
+                                entity.getCategory() : null
+                , DetailLevel.FULL));
         dto.setClient(accountMapper.toDTO(entity.getClient(), DetailLevel.REFERENCE));
         dto.setStatus(ProjectStatusDto.valueOf(entity.getStatus().name()));
         dto.setStartDate(DateTimeUtil.fromLocalToOffset(entity.getStartDate()));
@@ -164,10 +168,8 @@ public class ProjectMapper extends BaseMapper<ProjectDto, Project> {
                 .collect(Collectors.toList()));
         dto.setActiveMilestone(milestoneMapper.toDTO(entity.getActiveMilestone(), DetailLevel.FULL));
         dto.setRequiredSkills(entity.getRequiredSkills().stream()
+                .filter(skill -> skill.getSkill().getIsVisible() || authContext.hasInvisibilityBypass())
                 .map(skill -> projectSkillMapper.toDTO(skill, DetailLevel.FULL))
-                .collect(Collectors.toList()));
-        dto.setRequiredSkills(entity.getRequiredSkills().stream()
-                .map((s) -> projectSkillMapper.toDTO(s, DetailLevel.FULL))
                 .collect(Collectors.toList()));
         if (authContext.hasInternalAccess(entity)) {
             dto.setContract(entity.getContract() != null ?
