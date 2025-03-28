@@ -150,9 +150,26 @@ export const MilestoneDeadlineAdjustButton: React.FC<MilestoneDeadlineAdjustProp
 
   const handleDeadlineChange = (milestoneId: number | undefined, date: Dayjs | null) => {
     if (!milestoneId || !date) return;
-    
     const newDeadlines = { ...updatedDeadlines };
+    const originalDate = originalDeadlines[milestoneId];
+    const daysDifference = date.diff(originalDate, 'day');
+
+    const sortedMilestones = [...eligibleMilestones].sort(
+      (a, b) => (a.milestoneId || 0) - (b.milestoneId || 0)
+    );
+
+    const currentIndex = sortedMilestones.findIndex(m => m.milestoneId === milestoneId);
+
     newDeadlines[milestoneId] = date;
+    if (currentIndex !== -1) {
+      for (let i = currentIndex + 1; i < sortedMilestones.length; i++) {
+        const nextMilestoneId = sortedMilestones[i].milestoneId;
+        if (nextMilestoneId && originalDeadlines[nextMilestoneId]) {
+          // Apply the same day difference to each subsequent milestone
+          newDeadlines[nextMilestoneId] = originalDeadlines[nextMilestoneId].add(daysDifference, 'day');
+        }
+      }
+    }
     setUpdatedDeadlines(newDeadlines);
   };
 
