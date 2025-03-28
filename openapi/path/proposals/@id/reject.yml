@@ -10,6 +10,11 @@ put:
       schema:
         type: integer
         format: int64
+    - name: rejectReason
+      in: query
+      required: false
+      schema:
+        type: string    
   responses:
     '200':
       description: The operation was success

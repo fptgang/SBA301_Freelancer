@@ -103,10 +103,10 @@ public class ProposalController implements ProposalsApi {
      */
     @Override
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<ProposalDto> rejectProposal(Long proposalId) {
+    public ResponseEntity<ProposalDto> rejectProposal(Long proposalId,String rejectReason) {
         return new ResponseEntity<>(
                 proposalMapper.toDTO(
-                    proposalService.rejectProposal(proposalId),
+                    proposalService.rejectProposal(proposalId,rejectReason),
                     DetailLevel.FULL
                 ),
                 HttpStatus.OK

@@ -9,6 +9,7 @@ import {
   Typography,
 } from "antd";
 import ContractCreateButton from "./contract-create";
+import ContractRejectButton from "./contract-reject";
 import {
   CalendarOutlined,
   CheckCircleOutlined,
@@ -123,6 +124,20 @@ const TabProposals: React.FC<{
     }
   };
 
+  const handleProposalUpdate = () => {
+    proposalRefetch();
+    refetch();
+    invalidate({
+      resource: "proposals",
+      invalidates: ["list", "many", "detail"],
+    });
+    invalidate({
+      resource: "projects",
+      id: project.projectId,
+      invalidates: ["detail"],
+    });
+  };
+
   return (
     <>
       <div className="mb-4">
@@ -163,7 +178,10 @@ const TabProposals: React.FC<{
                         okText="Yes"
                         cancelText="No"
                       >
-                        <Button danger>Reject Proposal</Button>
+                      <ContractRejectButton
+                        proposalId={proposal.proposalId || -1}
+                        onSuccess={handleProposalUpdate}
+                      />
                       </Popconfirm>
                       <ContractCreateButton
                         proposal={proposal}

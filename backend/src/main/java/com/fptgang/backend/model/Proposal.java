@@ -35,6 +35,8 @@ public class    Proposal {
     @Searchable
     private String notes;
 
+    private String rejectReason;
+
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal budget;
 
