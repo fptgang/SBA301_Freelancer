@@ -94,7 +94,7 @@ export const MessageItem: React.FC<MessageItemProps> = ({
                   );
                 }
                 if (file?.fileType?.startsWith("video")) {
-                  return <video src={file.fileUrl} controls autoPlay />;
+                  return <video src={file.fileUrl} controls />;
                 }
               })}
             </Space>

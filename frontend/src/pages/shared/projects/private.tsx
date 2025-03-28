@@ -4,7 +4,7 @@ import {
   AccountDtoRoleEnum,
   ProjectDto,
   ProjectStatusDto,
-  ProposalDto
+  ProposalDto,
 } from "../../../../generated";
 import {
   Button,
@@ -204,8 +204,16 @@ const ProjectInternalDetail: React.FC<{
             image={Empty.PRESENTED_IMAGE_SIMPLE}
           />
           <div className="mt-4">
-            <Button type="primary" onClick={() => navigate(
-              user?.role === "CLIENT" ? "/client/projects" : "/freelancer/projects")}>
+            <Button
+              type="primary"
+              onClick={() =>
+                navigate(
+                  user?.role === "CLIENT"
+                    ? "/client/projects"
+                    : "/freelancer/projects"
+                )
+              }
+            >
               Back to Projects
             </Button>
           </div>
@@ -253,20 +261,26 @@ const ProjectInternalDetail: React.FC<{
             <div className="mt-4 md:mt-0 flex space-x-3">
               <Button
                 type="default"
-                onClick={() => navigate(
-                  user?.role === "CLIENT" ? "/client/projects" : "/freelancer/projects")}
+                onClick={() =>
+                  navigate(
+                    user?.role === "CLIENT"
+                      ? "/client/projects"
+                      : "/freelancer/projects"
+                  )
+                }
                 icon={<ArrowLeftOutlined />}
               >
                 Back
               </Button>
 
               {/* Add Edit Button Here */}
-              {(project.status === ProjectStatusDto.Open && user?.role == AccountDtoRoleEnum.Client) && (
-                <ClientProjectEditButton
-                  project={project}
-                  onSuccess={projectQueryResult.refetch}
-                />
-              )}
+              {project.status === ProjectStatusDto.Open &&
+                user?.role == AccountDtoRoleEnum.Client && (
+                  <ClientProjectEditButton
+                    project={project}
+                    onSuccess={projectQueryResult.refetch}
+                  />
+                )}
               {project.status === ProjectStatusDto.InProgress && (
                 <Button
                   type="primary"
@@ -278,23 +292,23 @@ const ProjectInternalDetail: React.FC<{
                 </Button>
               )}
 
-              {((
-                  project.status === ProjectStatusDto.Open ||
-                  (project.status === ProjectStatusDto.InProgress &&
-                    project.contract && !project.toTerminate)
-              ) && user?.role == AccountDtoRoleEnum.Client) && (
-                <Popconfirm
-                  title="Are you sure you want to close this project?"
-                  onConfirm={handleTerminateProject}
-                  okText="Yes"
-                  cancelText="No"
-                  placement="bottomRight"
-                >
-                  <Button type="primary" danger>
-                    Close Project
-                  </Button>
-                </Popconfirm>
-              )}
+              {(project.status === ProjectStatusDto.Open ||
+                (project.status === ProjectStatusDto.InProgress &&
+                  project.contract &&
+                  !project.toTerminate)) &&
+                user?.role == AccountDtoRoleEnum.Client && (
+                  <Popconfirm
+                    title="Are you sure you want to close this project?"
+                    onConfirm={handleTerminateProject}
+                    okText="Yes"
+                    cancelText="No"
+                    placement="bottomRight"
+                  >
+                    <Button type="primary" danger>
+                      Close Project
+                    </Button>
+                  </Popconfirm>
+                )}
             </div>
           </div>
         </div>
@@ -404,14 +418,13 @@ const ProjectInternalDetail: React.FC<{
         visible={showProfileModal}
         onClose={() => setShowProfileModal(false)}
       />
-
+      <ReportModal
+        showReportModal={showReportModal}
+        setShowReportModal={setShowReportModal}
+        project={project}
+      />
       {user?.role == "CLIENT" ? (
         <>
-          <ReportModal
-            showReportModal={showReportModal}
-            setShowReportModal={setShowReportModal}
-            project={project}
-          />
           <ModalTopup
             visible={showDepositModal}
             suggestedAmount={

@@ -2,6 +2,7 @@ package com.fptgang.backend.mapper;
 
 import com.fptgang.backend.api.model.ProfileDto;
 import com.fptgang.backend.model.Profile;
+import com.fptgang.backend.security.AuthContext;
 import com.fptgang.backend.util.DateTimeUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -44,9 +45,11 @@ public class ProfileMapper extends BaseMapper<ProfileDto, Profile> {
     @Component
     public static class Converter extends BaseMapper<ProfileDto, Profile> {
         private final ProfileSkillMapper profileSkillMapper;
+        private final AuthContext authContext;
 
-        public Converter(ProfileSkillMapper profileSkillMapper) {
+        public Converter(ProfileSkillMapper profileSkillMapper, AuthContext authContext) {
             this.profileSkillMapper = profileSkillMapper;
+            this.authContext = authContext;
         }
 
         @Override
@@ -91,6 +94,8 @@ public class ProfileMapper extends BaseMapper<ProfileDto, Profile> {
             dto.setPhoneNumber(entity.getPhoneNumber());
             dto.setLanguage(entity.getLanguage());
             dto.setSkills(entity.getSkills().stream()
+                    .filter(s -> (s.getSkill() != null && s.getSkill().getIsVisible()) ||
+                            authContext.hasInvisibilityBypass())
                     .map((s) -> profileSkillMapper.toDTO(s, DetailLevel.FULL))
                     .collect(Collectors.toList()));
             dto.setCreatedAt(DateTimeUtil.fromLocalToOffset(entity.getCreatedAt()));
