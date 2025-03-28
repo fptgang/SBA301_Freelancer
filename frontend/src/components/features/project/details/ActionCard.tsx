@@ -1,5 +1,14 @@
 import React, { useState } from "react";
-import { Card, Button, Space, Divider, Typography, Row, Col } from "antd";
+import {
+  Card,
+  Button,
+  Space,
+  Divider,
+  Typography,
+  Row,
+  Col,
+  Alert,
+} from "antd";
 import {
   DollarOutlined,
   CalendarOutlined,
@@ -8,16 +17,17 @@ import {
 import { useNavigate } from "react-router";
 import {
   AccountDto,
+  ProfileDto,
   ProjectDto,
   ProjectStatusDto,
 } from "../../../../../generated";
 import FreelancerCreateProposalButton from "../../../../pages/freelancer/proposal/freelancer-create";
-import { useGetIdentity } from "@refinedev/core";
+import { HttpError, useGetIdentity, useOne } from "@refinedev/core";
 import ContractShowModal from "../../../ContractShowModal";
-import {useLocalSettings} from "../../../../hooks/useLocalSettings";
+import { useLocalSettings } from "../../../../hooks/useLocalSettings";
 import dayjs from "dayjs";
 
-const {Title, Text, Paragraph} = Typography;
+const { Title, Text, Paragraph } = Typography;
 
 interface ActionCardProps {
   project: ProjectDto;
@@ -37,31 +47,54 @@ export const ActionCard: React.FC<ActionCardProps> = ({
   const [showContractModal, setShowContractModal] = useState(false);
   const [selectedContractId, setSelectedContractId] = useState<number>();
   const { data: user } = useGetIdentity<AccountDto>();
-
+  const { data: freelancerProfile } = useOne<ProfileDto, HttpError>({
+    resource: "profiles",
+    id: user?.profileId,
+    queryOptions: {
+      enabled: !!user && user?.role === "FREELANCER",
+    },
+  });
+  const checkSkills = () => {
+    if (freelancerProfile?.data?.skills) {
+      return project?.requiredSkills?.some((reqiredSkill) =>
+        freelancerProfile?.data?.skills?.some(
+          (freelancerSkill) =>
+            freelancerSkill?.skill?.skillId === reqiredSkill?.skill?.skillId
+        )
+      );
+    }
+    return true;
+  };
   return (
-    <Card 
-    title="Proposal Submission" 
-    style={{ borderRadius: 8 }} bodyStyle={{ padding: 16 }}>
+    <Card
+      title="Proposal Submission"
+      style={{ borderRadius: 8 }}
+      bodyStyle={{ padding: 16 }}
+    >
+      <Space direction="vertical" style={{ width: "100%" }}>
+        <Row gutter={[16, 16]}>
+          <Col span={24}>
+            <Text strong>Budget Range:</Text>{" "}
+            <Text>
+              ${project.minBudget} - ${project.maxBudget}
+            </Text>
+          </Col>
+          <Col span={24}>
+            <Text strong>Start Date: </Text>
+            <Text>{localSettings.formatDateTime(project.startDate!)}</Text>
+          </Col>
+          <Col span={24}>
+            <Text strong>Submission Deadline:</Text>{" "}
+            <Text>
+              {localSettings.formatDateTime(
+                dayjs(project.startDate!).subtract(1, "day").toDate()
+              )}
+            </Text>
+          </Col>
+        </Row>
+      </Space>
 
-
-    <Space direction="vertical" style={{ width: "100%" }}>
-      
-    <Row gutter={[16, 16]}>
-        <Col span={24}>
-          <Text strong>Budget Range:</Text> <Text>${project.minBudget} - ${project.maxBudget}</Text>
-        </Col>
-        <Col span={24}>
-          <Text strong>Start Date:{" "}</Text>
-          <Text>{localSettings.formatDateTime(project.startDate!)}</Text>
-        </Col>
-        <Col span={24}>
-          <Text strong>Submission Deadline:</Text>{" "}
-          <Text>{localSettings.formatDateTime(dayjs(project.startDate!).subtract(1, 'day').toDate())}</Text>
-        </Col>
-      </Row>
-    </Space>
-
-    <Divider style={{ margin: "16px 0" }} />
+      <Divider style={{ margin: "16px 0" }} />
 
       <Space direction="vertical" size="middle" style={{ width: "100%" }}>
         {role === "CLIENT" ? (
@@ -98,17 +131,26 @@ export const ActionCard: React.FC<ActionCardProps> = ({
             </>
           ) : (
             <>
-              <FreelancerCreateProposalButton
-                project={project}
-                freelancerId={freelancerId}
-                refetch={refetch}
-              />
+              {!checkSkills() && (
+                <Alert
+                  message=" You don't have any required skills for this project. 
+                  Consider carefully before apply!"
+                  type="warning"
+                  showIcon
+                  style={{ padding: 16 }}
+                />
+              )}
               <Typography.Text
                 type="secondary"
                 style={{ textAlign: "center", display: "block" }}
               >
                 {project?.proposalCount} proposals received
               </Typography.Text>
+              <FreelancerCreateProposalButton
+                project={project}
+                freelancerId={freelancerId}
+                refetch={refetch}
+              />
             </>
           )
         ) : (
@@ -166,7 +208,6 @@ export const ActionCard: React.FC<ActionCardProps> = ({
               </Button>
             </>
           )}
-
       </Space>
     </Card>
   );

@@ -11,12 +11,14 @@ import {
   SkillDto,
   ProficiencyEnum,
   ProjectCategoryDto,
+  AccountDto,
 } from "../../../../generated";
-import { HttpError, useList } from "@refinedev/core";
+import { HttpError, useGetIdentity, useList, useOne } from "@refinedev/core";
 import { useLocation, useSearchParams } from "react-router";
 import ProjectCard from "../../../components/features/project/cards/projectCard";
 import ProfileCard from "../../../components/features/profile/card/profileCard";
 import RenderFilter from "../../../components/features/project/filters/renderFilter";
+import { ac } from "react-router/dist/development/route-data-Cq_b5feC";
 
 const { Content, Sider } = Layout;
 
@@ -38,6 +40,7 @@ const SearchPage = () => {
     searchParam.get("type") === "work" ? "projects" : "talents"
   );
   const [typedSearch, setTypedSearch] = useState(searchText);
+  const { data: user } = useGetIdentity<AccountDto>();
 
   useEffect(() => {
     setTypedSearch(searchParam.get("keyword") || "");
@@ -182,6 +185,40 @@ const SearchPage = () => {
         pagination: { current, pageSize },
       });
 
+  const { data: freelancerProfile } = useOne<ProfileDto, HttpError>({
+    resource: "profiles",
+    id: user?.profileId,
+    queryOptions: {
+      enabled: !!user,
+    },
+  });
+
+  const {
+    data: jobsFY,
+    isLoading: isJobsFYLoading,
+    isError: isJobsFYError,
+  } = useList<ProjectDto, HttpError>({
+    resource: "projects",
+    queryOptions: {
+      enabled: !!freelancerProfile && activeTab !== "talents",
+    },
+    filters: [
+      {
+        field: "status",
+        operator: "eq",
+        value: "OPEN",
+      },
+      {
+        field: "requiredSkills.skill",
+        operator: "in",
+        value:
+          freelancerProfile?.data.skills?.map((ps) => ps?.skill?.skillId) ||
+          undefined,
+      },
+    ],
+    pagination: { pageSize: 5 },
+  });
+
   const handlePageChange = (page: number, newPageSize: number) => {
     setCurrent(page);
     setPageSize(newPageSize);
@@ -268,22 +305,51 @@ const SearchPage = () => {
               }}
             />
           ) : (
-            <List
-              dataSource={filteredItem?.data}
-              renderItem={(item) => <ProjectCard project={item} />}
-              pagination={{
-                current: current,
-                pageSize: pageSize,
-                total: filteredItem?.total,
-                onChange: handlePageChange,
-                showSizeChanger: true,
-                showQuickJumper: true,
-                showTotal: (total) => `Total ${total} items`,
-                position: "bottom",
-                responsive: true,
-                pageSizeOptions: ["10", "20", "50"],
-              }}
-            />
+            <>
+              {!(selectedCategories.length > 0) &&
+                !(selectedLevel.length > 0) &&
+                !(selectedSkills.length > 0) &&
+                freelancerProfile &&
+                (jobsFY?.data?.length || 0) > 0 && (
+                  <div className="mb-6">
+                    <div className="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-500 mb-3">
+                      <h3 className="text-lg font-medium text-blue-700 mb-1">
+                        Jobs For You
+                      </h3>
+                      <p className="text-sm text-blue-600">
+                        These jobs match your skills
+                      </p>
+                    </div>
+                    <List
+                      dataSource={jobsFY?.data}
+                      renderItem={(item) => (
+                        <div className="border-l-4 border-blue-400 pl-2 mb-3 transition-all hover:border-blue-600">
+                          <ProjectCard project={item} />
+                        </div>
+                      )}
+                      pagination={false}
+                    />
+                    <div className="border-t border-gray-200 my-6"></div>
+                  </div>
+                )}
+
+              <List
+                dataSource={filteredItem?.data}
+                renderItem={(item) => <ProjectCard project={item} />}
+                pagination={{
+                  current: current,
+                  pageSize: pageSize,
+                  total: filteredItem?.total,
+                  onChange: handlePageChange,
+                  showSizeChanger: true,
+                  showQuickJumper: true,
+                  showTotal: (total) => `Total ${total} items`,
+                  position: "bottom",
+                  responsive: true,
+                  pageSizeOptions: ["10", "20", "50"],
+                }}
+              />
+            </>
           )}
         </Col>
       </Row>
