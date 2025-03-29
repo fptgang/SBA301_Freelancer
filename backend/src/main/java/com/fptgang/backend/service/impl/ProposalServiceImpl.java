@@ -111,7 +111,7 @@ public class ProposalServiceImpl implements ProposalService {
     }
 
     @Override
-    public Proposal rejectProposal(long proposalId) {
+    public Proposal rejectProposal(long proposalId,String rejectReason) {
         Proposal proposal = findById(proposalId);
         authContext.requireAccountId(proposal.getProject().getClient().getAccountId()); // Client operation
 
@@ -121,7 +121,7 @@ public class ProposalServiceImpl implements ProposalService {
         if (proposal.getProject().getStatus() != Project.ProjectStatus.OPEN) {
             throw new IllegalStateException("Project is not OPEN");
         }
-
+        proposal.setRejectReason(rejectReason);
         proposal.setStatus(Proposal.ProposalStatus.REJECTED);
         try
         {

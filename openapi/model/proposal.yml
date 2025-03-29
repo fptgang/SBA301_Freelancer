@@ -29,3 +29,5 @@ ProposalDto:
       type: array
       items:
         $ref: 'file.yml#/FileDto'
+    rejectReason:
+      type: string

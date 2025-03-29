@@ -83,6 +83,7 @@ public class ProposalMapper extends BaseMapper<ProposalDto, Proposal> {
         dto.setFreelancer(accountMapper.toDTO(entity.getFreelancer(), DetailLevel.REFERENCE));
         dto.setNotes(entity.getNotes());
         dto.setBudget(entity.getBudget());
+        dto.setRejectReason(entity.getRejectReason());
         dto.setStatus(ProposalStatusDto.valueOf(entity.getStatus().name()));
         dto.setContractId(entity.getContract()!=null?entity.getContract().getContractId():null);
         dto.setCreatedAt(DateTimeUtil.fromLocalToOffset(entity.getCreatedAt()));
